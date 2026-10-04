@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Online Recruitment</title>
+
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+
+<body>
+
+<header class="header">
+    <div class="container header-content">
+
+        <a href="/" class="logo">
+            <span class="logo-icon">OR</span>
+            <span>Online Recruitment</span>
+        </a>
+
+        <nav class="nav">
+            <a href="/">Trang chủ</a>
+            <a href="/jobs">Việc làm</a>
+            <a href="/companies">Công ty</a>
+            <a href="/about">Giới thiệu</a>
+        </nav>
+
+        <div class="header-actions">
+            <a href="/login" class="login-btn">Đăng nhập</a>
+            <a href="/register" class="register-btn">Đăng ký</a>
+        </div>
+
+    </div>
+</header>
+
+
+<main>
+
+    <!-- HERO -->
+    <section class="hero">
+
+        <div class="container hero-content">
+
+            <div class="hero-text">
+
+                <span class="hero-label">
+                    🚀 Tìm công việc phù hợp với bạn
+                </span>
+
+                <h1>
+                    Tìm công việc
+                    <span>mơ ước</span>
+                    của bạn
+                </h1>
+
+                <p>
+                    Khám phá hàng nghìn cơ hội việc làm từ các công ty
+                    hàng đầu và tìm công việc phù hợp với năng lực của bạn.
+                </p>
+
+                <!-- SEARCH -->
+                <form class="search-box" action="/jobs" method="get">
+
+                    <div class="search-field">
+                        <span>🔎</span>
+                        <input
+                                type="text"
+                                name="keyword"
+                                placeholder="Tên công việc, kỹ năng..."
+                        >
+                    </div>
+
+                    <div class="search-field">
+                        <span>📍</span>
+                        <input
+                                type="text"
+                                name="location"
+                                placeholder="Địa điểm"
+                        >
+                    </div>
+
+                    <button type="submit">
+                        Tìm việc
+                    </button>
+
+                </form>
+
+                <div class="popular-search">
+
+                    <span>Tìm kiếm phổ biến:</span>
+
+                    <a href="/jobs?keyword=Java">Java</a>
+                    <a href="/jobs?keyword=Spring Boot">Spring Boot</a>
+                    <a href="/jobs?keyword=Frontend">Frontend</a>
+                    <a href="/jobs?keyword=DevOps">DevOps</a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- STATISTICS -->
+    <section class="statistics">
+
+        <div class="container statistics-grid">
+
+            <div class="stat-item">
+                <strong>10,000+</strong>
+                <span>Việc làm</span>
+            </div>
+
+            <div class="stat-item">
+                <strong>2,000+</strong>
+                <span>Công ty</span>
+            </div>
+
+            <div class="stat-item">
+                <strong>50,000+</strong>
+                <span>Ứng viên</span>
+            </div>
+
+            <div class="stat-item">
+                <strong>95%</strong>
+                <span>Tỷ lệ hài lòng</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- FEATURED JOBS -->
+    <section class="section">
+
+        <div class="container">
+
+            <div class="section-header">
+
+                <div>
+                    <span class="section-label">CƠ HỘI MỚI</span>
+
+                    <h2>Việc làm nổi bật</h2>
+
+                    <p>
+                        Những công việc mới nhất đang được tuyển dụng
+                    </p>
+                </div>
+
+                <a href="/jobs" class="view-all">
+                    Xem tất cả →
+                </a>
+
+            </div>
+
+
+            <div class="job-grid">
+
+                <!-- JOB 1 -->
+                <div class="job-card">
+
+                    <div class="job-top">
+
+                        <div class="company-logo">
+                            T
+                        </div>
+
+                        <span class="job-type">
+                            Full-time
+                        </span>
+
+                    </div>
+
+                    <h3>Java Backend Developer</h3>
+
+                    <p class="company-name">
+                        Tech Solutions Vietnam
+                    </p>
+
+                    <div class="job-info">
+                        <span>📍 Hà Nội</span>
+                        <span>💰 20 - 35 triệu</span>
+                    </div>
+
+                    <div class="job-tags">
+                        <span>Java</span>
+                        <span>Spring Boot</span>
+                        <span>SQL</span>
+                    </div>
+
+                    <a href="/jobs/1" class="job-detail">
+                        Xem chi tiết →
+                    </a>
+
+                </div>
+
+
+                <!-- JOB 2 -->
+                <div class="job-card">
+
+                    <div class="job-top">
+
+                        <div class="company-logo">
+                            A
+                        </div>
+
+                        <span class="job-type">
+                            Full-time
+                        </span>
+
+                    </div>
+
+                    <h3>Frontend Developer</h3>
+
+                    <p class="company-name">
+                        ABC Technology
+                    </p>
+
+                    <div class="job-info">
+                        <span>📍 Hồ Chí Minh</span>
+                        <span>💰 18 - 30 triệu</span>
+                    </div>
+
+                    <div class="job-tags">
+                        <span>Vue.js</span>
+                        <span>React</span>
+                        <span>JavaScript</span>
+                    </div>
+
+                    <a href="/jobs/2" class="job-detail">
+                        Xem chi tiết →
+                    </a>
+
+                </div>
+
+
+                <!-- JOB 3 -->
+                <div class="job-card">
+
+                    <div class="job-top">
+
+                        <div class="company-logo">
+                            V
+                        </div>
+
+                        <span class="job-type">
+                            Full-time
+                        </span>
+
+                    </div>
+
+                    <h3>DevOps Engineer</h3>
+
+                    <p class="company-name">
+                        Vietnam Digital
+                    </p>
+
+                    <div class="job-info">
+                        <span>📍 Đà Nẵng</span>
+                        <span>💰 25 - 40 triệu</span>
+                    </div>
+
+                    <div class="job-tags">
+                        <span>AWS</span>
+                        <span>Docker</span>
+                        <span>Linux</span>
+                    </div>
+
+                    <a href="/jobs/3" class="job-detail">
+                        Xem chi tiết →
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CATEGORIES -->
+    <section class="section categories-section">
+
+        <div class="container">
+
+            <div class="section-header center">
+
+                <span class="section-label">
+                    NGÀNH NGHỀ
+                </span>
+
+                <h2>Tìm việc theo ngành nghề</h2>
+
+                <p>
+                    Khám phá cơ hội trong lĩnh vực bạn yêu thích
+                </p>
+
+            </div>
+
+
+            <div class="category-grid">
+
+                <a href="/jobs?category=IT" class="category-card">
+                    <div class="category-icon">💻</div>
+                    <h3>Công nghệ thông tin</h3>
+                    <span>2,500+ việc làm</span>
+                </a>
+
+                <a href="/jobs?category=Marketing" class="category-card">
+                    <div class="category-icon">📢</div>
+                    <h3>Marketing</h3>
+                    <span>1,200+ việc làm</span>
+                </a>
+
+                <a href="/jobs?category=Finance" class="category-card">
+                    <div class="category-icon">💰</div>
+                    <h3>Tài chính</h3>
+                    <span>850+ việc làm</span>
+                </a>
+
+                <a href="/jobs?category=Design" class="category-card">
+                    <div class="category-icon">🎨</div>
+                    <h3>Thiết kế</h3>
+                    <span>600+ việc làm</span>
+                </a>
+
+                <a href="/jobs?category=Sales" class="category-card">
+                    <div class="category-icon">📈</div>
+                    <h3>Kinh doanh</h3>
+                    <span>1,500+ việc làm</span>
+                </a>
+
+                <a href="/jobs?category=HR" class="category-card">
+                    <div class="category-icon">👥</div>
+                    <h3>Nhân sự</h3>
+                    <span>400+ việc làm</span>
+                </a>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- WHY CHOOSE -->
+    <section class="section">
+
+        <div class="container">
+
+            <div class="section-header center">
+
+                <span class="section-label">
+                    TẠI SAO CHỌN CHÚNG TÔI
+                </span>
+
+                <h2>Tìm việc dễ dàng hơn</h2>
+
+            </div>
+
+
+            <div class="benefit-grid">
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        🔎
+                    </div>
+
+                    <h3>Tìm kiếm nhanh chóng</h3>
+
+                    <p>
+                        Tìm kiếm hàng nghìn công việc theo vị trí,
+                        ngành nghề và mức lương.
+                    </p>
+
+                </div>
+
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        🏢
+                    </div>
+
+                    <h3>Công ty uy tín</h3>
+
+                    <p>
+                        Tiếp cận các công ty và nhà tuyển dụng
+                        đang có nhu cầu tuyển dụng.
+                    </p>
+
+                </div>
+
+
+                <div class="benefit-card">
+
+                    <div class="benefit-icon">
+                        ⚡
+                    </div>
+
+                    <h3>Ứng tuyển dễ dàng</h3>
+
+                    <p>
+                        Tạo hồ sơ và ứng tuyển công việc
+                        chỉ với vài bước đơn giản.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- CTA -->
+    <section class="cta">
+
+        <div class="container cta-content">
+
+            <div>
+
+                <h2>
+                    Bạn đang tìm kiếm nhân tài?
+                </h2>
+
+                <p>
+                    Đăng tin tuyển dụng và tiếp cận hàng nghìn ứng viên.
+                </p>
+
+            </div>
+
+            <a href="/employer/post-job" class="cta-button">
+                Đăng tin tuyển dụng
+            </a>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- FOOTER -->
+<footer class="footer">
+
+    <div class="container footer-grid">
+
+        <div>
+
+            <a href="/" class="logo footer-logo">
+                <span class="logo-icon">OR</span>
+                <span>Online Recruitment</span>
+            </a>
+
+            <p>
+                Nền tảng kết nối ứng viên và nhà tuyển dụng
+                nhanh chóng và hiệu quả.
+            </p>
+
+        </div>
+
+
+        <div>
+
+            <h4>Ứng viên</h4>
+
+            <a href="/jobs">Tìm việc</a>
+            <a href="/companies">Công ty</a>
+            <a href="/register">Tạo tài khoản</a>
+
+        </div>
+
+
+        <div>
+
+            <h4>Nhà tuyển dụng</h4>
+
+            <a href="/employer/post-job">Đăng tin tuyển dụng</a>
+            <a href="/employer">Quản lý tuyển dụng</a>
+
+        </div>
+
+
+        <div>
+
+            <h4>Liên hệ</h4>
+
+            <p>Email: support@onlinerecruitment.com</p>
+            <p>Hotline: 1900 1234</p>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer-bottom">
+
+        <div class="container">
+
+            © 2026 Online Recruitment. All rights reserved.
+
+        </div>
+
+    </div>
+
+</footer>
+
+</body>
+</html>
