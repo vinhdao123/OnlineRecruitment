@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title} + ' — Online Recruitment Admin'">Admin</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body class="admin">
+
+<!-- ==================== SIDEBAR FRAGMENT ==================== -->
+<aside class="sidebar" th:fragment="sidebar">
+    <div class="sidebar-logo">
+        <div class="logo-icon">OR</div>
+        <div>
+            <div class="logo-text">RecruitAdmin</div>
+            <div class="logo-sub">Pro</div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-section">MENU</div>
+
+        <a th:href="@{/admin/dashboard}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'dashboard'} ? 'active' : ''">
+            <span class="icon">📊</span> Dashboard
+        </a>
+
+        <a th:href="@{/admin/users}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'users'} ? 'active' : ''">
+            <span class="icon">👥</span> Users
+        </a>
+
+        <a th:href="@{/admin/companies}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'companies'} ? 'active' : ''">
+            <span class="icon">🏢</span> Companies
+        </a>
+
+        <a th:href="@{/admin/companies?status=PENDING}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
+            <span class="icon">⏳</span> Pending
+        </a>
+
+        <a th:href="@{/admin/companies?status=INACTIVE}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'banned'} ? 'active' : ''">
+            <span class="icon">🚫</span> Ban List
+        </a>
+
+        <div class="nav-section">SYSTEM</div>
+
+        <a href="#" class="nav-item">
+            <span class="icon">⚙️</span> Settings
+        </a>
+        <a th:href="@{/logout}" class="nav-item">
+            <span class="icon">🚪</span> Đăng xuất
+        </a>
+    </nav>
+</aside>
+
+<!-- ==================== TOPBAR FRAGMENT ==================== -->
+<div class="topbar" th:fragment="topbar(title, subtitle)">
+    <div class="topbar-title">
+        <span th:text="${title}">Title</span>
+        <small th:if="${subtitle != null}" th:text="${subtitle}"></small>
+    </div>
+    <div class="topbar-actions">
+        <div class="search-global">
+            <input type="text" placeholder="Search candidates, companies..." maxlength="100">
+        </div>
+        <div class="topbar-user">
+            <div class="avatar-circle">
+                <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+            </div>
+            <span th:text="${#authentication.name}">admin</span>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

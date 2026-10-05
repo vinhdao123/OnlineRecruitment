@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Dashboard')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+    <div th:replace="~{admin/_layout :: topbar('Dashboard', 'Overview')}"></div>
+
+    <!-- ==================== WELCOME BANNER ==================== -->
+    <div class="section" style="background: linear-gradient(135deg, #e6efff 0%, #f0f6ff 100%);
+                                border: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="font-size: 24px; font-weight: 700; color: #1a2b4a; margin-bottom: 8px;">
+                    Welcome Back!
+                </h2>
+                <p style="color: #4a5568; font-size: 14px; max-width: 620px; line-height: 1.6;">
+                    Your recruitment pipeline is looking healthy today.
+                    You have
+                    <b style="color: #d33;" th:text="${companyPending}">0</b>
+                    pending companies and
+                    <b style="color: #d33;" th:text="${totalPending}">0</b>
+                    total items that require your attention.
+                </p>
+                <a th:href="@{/admin/companies(status='PENDING')}"
+                   class="btn btn-primary" style="margin-top: 16px;">
+                    Review Pending →
+                </a>
+            </div>
+            <div style="font-size: 64px; opacity: 0.3;">📋</div>
+        </div>
+    </div>
+
+    <!-- ==================== KPI CARDS ==================== -->
+    <div class="cards-grid">
+
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Total Users</div>
+                <div class="stat-value" th:text="${#numbers.formatInteger(totalUsers, 0, 'COMMA')}">0</div>
+                <div class="stat-trend">↑ All time</div>
+            </div>
+            <div class="stat-icon">👥</div>
+        </div>
+
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Companies</div>
+                <div class="stat-value" th:text="${#numbers.formatInteger(totalCompanies, 0, 'COMMA')}">0</div>
+                <div class="stat-trend">↑ All time</div>
+            </div>
+            <div class="stat-icon">🏢</div>
+        </div>
+
+        <div class="stat-card">
+            <div>
+                <div class="stat-label">Jobs</div>
+                <div class="stat-value" th:text="${#numbers.formatInteger(totalJobs, 0, 'COMMA')}">0</div>
+                <div class="stat-trend">— Coming soon</div>
+            </div>
+            <div class="stat-icon">💼</div>
+        </div>
+
+        <div class="stat-card danger">
+            <div>
+                <div class="stat-label">Pending</div>
+                <div class="stat-value" th:text="${totalPending}">0</div>
+                <div class="stat-trend down">⚠ Requires attention</div>
+            </div>
+            <div class="stat-icon">⏳</div>
+        </div>
+
+    </div>
+
+    <!-- ==================== CHARTS ==================== -->
+    <div class="chart-grid">
+
+        <!-- Line chart: User Growth -->
+        <div class="chart-box">
+            <h3>User Growth</h3>
+            <p class="sub">Registration statistics over the last 6 months</p>
+            <canvas id="growthChart"></canvas>
+        </div>
+
+        <!-- Donut chart: User Roles -->
+        <div class="chart-box">
+            <h3>User Roles</h3>
+            <p class="sub">Distribution by system privilege</p>
+            <canvas id="rolesChart"></canvas>
+        </div>
+
+    </div>
+
+    <!-- ==================== RECENT ACTIVITY ==================== -->
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title">Recent Activity</div>
+                <div class="section-sub">Latest updates across the recruitment platform</div>
+            </div>
+            <a th:href="@{/admin/activities}">View All →</a>
+        </div>
+
+        <div th:if="${recentActivities.isEmpty()}" style="color:#8895a8;font-size:13px;">
+            Chưa có hoạt động nào.
+        </div>
+
+        <div th:each="a : ${recentActivities}" class="activity-item">
+            <div class="avatar"
+                 th:text="${a.user != null ? a.user.fullName.substring(0,1).toUpperCase() : 'S'}">A</div>
+            <div class="body">
+                <div class="action" th:text="${a.description}">Description</div>
+                <div class="time" th:text="${a.createdAt}">time</div>
+            </div>
+            <span class="tag" th:if="${a.statusTag}" th:text="${a.statusTag}">Tag</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- ==================== CHART.JS ==================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const growthLabels = /*[[${growthLabels}]]*/ ['Jan','Feb','Mar','Apr','May','Jun'];
+    const growthData   = /*[[${growthData}]]*/ [0,0,0,0,0,0];
+    const roleData     = [
+        /*[[${totalCandidates}]]*/ 0,
+        /*[[${totalRecruiters}]]*/ 0,
+        /*[[${totalAdmins}]]*/ 0
+    ];
+
+    // ---- Line chart ----
+    const growthCtx = document.getElementById('growthChart');
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: growthLabels,
+            datasets: [{
+                label: 'New users',
+                data: growthData,
+                borderColor: '#2a6df4',
+                backgroundColor: 'rgba(42,109,244,0.1)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#2a6df4',
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: '#eef1f6' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // ---- Donut chart ----
+    const rolesCtx = document.getElementById('rolesChart');
+    new Chart(rolesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Candidate', 'Recruiter', 'Admin'],
+            datasets: [{
+                data: roleData,
+                backgroundColor: ['#2a6df4', '#e6a23c', '#7a3cd3'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '65%',
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 16, font: { size: 12 } }
+                }
+            }
+        }
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

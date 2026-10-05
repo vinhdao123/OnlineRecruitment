@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Account Detail')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+    <!-- Topbar với breadcrumb thay vì title thường -->
+    <div class="topbar">
+        <div>
+            <div class="breadcrumb">
+                <a th:href="@{/admin/users}">Accounts</a>
+                <span>›</span>
+                <b th:text="${user.fullName}">User</b>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <div class="search-global">
+                <input type="text" placeholder="Search candidates, companies..." maxlength="100">
+            </div>
+            <div class="topbar-user">
+                <div class="avatar-circle">
+                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                </div>
+                <span th:text="${#authentication.name}">admin</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+
+    <!-- ==================== USER HEADER ==================== -->
+    <div class="user-header">
+        <div class="avatar-big">
+            <span th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}">U</span>
+            <span class="online-dot" th:if="${user.status.name() == 'ACTIVE'}"></span>
+        </div>
+
+        <div class="user-info">
+            <div class="user-name" th:text="${user.fullName}">Nguyen Van A</div>
+            <div class="user-meta">
+                <span class="badge"
+                      th:classappend="'badge-' + ${#strings.toLowerCase(user.role.name())}">
+                    <span th:switch="${user.role.name()}">
+                        <span th:case="'ADMIN'">🛡 Admin</span>
+                        <span th:case="'RECRUITER'">💼 Recruiter</span>
+                        <span th:case="'CANDIDATE'">👤 Candidate</span>
+                    </span>
+                </span>
+                <span class="badge"
+                      th:classappend="'badge-' + ${#strings.toLowerCase(user.status.name())}">
+                    <span th:switch="${user.status.name()}">
+                        <span th:case="'ACTIVE'">● Active</span>
+                        <span th:case="'INACTIVE'">○ Inactive</span>
+                        <span th:case="'LOCKED'">⛔ Locked</span>
+                    </span>
+                </span>
+            </div>
+            <div class="user-meta">
+                <span th:text="${user.email}">email@x.com</span>
+                <span th:if="${user.location != null}">·</span>
+                <span th:if="${user.location != null}" th:text="${user.location}">Location</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <a href="#" class="btn btn-secondary">✏ Edit Profile</a>
+            <form th:if="${user.status.name() == 'ACTIVE'}"
+                  th:action="@{'/admin/users/' + ${user.id} + '/lock'}"
+                  method="post" style="display:inline">
+                <button type="submit" class="btn btn-danger"
+                        onclick="return confirm('Khóa tài khoản này?')">
+                    🚫 Ban Account
+                </button>
+            </form>
+            <form th:if="${user.status.name() != 'ACTIVE'}"
+                  th:action="@{'/admin/users/' + ${user.id} + '/unlock'}"
+                  method="post" style="display:inline">
+                <button type="submit" class="btn btn-success">
+                    ✓ Unban Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== INFO GRID ==================== -->
+    <div class="info-grid">
+
+        <!-- Personal Info -->
+        <div class="info-box">
+            <h3>👤 Personal Info</h3>
+            <div class="info-row">
+                <span class="label">Full Name</span>
+                <span class="value" th:text="${user.fullName}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email</span>
+                <span class="value" th:text="${user.email}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Phone Number</span>
+                <span class="value" th:text="${user.phone != null ? user.phone : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Location</span>
+                <span class="value" th:text="${user.location != null ? user.location : '—'}">—</span>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="info-box">
+            <h3>⚙ System Info</h3>
+            <div class="info-row">
+                <span class="label">Username</span>
+                <span class="value" th:text="${user.username}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Role</span>
+                <span class="value" th:text="${user.role}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Account Status</span>
+                <span class="value" th:text="${user.status}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Created Date</span>
+                <span class="value"
+                      th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Last Updated</span>
+                <span class="value"
+                      th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm')}">—</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ==================== COMPANY BOX (chỉ RECRUITER) ==================== -->
+    <div class="section" th:if="${user.role.name() == 'RECRUITER'}">
+        <div class="section-header">
+            <div>
+                <div class="section-title">🏢 Company Managed</div>
+                <div class="section-sub">Công ty mà nhà tuyển dụng này quản lý</div>
+            </div>
+        </div>
+
+        <div th:if="${company == null}" style="color:#8895a8; font-size:14px; padding: 12px 0;">
+            Nhà tuyển dụng này chưa đăng ký công ty nào.
+        </div>
+
+        <div th:if="${company != null}">
+            <div class="info-row">
+                <span class="label">Company Name</span>
+                <span class="value" th:text="${company.companyName}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Tax Code</span>
+                <span class="value" th:text="${company.taxCode != null ? company.taxCode : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email</span>
+                <span class="value" th:text="${company.email != null ? company.email : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Status</span>
+                <span class="value">
+                    <span class="badge"
+                          th:classappend="'badge-' + ${#strings.toLowerCase(company.status.name())}"
+                          th:text="${company.status}">APPROVED</span>
+                </span>
+            </div>
+            <div style="margin-top: 16px;">
+                <a th:href="@{'/admin/companies/' + ${company.id}}" class="btn btn-primary">
+                    Xem chi tiết công ty →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== CANDIDATE NOTE ==================== -->
+    <div class="section" th:if="${user.role.name() == 'CANDIDATE'}">
+        <div class="section-header">
+            <div>
+                <div class="section-title">📄 Candidate Profile</div>
+                <div class="section-sub">Hồ sơ ứng viên</div>
+            </div>
+        </div>
+        <p style="color:#8895a8; font-size:14px; padding: 12px 0;">
+            Thông tin chi tiết hồ sơ (CV, kỹ năng, kinh nghiệm) sẽ được hiển thị ở đây
+            sau khi module Candidate được triển khai.
+        </p>
+    </div>
+
+</div>
+</body>
+</html>
