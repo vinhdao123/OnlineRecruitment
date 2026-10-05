@@ -48,8 +48,6 @@ public class AdminUserController {
         model.addAttribute("statuses",       UserStatus.values());
         model.addAttribute("pageSize",       size);
 
-        // Nếu là RECRUITER, nạp company để hiển thị cột Company
-        // (cách đơn giản: build 1 map userId -> companyName)
         var recruiterIds = userPage.getContent().stream()
                 .filter(u -> u.getRole() == UserRole.RECRUITER)
                 .map(User::getId)
@@ -63,6 +61,39 @@ public class AdminUserController {
 
         model.addAttribute("activeMenu", "users");
         return "admin/users/list";
+    }
+
+    /** Form tạo user mới. */
+    @GetMapping("/new")
+    public String newForm(Model model) {
+        model.addAttribute("roles",    UserRole.values());
+        model.addAttribute("statuses", UserStatus.values());
+        model.addAttribute("activeMenu", "users");
+        return "admin/users/form";
+    }
+
+    /** Xử lý submit form tạo user. */
+    @PostMapping("/new")
+    public String createNew(@RequestParam String username,
+                            @RequestParam String email,
+                            @RequestParam String fullName,
+                            @RequestParam(required = false) String phone,
+                            @RequestParam(required = false) String location,
+                            @RequestParam String password,
+                            @RequestParam UserRole role,
+                            @RequestParam UserStatus status,
+                            @AuthenticationPrincipal UserDetails principal,
+                            RedirectAttributes ra) {
+        try {
+            User actor = userService.getByUsername(principal.getUsername());
+            User created = userService.create(username, email, fullName,
+                    phone, location, password, role, status, actor);
+            ra.addFlashAttribute("success", "Đã tạo tài khoản: " + created.getUsername());
+            return "redirect:/admin/users/" + created.getId();
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/users/new";
+        }
     }
 
     @GetMapping("/{id}")
@@ -98,10 +129,6 @@ public class AdminUserController {
         return "redirect:/admin/users/" + id;
     }
 
-    /**
-     * Export danh sách user hiện tại (theo filter) ra CSV.
-     * Không phân trang — xuất toàn bộ kết quả filter.
-     */
     @GetMapping("/export")
     public void exportCsv(@RequestParam(required = false) String keyword,
                           @RequestParam(required = false) UserRole role,
@@ -113,7 +140,6 @@ public class AdminUserController {
         response.setHeader("Content-Disposition",
                 "attachment; filename=\"users_" + System.currentTimeMillis() + ".csv\"");
 
-        // BOM để Excel đọc đúng tiếng Việt
         response.getWriter().write('\ufeff');
 
         List<User> users = userService.searchAll(keyword, role, status);
