@@ -73,14 +73,71 @@
         <div class="search-global">
             <input type="text" placeholder="Search candidates, companies..." maxlength="100">
         </div>
-        <div class="topbar-user">
-            <div class="avatar-circle">
-                <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+        <!-- User dropdown -->
+        <div class="user-dropdown" id="userDropdown">
+            <button type="button" class="topbar-user" onclick="toggleUserMenu(event)">
+                <div class="avatar-circle">
+                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                </div>
+                <span th:text="${#authentication.name}">admin</span>
+                <span style="font-size:10px; opacity:0.6;">▼</span>
+            </button>
+
+            <div class="dropdown-menu" id="userMenu">
+                <div class="dropdown-header">
+                    <div class="avatar-circle" style="width:36px; height:36px; font-size:14px;">
+                        <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                    </div>
+                    <div>
+                        <div style="font-weight:600; font-size:13px;"
+                             th:text="${#authentication.name}">admin</div>
+                        <div style="font-size:11px; color:#8895a8;"
+                             th:text="${#authentication.authorities[0].authority}">ROLE_ADMIN</div>
+                    </div>
+                </div>
+
+                <a href="#" class="dropdown-item">
+                    <span>⚙</span> Settings
+                </a>
+
+                <a href="#" class="dropdown-item">
+                    <span>👤</span> Profile
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <form th:action="@{/logout}" method="post" style="margin:0;">
+                    <button type="submit" class="dropdown-item dropdown-item-danger">
+                        <span>🚪</span> Đăng xuất
+                    </button>
+                </form>
             </div>
-            <span th:text="${#authentication.name}">admin</span>
         </div>
     </div>
 </div>
+
+<script th:fragment="scripts">
+    function toggleUserMenu(event) {
+        event.stopPropagation();
+        const menu = document.getElementById('userMenu');
+        if (menu) menu.classList.toggle('open');
+    }
+
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('userMenu');
+        const dropdown = document.getElementById('userDropdown');
+        if (dropdown && menu && !dropdown.contains(e.target)) {
+            menu.classList.remove('open');
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const menu = document.getElementById('userMenu');
+            if (menu) menu.classList.remove('open');
+        }
+    });
+</script>
 
 </body>
 </html>
