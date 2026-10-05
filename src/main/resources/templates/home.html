@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head>
     <meta charset="UTF-8">
@@ -28,8 +28,14 @@
         </nav>
 
         <div class="header-actions">
-            <a href="/login" class="login-btn">Đăng nhập</a>
-            <a href="/register" class="register-btn">Đăng ký</a>
+            <th:block sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}" class="login-btn">Đăng nhập</a>
+                <a th:href="@{/register}" class="register-btn">Đăng ký</a>
+            </th:block>
+            <th:block sec:authorize="isAuthenticated()">
+                <span style="font-weight: 600; color: #333; margin-right: 12px;" sec:authentication="name">User</span>
+                <a th:href="@{/logout}" class="login-btn" style="background: #e9ecef; color: #333;">Đăng xuất</a>
+            </th:block>
         </div>
 
     </div>
