@@ -2,8 +2,8 @@
   "languages": {
     "JAVA": {
       "groups": {
-        "OWASP": "DISABLED",
-        "GA": "SHOW_ALL"
+        "GA": "SHOW_ALL",
+        "OWASP": "DISABLED"
       }
     }
   },
@@ -29,12 +29,12 @@
     "V6032": true,
     "V6031": true,
     "V6005": true,
-    "V6125": true,
     "V6004": true,
+    "V6125": true,
     "V6007": true,
     "V6006": true,
-    "V6001": true,
     "V6122": true,
+    "V6001": true,
     "V6089": true,
     "V6088": true,
     "V6121": true,
@@ -66,8 +66,8 @@
     "V6090": true,
     "V6096": true,
     "V6095": true,
-    "V6098": true,
     "V6010": true,
+    "V6098": true,
     "V6097": true,
     "V6092": true,
     "V6091": true,
@@ -77,13 +77,13 @@
     "V6103": true,
     "V6106": true,
     "V6105": true,
-    "V6067": true,
     "V6100": true,
+    "V6067": true,
     "V6066": true,
-    "V6069": true,
     "V6102": true,
-    "V6068": true,
+    "V6069": true,
     "V6101": true,
+    "V6068": true,
     "V6108": true,
     "V6107": true,
     "V6109": true,
