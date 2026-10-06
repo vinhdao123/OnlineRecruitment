@@ -2,22 +2,31 @@ package OnlineRecruitment.OnlineRecruitment.service.impl;
 
 import OnlineRecruitment.OnlineRecruitment.dto.CandidateRegisterDto;
 import OnlineRecruitment.OnlineRecruitment.dto.RecruiterRegisterDto;
-import OnlineRecruitment.OnlineRecruitment.entity.*;
+import OnlineRecruitment.OnlineRecruitment.entity.Candidate;
+import OnlineRecruitment.OnlineRecruitment.entity.Company;
+import OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus;
+import OnlineRecruitment.OnlineRecruitment.entity.Role;
+import OnlineRecruitment.OnlineRecruitment.entity.TokenType;
+import OnlineRecruitment.OnlineRecruitment.entity.User;
+import OnlineRecruitment.OnlineRecruitment.entity.UserStatus;
+import OnlineRecruitment.OnlineRecruitment.entity.VerificationToken;
 import OnlineRecruitment.OnlineRecruitment.repository.CandidateRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.CompanyRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.TokenRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import OnlineRecruitment.OnlineRecruitment.service.AuthService;
 import OnlineRecruitment.OnlineRecruitment.service.EmailService;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.security.SecureRandom;
 import java.util.UUID;
 
 @Service
@@ -37,59 +46,122 @@ public class AuthServiceImpl implements AuthService {
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    // Trong AuthServiceImpl.java
+    // =========================================================
+    // 1. REGISTER CANDIDATE
+    // =========================================================
+
     @Override
     @Transactional
     public void registerCandidate(CandidateRegisterDto dto) {
-        // 1. Kiem tra email da ton tai chua
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email đã tồn tại trong hệ thống!");
+
+        // Kiểm tra mật khẩu xác nhận
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException(
+                    "Mật khẩu xác nhận không khớp"
+            );
         }
 
-        // 2. Luu User / Candidate
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setEnabled(false); // Chưa kích hoạt cho đến khi verify OTP
-        userRepository.save(user);
+        if (userRepository.existsByEmail(dto.getEmail())) {
+            throw new IllegalArgumentException(
+                    "Email đã tồn tại trong hệ thống!"
+            );
+        }
 
-        // 3. Sinh mã OTP 6 chữ số
-        String otpCode = String.format("%06d", new java.util.Random().nextInt(900000) + 100000);
+        String username = dto.getEmail();
 
-        // 4. Lưu VerificationToken
-        VerificationToken token = new VerificationToken();
-        token.setToken(otpCode);
-        token.setUser(user);
-        token.setExpiryDate(java.time.LocalDateTime.now().plusMinutes(5)); // Hết hạn sau 5 phút
-        tokenRepository.save(token);
+        // Kiểm tra username
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException(
+                    "Tên người dùng đã tồn tại trong hệ thống!"
+            );
+        }
 
-        // 5. Gửi Email OTP
-        emailService.sendOtpEmail(user.getEmail(), otpCode);
+        // -----------------------------------------------------
+        // Tạo User
+        // -----------------------------------------------------
+
+        User user = User.builder()
+                .username(username)
+                .email(dto.getEmail())
+                .passwordHash(
+                        passwordEncoder.encode(dto.getPassword())
+                )
+                .fullName(dto.getFullName())
+                .phone(dto.getPhone())
+                .role(Role.CANDIDATE)
+                .status(UserStatus.INACTIVE)
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        // -----------------------------------------------------
+        // Tạo Candidate
+        // -----------------------------------------------------
+
+        Candidate candidate = Candidate.builder()
+                .user(savedUser)
+                .dob(dto.getDob())
+                .gender(dto.getGender())
+                .address(dto.getAddress())
+                .build();
+
+        candidateRepository.save(candidate);
+
+        // -----------------------------------------------------
+        // Tạo OTP + Verification Token
+        // -----------------------------------------------------
+
+        createAndSendVerificationToken(savedUser);
+
+        log.info(
+                "Candidate registration successful: {}",
+                savedUser.getEmail()
+        );
     }
+
+    // =========================================================
+    // 2. REGISTER RECRUITER
+    // =========================================================
 
     @Override
     @Transactional
     public void registerRecruiter(RecruiterRegisterDto dto) {
+
+        // Kiểm tra confirm password
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new IllegalArgumentException("Mật khẩu xác nhận không khớp");
+            throw new IllegalArgumentException(
+                    "Mật khẩu xác nhận không khớp"
+            );
         }
 
         if (userRepository.existsByUsername(dto.getUsername())) {
-            throw new IllegalArgumentException("Tên người dùng đã tồn tại");
+            throw new IllegalArgumentException(
+                    "Tên người dùng đã tồn tại"
+            );
         }
 
         if (userRepository.existsByEmail(dto.getPersonalEmail())) {
-            throw new IllegalArgumentException("Email cá nhân đã được sử dụng");
+            throw new IllegalArgumentException(
+                    "Email cá nhân đã được sử dụng"
+            );
         }
 
         if (companyRepository.existsByTaxCode(dto.getTaxCode())) {
-            throw new IllegalArgumentException("Mã số thuế đã tồn tại trên hệ thống");
+            throw new IllegalArgumentException(
+                    "Mã số thuế đã tồn tại trên hệ thống"
+            );
         }
+
+        // -----------------------------------------------------
+        // Tạo User Recruiter
+        // -----------------------------------------------------
 
         User user = User.builder()
                 .username(dto.getUsername())
                 .email(dto.getPersonalEmail())
-                .passwordHash(passwordEncoder.encode(dto.getPassword()))
+                .passwordHash(
+                        passwordEncoder.encode(dto.getPassword())
+                )
                 .fullName(dto.getUsername())
                 .phone(dto.getCompanyPhone())
                 .role(Role.RECRUITER)
@@ -97,6 +169,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         User savedUser = userRepository.save(user);
+
+        // -----------------------------------------------------
+        // Tạo Company
+        // -----------------------------------------------------
 
         Company company = Company.builder()
                 .recruiter(savedUser)
@@ -113,86 +189,235 @@ public class AuthServiceImpl implements AuthService {
 
         companyRepository.save(company);
 
+        // -----------------------------------------------------
+        // Gửi OTP
+        // -----------------------------------------------------
+
         createAndSendVerificationToken(savedUser);
+
+        log.info(
+                "Recruiter registration successful: {}",
+                savedUser.getEmail()
+        );
     }
+
+    // =========================================================
+    // 3. VERIFY OTP
+    // =========================================================
 
     @Override
     @Transactional
     public boolean verifyEmailOtp(String email, String otp) {
-        User user = userRepository.findByEmail(email).orElse(null);
+
+        User user = userRepository.findByEmail(email)
+                .orElse(null);
+
         if (user == null) {
+            log.warn(
+                    "OTP verification failed - user not found: {}",
+                    email
+            );
             return false;
         }
 
-        VerificationToken verificationToken = tokenRepository
-                .findFirstByUserAndTokenTypeOrderByCreatedAtDesc(user, TokenType.EMAIL_VERIFICATION)
-                .orElse(null);
+        VerificationToken verificationToken =
+                tokenRepository
+                        .findFirstByUserAndTokenTypeOrderByCreatedAtDesc(
+                                user,
+                                TokenType.EMAIL_VERIFICATION
+                        )
+                        .orElse(null);
 
-        if (verificationToken == null || verificationToken.isUsed() || verificationToken.isExpired()) {
+        if (verificationToken == null) {
+            log.warn(
+                    "OTP verification failed - token not found: {}",
+                    email
+            );
             return false;
         }
 
-        // Token format: OTP_UUID
-        String tokenStr = verificationToken.getToken();
-        if (tokenStr.startsWith(otp + "_")) {
-            verificationToken.setUsedAt(LocalDateTime.now());
-            tokenRepository.save(verificationToken);
-
-            user.setStatus(UserStatus.ACTIVE);
-            userRepository.save(user);
-            return true;
-        }
-
-        return false;
-    }
-
-    @Override
-    @Transactional
-    public boolean verifyByToken(String token) {
-        VerificationToken verificationToken = tokenRepository
-                .findByTokenAndTokenType(token, TokenType.EMAIL_VERIFICATION)
-                .orElse(null);
-
-        if (verificationToken == null || verificationToken.isUsed() || verificationToken.isExpired()) {
+        if (verificationToken.isUsed()) {
+            log.warn(
+                    "OTP verification failed - token already used: {}",
+                    email
+            );
             return false;
         }
+
+        if (verificationToken.isExpired()) {
+            log.warn(
+                    "OTP verification failed - token expired: {}",
+                    email
+            );
+            return false;
+        }
+
+        String token = verificationToken.getToken();
+
+        if (token == null || !token.startsWith(otp + "_")) {
+            log.warn(
+                    "OTP verification failed - wrong OTP: {}",
+                    email
+            );
+            return false;
+        }
+
+        // -----------------------------------------------------
+        // OTP đúng
+        // -----------------------------------------------------
 
         verificationToken.setUsedAt(LocalDateTime.now());
         tokenRepository.save(verificationToken);
 
-        User user = verificationToken.getUser();
         user.setStatus(UserStatus.ACTIVE);
         userRepository.save(user);
+
+        log.info(
+                "Email verified successfully: {}",
+                email
+        );
+
         return true;
     }
 
+    // =========================================================
+    // 4. VERIFY BY EMAIL LINK
+    // =========================================================
+
     @Override
     @Transactional
-    public void resendVerificationOtp(String email) {
+    public boolean verifyByToken(String token) {
+
+        VerificationToken verificationToken =
+                tokenRepository
+                        .findByTokenAndTokenType(
+                                token,
+                                TokenType.EMAIL_VERIFICATION
+                        )
+                        .orElse(null);
+
+        if (verificationToken == null) {
+            log.warn(
+                    "Verification failed - token not found"
+            );
+            return false;
+        }
+
+        if (verificationToken.isUsed()) {
+            log.warn(
+                    "Verification failed - token already used"
+            );
+            return false;
+        }
+
+        if (verificationToken.isExpired()) {
+            log.warn(
+                    "Verification failed - token expired"
+            );
+            return false;
+        }
+
+        // Đánh dấu token đã sử dụng
+        verificationToken.setUsedAt(LocalDateTime.now());
+        tokenRepository.save(verificationToken);
+
+        // Kích hoạt user
+        User user = verificationToken.getUser();
+
+        if (user == null) {
+            log.error(
+                    "Verification token has no associated user"
+            );
+            return false;
+        }
+
+        user.setStatus(UserStatus.ACTIVE);
+        userRepository.save(user);
+
+        log.info(
+                "Email verified successfully by link: {}",
+                user.getEmail()
+        );
+
+        return true;
+    }
+
+    // =========================================================
+    // 5. RESEND OTP
+    // =========================================================
+
+    @Override
+    @Transactional
+    public void resendOtp(String email) {
+
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với email: " + email));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Không tìm thấy người dùng với email: "
+                                        + email
+                        )
+                );
 
         if (user.getStatus() == UserStatus.ACTIVE) {
-            throw new IllegalArgumentException("Tài khoản này đã được xác thực trước đó.");
+            throw new IllegalArgumentException(
+                    "Tài khoản này đã được xác thực trước đó."
+            );
         }
 
         createAndSendVerificationToken(user);
+
+        log.info(
+                "OTP resent successfully: {}",
+                email
+        );
     }
 
-    private void createAndSendVerificationToken(User user) {
-        String otpCode = String.format("%06d", RANDOM.nextInt(1_000_000));
-        String fullToken = otpCode + "_" + UUID.randomUUID().toString();
+    // =========================================================
+    // 6. CREATE + SEND VERIFICATION TOKEN
+    // =========================================================
 
-        VerificationToken token = VerificationToken.builder()
-                .user(user)
-                .token(fullToken)
-                .tokenType(TokenType.EMAIL_VERIFICATION)
-                .expiresAt(LocalDateTime.now().plusMinutes(15))
-                .build();
+    private void createAndSendVerificationToken(User user) {
+
+        String otpCode = String.format(
+                "%06d",
+                RANDOM.nextInt(1_000_000)
+        );
+
+        String fullToken =
+                otpCode + "_" + UUID.randomUUID();
+
+        VerificationToken token =
+                VerificationToken.builder()
+                        .user(user)
+                        .token(fullToken)
+                        .tokenType(
+                                TokenType.EMAIL_VERIFICATION
+                        )
+                        .expiresAt(
+                                LocalDateTime.now()
+                                        .plusMinutes(15)
+                        )
+                        .build();
 
         tokenRepository.save(token);
 
-        String verificationLink = baseUrl + "/auth/verify?token=" + fullToken;
-        emailService.sendVerificationEmail(user.getEmail(), user.getFullName(), otpCode, verificationLink);
+        String verificationLink =
+                baseUrl
+                        + "/auth/verify?token="
+                        + fullToken;
+
+        // Gửi email
+        emailService.sendVerificationEmail(
+                user.getEmail(),
+                user.getFullName(),
+                otpCode,
+                verificationLink
+        );
+
+        log.info(
+                "Verification token created for: {}",
+                user.getEmail()
+        );
     }
 }
+
