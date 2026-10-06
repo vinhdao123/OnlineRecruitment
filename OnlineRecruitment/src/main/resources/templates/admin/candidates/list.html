@@ -11,15 +11,15 @@
 
   <!-- ==================== ACTION BAR ==================== -->
   <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px;">
-    <a th:href="@{/admin/users/export(keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
+    <a th:href="@{/templates/admin/candidates/export(keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
        class="btn btn-secondary">
       📥 Export CSV
     </a>
-    <a th:href="@{/admin/users/new}" class="btn btn-primary">+ Add New User</a>
+    <a th:href="@{/templates/admin/candidates/new}" class="btn btn-primary">+ Add New User</a>
   </div>
 
   <!-- ==================== FILTERS ==================== -->
-  <form method="get" th:action="@{/admin/users}" class="filters">
+  <form method="get" th:action="@{/templates/admin/candidates}" class="filters">
     <input type="text" name="keyword"
            class="grow"
            placeholder="Search by name or email..."
@@ -43,7 +43,7 @@
     </select>
 
     <button type="submit" class="btn btn-primary">Filter</button>
-    <a th:href="@{/admin/users}" class="btn btn-secondary">Clear</a>
+    <a th:href="@{/templates/admin/candidates}" class="btn btn-secondary">Clear</a>
   </form>
 
   <!-- ==================== COUNTER ==================== -->
@@ -142,7 +142,7 @@
         <select onchange="window.location.href=this.value"
                 style="padding:4px; border:1px solid #d5dde8; border-radius:6px;">
           <option th:each="sz : ${ {5, 10, 20, 50} }"
-                  th:value="@{/admin/users(page=0, size=${sz}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
+                  th:value="@{/templates/admin/candidates(page=0, size=${sz}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
                   th:text="${sz}"
                   th:selected="${pageSize == sz}"></option>
         </select>
@@ -150,19 +150,19 @@
 
       <div class="pages">
         <a th:if="${currentPage > 0}"
-           th:href="@{/admin/users(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}">
+           th:href="@{/templates/admin/candidates(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}">
           ◀
         </a>
 
         <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
           <a th:if="${i != currentPage}"
-             th:href="@{/admin/users(page=${i}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
+             th:href="@{/templates/admin/candidates(page=${i}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
              th:text="${i + 1}">1</a>
           <span th:if="${i == currentPage}" class="current" th:text="${i + 1}">1</span>
         </th:block>
 
         <a th:if="${currentPage < totalPages - 1}"
-           th:href="@{/admin/users(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}">
+           th:href="@{/templates/admin/candidates(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}">
           ▶
         </a>
       </div>

@@ -10,7 +10,7 @@
     <div class="topbar">
         <div>
             <div class="breadcrumb">
-                <a th:href="@{/admin/users}">Accounts</a>
+                <a th:href="@{/templates/admin/candidates}">Accounts</a>
                 <span>›</span>
                 <b>Add New User</b>
             </div>
@@ -38,7 +38,7 @@
             </div>
         </div>
 
-        <form th:action="@{/admin/users/new}" method="post">
+        <form th:action="@{/templates/admin/candidates/new}" method="post">
 
             <!-- ===== ACCOUNT INFO ===== -->
             <h3 style="font-size: 14px; color: #4a5568; margin: 16px 0 12px;
@@ -152,7 +152,7 @@
                 <button type="submit" class="btn btn-primary">
                     ✓ Tạo tài khoản
                 </button>
-                <a th:href="@{/admin/users}" class="btn btn-secondary">
+                <a th:href="@{/templates/admin/candidates}" class="btn btn-secondary">
                     Hủy
                 </a>
             </div>

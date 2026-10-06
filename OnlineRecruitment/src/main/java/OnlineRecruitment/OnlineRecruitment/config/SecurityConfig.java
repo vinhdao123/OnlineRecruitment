@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
+                        .usernameParameter("email")
+                        .passwordParameter("password")
                         .successHandler((req, res, auth) -> {
                             String role = auth.getAuthorities().iterator().next().getAuthority();
                             String target = switch (role) {
