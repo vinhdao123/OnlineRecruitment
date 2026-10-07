@@ -26,8 +26,8 @@
         <!-- Họ và tên -->
         <div class="form-group">
             <label for="fullName">Họ và tên <span class="required">*</span></label>
-            <input type="text" id="fullName" th:field="*{fullName}" 
-                   class="form-control" th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''" 
+            <input type="text" id="fullName" th:field="*{fullName}"
+                   class="form-control" th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid' : ''"
                    placeholder="Nguyễn Văn A">
             <div class="invalid-feedback" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
         </div>
@@ -35,8 +35,8 @@
         <!-- Email / Gmail -->
         <div class="form-group">
             <label for="email">Email / Gmail <span class="required">*</span></label>
-            <input type="email" id="email" th:field="*{email}" 
-                   class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''" 
+            <input type="email" id="email" th:field="*{email}"
+                   class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
                    placeholder="example@gmail.com">
             <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
         </div>
@@ -45,15 +45,15 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="password">Mật khẩu <span class="required">*</span></label>
-                <input type="password" id="password" th:field="*{password}" 
-                       class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''" 
+                <input type="password" id="password" th:field="*{password}"
+                       class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"
                        placeholder="Nhập mật khẩu">
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
             </div>
             <div class="form-group">
                 <label for="confirmPassword">Nhập lại mật khẩu <span class="required">*</span></label>
-                <input type="password" id="confirmPassword" th:field="*{confirmPassword}" 
-                       class="form-control" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''" 
+                <input type="password" id="confirmPassword" th:field="*{confirmPassword}"
+                       class="form-control" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''"
                        placeholder="Xác nhận mật khẩu">
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
             </div>
@@ -63,14 +63,14 @@
         <div class="form-row">
             <div class="form-group">
                 <label for="phone">Số điện thoại <span class="required">*</span></label>
-                <input type="text" id="phone" th:field="*{phone}" 
-                       class="form-control" th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid' : ''" 
+                <input type="text" id="phone" th:field="*{phone}"
+                       class="form-control" th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid' : ''"
                        placeholder="0912345678">
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
             </div>
             <div class="form-group">
                 <label for="dob">Ngày sinh <span class="required">*</span></label>
-                <input type="date" id="dob" th:field="*{dob}" 
+                <input type="date" id="dob" th:field="*{dob}"
                        class="form-control" th:classappend="${#fields.hasErrors('dob')} ? 'is-invalid' : ''">
                 <div class="invalid-feedback" th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}"></div>
             </div>
@@ -99,8 +99,8 @@
         <!-- Địa chỉ hiện tại -->
         <div class="form-group">
             <label for="address">Địa chỉ hiện tại <span class="required">*</span></label>
-            <input type="text" id="address" th:field="*{address}" 
-                   class="form-control" th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''" 
+            <input type="text" id="address" th:field="*{address}"
+                   class="form-control" th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''"
                    placeholder="Quận/Huyện, Tỉnh/Thành phố">
             <div class="invalid-feedback" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
         </div>
