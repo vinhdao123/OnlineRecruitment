@@ -10,4 +10,14 @@ public class HomeController {
     public String home() {
         return "home";
     }
+
+    @GetMapping("/login")
+    public String login() {
+        return "auth/login";     // ← file templates/login.html
+    }
+
+    @GetMapping("/403")
+    public String forbidden() {
+        return "403";
+    }
 }

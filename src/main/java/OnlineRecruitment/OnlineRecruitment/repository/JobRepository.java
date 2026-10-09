@@ -35,4 +35,9 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     // ================= ĐỊA ĐIỂM =================
 
     List<Job> findDistinctByLocationIsNotNullOrderByLocationAsc();
+
+
+    // ================= ĐẾM THEO STATUS =================
+
+    long countByStatus(String status);
 }

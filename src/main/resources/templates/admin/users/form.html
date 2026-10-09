@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Add New User')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+    <div class="topbar">
+        <div>
+            <div class="breadcrumb">
+                <a th:href="@{/admin/users}">Accounts</a>
+                <span>›</span>
+                <b>Add New User</b>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <div class="search-global">
+                <input type="text" placeholder="Search candidates, companies..." maxlength="100">
+            </div>
+            <div class="topbar-user">
+                <div class="avatar-circle">
+                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                </div>
+                <span th:text="${#authentication.name}">admin</span>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="section">
+        <div class="section-header">
+            <div>
+                <div class="section-title">➕ Tạo tài khoản mới</div>
+                <div class="section-sub">Điền thông tin để tạo tài khoản mới trong hệ thống</div>
+            </div>
+        </div>
+
+        <form th:action="@{/admin/users/new}" method="post">
+
+            <h3 style="font-size: 14px; color: #4a5568; margin: 16px 0 12px;
+                       text-transform: uppercase; letter-spacing: 0.5px;">
+                🔐 Thông tin đăng nhập
+            </h3>
+
+            <div class="info-grid">
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin-bottom:6px;">
+                        Username <span style="color:#d33;">*</span>
+                    </label>
+                    <input type="text" name="username" required maxlength="100"
+                           pattern="[a-zA-Z0-9_]{3,50}"
+                           title="Chỉ chữ, số và gạch dưới, 3-50 ký tự"
+                           placeholder="vd: nguyenvana"
+                           style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                  border-radius:8px; font-size:14px;">
+
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin:14px 0 6px;">
+                        Email <span style="color:#d33;">*</span>
+                    </label>
+                    <input type="email" name="email" required maxlength="255"
+                           placeholder="vd: user@example.com"
+                           style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                  border-radius:8px; font-size:14px;">
+
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin:14px 0 6px;">
+                        Mật khẩu <span style="color:#d33;">*</span>
+                    </label>
+                    <input type="password" name="password" required minlength="6" maxlength="100"
+                           placeholder="Tối thiểu 6 ký tự"
+                           style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                  border-radius:8px; font-size:14px;">
+                </div>
+
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin-bottom:6px;">
+                        Vai trò <span style="color:#d33;">*</span>
+                    </label>
+                    <select name="role" required
+                            style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                   border-radius:8px; font-size:14px;">
+                        <option value="">-- Chọn vai trò --</option>
+                        <option th:each="r : ${roles}"
+                                th:value="${r}"
+                                th:text="${r}"></option>
+                    </select>
+
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin:14px 0 6px;">
+                        Trạng thái <span style="color:#d33;">*</span>
+                    </label>
+                    <select name="status" required
+                            style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                   border-radius:8px; font-size:14px;">
+                        <option th:each="s : ${statuses}"
+                                th:if="${s.name() != 'INACTIVE'}"
+                                th:value="${s}"
+                                th:text="${s}"
+                                th:selected="${s.name() == 'ACTIVE'}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <h3 style="font-size: 14px; color: #4a5568; margin: 24px 0 12px;
+                       text-transform: uppercase; letter-spacing: 0.5px;">
+                👤 Thông tin cá nhân
+            </h3>
+
+            <div class="info-grid">
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin-bottom:6px;">
+                        Họ tên <span style="color:#d33;">*</span>
+                    </label>
+                    <input type="text" name="fullName" required maxlength="150"
+                           placeholder="vd: Nguyễn Văn A"
+                           style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                  border-radius:8px; font-size:14px;">
+
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin:14px 0 6px;">
+                        Số điện thoại
+                    </label>
+                    <input type="text" name="phone" maxlength="20"
+                           placeholder="vd: 0901234567"
+                           style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                  border-radius:8px; font-size:14px;">
+                </div>
+
+                <div>
+                    <label style="display:block; font-size:13px; font-weight:600;
+                                  color:#4a5568; margin-bottom:6px;">
+                        Địa điểm
+                    </label>
+                    <input type="text" name="location" maxlength="255"
+                           placeholder="vd: Hà Nội"
+                           style="width:100%; padding:10px; border:1px solid #d5dde8;
+                                  border-radius:8px; font-size:14px;">
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:32px; padding-top:20px;
+                        border-top:1px solid #eef1f6;">
+                <button type="submit" class="btn btn-primary">
+                    ✓ Tạo tài khoản
+                </button>
+                <a th:href="@{/admin/users}" class="btn btn-secondary">
+                    Hủy
+                </a>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

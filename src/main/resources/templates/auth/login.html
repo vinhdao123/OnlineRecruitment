@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body class="auth-body">
+
+<div class="auth-header">
+    <a href="/" class="logo">
+        <span class="logo-icon">OR</span>
+        <span>Online Recruitment</span>
+    </a>
+</div>
+
+<div class="auth-card">
+    <h1 class="auth-title">Đăng Nhập</h1>
+
+    <!-- Thông báo lỗi cụ thể theo param URL -->
+    <div th:if="${param.locked}" class="alert alert-danger">
+        🔒 Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.
+    </div>
+
+    <div th:if="${param.inactive}" class="alert alert-danger">
+        ⏸ Tài khoản đang tạm ẩn.
+    </div>
+
+    <div th:if="${param.badCredentials}" class="alert alert-danger">
+        ❌ Sai email hoặc mật khẩu.
+    </div>
+
+    <div th:if="${param.error}" class="alert alert-danger">
+        ❌ Sai email hoặc mật khẩu.
+    </div>
+
+    <div th:if="${param.logout}" class="alert alert-success">
+        ✅ Đã đăng xuất thành công.
+    </div>
+
+    <!-- Thông báo từ controller -->
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <form th:action="@{/login}" method="post">
+        <div class="form-group">
+            <label for="email">Gmail</label>
+            <input type="text" id="email" name="email" class="form-control"
+                   placeholder="example@gmail.com" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Mật khẩu</label>
+            <input type="password" id="password" name="password" class="form-control"
+                   placeholder="Nhập mật khẩu" required>
+        </div>
+
+        <a href="#" class="forgot-password-link">Quên mật khẩu?</a>
+
+        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+
+        <div class="auth-divider">
+            <span>Hoặc đăng ký tài khoản mới</span>
+        </div>
+
+        <div class="btn-group-row">
+            <a th:href="@{/register/candidate}" class="btn btn-secondary">Đăng ký: Candidate</a>
+            <a th:href="@{/register/recruiter}" class="btn btn-success">Đăng ký: Recruiter</a>
+        </div>
+    </form>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Account Management')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+  <div th:replace="~{admin/_layout :: topbar('Account Management', 'Manage all accounts and their system roles')}"></div>
+
+  <div style="display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 16px;">
+    <a th:href="@{/admin/users/export(keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
+       class="btn btn-secondary">
+      📥 Export CSV
+    </a>
+    <a th:href="@{/admin/users/new}" class="btn btn-primary">+ Add New User</a>
+  </div>
+
+  <form method="get" th:action="@{/admin/users}" class="filters">
+    <input type="text" name="keyword" class="grow"
+           placeholder="Search by name or email..." maxlength="100"
+           th:value="${keyword}">
+
+    <select name="role">
+      <option value="">All Roles</option>
+      <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+              th:selected="${selectedRole != null and selectedRole.name() == r.name()}"></option>
+    </select>
+
+    <select name="status">
+      <option value="">All Status</option>
+      <option th:each="s : ${statuses}"  th:if="${s.name() != 'INACTIVE'}" th:value="${s}" th:text="${s}"
+              th:selected="${selectedStatus != null and selectedStatus.name() == s.name()}"></option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a th:href="@{/admin/users}" class="btn btn-secondary">Clear</a>
+  </form>
+
+  <p style="font-size: 13px; color: #8895a8; margin-bottom: 12px;">
+    Showing <b th:text="${users.size()}">0</b> of <b th:text="${totalItems}">0</b> accounts
+  </p>
+
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+      <tr>
+        <th style="width: 40px;"><input type="checkbox" aria-label="Select all"></th>
+        <th>Full Name</th>
+        <th>Email Address</th>
+        <th>Company</th>
+        <th>System Role</th>
+        <th>Status</th>
+        <th style="width: 60px;">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="u : ${users}">
+        <td><input type="checkbox" aria-label="Select row"></td>
+        <td>
+          <a th:href="@{'/admin/users/' + ${u.id}}"
+             style="color: #1a2b4a; text-decoration: none;
+                    display: flex; align-items: center; gap: 10px;">
+            <span style="width: 32px; height: 32px; border-radius: 50%;
+                         background: #e6efff; color: #2a6df4;
+                         display: inline-flex; align-items: center;
+                         justify-content: center; font-weight: 600;
+                         font-size: 13px;"
+                  th:text="${#strings.substring(u.fullName, 0, 1).toUpperCase()}">U</span>
+            <span th:text="${u.fullName}">Name</span>
+          </a>
+        </td>
+        <td th:text="${u.email}">email</td>
+        <td>
+          <span th:if="${u.role.name() == 'RECRUITER' and companyMap.get(u.id) != null}"
+                th:text="${companyMap.get(u.id)}">Company</span>
+          <span th:if="${u.role.name() != 'RECRUITER' or companyMap.get(u.id) == null}"
+                style="color: #8895a8;">—</span>
+        </td>
+        <td>
+          <span class="badge"
+                th:classappend="'badge-' + ${#strings.toLowerCase(u.role.name())}">
+            <span th:switch="${u.role.name()}">
+              <span th:case="'ADMIN'">🛡 Admin</span>
+              <span th:case="'RECRUITER'">💼 Recruiter</span>
+              <span th:case="'CANDIDATE'">👤 Candidate</span>
+            </span>
+          </span>
+        </td>
+        <td>
+          <span class="badge"
+                th:classappend="'badge-' + ${#strings.toLowerCase(u.status.name())}">
+            <span th:switch="${u.status.name()}">
+              <span th:case="'ACTIVE'">● Active</span>
+              <span th:case="'INACTIVE'">○ Inactive</span>
+              <span th:case="'LOCKED'">⛔ Locked</span>
+            </span>
+          </span>
+        </td>
+        <td style="position: relative;">
+          <details class="action-menu">
+            <summary class="action-trigger" title="Actions">⋮</summary>
+            <div class="action-dropdown">
+
+              <a th:href="@{'/admin/users/' + ${u.id}}" class="action-item">
+                <span>👁</span> View Details
+              </a>
+
+              <a th:href="@{'/admin/users/' + ${u.id} + '/edit'}" class="action-item">
+                <span>✏</span> Edit
+              </a>
+
+              <div class="action-divider"></div>
+
+              <form th:if="${u.status.name() == 'ACTIVE'}"
+                    th:action="@{'/admin/users/' + ${u.id} + '/lock'}"
+                    method="post" style="margin:0;">
+                <button type="submit" class="action-item action-item-danger"
+                        onclick="return confirm('Khóa tài khoản này?')">
+                  <span>🚫</span> Deactivate
+                </button>
+              </form>
+
+              <form th:if="${u.status.name() != 'ACTIVE'}"
+                    th:action="@{'/admin/users/' + ${u.id} + '/unlock'}"
+                    method="post" style="margin:0;">
+                <button type="submit" class="action-item action-item-success">
+                  <span>✓</span> Activate
+                </button>
+              </form>
+
+            </div>
+          </details>
+        </td>
+      </tr>
+      <tr th:if="${users.isEmpty()}">
+        <td colspan="7" style="text-align:center; color:#8895a8; padding: 40px;">
+          Không có tài khoản nào.
+        </td>
+      </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <div>
+        Rows per page:
+        <select onchange="window.location.href=this.value"
+                style="padding:4px; border:1px solid #d5dde8; border-radius:6px;">
+          <option th:each="sz : ${ {5, 10, 20, 50} }"
+                  th:value="@{/admin/users(page=0, size=${sz}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
+                  th:text="${sz}" th:selected="${pageSize == sz}"></option>
+        </select>
+      </div>
+      <div class="pages">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/admin/users(page=${currentPage - 1}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}">◀</a>
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+          <a th:if="${i != currentPage}"
+             th:href="@{/admin/users(page=${i}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}"
+             th:text="${i + 1}">1</a>
+          <span th:if="${i == currentPage}" class="current" th:text="${i + 1}">1</span>
+        </th:block>
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/admin/users(page=${currentPage + 1}, size=${pageSize}, keyword=${keyword}, role=${selectedRole}, status=${selectedStatus})}">▶</a>
+      </div>
+      <div>
+        Page <b th:text="${currentPage + 1}">1</b> of <b th:text="${totalPages}">1</b>
+      </div>
+    </div>
+  </div>
+
+</div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>
