@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý hồ sơ ứng tuyển</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 30px;
+            background: #f5f7fb;
+            color: #17243a;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+
+        h1 { margin-bottom: 8px; }
+
+        .muted { color: #64748b; }
+
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 24px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 18px #17243a0d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #e8edf4;
+            text-align: left;
+        }
+
+        th {
+            background: #eef4ff;
+            font-size: 13px;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .detail-link {
+            color: #2563eb;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .alert {
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+        }
+
+        .success { background: #dcfce7; color: #166534; }
+        .error { background: #fee2e2; color: #991b1b; }
+
+        .empty {
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <h1>Quản lý hồ sơ ứng tuyển</h1>
+    <p class="muted">
+        Hồ sơ ứng tuyển vào các công việc do bạn đăng tuyển.
+    </p>
+
+    <div th:if="${successMessage}"
+         class="alert success"
+         th:text="${successMessage}"></div>
+
+    <div th:if="${errorMessage}"
+         class="alert error"
+         th:text="${errorMessage}"></div>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th>Ứng viên</th>
+                <th>Vị trí</th>
+                <th>Ngày ứng tuyển</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="app : ${applications}">
+                <td>
+                    <strong
+                            th:text="${app.candidate.user.fullName}">
+                        Tên ứng viên
+                    </strong>
+                </td>
+
+                <td th:text="${app.job.title}">
+                    Vị trí ứng tuyển
+                </td>
+
+                <td th:text="${app.appliedAt != null
+                    ? #temporals.format(app.appliedAt, 'dd/MM/yyyy HH:mm')
+                    : '—'}">
+                    Ngày ứng tuyển
+                </td>
+
+                <td>
+                    <span class="status"
+                          th:text="${app.status}">
+                        SUBMITTED
+                    </span>
+                </td>
+
+                <td>
+                    <a class="detail-link"
+                       th:href="@{/recruiter/applications/{id}(id=${app.id})}">
+                        Xem hồ sơ →
+                    </a>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(applications)}">
+                <td colspan="5" class="empty">
+                    Chưa có hồ sơ ứng tuyển nào.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

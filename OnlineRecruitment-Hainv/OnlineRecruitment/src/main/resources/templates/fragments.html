@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<header class="site-header" th:fragment="header">
+    <div class="wrap header-inner">
+
+        <!-- LOGO -->
+        <a th:href="@{/}" class="brand">
+            <span class="brand-mark">OR</span>
+            <span class="brand-name">Online<span>Recruitment</span></span>
+        </a>
+
+        <!-- NAVIGATION -->
+        <nav class="main-nav" aria-label="Menu chính">
+
+            <!-- TRANG CHỦ -->
+            <a th:href="@{/}"
+               th:classappend="${currentPath == '/'} ? ' active' : ''">
+                Trang chủ
+            </a>
+
+            <!-- VIỆC LÀM -->
+            <div class="nav-dropdown">
+                <a th:href="@{/jobs}"
+                   th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/jobs')} ? ' active' : ''">
+                    Việc làm <span class="dropdown-arrow">▾</span>
+                </a>
+
+                <div class="dropdown-menu">
+                    <a th:href="@{/jobs}">Tất cả việc làm</a>
+                    <a th:href="@{/jobs(keyword='Backend')}">Backend Developer</a>
+                    <a th:href="@{/jobs(keyword='Frontend')}">Frontend Developer</a>
+                    <a th:href="@{/jobs(keyword='Java')}">Java Developer</a>
+                </div>
+            </div>
+
+            <!-- CÔNG TY -->
+            <div class="nav-dropdown">
+                <a th:href="@{/companies}"
+                   th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/companies')} ? ' active' : ''">
+                    Công ty <span class="dropdown-arrow">▾</span>
+                </a>
+
+                <div class="dropdown-menu">
+                    <a th:href="@{/companies}">Tất cả công ty</a>
+                    <a th:href="@{/companies}">Khám phá công ty</a>
+                </div>
+            </div>
+
+            <!-- GIỚI THIỆU -->
+            <a th:href="@{/about}"
+               th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/about')} ? ' active' : ''">
+                Giới thiệu
+            </a>
+
+            <!-- RECRUITER: TIN CỦA TÔI -->
+            <div class="nav-dropdown" th:if="${isRecruiter}">
+                <a th:href="@{/recruiter/jobs}"
+                   th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/recruiter')} ? ' active' : ''">
+                    Tin của tôi <span class="dropdown-arrow">▾</span>
+                </a>
+
+                <div class="dropdown-menu">
+                    <a th:href="@{/recruiter/jobs}">
+                        Quản lý tin tuyển dụng
+                    </a>
+
+                    <a th:href="@{/recruiter/jobs/new}">
+                        Đăng tin mới
+                    </a>
+
+                    <a th:href="@{/recruiter/applications}">
+                        Hồ sơ ứng tuyển
+                    </a>
+                </div>
+            </div>
+
+            <!-- ADMIN: DUYỆT TIN -->
+            <div class="nav-dropdown" th:if="${isAdmin}">
+                <a th:href="@{/admin/jobs}"
+                   th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/jobs')} ? ' active' : ''">
+                    Duyệt tin <span class="dropdown-arrow">▾</span>
+                </a>
+
+                <div class="dropdown-menu">
+                    <a th:href="@{/admin/jobs}">
+                        Tất cả tin tuyển dụng
+                    </a>
+
+                    <a th:href="@{/admin/jobs(status='PENDING')}">
+                        Tin chờ duyệt
+                    </a>
+                </div>
+            </div>
+
+            <!-- ADMIN: XÓA TÀI KHOẢN -->
+            <div class="nav-dropdown" th:if="${isAdmin}">
+                <a th:href="@{/admin/users}"
+                   th:classappend="${currentPath != null and #strings.startsWith(currentPath, '/admin/users')} ? ' active' : ''">
+                    Xóa tài khoản <span class="dropdown-arrow">▾</span>
+                </a>
+
+                <div class="dropdown-menu">
+                    <a th:href="@{/admin/users}">
+                        Quản lý tài khoản
+                    </a>
+                </div>
+            </div>
+
+        </nav>
+
+        <!-- CHƯA ĐĂNG NHẬP -->
+        <div class="header-actions" th:if="${currentUser == null}">
+            <a th:href="@{/login}" class="btn btn-ghost">
+                Đăng nhập
+            </a>
+
+            <a th:href="@{/register}" class="btn btn-primary">
+                Đăng ký
+            </a>
+        </div>
+
+        <!-- ĐÃ ĐĂNG NHẬP -->
+        <div class="header-actions" th:if="${currentUser != null}">
+
+            <!-- NÚT ĐĂNG TIN CHO RECRUITER -->
+            <a th:if="${isRecruiter}"
+               th:href="@{/recruiter/jobs/new}"
+               class="btn btn-primary btn-sm">
+                + Đăng tin
+            </a>
+
+            <!-- THÔNG TIN TÀI KHOẢN -->
+            <div class="user-chip">
+                <span class="user-avatar"
+                      th:text="${#strings.toUpperCase(currentUser.substring(0, 1))}">
+                    U
+                </span>
+
+                <span class="user-name"
+                      th:text="${currentUser}">
+                    user
+                </span>
+            </div>
+
+            <!-- ĐĂNG XUẤT -->
+            <form th:action="@{/logout}"
+                  method="post"
+                  class="logout-form">
+
+                <input type="hidden"
+                       th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <button type="submit" class="btn btn-ghost btn-sm">
+                    Đăng xuất
+                </button>
+            </form>
+
+        </div>
+    </div>
+</header>
+
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="site-footer" th:fragment="footer">
+
+    <div class="wrap footer-inner">
+
+        <!-- BRAND -->
+        <div class="footer-brand">
+            <a th:href="@{/}" class="brand brand-light">
+                <span class="brand-mark">OR</span>
+                <span class="brand-name">Online<span>Recruitment</span></span>
+            </a>
+
+            <p>
+                Nền tảng kết nối nhà tuyển dụng và ứng viên
+                nhanh chóng, minh bạch và hiệu quả.
+            </p>
+        </div>
+
+        <!-- CANDIDATE LINKS -->
+        <div class="footer-column">
+            <h4>Dành cho ứng viên</h4>
+            <a th:href="@{/jobs}">Tìm việc làm</a>
+            <a th:href="@{/companies}">Danh sách công ty</a>
+            <a th:href="@{/register}">Tạo hồ sơ</a>
+        </div>
+
+        <!-- ABOUT LINKS -->
+        <div class="footer-column">
+            <h4>Về chúng tôi</h4>
+            <a th:href="@{/about}">Giới thiệu</a>
+            <a href="#">Liên hệ</a>
+            <a href="#">Điều khoản sử dụng</a>
+        </div>
+
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 Online Recruitment. All rights reserved.</p>
+    </div>
+
+</footer>
+
+</body>
+</html>

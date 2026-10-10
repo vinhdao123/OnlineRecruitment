@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết hồ sơ ứng tuyển</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 32px 16px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 22px;
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            margin: 0 0 22px;
+            font-size: 28px;
+        }
+
+        .card {
+            margin-bottom: 22px;
+            padding: 24px;
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+        }
+
+        .card h2 {
+            margin: 0 0 20px;
+            font-size: 19px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 180px minmax(0, 1fr);
+            gap: 14px;
+            padding: 13px 0;
+            border-bottom: 1px solid #eef0f3;
+            overflow-wrap: anywhere;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 11px;
+            border-radius: 20px;
+            background: #dbeafe;
+            color: #1d4ed8;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 15px;
+        }
+
+        button,
+        .download-btn {
+            display: inline-block;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        button:hover,
+        .download-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .alert-success,
+        .alert-error {
+            margin-bottom: 20px;
+            padding: 13px 16px;
+            border-radius: 8px;
+        }
+
+        .alert-success {
+            color: #166534;
+            background: #dcfce7;
+            border: 1px solid #86efac;
+        }
+
+        .alert-error {
+            color: #991b1b;
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+        }
+
+        .cv-description {
+            margin: 0 0 18px;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+
+    <a class="back-link" th:href="@{/recruiter/applications}">
+        ← Quay lại danh sách hồ sơ
+    </a>
+
+    <h1>Chi tiết hồ sơ ứng tuyển</h1>
+
+    <div th:if="${successMessage}"
+         class="alert-success"
+         th:text="${successMessage}">
+        Cập nhật trạng thái thành công!
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="alert-error"
+         th:text="${errorMessage}">
+        Có lỗi xảy ra.
+    </div>
+
+    <section class="card">
+        <h2>Thông tin ứng viên</h2>
+
+        <div class="info-row">
+            <div class="info-label">Họ và tên</div>
+            <div class="info-value" th:text="${candidateName}">
+                Tên ứng viên
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Email tài khoản</div>
+            <div class="info-value" th:text="${candidateEmail}">
+                candidate@example.com
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Vị trí ứng tuyển</div>
+            <div class="info-value" th:text="${jobTitle}">
+                Tên vị trí
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Ngày nộp hồ sơ</div>
+            <div class="info-value"
+                 th:text="${appliedAt != null
+                    ? #temporals.format(appliedAt, 'dd/MM/yyyy HH:mm')
+                    : 'Chưa có thông tin'}">
+                10/10/2026 17:54
+            </div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Trạng thái hiện tại</div>
+            <div>
+                <span class="status-badge"
+                      th:text="${applicationStatus}">
+                    SUBMITTED
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <h2>Cập nhật trạng thái</h2>
+
+        <form th:action="@{/recruiter/applications/{id}/status(id=${applicationId})}"
+              method="post">
+
+            <div class="form-group">
+                <label for="status">Trạng thái mới</label>
+
+                <select id="status" name="status" required>
+                    <option value="SUBMITTED"
+                            th:selected="${applicationStatus == 'SUBMITTED'}">
+                        Đã nộp
+                    </option>
+
+                    <option value="REVIEWING"
+                            th:selected="${applicationStatus == 'REVIEWING'}">
+                        Đang xem xét
+                    </option>
+
+                    <option value="INTERVIEW"
+                            th:selected="${applicationStatus == 'INTERVIEW'}">
+                        Mời phỏng vấn
+                    </option>
+
+                    <option value="REJECTED"
+                            th:selected="${applicationStatus == 'REJECTED'}">
+                        Từ chối
+                    </option>
+
+                    <option value="HIRED"
+                            th:selected="${applicationStatus == 'HIRED'}">
+                        Được tuyển
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit">Lưu trạng thái</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>CV đính kèm</h2>
+
+        <p class="cv-description"
+           th:if="${cvFilePath != null and !#strings.isEmpty(cvFilePath)}">
+            Ứng viên đã đính kèm CV.<br>
+            File CV được lưu trên máy chủ. Nhấn nút bên dưới để tải file về máy.
+        </p>
+
+        <p class="cv-description"
+           th:unless="${cvFilePath != null and !#strings.isEmpty(cvFilePath)}">
+            Hồ sơ này chưa có file CV đính kèm.
+        </p>
+
+        <a th:if="${cvFilePath != null and !#strings.isEmpty(cvFilePath)}"
+           class="download-btn"
+           th:href="@{/recruiter/applications/{id}/cv(id=${applicationId})}">
+            ⬇ Tải CV xuống
+        </a>
+    </section>
+
+</div>
+</body>
+</html>

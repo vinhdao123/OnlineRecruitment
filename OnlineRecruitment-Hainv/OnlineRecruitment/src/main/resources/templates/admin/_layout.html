@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<!-- ==================== HEAD FRAGMENT ==================== -->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${title} + ' — Online Recruitment Admin'">
+        Admin
+    </title>
+
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body class="admin">
+
+<!-- ==================== SIDEBAR FRAGMENT ==================== -->
+<aside class="sidebar" th:fragment="sidebar">
+
+    <div class="sidebar-logo">
+        <div class="logo-icon">OR</div>
+
+        <div>
+            <div class="logo-text">RecruitAdmin</div>
+            <div class="logo-sub">Pro</div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="nav-section">MENU</div>
+
+        <!-- DASHBOARD -->
+        <a th:href="@{/admin/dashboard}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'dashboard'} ? ' active' : ''">
+            <span class="icon">📊</span>
+            Dashboard
+        </a>
+
+        <!-- USERS -->
+        <a th:href="@{/admin/users}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'users'} ? ' active' : ''">
+            <span class="icon">👥</span>
+            Users
+        </a>
+
+        <!-- COMPANIES -->
+        <a th:href="@{/admin/companies}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'companies'} ? ' active' : ''">
+            <span class="icon">🏢</span>
+            Companies
+        </a>
+
+        <!-- JOB APPROVAL: NEW MENU ITEM -->
+        <a th:href="@{/admin/jobs(status='PENDING')}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'jobs'} ? ' active' : ''">
+            <span class="icon">💼</span>
+            Duyệt tin tuyển dụng
+        </a>
+
+        <!-- PENDING COMPANIES -->
+        <a th:href="@{/admin/companies(status='PENDING')}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'pending'} ? ' active' : ''">
+            <span class="icon">⏳</span>
+            Pending
+        </a>
+
+        <!-- INACTIVE COMPANIES -->
+        <a th:href="@{/admin/companies(status='INACTIVE')}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'banned'} ? ' active' : ''">
+            <span class="icon">🚫</span>
+            Ban List
+        </a>
+
+        <div class="nav-section">SYSTEM</div>
+
+        <!-- SETTINGS -->
+        <a href="#"
+           class="nav-item">
+            <span class="icon">⚙️</span>
+            Settings
+        </a>
+    </nav>
+
+</aside>
+
+<!-- ==================== TOPBAR FRAGMENT ==================== -->
+<div class="topbar" th:fragment="topbar(title, subtitle)">
+
+    <div class="topbar-title">
+        <span th:text="${title}">Title</span>
+
+        <small th:if="${subtitle != null}"
+               th:text="${subtitle}">
+            Overview
+        </small>
+    </div>
+
+    <div class="topbar-actions">
+
+        <div class="search-global">
+            <input type="text"
+                   placeholder="Search candidates, companies..."
+                   maxlength="100">
+        </div>
+
+        <!-- USER DROPDOWN -->
+        <div class="user-dropdown" id="userDropdown">
+
+            <button type="button"
+                    class="topbar-user"
+                    onclick="toggleUserMenu(event)">
+
+                <div class="avatar-circle">
+                    <span th:text="${#authentication.name != null and !#strings.isEmpty(#authentication.name) ? #strings.toUpperCase(#strings.substring(#authentication.name, 0, 1)) : 'A'}">
+                        A
+                    </span>
+                </div>
+
+                <span th:text="${#authentication.name}">
+                    admin
+                </span>
+
+                <span style="font-size:10px; opacity:0.6;">
+                    ▼
+                </span>
+
+            </button>
+
+            <div class="dropdown-menu" id="userMenu">
+
+                <div class="dropdown-header">
+
+                    <div class="avatar-circle"
+                         style="width:36px; height:36px; font-size:14px;">
+
+                        <span th:text="${#authentication.name != null and !#strings.isEmpty(#authentication.name) ? #strings.toUpperCase(#strings.substring(#authentication.name, 0, 1)) : 'A'}">
+                            A
+                        </span>
+
+                    </div>
+
+                    <div>
+                        <div style="font-weight:600; font-size:13px;"
+                             th:text="${#authentication.name}">
+                            admin
+                        </div>
+
+                        <div style="font-size:11px; color:#8895a8;"
+                             th:text="${#authentication.authorities != null and !#authentication.authorities.isEmpty() ? #authentication.authorities[0].authority : 'USER'}">
+                            ROLE_ADMIN
+                        </div>
+                    </div>
+
+                </div>
+
+                <a href="#"
+                   class="dropdown-item">
+                    <span>⚙</span>
+                    Settings
+                </a>
+
+                <a href="#"
+                   class="dropdown-item">
+                    <span>👤</span>
+                    Profile
+                </a>
+
+                <div class="dropdown-divider"></div>
+
+                <form th:action="@{/logout}"
+                      method="post"
+                      style="margin:0;">
+
+                    <button type="submit"
+                            class="dropdown-item dropdown-item-danger">
+                        <span>🚪</span>
+                        Đăng xuất
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==================== SCRIPTS FRAGMENT ==================== -->
+<script th:fragment="scripts">
+
+    function toggleUserMenu(event) {
+        event.stopPropagation();
+
+        const menu = document.getElementById('userMenu');
+
+        if (menu) {
+            menu.classList.toggle('open');
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        const menu = document.getElementById('userMenu');
+        const dropdown = document.getElementById('userDropdown');
+
+        if (dropdown && menu && !dropdown.contains(event.target)) {
+            menu.classList.remove('open');
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            const menu = document.getElementById('userMenu');
+
+            if (menu) {
+                menu.classList.remove('open');
+            }
+        }
+    });
+
+</script>
+
+</body>
+</html>

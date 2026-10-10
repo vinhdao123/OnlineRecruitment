@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle} + ' - Online Recruitment'">Create Job</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/jobs.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments :: header}"></div>
+
+<main class="wrap form-page">
+    <div class="form-head">
+        <h1 th:text="${pageTitle}">Create New Job</h1>
+        <p>Fill in the details to create a job posting</p>
+    </div>
+
+    <div class="alert alert-error" th:if="${#fields.hasErrors('${jobForm.*}')}">
+        Please check the fields marked in red below.
+    </div>
+
+    <form th:action="@{${formAction}}" th:object="${jobForm}" method="post" novalidate>
+
+        <!-- 1. GENERAL INFORMATION -->
+        <section class="panel form-section">
+            <h2>General Information</h2>
+
+            <div class="grid-2">
+                <div class="form-group">
+                    <label for="title">Job Title <span class="req">*</span></label>
+                    <input type="text" id="title" th:field="*{title}" placeholder="e.g. Frontend Developer"
+                           th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'">
+                    <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Job Level</label>
+                    <select id="level" th:field="*{level}">
+                        <option th:each="l : ${levels}" th:value="${l}" th:text="${l}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="categoryId">Job Category <span class="req">*</span></label>
+                <select id="categoryId" th:field="*{categoryId}"
+                        th:classappend="${#fields.hasErrors('categoryId')} ? 'is-invalid'">
+                    <option value="">Select category</option>
+                    <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                </select>
+                <p class="error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+            </div>
+
+            <div class="grid-3">
+                <div class="form-group">
+                    <label for="location">Location <span class="req">*</span></label>
+                    <select id="location" th:field="*{location}"
+                            th:classappend="${#fields.hasErrors('location')} ? 'is-invalid'">
+                        <option value="">Select location</option>
+                        <option th:each="p : ${provinces}" th:value="${p}" th:text="${p}"></option>
+                    </select>
+                    <p class="error" th:if="${#fields.hasErrors('location')}" th:errors="*{location}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Number of Positions <span class="req">*</span></label>
+                    <input type="number" id="quantity" min="1" th:field="*{quantity}"
+                           placeholder="Enter number of positions"
+                           th:classappend="${#fields.hasErrors('quantity')} ? 'is-invalid'">
+                    <p class="error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="deadline">Application Deadline <span class="req">*</span></label>
+                    <input type="date" id="deadline" th:field="*{deadline}"
+                           th:classappend="${#fields.hasErrors('deadline')} ? 'is-invalid'">
+                    <p class="error" th:if="${#fields.hasErrors('deadline')}" th:errors="*{deadline}"></p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Skills</label>
+                <div class="chip-select">
+                    <label class="chip-option" th:each="s : ${skillOptions}">
+                        <input type="checkbox" th:field="*{skillIds}" th:value="${s.id}">
+                        <span th:text="${s.name}">Java</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. SALARY & EXPERIENCE -->
+        <section class="panel form-section">
+            <h2>Salary &amp; Experience</h2>
+
+            <div class="grid-2">
+                <div class="option-box">
+                    <h4>Salary Range <span class="req">*</span></h4>
+
+                    <div class="radio-grid">
+                        <label class="radio" th:each="s : ${salaryOptions}">
+                            <input type="radio" th:field="*{salary}" th:value="${s}">
+                            <span th:text="${s}">Under $400</span>
+                        </label>
+                    </div>
+
+                    <p class="error"
+                       th:if="${#fields.hasErrors('salary')}"
+                       th:errors="*{salary}">
+                    </p>
+                </div>
+
+                <div class="option-box">
+                    <h4>Required Experience</h4>
+
+                    <div class="radio-grid">
+                        <label class="radio" th:each="e : ${experienceOptions}">
+                            <input type="radio" th:field="*{experience}" th:value="${e}">
+                            <span th:text="${e}">No experience</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. DESCRIPTION -->
+        <section class="panel form-section">
+            <h2>Description &amp; Requirements</h2>
+
+            <div class="form-group">
+                <label for="description">Job Description <span class="req">*</span></label>
+                <textarea id="description"
+                          rows="6"
+                          th:field="*{description}"
+                          placeholder="Enter the main responsibilities..."
+                          th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+
+                <p class="error"
+                   th:if="${#fields.hasErrors('description')}"
+                   th:errors="*{description}">
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="requirements">Candidate Requirements <span class="req">*</span></label>
+                <textarea id="requirements"
+                          rows="6"
+                          th:field="*{requirements}"
+                          placeholder="Enter required skills, experience..."
+                          th:classappend="${#fields.hasErrors('requirements')} ? 'is-invalid'"></textarea>
+
+                <p class="error"
+                   th:if="${#fields.hasErrors('requirements')}"
+                   th:errors="*{requirements}">
+                </p>
+            </div>
+
+            <div class="form-group">
+                <label for="benefits">Benefits</label>
+                <textarea id="benefits"
+                          rows="4"
+                          th:field="*{benefits}"
+                          placeholder="Bonus, insurance, allowances, leave, training..."></textarea>
+            </div>
+        </section>
+
+        <div class="form-actions">
+            <a th:href="@{/jobs}" class="btn btn-ghost">Cancel</a>
+
+            <button type="reset" class="btn btn-outline">
+                Reset
+            </button>
+
+            <button type="submit"
+                    class="btn btn-primary btn-lg"
+                    th:text="${editMode} ? 'Update & Submit for Review' : 'Submit for Review'">
+                Submit for Review
+            </button>
+        </div>
+    </form>
+</main>
+
+<div th:replace="~{fragments :: footer}"></div>
+
+</body>
+</html>

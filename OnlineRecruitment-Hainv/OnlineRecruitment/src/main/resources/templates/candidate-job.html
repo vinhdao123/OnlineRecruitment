@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng tuyển - OnlineRecruitment</title>
+    <link rel="stylesheet" th:href="@{/css/candidate-job.css}">
+
+    <style>
+        .mode-switch {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .mode-button {
+            padding: 12px 18px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .mode-button.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .choice-note {
+            padding: 12px 16px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            margin-bottom: 18px;
+        }
+
+        .application-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr);
+            align-items: start;
+            gap: 24px;
+        }
+
+        .editor-column {
+            display: grid;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .preview-column {
+            position: sticky;
+            top: 96px;
+            min-width: 0;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 16px;
+            min-width: 0;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            font-weight: 600;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 11px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font: inherit;
+        }
+
+        .field textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .field small {
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0 16px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .template-card {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            padding: 10px;
+            border: 2px solid #dce3ee;
+            border-radius: 12px;
+            background: white;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .template-card.selected {
+            border-color: #2864ed;
+            background: #eef4ff;
+            box-shadow: 0 0 0 3px rgba(40,100,237,.10);
+        }
+
+        .template-preview {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+        }
+
+        .fake-title,
+        .fake-heading,
+        .fake-line {
+            display: block;
+            height: 6px;
+            flex: 0 0 auto;
+            border-radius: 4px;
+            background: #dbe1eb;
+        }
+
+        .fake-title {
+            width: 70%;
+            height: 9px;
+            background: #334766;
+        }
+
+        .fake-heading {
+            width: 45%;
+            margin-top: 4px;
+            background: #9aacc8;
+        }
+
+        .fake-line {
+            width: 100%;
+        }
+
+        .fake-line.short {
+            width: 65%;
+        }
+
+        .preview-modern .fake-title,
+        .preview-modern .fake-heading {
+            background: #2864ed;
+        }
+
+        .preview-professional .fake-title,
+        .preview-professional .fake-heading {
+            background: #0f766e;
+        }
+
+        .template-name {
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .template-description {
+            color: #718096;
+            font-size: 11px;
+        }
+
+        .experience-item,
+        .education-item {
+            margin-bottom: 14px;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .remove-item,
+        .add-item {
+            padding: 9px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .remove-item {
+            margin-bottom: 12px;
+            border: 0;
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .add-item {
+            margin: 4px 0 12px;
+            border: 1px solid #2563eb;
+            color: #2563eb;
+            background: white;
+        }
+
+        .upload-cv-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 24px;
+            border: 2px dashed #93c5fd;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .upload-cv-button {
+            padding: 12px 16px;
+            border: 0;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .primary-button,
+        .secondary-button {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font: inherit;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .primary-button {
+            background: #2563eb;
+            border: 1px solid #2563eb;
+            color: white;
+        }
+
+        .primary-button:disabled {
+            opacity: .65;
+            cursor: wait;
+        }
+
+        .secondary-button {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+        }
+
+        .preview-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .preview-toolbar h2 {
+            margin: 0 0 4px;
+            font-size: 19px;
+        }
+
+        .preview-toolbar p,
+        .preview-note {
+            margin: 0;
+            color: #718096;
+            font-size: 12px;
+        }
+
+        .live-status {
+            padding: 5px 9px;
+            border-radius: 20px;
+            background: #f0fdf4;
+            color: #15803d;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* Bản CV */
+        .cv-paper {
+            overflow-wrap: anywhere;
+            overflow: hidden;
+            border: 1px solid #dfe5ee;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 12px 30px rgba(24,39,75,.10);
+        }
+
+        .cv-header {
+            padding: 28px 24px;
+            background: #f0f5ff;
+            border-bottom: 3px solid #2864ed;
+        }
+
+        .cv-header h1 {
+            margin: 0 0 8px;
+            color: #17243a;
+            font-size: 26px;
+            line-height: 1.25;
+        }
+
+        .cv-header h3 {
+            margin: 0 0 12px;
+            color: #2864ed;
+            font-size: 14px;
+        }
+
+        .cv-header p {
+            margin: 5px 0;
+            color: #59677e;
+            font-size: 11px;
+        }
+
+        .cv-section {
+            padding: 19px 24px;
+            border-bottom: 1px solid #edf0f5;
+        }
+
+        .cv-section:last-child {
+            border-bottom: 0;
+        }
+
+        .cv-section h3 {
+            margin: 0 0 10px;
+            color: #2864ed;
+            font-size: 12px;
+            letter-spacing: .8px;
+        }
+
+        .cv-section p {
+            margin: 6px 0;
+            color: #536178;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-line;
+        }
+
+        .cv-entry {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .cv-entry:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .cv-entry .entry-title {
+            color: #23334e;
+            font-weight: 750;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .skill-tag {
+            padding: 5px 9px;
+            border: 1px solid #dbe7ff;
+            border-radius: 7px;
+            background: #f0f5ff;
+            color: #2856b6;
+            font-size: 11px;
+        }
+
+        .cv-paper.theme-classic .cv-header {
+            background: white;
+            border-bottom: 1px solid #dce3ee;
+        }
+
+        .cv-paper.theme-classic .cv-header h3,
+        .cv-paper.theme-classic .cv-section h3 {
+            color: #475569;
+        }
+
+        .cv-paper.theme-professional .cv-header {
+            background: #124e4a;
+            border-bottom-color: #0f766e;
+        }
+
+        .cv-paper.theme-professional .cv-header h1,
+        .cv-paper.theme-professional .cv-header h3,
+        .cv-paper.theme-professional .cv-header p {
+            color: white;
+        }
+
+        .cv-paper.theme-professional .cv-section h3 {
+            color: #0f766e;
+        }
+
+        .cv-paper.theme-minimal .cv-header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .cv-paper.theme-minimal .cv-header h3,
+        .cv-paper.theme-minimal .cv-section h3 {
+            color: #475569;
+        }
+
+        .preview-note {
+            margin-top: 12px;
+            line-height: 1.6;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 900px) {
+            .application-layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .preview-column {
+                position: static;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .form-grid,
+            .template-grid {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+
+            .form-actions a,
+            .form-actions button {
+                width: 100%;
+            }
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 12mm;
+            }
+
+            body {
+                background: white !important;
+                color: #17243a !important;
+            }
+
+            .site-header,
+            .back-link,
+            .page-heading,
+            .mode-switch,
+            .choice-note,
+            .editor-column,
+            .preview-toolbar,
+            .preview-note,
+            .preview-actions,
+            .form-actions,
+            .alert {
+                display: none !important;
+            }
+
+            .page-container {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .application-layout {
+                display: block;
+            }
+
+            .preview-column {
+                display: block;
+                position: static;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+
+            .cv-paper {
+                width: 100%;
+                max-width: none;
+                overflow: visible;
+                border: none;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .cv-header,
+            .cv-section,
+            .cv-entry {
+                break-inside: avoid;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-logo">OR</span>
+            <span>Online<span class="brand-blue">Recruitment</span></span>
+        </a>
+
+        <nav class="main-nav">
+            <a th:href="@{/}">Trang chủ</a>
+            <a class="active" th:href="@{/jobs}">Việc làm</a>
+            <a th:href="@{/companies}">Công ty</a>
+            <a th:href="@{/about}">Giới thiệu</a>
+        </nav>
+
+        <div class="header-actions">
+            <span class="account">
+                <span class="avatar">C</span>
+                <span th:text="${#authentication.name}">Candidate</span>
+            </span>
+
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+                <button class="logout-button" type="submit">Đăng xuất</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<main class="page-container">
+    <div th:if="${successMessage}"
+         class="alert alert-success"
+         role="status"
+         th:text="${successMessage}"></div>
+
+    <div th:if="${errorMessage}"
+         class="alert alert-error"
+         role="alert"
+         th:text="${errorMessage}"></div>
+
+    <a class="back-link"
+       th:href="@{/jobs/{id}(id=${jobId})}">
+        ← Quay lại chi tiết việc làm
+    </a>
+
+    <section class="page-heading">
+        <span class="eyebrow">HỒ SƠ ỨNG TUYỂN</span>
+        <h1>Nộp hồ sơ ứng tuyển</h1>
+        <p>Vị trí:
+            <strong th:text="${jobTitle}">Vị trí ứng tuyển</strong>
+        </p>
+        <p>Nhập CV để xem trước hoặc tải file CV có sẵn.</p>
+    </section>
+
+    <div class="mode-switch">
+        <button type="button"
+                class="mode-button active"
+                id="formModeButton">
+            ✍️ Nhập nội dung CV
+        </button>
+
+        <button type="button"
+                class="mode-button"
+                id="fileModeButton">
+            📎 Tải file CV
+        </button>
+    </div>
+
+    <div class="choice-note" id="modeNote" aria-live="polite">
+        Bạn đang chọn nhập nội dung CV.
+    </div>
+
+    <form th:action="@{/candidate-job/apply}"
+          method="post"
+          enctype="multipart/form-data"
+          id="applicationForm">
+
+        <input type="hidden" name="jobId" th:value="${jobId}">
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <div class="application-layout">
+            <div class="editor-column">
+                <!-- NHẬP CV -->
+                <section id="formMode">
+                    <div class="panel">
+                        <div class="panel-heading">
+                            <h2>Thông tin cá nhân</h2>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="fullName">Họ và tên *</label>
+                                <input id="fullName" name="fullName"
+                                       type="text" maxlength="150"
+                                       autocomplete="name"
+                                       placeholder="Nhập họ và tên" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="formEmail">Email *</label>
+                                <input id="formEmail" name="formEmail"
+                                       type="email" maxlength="255"
+                                       autocomplete="email"
+                                       placeholder="example@email.com" required>
+                            </div>
+
+                            <div class="field">
+                                <label for="phone">Số điện thoại</label>
+                                <input id="phone" name="phone"
+                                       type="tel" maxlength="30"
+                                       autocomplete="tel"
+                                       placeholder="Nhập số điện thoại">
+                            </div>
+
+                            <div class="field">
+                                <label for="position">Vị trí mong muốn</label>
+                                <input id="position" name="position"
+                                       type="text" maxlength="255"
+                                       th:value="${jobTitle}">
+                            </div>
+
+                            <div class="field full">
+                                <label for="address">Địa chỉ</label>
+                                <input id="address" name="address"
+                                       type="text" maxlength="255"
+                                       placeholder="Nhập địa chỉ">
+                            </div>
+
+                            <div class="field full">
+                                <label for="summary">Giới thiệu bản thân</label>
+                                <textarea id="summary" name="summary"
+                                          maxlength="5000"
+                                          placeholder="Giới thiệu ngắn gọn về bản thân..."></textarea>
+                            </div>
+
+                            <div class="field full">
+                                <label>Chọn mẫu CV</label>
+                                <input type="hidden" id="template"
+                                       name="template" value="modern">
+
+                                <div class="template-grid" id="templateGrid">
+                                    <button type="button" class="template-card"
+                                            data-template="classic"
+                                            aria-pressed="false">
+                                        <div class="template-preview preview-simple">
+                                            <span class="fake-title"></span>
+                                            <span class="fake-heading"></span>
+                                            <span class="fake-line"></span>
+                                            <span class="fake-line short"></span>
+                                        </div>
+                                        <span class="template-name">Cổ điển</span>
+                                        <span class="template-description">Classic</span>
+                                    </button>
+
+                                    <button type="button"
+                                            class="template-card selected"
+                                            data-template="modern"
+                                            aria-pressed="true">
+                                        <div class="template-preview preview-modern">
+                                            <span class="fake-title"></span>
+                                            <span class="fake-heading"></span>
+                                            <span class="fake-line"></span>
+                                            <span class="fake-line short"></span>
+                                        </div>
+                                        <span class="template-name">Hiện đại</span>
+                                        <span class="template-description">Modern</span>
+                                    </button>
+
+                                    <button type="button"
+                                            class="template-card"
+                                            data-template="professional"
+                                            aria-pressed="false">
+                                        <div class="template-preview preview-professional">
+                                            <span class="fake-title"></span>
+                                            <span class="fake-heading"></span>
+                                            <span class="fake-line"></span>
+                                            <span class="fake-line short"></span>
+                                        </div>
+                                        <span class="template-name">Chuyên nghiệp</span>
+                                        <span class="template-description">Professional</span>
+                                    </button>
+
+                                    <button type="button"
+                                            class="template-card"
+                                            data-template="minimal"
+                                            aria-pressed="false">
+                                        <div class="template-preview">
+                                            <span class="fake-title"></span>
+                                            <span class="fake-line"></span>
+                                            <span class="fake-line short"></span>
+                                            <span class="fake-heading"></span>
+                                        </div>
+                                        <span class="template-name">Tối giản</span>
+                                        <span class="template-description">Minimal</span>
+                                    </button>
+                                </div>
+                                <small>Chọn mẫu để thay đổi giao diện CV xem trước.</small>
+                            </div>
+
+                            <div class="field full">
+                                <label for="skills">Kỹ năng</label>
+                                <input id="skills" name="skills"
+                                       type="text" maxlength="2000"
+                                       placeholder="Java, SQL, Spring Boot...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Kinh nghiệm làm việc</h2>
+                        <div id="experienceList"></div>
+                        <button type="button" class="add-item"
+                                id="addExperience">+ Thêm kinh nghiệm</button>
+                    </div>
+
+                    <div class="panel">
+                        <h2>Học vấn</h2>
+                        <div id="educationList"></div>
+                        <button type="button" class="add-item"
+                                id="addEducation">+ Thêm học vấn</button>
+                    </div>
+                </section>
+
+                <!-- TẢI FILE CV -->
+                <section id="fileMode" hidden>
+                    <div class="panel upload-cv-panel">
+                        <div class="panel-heading">
+                            <div>
+                                <h2>Chọn CV từ máy tính</h2>
+                                <p>Hỗ trợ PDF, DOC, DOCX; tối đa 10 MB.</p>
+                            </div>
+                        </div>
+
+                        <div class="upload-cv-box">
+                            <input type="file" id="cvFile" name="cvFile"
+                                   accept=".pdf,.doc,.docx" hidden>
+
+                            <button type="button" class="upload-cv-button"
+                                    id="chooseCvButton">📎 Chọn file CV</button>
+
+                            <span id="cvFileName" aria-live="polite">
+                                Chưa chọn file CV
+                            </span>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="formError" class="alert alert-error"
+                     role="alert" hidden></div>
+
+                <div class="form-actions">
+                    <a class="secondary-button"
+                       th:href="@{/jobs/{id}(id=${jobId})}">Hủy</a>
+
+                    <button type="submit" class="primary-button"
+                            id="submitButton">Nộp hồ sơ ứng tuyển →</button>
+                </div>
+            </div>
+
+            <!-- XEM TRƯỚC CV -->
+            <aside class="preview-column" id="previewColumn">
+                <div class="preview-toolbar">
+                    <div>
+                        <h2>Xem trước CV</h2>
+                        <p>Bản xem trước cập nhật khi bạn nhập thông tin.</p>
+                    </div>
+                    <span class="live-status">● Trực tiếp</span>
+                </div>
+
+                <div class="form-actions preview-actions">
+                    <button type="button" class="secondary-button"
+                            id="printCvButton">🖨️ In / Lưu PDF</button>
+                </div>
+
+                <article class="cv-paper theme-modern" id="cvPaper">
+                    <header class="cv-header">
+                        <h1 id="previewName">HỌ VÀ TÊN</h1>
+                        <h3 id="previewPosition">Vị trí mong muốn</h3>
+                        <p id="previewEmail">Email: example@email.com</p>
+                        <p id="previewPhone">Điện thoại: —</p>
+                        <p id="previewAddress">Địa chỉ: —</p>
+                    </header>
+
+                    <section class="cv-section" id="summarySection">
+                        <h3>GIỚI THIỆU BẢN THÂN</h3>
+                        <p id="previewSummary">Phần giới thiệu bản thân sẽ hiển thị ở đây.</p>
+                    </section>
+
+                    <section class="cv-section" id="skillsSection">
+                        <h3>KỸ NĂNG</h3>
+                        <div class="skill-list" id="previewSkills">
+                            <span class="skill-tag">Kỹ năng của bạn</span>
+                        </div>
+                    </section>
+
+                    <section class="cv-section" id="experienceSection">
+                        <h3>KINH NGHIỆM LÀM VIỆC</h3>
+                        <div id="previewExperience">
+                            <p>Kinh nghiệm làm việc sẽ hiển thị ở đây.</p>
+                        </div>
+                    </section>
+
+                    <section class="cv-section" id="educationSection">
+                        <h3>HỌC VẤN</h3>
+                        <div id="previewEducation">
+                            <p>Thông tin học vấn sẽ hiển thị ở đây.</p>
+                        </div>
+                    </section>
+                </article>
+
+                <p class="preview-note">
+                    Khi chọn “In / Lưu PDF”, hãy chọn “Save as PDF” trong hộp thoại
+                    in của trình duyệt để lưu CV về máy tính.
+                </p>
+            </aside>
+        </div>
+    </form>
+</main>
+
+<script>
+    (() => {
+        const form = document.getElementById('applicationForm');
+        const formMode = document.getElementById('formMode');
+        const fileMode = document.getElementById('fileMode');
+        const previewColumn = document.getElementById('previewColumn');
+
+        const formModeButton = document.getElementById('formModeButton');
+        const fileModeButton = document.getElementById('fileModeButton');
+        const modeNote = document.getElementById('modeNote');
+
+        const fileInput = document.getElementById('cvFile');
+        const fileName = document.getElementById('cvFileName');
+        const chooseButton = document.getElementById('chooseCvButton');
+
+        const formError = document.getElementById('formError');
+        const submitButton = document.getElementById('submitButton');
+        const templateInput = document.getElementById('template');
+        const cvPaper = document.getElementById('cvPaper');
+
+        const MAX_FILE_SIZE = 10 * 1024 * 1024;
+        let mode = 'form';
+        let formTouched = false;
+        let fileTouched = false;
+        let submitting = false;
+
+        function showError(message) {
+            formError.textContent = message;
+            formError.hidden = !message;
+        }
+
+        function clearError() {
+            showError('');
+        }
+
+        function valueOf(id, fallback = '') {
+            const element = document.getElementById(id);
+            return element ? element.value.trim() || fallback : fallback;
+        }
+
+        function setText(id, value) {
+            document.getElementById(id).textContent = value;
+        }
+
+        function setFieldsDisabled(container, disabled) {
+            container.querySelectorAll('input, textarea, select, button')
+                .forEach(element => {
+                    element.disabled = disabled;
+                });
+        }
+
+        function selectTemplate(value) {
+            templateInput.value = value;
+
+            document.querySelectorAll('.template-card').forEach(card => {
+                const selected = card.dataset.template === value;
+                card.classList.toggle('selected', selected);
+                card.setAttribute('aria-pressed', String(selected));
+            });
+
+            cvPaper.classList.remove(
+                'theme-classic', 'theme-modern',
+                'theme-professional', 'theme-minimal'
+            );
+            cvPaper.classList.add('theme-' + value);
+        }
+
+        document.querySelectorAll('.template-card').forEach(card => {
+            card.addEventListener('click', () => {
+                if (mode !== 'form' || submitting) return;
+                selectTemplate(card.dataset.template);
+                formTouched = true;
+            });
+        });
+
+        function renderPreview() {
+            setText('previewName', valueOf('fullName', 'HỌ VÀ TÊN'));
+            setText('previewPosition', valueOf('position', 'Vị trí mong muốn'));
+            setText('previewEmail', 'Email: ' + valueOf('formEmail', 'example@email.com'));
+            setText('previewPhone', 'Điện thoại: ' + valueOf('phone', '—'));
+            setText('previewAddress', 'Địa chỉ: ' + valueOf('address', '—'));
+            setText('previewSummary', valueOf('summary', 'Phần giới thiệu bản thân sẽ hiển thị ở đây.'));
+
+            const skillList = document.getElementById('previewSkills');
+            skillList.replaceChildren();
+
+            const skills = valueOf('skills')
+                .split(/[,;\n]/)
+                .map(skill => skill.trim())
+                .filter(Boolean);
+
+            if (!skills.length) {
+                const tag = document.createElement('span');
+                tag.className = 'skill-tag';
+                tag.textContent = 'Kỹ năng của bạn';
+                skillList.append(tag);
+            } else {
+                skills.forEach(skill => {
+                    const tag = document.createElement('span');
+                    tag.className = 'skill-tag';
+                    tag.textContent = skill;
+                    skillList.append(tag);
+                });
+            }
+
+            renderEntries('experienceList', 'previewExperience', [
+                ['experienceTitles', 'entry-title'],
+                ['experiencePeriods', 'entry-period'],
+                ['experienceDescriptions', 'entry-description']
+            ], 'Kinh nghiệm làm việc sẽ hiển thị ở đây.');
+
+            renderEntries('educationList', 'previewEducation', [
+                ['educationSchools', 'entry-title'],
+                ['educationPeriods', 'entry-period'],
+                ['educationDescriptions', 'entry-description']
+            ], 'Thông tin học vấn sẽ hiển thị ở đây.');
+        }
+
+        function renderEntries(sourceId, targetId, fields, emptyText) {
+            const source = document.getElementById(sourceId);
+            const target = document.getElementById(targetId);
+            target.replaceChildren();
+
+            const groups = [...source.children];
+
+            let count = 0;
+            groups.forEach(group => {
+                const values = fields.map(([name]) => {
+                    const input = [...group.querySelectorAll('input, textarea')]
+                        .find(element => element.name === name);
+                    return input ? input.value.trim() : '';
+                });
+
+                if (!values.some(Boolean)) return;
+                count++;
+
+                const entry = document.createElement('div');
+                entry.className = 'cv-entry';
+
+                values.forEach((value, index) => {
+                    if (!value) return;
+                    const paragraph = document.createElement('p');
+                    paragraph.className = fields[index][1];
+                    paragraph.textContent = value;
+                    entry.append(paragraph);
+                });
+
+                target.append(entry);
+            });
+
+            if (!count) {
+                const paragraph = document.createElement('p');
+                paragraph.textContent = emptyText;
+                target.append(paragraph);
+            }
+        }
+
+        function resetFormFields() {
+            formMode.querySelectorAll('input, textarea, select').forEach(field => {
+                if (field.id === 'template') {
+                    field.value = 'modern';
+                } else if (field.tagName === 'SELECT') {
+                    field.selectedIndex = 0;
+                } else {
+                    field.value = '';
+                }
+            });
+
+            document.getElementById('experienceList').replaceChildren();
+            document.getElementById('educationList').replaceChildren();
+
+            selectTemplate('modern');
+            addExperience(false);
+            addEducation(false);
+            formTouched = false;
+            renderPreview();
+        }
+
+        function switchMode(nextMode) {
+            if (nextMode === mode || submitting) return;
+
+            if (mode === 'form' && formTouched) {
+                if (!confirm('Chuyển sang tải file sẽ xóa nội dung CV đã nhập. Bạn có muốn tiếp tục không?')) {
+                    return;
+                }
+                resetFormFields();
+            }
+
+            if (mode === 'file' && fileTouched) {
+                if (!confirm('Chuyển sang nhập nội dung sẽ bỏ file CV đã chọn. Bạn có muốn tiếp tục không?')) {
+                    return;
+                }
+                fileInput.value = '';
+                fileName.textContent = 'Chưa chọn file CV';
+                fileTouched = false;
+            }
+
+            mode = nextMode;
+            clearError();
+
+            formMode.hidden = mode !== 'form';
+            fileMode.hidden = mode !== 'file';
+
+            setFieldsDisabled(formMode, mode !== 'form');
+            setFieldsDisabled(fileMode, mode !== 'file');
+
+            previewColumn.hidden = mode !== 'form';
+
+            formModeButton.classList.toggle('active', mode === 'form');
+            fileModeButton.classList.toggle('active', mode === 'file');
+
+            modeNote.textContent = mode === 'form'
+                ? 'Bạn đang chọn nhập nội dung CV. Chế độ tải file đang bị khóa.'
+                : 'Bạn đang chọn tải file CV. Phần nhập nội dung đang bị khóa.';
+
+            if (mode === 'form') renderPreview();
+        }
+
+        formModeButton.addEventListener('click', () => switchMode('form'));
+        fileModeButton.addEventListener('click', () => switchMode('file'));
+
+        formMode.addEventListener('input', () => {
+            if (mode === 'form') {
+                formTouched = true;
+                renderPreview();
+            }
+        });
+
+        formMode.addEventListener('change', () => {
+            if (mode === 'form') {
+                formTouched = true;
+                renderPreview();
+            }
+        });
+
+        chooseButton.addEventListener('click', () => {
+            if (mode === 'file') fileInput.click();
+        });
+
+        fileInput.addEventListener('change', () => {
+            clearError();
+            const file = fileInput.files[0];
+
+            if (!file) {
+                fileName.textContent = 'Chưa chọn file CV';
+                fileTouched = false;
+                return;
+            }
+
+            if (!/\.(pdf|doc|docx)$/i.test(file.name)) {
+                fileInput.value = '';
+                fileName.textContent = 'Chưa chọn file CV';
+                fileTouched = false;
+                showError('Chỉ hỗ trợ file PDF, DOC hoặc DOCX.');
+                return;
+            }
+
+            if (file.size === 0 || file.size > MAX_FILE_SIZE) {
+                fileInput.value = '';
+                fileName.textContent = 'Chưa chọn file CV';
+                fileTouched = false;
+                showError(file.size === 0
+                    ? 'File CV đang trống. Vui lòng chọn file khác.'
+                    : 'File CV không được vượt quá 10 MB.');
+                return;
+            }
+
+            fileTouched = true;
+            fileName.textContent = 'Đã chọn: ' + file.name;
+        });
+
+        function createField(labelText, name, placeholder, textarea = false) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'field';
+
+            const label = document.createElement('label');
+            label.textContent = labelText;
+
+            const input = document.createElement(textarea ? 'textarea' : 'input');
+            input.name = name;
+            input.placeholder = placeholder;
+            label.htmlFor = name + '-' + Math.random().toString(36).slice(2);
+            input.id = label.htmlFor;
+
+            wrapper.append(label, input);
+            return wrapper;
+        }
+
+        function addExperience(markTouched = true) {
+            const list = document.getElementById('experienceList');
+            const item = document.createElement('div');
+            item.className = 'experience-item';
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'remove-item';
+            remove.textContent = 'Xóa mục';
+            remove.addEventListener('click', () => {
+                item.remove();
+                formTouched = true;
+                renderPreview();
+            });
+
+            item.append(
+                remove,
+                createField('Chức danh', 'experienceTitles', 'Ví dụ: Java Developer'),
+                createField('Thời gian', 'experiencePeriods', 'Ví dụ: 2024 - 2025'),
+                createField('Mô tả công việc', 'experienceDescriptions', 'Mô tả nhiệm vụ và kết quả', true)
+            );
+
+            list.append(item);
+            if (markTouched) formTouched = true;
+        }
+
+        function addEducation(markTouched = true) {
+            const list = document.getElementById('educationList');
+            const item = document.createElement('div');
+            item.className = 'education-item';
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'remove-item';
+            remove.textContent = 'Xóa mục';
+            remove.addEventListener('click', () => {
+                item.remove();
+                formTouched = true;
+                renderPreview();
+            });
+
+            item.append(
+                remove,
+                createField('Trường học', 'educationSchools', 'Tên trường'),
+                createField('Thời gian', 'educationPeriods', 'Ví dụ: 2022 - 2026'),
+                createField('Mô tả', 'educationDescriptions', 'Ngành học hoặc thành tích', true)
+            );
+
+            list.append(item);
+            if (markTouched) formTouched = true;
+        }
+
+        document.getElementById('addExperience')
+            .addEventListener('click', () => addExperience());
+
+        document.getElementById('addEducation')
+            .addEventListener('click', () => addEducation());
+
+        document.getElementById('printCvButton').addEventListener('click', () => {
+            if (mode !== 'form') return;
+            renderPreview();
+            window.print();
+        });
+
+        form.addEventListener('submit', event => {
+            clearError();
+
+            if (submitting) {
+                event.preventDefault();
+                return;
+            }
+
+            if (mode === 'file') {
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    event.preventDefault();
+                    showError('Vui lòng chọn file CV trước khi nộp.');
+                    return;
+                }
+
+                if (!/\.(pdf|doc|docx)$/i.test(file.name) ||
+                    file.size === 0 || file.size > MAX_FILE_SIZE) {
+                    event.preventDefault();
+                    showError('File không hợp lệ. Chọn PDF, DOC hoặc DOCX dưới 10 MB.');
+                    return;
+                }
+            } else {
+                const fullName = valueOf('fullName');
+                const email = valueOf('formEmail');
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const allowedTemplates = ['classic', 'modern', 'professional', 'minimal'];
+
+                if (!fullName || !email) {
+                    event.preventDefault();
+                    showError('Vui lòng nhập họ tên và email.');
+                    return;
+                }
+
+                if (!emailPattern.test(email)) {
+                    event.preventDefault();
+                    showError('Email không hợp lệ.');
+                    return;
+                }
+
+                if (!allowedTemplates.includes(templateInput.value)) {
+                    event.preventDefault();
+                    showError('Vui lòng chọn mẫu CV hợp lệ.');
+                    return;
+                }
+            }
+
+            submitting = true;
+            submitButton.disabled = true;
+            submitButton.textContent = 'Đang gửi hồ sơ...';
+        });
+
+        // Khởi tạo trang
+        setFieldsDisabled(fileMode, true);
+        selectTemplate('modern');
+        addExperience(false);
+        addEducation(false);
+        renderPreview();
+    })();
+</script>
+</body>
+</html>

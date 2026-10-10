@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký Candidate - Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+
+<body class="auth-body">
+
+<div class="auth-header">
+    <a th:href="@{/}" class="logo">
+        <span class="logo-icon">OR</span>
+        <span>Online Recruitment</span>
+    </a>
+</div>
+
+<div class="auth-card wide-card">
+
+    <h1 class="auth-title">Đăng Ký Candidate</h1>
+    <p class="auth-subtitle">
+        Tạo tài khoản để tìm kiếm cơ hội việc làm
+    </p>
+
+    <!-- Thông báo thành công -->
+    <div th:if="${successMessage}"
+         class="alert alert-success"
+         th:text="${successMessage}">
+    </div>
+
+    <!-- Thông báo lỗi tổng quát -->
+    <div th:if="${errorMessage}"
+         class="alert alert-danger"
+         th:text="${errorMessage}">
+    </div>
+
+    <form th:action="@{/register/candidate}"
+          th:object="${candidateDto}"
+          method="post">
+
+        <!-- Lỗi validation tổng quát: đặt bên trong form -->
+        <div th:if="${#fields.hasGlobalErrors()}"
+             class="alert alert-danger">
+            <p th:each="err : ${#fields.globalErrors()}"
+               th:text="${err}">
+            </p>
+        </div>
+
+        <!-- Họ và tên -->
+        <div class="form-group">
+            <label for="fullName">
+                Họ và tên <span class="required">*</span>
+            </label>
+
+            <input type="text"
+                   id="fullName"
+                   th:field="*{fullName}"
+                   class="form-control"
+                   th:classappend="${#fields.hasErrors('fullName')} ? ' is-invalid' : ''"
+                   placeholder="Nguyễn Văn A"
+                   autocomplete="name"
+                   required>
+
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('fullName')}"
+                 th:errors="*{fullName}">
+            </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email">
+                Email / Gmail <span class="required">*</span>
+            </label>
+
+            <input type="email"
+                   id="email"
+                   th:field="*{email}"
+                   class="form-control"
+                   th:classappend="${#fields.hasErrors('email')} ? ' is-invalid' : ''"
+                   placeholder="example@gmail.com"
+                   autocomplete="email"
+                   required>
+
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('email')}"
+                 th:errors="*{email}">
+            </div>
+        </div>
+
+        <!-- Mật khẩu và xác nhận mật khẩu -->
+        <div class="form-row">
+
+            <div class="form-group">
+                <label for="password">
+                    Mật khẩu <span class="required">*</span>
+                </label>
+
+                <input type="password"
+                       id="password"
+                       th:field="*{password}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('password')} ? ' is-invalid' : ''"
+                       placeholder="Nhập mật khẩu"
+                       autocomplete="new-password"
+                       required>
+
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('password')}"
+                     th:errors="*{password}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">
+                    Nhập lại mật khẩu <span class="required">*</span>
+                </label>
+
+                <input type="password"
+                       id="confirmPassword"
+                       th:field="*{confirmPassword}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('confirmPassword')} ? ' is-invalid' : ''"
+                       placeholder="Xác nhận mật khẩu"
+                       autocomplete="new-password"
+                       required>
+
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('confirmPassword')}"
+                     th:errors="*{confirmPassword}">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Số điện thoại và ngày sinh -->
+        <div class="form-row">
+
+            <div class="form-group">
+                <label for="phone">
+                    Số điện thoại <span class="required">*</span>
+                </label>
+
+                <input type="tel"
+                       id="phone"
+                       th:field="*{phone}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('phone')} ? ' is-invalid' : ''"
+                       placeholder="0912345678"
+                       autocomplete="tel"
+                       required>
+
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('phone')}"
+                     th:errors="*{phone}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="dob">
+                    Ngày sinh <span class="required">*</span>
+                </label>
+
+                <input type="date"
+                       id="dob"
+                       th:field="*{dob}"
+                       class="form-control"
+                       th:classappend="${#fields.hasErrors('dob')} ? ' is-invalid' : ''"
+                       required>
+
+                <div class="invalid-feedback"
+                     th:if="${#fields.hasErrors('dob')}"
+                     th:errors="*{dob}">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Giới tính -->
+        <div class="form-group">
+            <label>
+                Giới tính <span class="required">*</span>
+            </label>
+
+            <div class="radio-group">
+                <label class="radio-item">
+                    <input type="radio"
+                           th:field="*{gender}"
+                           value="Male"
+                           required>
+                    <span>Nam</span>
+                </label>
+
+                <label class="radio-item">
+                    <input type="radio"
+                           th:field="*{gender}"
+                           value="Female">
+                    <span>Nữ</span>
+                </label>
+
+                <label class="radio-item">
+                    <input type="radio"
+                           th:field="*{gender}"
+                           value="Other">
+                    <span>Khác</span>
+                </label>
+            </div>
+
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('gender')}"
+                 th:errors="*{gender}">
+            </div>
+        </div>
+
+        <!-- Địa chỉ -->
+        <div class="form-group">
+            <label for="address">
+                Địa chỉ hiện tại <span class="required">*</span>
+            </label>
+
+            <input type="text"
+                   id="address"
+                   th:field="*{address}"
+                   class="form-control"
+                   th:classappend="${#fields.hasErrors('address')} ? ' is-invalid' : ''"
+                   placeholder="Quận/Huyện, Tỉnh/Thành phố"
+                   autocomplete="street-address"
+                   required>
+
+            <div class="invalid-feedback"
+                 th:if="${#fields.hasErrors('address')}"
+                 th:errors="*{address}">
+            </div>
+        </div>
+
+        <!-- Nút đăng ký -->
+        <button type="submit"
+                class="btn btn-primary"
+                style="margin-top: 10px;">
+            Đăng Ký Tài Khoản
+        </button>
+
+        <div class="auth-footer">
+            Đã có tài khoản?
+            <a th:href="@{/login}">Đăng nhập ngay</a>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>

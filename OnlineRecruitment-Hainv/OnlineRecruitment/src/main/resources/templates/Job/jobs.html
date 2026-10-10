@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tìm việc làm - Online Recruitment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/jobs.css}">
+</head>
+<body>
+
+<!-- HEADER -->
+<div th:replace="~{fragments :: header}"></div>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="wrap">
+        <span class="hero-badge"
+              th:text="${jobPage.totalElements} + ' cơ hội việc làm đang chờ bạn'">
+            Cơ hội việc làm
+        </span>
+
+        <h1>
+            Tìm công việc phù hợp,<br>
+            bắt đầu sự nghiệp đáng mơ ước
+        </h1>
+
+        <p>
+            Kết nối trực tiếp với các doanh nghiệp uy tín.
+            Ứng tuyển nhanh, theo dõi dễ dàng.
+        </p>
+
+        <!-- SEARCH -->
+        <form class="search-box" th:action="@{/jobs}" method="get">
+            <div class="field">
+                <span class="field-icon">&#128269;</span>
+                <input type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Chức danh hoặc công ty">
+            </div>
+
+            <div class="field">
+                <span class="field-icon">&#128205;</span>
+                <select name="location">
+                    <option value="">Tất cả địa điểm</option>
+                    <option th:each="loc : ${locations}"
+                            th:value="${loc}"
+                            th:text="${loc}"
+                            th:selected="${loc == location}">
+                    </option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg">
+                Tìm việc ngay
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- JOB LIST -->
+<main class="wrap section">
+
+    <div class="list-head">
+        <h2>Việc làm mới nhất</h2>
+
+        <p>
+            <strong th:text="${jobPage.totalElements}">0</strong>
+            việc làm phù hợp
+
+            <span th:if="${!#strings.isEmpty(keyword)}">
+                với "<strong th:text="${keyword}"></strong>"
+            </span>
+
+            <span th:if="${!#strings.isEmpty(location)}">
+                tại <strong th:text="${location}"></strong>
+            </span>
+        </p>
+    </div>
+
+    <!-- JOB CARDS -->
+    <div class="job-grid">
+
+        <article class="job-card" th:each="job : ${jobPage.content}">
+
+
+            <!-- COMPANY LOGO -->
+            <div class="avatar">
+
+                <img th:if="${job.company != null
+                 and job.company.logoUrl != null
+                 and !#strings.isEmpty(job.company.logoUrl)}"
+                     th:src="${#strings.startsWith(job.company.logoUrl, '/images/')
+                    ? #strings.replace(job.company.logoUrl, '/images/', '/image/')
+                    : job.company.logoUrl}"
+                     th:alt="${job.companyName}"
+                     class="company-logo"
+                     onerror="this.style.display='none';
+                  this.parentElement.querySelector('.company-logo-fallback').style.display='flex';">
+
+                <span class="company-logo-fallback"
+                      th:style="${job.company != null
+                      and job.company.logoUrl != null
+                      and !#strings.isEmpty(job.company.logoUrl)}
+                      ? 'display:none' : 'display:flex'"
+                      th:text="${job.companyName != null
+                    and !#strings.isEmpty(job.companyName)
+                    ? #strings.toUpperCase(job.companyName.substring(0,1))
+                    : '?'}">
+        F
+    </span>
+
+            </div>
+
+
+            <div class="job-body">
+
+                <div class="job-top">
+                    <h3>
+                        <a th:href="@{/jobs/{id}(id=${job.id})}"
+                           th:text="${job.title}">
+                            Tên công việc
+                        </a>
+                    </h3>
+
+                    <span class="badge-new"
+                          th:if="${job.createdAt != null
+                                  and job.createdAt.isAfter(#temporals.createNow().minusDays(7))}">
+                        Mới
+                    </span>
+                </div>
+
+                <p class="company" th:text="${job.companyName}">
+                    Công ty
+                </p>
+
+                <div class="meta">
+                    <span class="chip">
+                        &#128205;
+                        <span th:text="${job.location}">Hanoi</span>
+                    </span>
+
+                    <span class="chip" th:if="${job.level != null}">
+                        &#128188;
+                        <span th:text="${job.level}">Junior</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- SALARY AND DETAIL -->
+            <div class="job-side">
+
+                <div class="salary" th:text="${job.salary}">
+                    20 - 35 triệu
+                </div>
+
+                <a class="btn btn-outline"
+                   th:href="@{/jobs/{id}(id=${job.id})}">
+                    Xem chi tiết
+                </a>
+
+            </div>
+        </article>
+
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" th:if="${jobPage.empty}">
+        <div class="empty-icon">&#128269;</div>
+
+        <h3>Chưa tìm thấy việc làm phù hợp</h3>
+
+        <p>Hãy thử đổi từ khóa hoặc chọn địa điểm khác.</p>
+
+        <a th:href="@{/jobs}" class="btn btn-primary">
+            Xem tất cả việc làm
+        </a>
+    </div>
+
+    <!-- PAGINATION -->
+    <nav class="pagination" th:if="${jobPage.totalPages > 1}">
+
+        <a th:if="${jobPage.hasPrevious()}"
+           th:href="@{/jobs(keyword=${keyword}, location=${location}, page=${jobPage.number - 1})}">
+            &laquo;
+        </a>
+
+        <a th:each="i : ${#numbers.sequence(0, jobPage.totalPages - 1)}"
+           th:href="@{/jobs(keyword=${keyword}, location=${location}, page=${i})}"
+           th:text="${i + 1}"
+           th:classappend="${i == jobPage.number} ? 'active'">
+        </a>
+
+        <a th:if="${jobPage.hasNext()}"
+           th:href="@{/jobs(keyword=${keyword}, location=${location}, page=${jobPage.number + 1})}">
+            &raquo;
+        </a>
+
+    </nav>
+
+</main>
+
+<!-- BENEFITS -->
+<section class="benefits">
+    <div class="wrap benefit-grid">
+
+        <div class="benefit">
+            <div class="benefit-icon">&#9889;</div>
+            <h4>Ứng tuyển nhanh chóng</h4>
+            <p>Chỉ vài bước để gửi hồ sơ đến nhà tuyển dụng.</p>
+        </div>
+
+        <div class="benefit">
+            <div class="benefit-icon">&#128737;</div>
+            <h4>Thông tin minh bạch</h4>
+            <p>Mức lương, yêu cầu và quyền lợi được hiển thị rõ ràng.</p>
+        </div>
+
+        <div class="benefit">
+            <div class="benefit-icon">&#127919;</div>
+            <h4>Phù hợp với bạn</h4>
+            <p>Tìm kiếm theo chức danh, công ty và địa điểm mong muốn.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments :: footer}"></div>
+
+</body>
+</html>
