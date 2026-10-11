@@ -619,3 +619,147 @@ table.data tbody tr:last-child td { border-bottom: none; }
     background: #eef1f6;
     margin: 4px 0;
 }
+
+/* ==================== SIDEBAR (DARK THEME) ==================== */
+.sidebar {
+    width: 260px;
+    background: #1e2a5a;      /* nền xanh navy đậm giống CareerViet */
+    color: #fff;
+    min-height: 100vh;
+    padding: 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    overflow-y: auto;
+    font-size: 14px;
+}
+
+/* Logo */
+.sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-logo .logo-icon {
+    width: 36px; height: 36px;
+    background: #fff;
+    color: #1e2a5a;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 16px;
+}
+
+.sidebar-logo .logo-text {
+    font-size: 15px; font-weight: 700; color: #fff; line-height: 1.2;
+}
+.sidebar-logo .logo-sub {
+    font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 400;
+}
+
+/* Menu chính */
+.sidebar nav { padding: 12px 0; }
+
+.sidebar .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 24px;
+    color: rgba(255,255,255,0.85);
+    text-decoration: none;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+.sidebar .nav-item:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+
+.sidebar .nav-item.active {
+    background: #ff3b5c;      /* đỏ hồng giống CareerViet */
+    color: #fff;
+    font-weight: 600;
+}
+
+.sidebar .nav-item .icon {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.sidebar .nav-item .chevron {
+    margin-left: auto;
+    font-size: 18px;
+    transition: transform .2s;
+    opacity: 0.6;
+}
+
+/* Menu cha (details) khi mở → xoay mũi tên */
+.nav-group[open] .nav-parent .chevron {
+    transform: rotate(90deg);
+}
+
+/* Menu cha có active item con → nền đỏ nhạt */
+.nav-group[open] .nav-parent {
+    background: rgba(255,255,255,0.05);
+}
+
+/* Submenu */
+.sidebar .nav-submenu {
+    background: rgba(0,0,0,0.15);
+    padding: 6px 0;
+}
+
+.sidebar .nav-sub-item {
+    display: block;
+    padding: 10px 24px 10px 56px;
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 13px;
+    transition: background .15s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar .nav-sub-item:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
+
+.sidebar .nav-sub-item.active {
+    color: #fff;
+    border-left-color: #ff3b5c;
+    background: rgba(255,59,92,0.15);
+    font-weight: 500;
+}
+
+/* Section label */
+.sidebar .nav-section {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    padding: 20px 24px 8px;
+    letter-spacing: 0.5px;
+}
+
+/* Ẩn marker mặc định của <details> */
+.nav-group > summary {
+    list-style: none;
+}
+.nav-group > summary::-webkit-details-marker {
+    display: none;
+}
+
+/* Main content đẩy sang phải do sidebar rộng hơn */
+.main {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+}

@@ -20,42 +20,72 @@
     </div>
 
     <nav>
-        <div class="nav-section">MENU</div>
+        <!-- ========== MENU CHÍNH ========== -->
 
         <a th:href="@{/admin/dashboard}"
            class="nav-item"
            th:classappend="${activeMenu == 'dashboard'} ? 'active' : ''">
-            <span class="icon">📊</span> Dashboard
+            <span class="icon">📊</span>
+            <span>Dashboard</span>
         </a>
 
         <a th:href="@{/admin/users}"
            class="nav-item"
            th:classappend="${activeMenu == 'users'} ? 'active' : ''">
-            <span class="icon">👥</span> Users
+            <span class="icon">👥</span>
+            <span>Users</span>
         </a>
 
-        <a th:href="@{/admin/companies}"
-           class="nav-item"
-           th:classappend="${activeMenu == 'companies'} ? 'active' : ''">
-            <span class="icon">🏢</span> Companies
-        </a>
+        <!-- MENU CHA có submenu: Companies -->
+        <details class="nav-group" th:attr="open=${activeMenu == 'companies' or activeMenu == 'pending' or activeMenu == 'banned'} ? 'open' : null">
+            <summary class="nav-item nav-parent">
+                <span class="icon">🏢</span>
+                <span>Companies</span>
+                <span class="chevron">›</span>
+            </summary>
+            <div class="nav-submenu">
+                <a th:href="@{/admin/companies}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'companies'} ? 'active' : ''">
+                    Tất cả công ty
+                </a>
+                <a th:href="@{/admin/companies?status=PENDING}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
+                    Chờ duyệt
+                </a>
+                <a th:href="@{/admin/companies?status=INACTIVE}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'banned'} ? 'active' : ''">
+                    Đã khóa
+                </a>
+            </div>
+        </details>
 
-        <a th:href="@{/admin/companies?status=PENDING}"
-           class="nav-item"
-           th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
-            <span class="icon">⏳</span> Pending
-        </a>
-
-        <a th:href="@{/admin/companies?status=INACTIVE}"
-           class="nav-item"
-           th:classappend="${activeMenu == 'banned'} ? 'active' : ''">
-            <span class="icon">🚫</span> Ban List
-        </a>
+        <!-- MENU CHA có submenu: Jobs (nếu có) -->
+        <details class="nav-group" th:attr="open=${activeMenu == 'jobs'} ? 'open' : null">
+            <summary class="nav-item nav-parent">
+                <span class="icon">💼</span>
+                <span>Jobs</span>
+                <span class="chevron">›</span>
+            </summary>
+            <div class="nav-submenu">
+                <a href="#" class="nav-sub-item">Tất cả job</a>
+                <a href="#" class="nav-sub-item">Chờ duyệt</a>
+                <a href="#" class="nav-sub-item">Đã đóng</a>
+            </div>
+        </details>
 
         <div class="nav-section">SYSTEM</div>
 
         <a href="#" class="nav-item">
-            <span class="icon">⚙️</span> Settings
+            <span class="icon">⚙️</span>
+            <span>Settings</span>
+        </a>
+
+        <a th:href="@{/logout}" class="nav-item">
+            <span class="icon">🚪</span>
+            <span>Đăng xuất</span>
         </a>
     </nav>
 </aside>
