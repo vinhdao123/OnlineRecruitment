@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực mã OTP - Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body class="auth-body">
+
+<div class="auth-header">
+    <a href="/" class="logo">
+        <span class="logo-icon">OR</span>
+        <span>Online Recruitment</span>
+    </a>
+</div>
+
+<div class="auth-card">
+    <div class="otp-icon">✉️</div>
+    <h1 class="auth-title">Xác Thực Tài Khoản</h1>
+    <p class="auth-subtitle">
+        Chúng tôi đã gửi mã xác thực gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra hộp thư đến (hoặc hòm thư rác/spam).
+    </p>
+
+    <!-- Thông báo lỗi hoặc thành công -->
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+    <form th:action="@{/auth/verify-otp}" th:object="${verifyDto}" method="post">
+        <div class="form-group">
+            <label for="email">Email tài khoản</label>
+            <input type="email" id="email" th:field="*{email}" class="form-control" readonly style="background-color: #f8f9fa;">
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="otp">Nhập mã xác thực (6 chữ số) <span class="required">*</span></label>
+            <input type="text" id="otp" th:field="*{otp}"
+                   class="form-control otp-input"
+                   maxlength="6"
+                   pattern="[0-9]{6}"
+                   placeholder="123456"
+                   autocomplete="one-time-code"
+                   required autofocus>
+            <div class="invalid-feedback" th:if="${#fields.hasErrors('otp')}" th:errors="*{otp}"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Xác Thực Ngay</button>
+    </form>
+
+    <div class="auth-divider">
+        <span>Không nhận được mã?</span>
+    </div>
+
+    <form th:action="@{/auth/resend-otp}" method="post" style="text-align: center;">
+        <input type="hidden" name="email" th:value="${verifyDto.email}">
+        <button type="submit" class="btn btn-outline" style="font-size: 14px; padding: 8px 16px;">
+            🔄 Gửi lại mã OTP
+        </button>
+    </form>
+
+    <div class="auth-footer" style="margin-top: 25px;">
+        <a th:href="@{/login}">Quay lại trang Đăng nhập</a>
+    </div>
+</div>
+
+</body>
+</html>
