@@ -13,7 +13,7 @@ public class HomeController {
 
     @GetMapping("/login")
     public String login() {
-        return "auth/login";     // ← file templates/login.html
+        return "auth/login";
     }
 
     @GetMapping("/403")
