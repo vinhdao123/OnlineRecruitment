@@ -10,7 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import OnlineRecruitment.OnlineRecruitment.dto.CompanyProfileUpdateDto;
+import OnlineRecruitment.OnlineRecruitment.entity.UserRole;
 import java.util.Optional;
 
 @Service
@@ -88,4 +89,58 @@ public class CompanyService {
 
     public long countAll()                     { return companyRepository.count(); }
     public long countByStatus(CompanyStatus s) { return companyRepository.countByStatus(s); }
+    @Transactional
+    public Company updateRecruiterCompany(
+            Long recruiterId,
+            CompanyProfileUpdateDto dto
+    ) {
+        User recruiter = companyRepository
+                .findByRecruiterId(recruiterId)
+                .map(Company::getRecruiter)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Bạn chưa có hồ sơ công ty"
+                ));
+
+        if (recruiter.getRole() != UserRole.RECRUITER) {
+            throw new IllegalArgumentException(
+                    "Tài khoản không có quyền recruiter"
+            );
+        }
+
+        Company company = companyRepository
+                .findByRecruiterId(recruiterId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy công ty của bạn"
+                ));
+
+        String taxCode = dto.taxCode().trim();
+
+        if (!taxCode.equals(company.getTaxCode())
+                && companyRepository.existsByTaxCode(taxCode)) {
+            throw new IllegalArgumentException(
+                    "Mã số thuế đã được sử dụng"
+            );
+        }
+
+        company.setCompanyName(dto.companyName().trim());
+        company.setTaxCode(taxCode);
+        company.setEmail(dto.email().trim().toLowerCase(
+                java.util.Locale.ROOT
+        ));
+        company.setPhone(normalizeCompanyField(dto.phone()));
+        company.setAddress(dto.address().trim());
+        company.setCompanySize(normalizeCompanyField(dto.companySize()));
+        company.setWebsite(normalizeCompanyField(dto.website()));
+        company.setDescription(normalizeCompanyField(dto.description()));
+        company.setLogoUrl(normalizeCompanyField(dto.logoUrl()));
+
+        // Không thay đổi recruiter, status hoặc rejectionReason.
+        return companyRepository.save(company);
+    }
+
+    private String normalizeCompanyField(String value) {
+        return value == null || value.isBlank()
+                ? null
+                : value.trim();
+    }
 }

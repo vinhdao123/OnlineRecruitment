@@ -11,7 +11,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import OnlineRecruitment.OnlineRecruitment.dto.RecruiterProfileDto;
+import OnlineRecruitment.OnlineRecruitment.dto.RecruiterProfileUpdateDto;
+import OnlineRecruitment.OnlineRecruitment.entity.UserRole;
+import jakarta.validation.Valid;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
@@ -142,4 +146,59 @@ public class UserService {
     public long countAll()                       { return userRepository.count(); }
     public long countByRole(UserRole role)       { return userRepository.countByRole(role); }
     public long countByStatus(UserStatus status) { return userRepository.countByStatus(status); }
+
+    @Transactional(readOnly = true)
+    public RecruiterProfileDto getRecruiterProfile(Long userId) {
+        User user = getById(userId);
+
+        if (user.getRole() != UserRole.RECRUITER) {
+            throw new IllegalArgumentException(
+                    "Tài khoản không có quyền recruiter"
+            );
+        }
+
+        return RecruiterProfileDto.from(user);
+    }
+
+    @Transactional
+    public RecruiterProfileDto updateRecruiterProfile(
+            Long userId,
+            @Valid RecruiterProfileUpdateDto dto
+    ) {
+        User user = getById(userId);
+
+        if (user.getRole() != UserRole.RECRUITER) {
+            throw new IllegalArgumentException(
+                    "Tài khoản không có quyền recruiter"
+            );
+        }
+
+        String email = dto.email().trim().toLowerCase(
+                java.util.Locale.ROOT
+        );
+
+        userRepository.findByEmail(email).ifPresent(existing -> {
+            if (!existing.getId().equals(userId)) {
+                throw new IllegalArgumentException(
+                        "Email đã được sử dụng bởi tài khoản khác"
+                );
+            }
+        });
+
+        user.setFullName(dto.fullName().trim());
+        user.setEmail(email);
+        user.setPhone(normalize(dto.phone()));
+        user.setLocation(normalize(dto.location()));
+        user.setAvatarUrl(normalize(dto.avatarUrl()));
+
+        User savedUser = userRepository.save(user);
+
+        return RecruiterProfileDto.from(savedUser);
+    }
+
+    private String normalize(String value) {
+        return value == null || value.isBlank()
+                ? null
+                : value.trim();
+    }
 }

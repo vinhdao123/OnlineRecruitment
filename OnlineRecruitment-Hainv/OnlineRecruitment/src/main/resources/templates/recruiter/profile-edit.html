@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cập nhật hồ sơ cá nhân</title>
+</head>
+<body>
+<h1>Cập nhật hồ sơ recruiter</h1>
+
+<p th:if="${errorMessage}"
+   th:text="${errorMessage}"
+   style="color: red"></p>
+
+<form th:action="@{/recruiter/profile/edit}"
+      th:object="${form}"
+      method="post">
+
+    <div>
+        <label for="fullName">Họ và tên</label>
+        <input id="fullName" type="text" th:field="*{fullName}">
+        <p th:errors="*{fullName}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="email">Email</label>
+        <input id="email" type="email" th:field="*{email}">
+        <p th:errors="*{email}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="phone">Số điện thoại</label>
+        <input id="phone" type="text" th:field="*{phone}">
+        <p th:errors="*{phone}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="location">Địa chỉ</label>
+        <input id="location" type="text" th:field="*{location}">
+        <p th:errors="*{location}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="avatarUrl">URL ảnh đại diện</label>
+        <input id="avatarUrl" type="url" th:field="*{avatarUrl}">
+        <p th:errors="*{avatarUrl}" style="color: red"></p>
+    </div>
+
+    <button type="submit">Lưu thay đổi</button>
+    <a th:href="@{/recruiter/profile}">Quay lại</a>
+</form>
+</body>
+</html>

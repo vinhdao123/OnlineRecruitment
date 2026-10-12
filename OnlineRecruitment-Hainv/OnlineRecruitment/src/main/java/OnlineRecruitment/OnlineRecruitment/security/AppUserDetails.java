@@ -33,7 +33,9 @@ public class AppUserDetails implements UserDetails {
     public String getFullName() {
         return fullName;
     }
-
+    public String getRole() {
+        return role;
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role));

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hồ sơ recruiter</title>
+</head>
+<body>
+<h1>Hồ sơ nhà tuyển dụng</h1>
+
+<p th:if="${successMessage}"
+   th:text="${successMessage}"
+   style="color: green"></p>
+
+<div>
+    <img th:if="${profile.avatarUrl() != null
+                 and !profile.avatarUrl().isBlank()}"
+         th:src="${profile.avatarUrl()}"
+         alt="Ảnh đại diện"
+         width="120">
+
+    <p><strong>Username:</strong>
+        <span th:text="${profile.username()}"></span>
+    </p>
+
+    <p><strong>Họ tên:</strong>
+        <span th:text="${profile.fullName()}"></span>
+    </p>
+
+    <p><strong>Email:</strong>
+        <span th:text="${profile.email()}"></span>
+    </p>
+
+    <p><strong>Số điện thoại:</strong>
+        <span th:text="${profile.phone()}"></span>
+    </p>
+
+    <p><strong>Địa chỉ:</strong>
+        <span th:text="${profile.location()}"></span>
+    </p>
+</div>
+
+<p>
+    <a th:href="@{/recruiter/profile/edit}">
+        Cập nhật hồ sơ cá nhân
+    </a>
+</p>
+
+<p>
+    <a th:href="@{/recruiter/profile/company}">
+        Xem hồ sơ công ty
+    </a>
+</p>
+</body>
+</html>

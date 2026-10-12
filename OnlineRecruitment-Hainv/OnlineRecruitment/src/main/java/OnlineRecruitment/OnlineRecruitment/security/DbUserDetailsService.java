@@ -23,10 +23,13 @@ public class DbUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(
-                        "Không tìm thấy tài khoản: " + username
-                ));
+        User user = userRepository.findByEmail(username)
+                .or(() -> userRepository.findByUsername(username))
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "Không tìm thấy tài khoản: " + username
+                        )
+                );
 
         return new AppUserDetails(
                 user.getId(),

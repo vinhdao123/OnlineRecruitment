@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cập nhật hồ sơ công ty</title>
+</head>
+<body>
+<h1>Cập nhật hồ sơ công ty</h1>
+
+<p th:if="${errorMessage}"
+   th:text="${errorMessage}"
+   style="color: red"></p>
+
+<form th:action="@{/recruiter/profile/company/edit}"
+      th:object="${form}"
+      method="post">
+
+    <div>
+        <label for="companyName">Tên công ty</label>
+        <input id="companyName" type="text" th:field="*{companyName}">
+        <p th:errors="*{companyName}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="taxCode">Mã số thuế</label>
+        <input id="taxCode" type="text" th:field="*{taxCode}">
+        <p th:errors="*{taxCode}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="email">Email công ty</label>
+        <input id="email" type="email" th:field="*{email}">
+        <p th:errors="*{email}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="phone">Số điện thoại</label>
+        <input id="phone" type="text" th:field="*{phone}">
+        <p th:errors="*{phone}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="address">Địa chỉ</label>
+        <input id="address" type="text" th:field="*{address}">
+        <p th:errors="*{address}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="companySize">Quy mô công ty</label>
+        <input id="companySize" type="text" th:field="*{companySize}">
+        <p th:errors="*{companySize}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="website">Website</label>
+        <input id="website" type="url" th:field="*{website}">
+        <p th:errors="*{website}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="description">Mô tả công ty</label>
+        <textarea id="description"
+                  th:field="*{description}"></textarea>
+        <p th:errors="*{description}" style="color: red"></p>
+    </div>
+
+    <div>
+        <label for="logoUrl">URL logo</label>
+        <input id="logoUrl" type="url" th:field="*{logoUrl}">
+        <p th:errors="*{logoUrl}" style="color: red"></p>
+    </div>
+
+    <button type="submit">Lưu thay đổi</button>
+    <a th:href="@{/recruiter/profile/company}">Quay lại</a>
+</form>
+</body>
+</html>

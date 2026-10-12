@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hồ sơ công ty</title>
+</head>
+<body>
+<h1>Hồ sơ công ty</h1>
+
+<p th:if="${successMessage}"
+   th:text="${successMessage}"
+   style="color: green"></p>
+
+<img th:if="${company.logoUrl != null and !company.logoUrl.isBlank()}"
+     th:src="${company.logoUrl}"
+     alt="Logo công ty"
+     width="120">
+
+<p><strong>Tên công ty:</strong>
+    <span th:text="${company.companyName}"></span>
+</p>
+
+<p><strong>Mã số thuế:</strong>
+    <span th:text="${company.taxCode}"></span>
+</p>
+
+<p><strong>Email:</strong>
+    <span th:text="${company.email}"></span>
+</p>
+
+<p><strong>Số điện thoại:</strong>
+    <span th:text="${company.phone}"></span>
+</p>
+
+<p><strong>Địa chỉ:</strong>
+    <span th:text="${company.address}"></span>
+</p>
+
+<p><strong>Quy mô:</strong>
+    <span th:text="${company.companySize}"></span>
+</p>
+
+<p><strong>Website:</strong>
+    <span th:text="${company.website}"></span>
+</p>
+
+<p><strong>Mô tả:</strong>
+    <span th:text="${company.description}"></span>
+</p>
+
+<p><strong>Trạng thái:</strong>
+    <span th:text="${company.status}"></span>
+</p>
+
+<a th:href="@{/recruiter/profile/company/edit}">
+    Cập nhật hồ sơ công ty
+</a>
+
+<p>
+    <a th:href="@{/recruiter/profile}">Quay lại hồ sơ cá nhân</a>
+</p>
+</body>
+</html>
