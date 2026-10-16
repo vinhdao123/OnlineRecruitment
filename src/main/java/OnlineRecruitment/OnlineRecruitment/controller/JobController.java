@@ -59,28 +59,15 @@ public class JobController {
         // ==========================================
 
         if ("salary-high".equals(sort)) {
-
-            jobs.sort((job1, job2) -> {
-                BigDecimal salary1 = job1.getSalaryMax();
-                BigDecimal salary2 = job2.getSalaryMax();
-
-                if (salary1 == null) return 1;
-                if (salary2 == null) return -1;
-
-                return salary2.compareTo(salary1);
-            });
-
+            jobs.sort(java.util.Comparator.comparing(
+                    Job::getSalaryMax,
+                    java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())
+            ));
         } else if ("salary-low".equals(sort)) {
-
-            jobs.sort((job1, job2) -> {
-                BigDecimal salary1 = job1.getSalaryMax();
-                BigDecimal salary2 = job2.getSalaryMax();
-
-                if (salary1 == null) return 1;
-                if (salary2 == null) return -1;
-
-                return salary1.compareTo(salary2);
-            });
+            jobs.sort(java.util.Comparator.comparing(
+                    Job::getSalaryMax,
+                    java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())
+            ));
         }
 
         // ==========================================

@@ -16,6 +16,31 @@ public class HomeController {
         return "auth/login";
     }
 
+    @GetMapping("/register")
+    public String register() {
+        return "redirect:/register/candidate";
+    }
+
+    @GetMapping("/about")
+    public String about() {
+        return "about";
+    }
+
+    @GetMapping("/companies")
+    public String companies() {
+        return "redirect:/jobs";
+    }
+
+    @GetMapping("/candidate/dashboard")
+    public String candidateDashboard() {
+        return "candidate/dashboard";
+    }
+
+    @GetMapping("/recruiter/dashboard")
+    public String recruiterDashboard() {
+        return "recruiter/dashboard";
+    }
+
     @GetMapping("/403")
     public String forbidden() {
         return "403";

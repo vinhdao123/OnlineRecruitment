@@ -58,11 +58,13 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/login", "/register", "/register/**", "/403", "/error",
-                                "/jobs/**", "/companies/**", "/about",
+                                "/", "/login", "/register", "/register/**", "/verify-otp", "/resend-otp", "/auth/**",
+                                "/403", "/error", "/companies", "/about",
                                 "/css/**", "/js/**", "/images/**", "/static/**",
                                 "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers("/jobs/*/apply").hasRole("CANDIDATE")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/jobs", "/jobs/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/recruiter/**").hasRole("RECRUITER")
                         .requestMatchers("/candidate/**").hasRole("CANDIDATE")

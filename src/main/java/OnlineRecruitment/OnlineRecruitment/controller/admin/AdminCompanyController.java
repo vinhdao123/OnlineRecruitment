@@ -38,6 +38,7 @@ public class AdminCompanyController {
         model.addAttribute("keyword",        keyword);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("statuses",       CompanyStatus.values());
+        model.addAttribute("activeMenu",     status == CompanyStatus.PENDING ? "pending" : (status == CompanyStatus.LOCKED ? "banned" : "companies"));
         return "admin/companies/list";
     }
 
@@ -45,6 +46,7 @@ public class AdminCompanyController {
     public String detail(@PathVariable Long id, Model model) {
         Company company = companyService.getById(id);
         model.addAttribute("company", company);
+        model.addAttribute("activeMenu", "companies");
         return "admin/companies/detail";
     }
 
@@ -52,9 +54,13 @@ public class AdminCompanyController {
     public String approve(@PathVariable Long id,
                           @AuthenticationPrincipal UserDetails principal,
                           RedirectAttributes ra) {
-        User actor = userService.getByEmail(principal.getUsername());
-        companyService.approve(id, actor);
-        ra.addFlashAttribute("success", "Đã duyệt công ty.");
+        try {
+            User actor = userService.getByEmail(principal.getUsername());
+            companyService.approve(id, actor);
+            ra.addFlashAttribute("success", "Đã duyệt công ty thành công.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/companies/" + id;
     }
 
@@ -63,9 +69,13 @@ public class AdminCompanyController {
                          @RequestParam String reason,
                          @AuthenticationPrincipal UserDetails principal,
                          RedirectAttributes ra) {
-        User actor = userService.getByEmail(principal.getUsername());
-        companyService.reject(id, reason, actor);
-        ra.addFlashAttribute("success", "Đã từ chối công ty.");
+        try {
+            User actor = userService.getByEmail(principal.getUsername());
+            companyService.reject(id, reason, actor);
+            ra.addFlashAttribute("success", "Đã từ chối công ty.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/companies/" + id;
     }
 
@@ -73,9 +83,13 @@ public class AdminCompanyController {
     public String lock(@PathVariable Long id,
                        @AuthenticationPrincipal UserDetails principal,
                        RedirectAttributes ra) {
-        User actor = userService.getByEmail(principal.getUsername());
-        companyService.lock(id, actor);
-        ra.addFlashAttribute("success", "Đã khóa công ty.");
+        try {
+            User actor = userService.getByEmail(principal.getUsername());
+            companyService.lock(id, actor);
+            ra.addFlashAttribute("success", "Đã khóa công ty.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/companies/" + id;
     }
 
@@ -83,9 +97,13 @@ public class AdminCompanyController {
     public String unlock(@PathVariable Long id,
                          @AuthenticationPrincipal UserDetails principal,
                          RedirectAttributes ra) {
-        User actor = userService.getByEmail(principal.getUsername());
-        companyService.unlock(id, actor);
-        ra.addFlashAttribute("success", "Đã mở khóa công ty.");
+        try {
+            User actor = userService.getByEmail(principal.getUsername());
+            companyService.unlock(id, actor);
+            ra.addFlashAttribute("success", "Đã mở khóa công ty.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/companies/" + id;
     }
 }

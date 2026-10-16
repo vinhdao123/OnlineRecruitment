@@ -1,4 +1,4 @@
-package OnlineRecruitment.OnlineRecruitment.repository.admin;
+package OnlineRecruitment.OnlineRecruitment.repository;
 
 import OnlineRecruitment.OnlineRecruitment.entity.Company;
 import OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus;
@@ -7,11 +7,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
+
+    boolean existsByTaxCode(String taxCode);
 
     Optional<Company> findByRecruiterId(Long recruiterId);
 
@@ -45,10 +49,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
                          @Param("status") CompanyStatus status,
                          Pageable pageable);
 
-    @Query("SELECT c FROM Company c WHERE c.id = :id AND c.status = 'APPROVED'")
+    @Query("SELECT c FROM Company c WHERE c.id = :id AND c.status = OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus.ACTIVE")
     Optional<Company> findApprovedById(@Param("id") Long id);
 
-    /** Lấy N công ty mới nhất — dùng cho dashboard. */
     @Query("""
         SELECT c FROM Company c
         LEFT JOIN FETCH c.recruiter

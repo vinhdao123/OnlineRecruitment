@@ -1,4 +1,4 @@
-package OnlineRecruitment.OnlineRecruitment.repository.admin;
+package OnlineRecruitment.OnlineRecruitment.repository;
 
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.entity.UserRole;
@@ -8,12 +8,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    boolean existsByEmail(String email);
+
+    boolean existsByUsername(String username);
 
     Optional<User> findByUsername(String username);
 
@@ -22,6 +28,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     long countByRole(UserRole role);
 
     long countByStatus(UserStatus status);
+
+    List<User> findByRoleAndStatus(UserRole role, UserStatus status);
 
     @Query("""
         SELECT u FROM User u
@@ -37,19 +45,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
                       @Param("status") UserStatus status,
                       Pageable pageable);
 
-    /**
-     * Đếm user đăng ký trong khoảng thời gian — dùng cho chart User Growth.
-     * Trả về số lượng user có created_at trong [from, to).
-     */
     @Query("SELECT COUNT(u) FROM User u WHERE u.createdAt >= :from AND u.createdAt < :to")
     long countBetween(@Param("from") LocalDateTime from,
                       @Param("to") LocalDateTime to);
 
-    /** 5 user mới nhất — hiển thị ở dashboard nếu cần. */
     @Query("SELECT u FROM User u ORDER BY u.createdAt DESC")
     List<User> findRecent(Pageable pageable);
 
-    /** Export CSV — lấy toàn bộ user theo filter, không phân trang. */
     @Query("""
         SELECT u FROM User u
         WHERE (:keyword IS NULL OR

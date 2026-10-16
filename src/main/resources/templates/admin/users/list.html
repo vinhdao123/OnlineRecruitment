@@ -93,7 +93,8 @@
                 th:classappend="'badge-' + ${#strings.toLowerCase(u.status.name())}">
             <span th:switch="${u.status.name()}">
               <span th:case="'ACTIVE'">● Active</span>
-              <span th:case="'INACTIVE'">○ Inactive</span>
+              <span th:case="'PENDING'">⏳ Pending</span>
+              <span th:case="'REJECTED'">✕ Rejected</span>
               <span th:case="'LOCKED'">⛔ Locked</span>
             </span>
           </span>
@@ -122,7 +123,7 @@
                 </button>
               </form>
 
-              <form th:if="${u.status.name() != 'ACTIVE'}"
+              <form th:if="${u.status.name() == 'LOCKED'}"
                     th:action="@{'/admin/users/' + ${u.id} + '/unlock'}"
                     method="post" style="margin:0;">
                 <button type="submit" class="action-item action-item-success">
