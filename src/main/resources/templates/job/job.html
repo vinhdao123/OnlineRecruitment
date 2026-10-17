@@ -1,5 +1,9 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
 
 <head>
 
@@ -54,17 +58,33 @@
         </nav>
 
 
-        <div class="header-actions">
 
-            <button class="login-btn">
-                Đăng nhập
-            </button>
 
-            <button class="register-btn">
-                Đăng ký
-            </button>
-
+        <!-- Khi chưa đăng nhập -->
+        <div class="header-actions"
+             sec:authorize="isAnonymous()">
+            <a th:href="@{/login}" class="login-btn">Đăng nhập</a>
+            <a th:href="@{/register/candidate}" class="register-btn">Đăng ký</a>
         </div>
+
+        <!-- Khi đã đăng nhập -->
+        <div class="header-actions"
+             sec:authorize="isAuthenticated()">
+    <span class="user-name"
+          th:text="${#authentication.name}">
+        Tài khoản
+    </span>
+
+            <form th:action="@{/logout}"
+                  method="post"
+                  style="display: inline;">
+                <button type="submit" class="logout-btn">
+                    Đăng xuất
+                </button>
+            </form>
+        </div>
+
+
 
     </div>
 
