@@ -202,7 +202,7 @@ body.admin {
     background: #fff;
     border-radius: 12px;
     border: 1px solid #eef1f6;
-    overflow: hidden;
+    overflow: visible;
 }
 table.data {
     width: 100%;

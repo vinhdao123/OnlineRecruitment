@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 @Controller
@@ -65,7 +66,12 @@ public class AdminUserController {
 
     @GetMapping("/new")
     public String newForm(Model model) {
-        model.addAttribute("roles",    UserRole.values());
+        // 1. Lọc bỏ ADMIN khỏi danh sách roles khi tạo mới
+        List<UserRole> allowedRoles = Arrays.stream(UserRole.values())
+                .filter(role -> role != UserRole.ADMIN)
+                .toList();
+
+        model.addAttribute("roles",    allowedRoles);
         model.addAttribute("statuses", UserStatus.values());
         model.addAttribute("activeMenu", "users");
         return "admin/users/form";
@@ -82,6 +88,12 @@ public class AdminUserController {
                             @RequestParam UserStatus status,
                             @AuthenticationPrincipal UserDetails principal,
                             RedirectAttributes ra) {
+        // 2. Chặn tạo ADMIN từ request bên ngoài (bảo mật)
+        if (role == UserRole.ADMIN) {
+            ra.addFlashAttribute("error", "Không được phép tạo tài khoản Admin từ trang này.");
+            return "redirect:/admin/users/new";
+        }
+
         try {
             User actor = userService.getByEmail(principal.getUsername());
             User created = userService.create(username, email, fullName,
@@ -172,7 +184,13 @@ public class AdminUserController {
     public String editForm(@PathVariable Long id, Model model) {
         User user = userService.getById(id);
         model.addAttribute("user", user);
-        model.addAttribute("roles", UserRole.values());
+
+        // 3. Lọc bỏ ADMIN khỏi danh sách roles khi chỉnh sửa (tránh việc nâng cấp user thành admin)
+        List<UserRole> allowedRoles = Arrays.stream(UserRole.values())
+                .filter(role -> role != UserRole.ADMIN)
+                .toList();
+        model.addAttribute("roles", allowedRoles);
+
         model.addAttribute("statuses", UserStatus.values());
         model.addAttribute("activeMenu", "users");
         return "admin/users/edit-form";
@@ -189,6 +207,12 @@ public class AdminUserController {
                          @RequestParam UserStatus status,
                          @AuthenticationPrincipal UserDetails principal,
                          RedirectAttributes ra) {
+        // 4. Chặn việc cố tình gửi request đổi role thành ADMIN
+        if (role == UserRole.ADMIN) {
+            ra.addFlashAttribute("error", "Không được phép thay đổi thành tài khoản Admin.");
+            return "redirect:/admin/users/" + id + "/edit";
+        }
+
         try {
             User actor = userService.getByEmail(principal.getUsername());
             userService.update(id, fullName, email, phone, location, role, status, actor);
