@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recruiter Dashboard — Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <a th:href="@{/}" class="logo">Online<span>Recruitment</span></a>
+            <nav class="nav">
+                <a th:href="@{/recruiter/dashboard}" class="active">Kênh tuyển dụng</a>
+            </nav>
+            <div class="auth-buttons">
+                <span th:text="${#authentication.name}" style="font-weight: 600; color: #1f2937;">Recruiter</span>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-login" style="cursor:pointer; background:none; border:none;">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+        <h2>Chào mừng Nhà Tuyển Dụng</h2>
+        <p style="color: #6b7280; margin-top: 8px;">Quản lý thông tin doanh nghiệp, đăng tin tuyển dụng và tìm kiếm ứng viên tiềm năng.</p>
+
+        <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px;">
+                <h3>🏢 Trạng thái tài khoản</h3>
+                <p style="color: #4b5563; margin: 12px 0;">Tài khoản doanh nghiệp của bạn đang hoạt động bình thường trên hệ thống.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

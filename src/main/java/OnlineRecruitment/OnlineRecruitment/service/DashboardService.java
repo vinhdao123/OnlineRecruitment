@@ -1,9 +1,9 @@
 package OnlineRecruitment.OnlineRecruitment.service;
 
 import OnlineRecruitment.OnlineRecruitment.entity.*;
-import OnlineRecruitment.OnlineRecruitment.repository.admin.CompanyRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.CompanyRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.JobRepository;
-import OnlineRecruitment.OnlineRecruitment.repository.admin.UserRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ public class DashboardService {
     public long totalCompanies()                    { return companyRepository.count(); }
     public long companiesByStatus(CompanyStatus s)  { return companyRepository.countByStatus(s); }
     public long totalJobs()                         { return jobRepository.count(); }
-    public long jobsByStatus(String status)         { return jobRepository.countByStatus(status); }
+    public long jobsByStatus(JobStatus status)      { return jobRepository.countByStatus(status); }
 
     @Transactional(readOnly = true)
     public List<Map<String, Object>> userGrowthLast6Months() {

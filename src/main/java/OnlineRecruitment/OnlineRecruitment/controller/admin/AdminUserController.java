@@ -111,9 +111,13 @@ public class AdminUserController {
     public String lock(@PathVariable Long id,
                        @AuthenticationPrincipal UserDetails principal,
                        RedirectAttributes ra) {
-        User actor = userService.getByEmail(principal.getUsername());
-        userService.lock(id, actor);
-        ra.addFlashAttribute("success", "Đã khóa tài khoản.");
+        try {
+            User actor = userService.getByEmail(principal.getUsername());
+            userService.lock(id, actor);
+            ra.addFlashAttribute("success", "Đã khóa tài khoản.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/users/" + id;
     }
 
@@ -121,9 +125,13 @@ public class AdminUserController {
     public String unlock(@PathVariable Long id,
                          @AuthenticationPrincipal UserDetails principal,
                          RedirectAttributes ra) {
-        User actor = userService.getByEmail(principal.getUsername());
-        userService.unlock(id, actor);
-        ra.addFlashAttribute("success", "Đã mở khóa tài khoản.");
+        try {
+            User actor = userService.getByEmail(principal.getUsername());
+            userService.unlock(id, actor);
+            ra.addFlashAttribute("success", "Đã mở khóa tài khoản.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/admin/users/" + id;
     }
 
@@ -138,11 +146,11 @@ public class AdminUserController {
         response.setHeader("Content-Disposition",
                 "attachment; filename=\"users_" + System.currentTimeMillis() + ".csv\"");
 
-        response.getWriter().write('\ufeff');
+        PrintWriter w = response.getWriter();
+        w.write('\ufeff'); // UTF-8 BOM qua cùng 1 writer
 
         List<User> users = userService.searchAll(keyword, role, status);
 
-        PrintWriter w = response.getWriter();
         w.println("ID,Username,Full Name,Email,Phone,Role,Status,Created At");
         for (User u : users) {
             w.printf("%d,%s,%s,%s,%s,%s,%s,%s%n",
@@ -194,7 +202,11 @@ public class AdminUserController {
 
     private String csv(String s) {
         if (s == null) return "";
-        if (s.contains(",") || s.contains("\"") || s.contains("\n")) {
+        // Ngăn chặn Formula Injection (=, +, -, @)
+        if (s.startsWith("=") || s.startsWith("+") || s.startsWith("-") || s.startsWith("@")) {
+            s = "'" + s;
+        }
+        if (s.contains(",") || s.contains("\"") || s.contains("\n") || s.contains("\r")) {
             return "\"" + s.replace("\"", "\"\"") + "\"";
         }
         return s;

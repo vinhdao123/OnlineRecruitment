@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "companies")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Company {
 
     @Id
@@ -18,7 +21,7 @@ public class Company {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruiter_id", nullable = false)
     private User recruiter;
 
@@ -31,7 +34,7 @@ public class Company {
     @Column(name = "email", length = 255)
     private String email;
 
-    @Column(name = "phone", length = 20)
+    @Column(name = "phone", length = 30)
     private String phone;
 
     @Column(name = "address", length = 500)
@@ -40,8 +43,14 @@ public class Company {
     @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
-    @Column(name = "logo_url", length = 500)
+    @Column(name = "logo_url", length = 1000)
     private String logoUrl;
+
+    @Column(name = "website", length = 500)
+    private String website;
+
+    @Column(name = "company_size", length = 100)
+    private String companySize;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", length = 20, nullable = false)

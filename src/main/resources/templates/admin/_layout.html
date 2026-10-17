@@ -54,7 +54,7 @@
                    th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
                     Chờ duyệt
                 </a>
-                <a th:href="@{/admin/companies?status=INACTIVE}"
+                <a th:href="@{/admin/companies?status=LOCKED}"
                    class="nav-sub-item"
                    th:classappend="${activeMenu == 'banned'} ? 'active' : ''">
                     Đã khóa
@@ -83,10 +83,12 @@
             <span>Settings</span>
         </a>
 
-        <a th:href="@{/logout}" class="nav-item">
-            <span class="icon">🚪</span>
-            <span>Đăng xuất</span>
-        </a>
+        <form th:action="@{/logout}" method="post" style="margin:0; padding:0;">
+            <button type="submit" class="nav-item" style="width:100%; text-align:left; background:none; border:none; cursor:pointer; font:inherit; color:inherit;">
+                <span class="icon">🚪</span>
+                <span>Đăng xuất</span>
+            </button>
+        </form>
     </nav>
 </aside>
 

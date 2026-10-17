@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Dashboard — Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <a th:href="@{/}" class="logo">Online<span>Recruitment</span></a>
+            <nav class="nav">
+                <a th:href="@{/jobs}">Tìm việc làm</a>
+                <a th:href="@{/candidate/dashboard}" class="active">Dashboard</a>
+            </nav>
+            <div class="auth-buttons">
+                <span th:text="${#authentication.name}" style="font-weight: 600; color: #1f2937;">Candidate</span>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit" class="btn-login" style="cursor:pointer; background:none; border:none;">Đăng xuất</button>
+                </form>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+        <h2>Chào mừng bạn đến với Candidate Portal</h2>
+        <p style="color: #6b7280; margin-top: 8px;">Quản lý hồ sơ ứng tuyển và tìm kiếm việc làm phù hợp nhất.</p>
+
+        <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px;">
+                <h3>🔍 Tìm kiếm việc làm</h3>
+                <p style="color: #4b5563; margin: 12px 0;">Khám phá hàng ngàn cơ hội việc làm mới nhất từ các nhà tuyển dụng hàng đầu.</p>
+                <a th:href="@{/jobs}" class="btn-register" style="display:inline-block; padding: 8px 16px;">Xem danh sách việc làm</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
