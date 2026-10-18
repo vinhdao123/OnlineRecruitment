@@ -1,0 +1,418 @@
+/* =====================================================
+   UI POLISH: hiệu ứng + làm mượt giao diện các trang job
+   Đặt file này ở: src/main/resources/static/css/ui-polish.css
+   Link SAU các file css khác để các quy tắc dưới đây được ưu tiên.
+   ===================================================== */
+
+/* ---------- 1) NỀN TẢNG ---------- */
+
+/* Cuộn mượt khi bấm link dạng #job-list */
+html { scroll-behavior: smooth; }
+
+/* Chữ mịn hơn */
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Footer luôn nằm sát đáy trang, không để khoảng trống phía dưới */
+body:has(> .site-footer) {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+body:has(> .site-footer) > main { flex: 1 0 auto; }
+body > .site-footer { margin-top: auto; margin-bottom: 0; }
+body > main { padding-bottom: 48px; }
+
+/* Trang vào nhẹ nhàng */
+@keyframes upFadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+}
+body > main { animation: upFadeIn .45s ease both; }
+
+/* Vòng focus rõ ràng khi dùng bàn phím */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid rgba(16, 185, 129, .45);
+    outline-offset: 2px;
+}
+
+/* ---------- 2) HEADER ---------- */
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    background: rgba(255, 255, 255, .88);
+    -webkit-backdrop-filter: saturate(160%) blur(12px);
+    backdrop-filter: saturate(160%) blur(12px);
+    transition: box-shadow .25s ease, background .25s ease;
+}
+/* JS thêm class này khi người dùng cuộn xuống */
+.site-header.is-scrolled { box-shadow: 0 6px 24px rgba(15, 23, 42, .08); }
+
+.site-nav a { transition: color .2s ease, background .2s ease, transform .15s ease; }
+.site-nav a:hover { transform: translateY(-1px); }
+.site-nav a:active { transform: scale(.96); }
+
+.site-logo .logo-mark { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1); }
+.site-logo:hover .logo-mark { transform: rotate(-8deg) scale(1.08); }
+
+/* ---------- 3) THẺ TIN: xuất hiện lần lượt + nổi lên khi rê chuột ---------- */
+
+/* backwards: chỉ áp dụng trước khi chạy, không đè lên hiệu ứng hover sau đó */
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(18px) scale(.98); }
+    to   { opacity: 1; transform: none; }
+}
+.job-card, .cd-job {
+    animation: cardIn .5s cubic-bezier(.22, 1, .36, 1) backwards;
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.job-card:nth-child(1), .cd-job:nth-child(1) { animation-delay: .04s; }
+.job-card:nth-child(2), .cd-job:nth-child(2) { animation-delay: .10s; }
+.job-card:nth-child(3), .cd-job:nth-child(3) { animation-delay: .16s; }
+.job-card:nth-child(4), .cd-job:nth-child(4) { animation-delay: .22s; }
+.job-card:nth-child(5), .cd-job:nth-child(5) { animation-delay: .28s; }
+.job-card:nth-child(6), .cd-job:nth-child(6) { animation-delay: .34s; }
+.job-card:nth-child(7), .cd-job:nth-child(7) { animation-delay: .40s; }
+.job-card:nth-child(8), .cd-job:nth-child(8) { animation-delay: .46s; }
+.job-card:nth-child(n+9), .cd-job:nth-child(n+9) { animation-delay: .52s; }
+
+.job-card:hover, .job-card:focus-within {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(15, 23, 42, .12);
+    border-color: #34d399;
+}
+
+/* ---------- HIỆU ỨNG KÍNH LÚP: rê chuột vào thì phóng to, rê ra thì thu lại ---------- */
+
+/* Chỉ áp dụng trên thiết bị có chuột (điện thoại cảm ứng dùng chạm để mở chi tiết) */
+@media (hover: hover) and (pointer: fine) {
+
+    .job-card, .cd-job {
+        position: relative;          /* để z-index hoạt động */
+        cursor: zoom-in;             /* con trỏ hình kính lúp + */
+        transform-origin: center center;
+        will-change: transform;      /* báo trình duyệt chuẩn bị, chữ mượt hơn */
+        backface-visibility: hidden;
+        /* Thu lại (khi rê ra): nhanh, mượt */
+        transition: transform .25s cubic-bezier(.22, 1, .36, 1),
+        box-shadow .25s ease,
+        border-color .25s ease;
+    }
+
+    /* Phóng to (khi rê vào): nảy nhẹ như kính lúp */
+    .job-card:hover, .job-card:focus-within, .cd-job:hover {
+        transform: translateY(-4px) scale(1.045);
+        z-index: 30;                 /* nổi lên trên các thẻ bên cạnh */
+        box-shadow: 0 22px 44px rgba(15, 23, 42, .18);
+        transition: transform .32s cubic-bezier(.34, 1.4, .64, 1),
+        box-shadow .3s ease,
+        border-color .25s ease;
+    }
+
+    /* Link và nút bên trong vẫn dùng con trỏ bàn tay */
+    .job-card a, .job-card button, .cd-job { cursor: pointer; }
+}
+
+/* Logo phóng nhẹ khi rê vào thẻ */
+.job-logo, .cd-logo { transition: transform .25s ease; }
+.job-card:hover .job-logo, .cd-job:hover .cd-logo { transform: scale(1.06) rotate(-2deg); }
+
+/* Tiêu đề đổi màu khi rê chuột */
+.job-card-title a { transition: color .2s ease; }
+.job-card:hover .job-card-title a { color: #059669; }
+
+/* Nhãn nhỏ nổi nhẹ */
+.job-chip { transition: transform .2s ease, background .2s ease; }
+.job-card:hover .job-chip { transform: translateY(-1px); }
+
+/* ---------- 4) NÚT BẤM: nổi lên, nhấn xuống, gợn sóng ---------- */
+
+.btn, .slide-cta, .discovery-search-button, .page-link,
+.cd-search button, .btn-draft, .btn-submit, button[type="submit"] {
+    position: relative;
+    overflow: hidden;
+    transition: transform .18s ease, box-shadow .2s ease,
+    background-color .2s ease, border-color .2s ease, color .2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.btn:hover, .slide-cta:hover, .discovery-search-button:hover,
+.page-link:hover, .cd-search button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, .14);
+}
+/* Nhấn xuống khi bấm */
+.btn:active, .slide-cta:active, .discovery-search-button:active,
+.page-link:active, .cd-search button:active, button[type="submit"]:active {
+    transform: translateY(0) scale(.96);
+    box-shadow: 0 2px 6px rgba(15, 23, 42, .12);
+    transition-duration: .08s;
+}
+
+/* Hiệu ứng gợn sóng (JS tạo thẻ .ripple tại điểm bấm) */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: .28;
+    transform: scale(0);
+    pointer-events: none;
+    animation: rippleOut .6s ease-out forwards;
+}
+@keyframes rippleOut { to { transform: scale(1); opacity: 0; } }
+
+/* Icon trong nút xoay/nhích nhẹ */
+.btn .ui-icon, .slide-cta .ui-icon { transition: transform .2s ease; }
+.btn:hover .ui-icon, .slide-cta:hover .ui-icon { transform: translateX(2px); }
+
+/* Trạng thái đang gửi: hiện vòng xoay, chặn bấm lại */
+button.is-loading, .btn.is-loading {
+    pointer-events: none;
+    opacity: .75;
+    position: relative;
+}
+button.is-loading::after, .btn.is-loading::after {
+    content: "";
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-left: 8px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- 5) Ô NHẬP / BỘ LỌC ---------- */
+
+.filter-bar input, .filter-bar select,
+.discovery-search input, .cd-search input {
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.filter-bar input:focus, .filter-bar select:focus,
+.discovery-search input:focus, .cd-search input:focus {
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, .15);
+}
+
+/* ---------- 6) PHÂN TRANG ---------- */
+
+.page-link.active, .page-link[aria-current="page"] {
+    box-shadow: 0 6px 14px rgba(5, 150, 105, .28);
+}
+
+/* ---------- 7) THÔNG BÁO ---------- */
+
+.alert { animation: upFadeIn .35s ease both; }
+
+/* ---------- 8) NÚT LÊN ĐẦU TRANG (JS tạo) ---------- */
+
+.to-top {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 70;
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #059669, #0d9488);
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(5, 150, 105, .35);
+    opacity: 0;
+    transform: translateY(14px) scale(.9);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease, box-shadow .2s ease;
+}
+.to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { box-shadow: 0 14px 30px rgba(5, 150, 105, .45); transform: translateY(-3px); }
+.to-top:active { transform: scale(.92); }
+
+/* ---------- 9) FOOTER MỚI ---------- */
+
+.site-footer.sf {
+    display: block;
+    padding: 0;
+    background: linear-gradient(180deg, #0f172a 0%, #111c33 100%);
+    color: #cbd5e1;
+    border-top: 0;
+    text-align: left;
+    position: relative;
+}
+/* Dải màu mảnh phía trên footer */
+.site-footer.sf::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, #059669, #0d9488, #2563eb, #7c3aed);
+}
+
+.sf-inner {
+    width: min(1240px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 44px 0 22px;
+}
+
+.sf-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1.3fr;
+    gap: 32px;
+}
+
+.sf-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+    text-decoration: none;
+}
+.sf-brand span { color: #34d399; }
+.sf-desc { margin: 14px 0 0; max-width: 320px; font-size: 14px; line-height: 1.75; color: #94a3b8; }
+
+.sf-col h4 {
+    margin: 0 0 14px;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+.sf-col ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; }
+.sf-col a {
+    position: relative;
+    display: inline-block;
+    color: #cbd5e1;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color .2s ease, transform .2s ease;
+}
+/* Gạch chân chạy ra khi rê chuột */
+.sf-col a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -2px;
+    width: 100%;
+    height: 1px;
+    background: #34d399;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .25s ease;
+}
+.sf-col a:hover { color: #34d399; transform: translateX(3px); }
+.sf-col a:hover::after { transform: scaleX(1); }
+
+.sf-contact li { display: flex; gap: 8px; font-size: 14px; color: #94a3b8; }
+
+.sf-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(148, 163, 184, .18);
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Dải kêu gọi hành động */
+.sf-cta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(148, 163, 184, .2);
+    border-radius: 16px;
+    background: linear-gradient(120deg, rgba(5, 150, 105, .22), rgba(37, 99, 235, .18));
+}
+.sf-cta h3 { margin: 0 0 4px; color: #fff; font-size: 20px; }
+.sf-cta p { margin: 0; color: #cbd5e1; font-size: 14px; }
+.sf-cta-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.sf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 0 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform .18s ease, box-shadow .2s ease, background .2s ease;
+}
+.sf-btn:hover { transform: translateY(-2px); }
+.sf-btn:active { transform: scale(.96); }
+.sf-btn-primary { background: #10b981; color: #052e22; box-shadow: 0 8px 18px rgba(16, 185, 129, .3); }
+.sf-btn-primary:hover { background: #34d399; }
+.sf-btn-ghost { border: 1.5px solid rgba(255, 255, 255, .35); color: #fff; }
+.sf-btn-ghost:hover { background: rgba(255, 255, 255, .1); }
+
+/* Mạng xã hội */
+.sf-social { display: flex; gap: 10px; margin-top: 18px; }
+.sf-social a {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(148, 163, 184, .3);
+    border-radius: 50%;
+    color: #cbd5e1;
+    transition: transform .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+}
+.sf-social a:hover { transform: translateY(-3px); background: #10b981; border-color: #10b981; color: #052e22; }
+.sf-social svg { width: 18px; height: 18px; }
+
+/* Chính sách */
+.sf-legal { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+.sf-legal a { color: #94a3b8; text-decoration: none; transition: color .2s ease; }
+.sf-legal a:hover { color: #34d399; }
+
+/* Icon trong cột liên hệ */
+.sf-contact li { align-items: flex-start; }
+.sf-contact svg { flex: none; width: 16px; height: 16px; margin-top: 3px; color: #34d399; }
+
+@media (max-width: 1100px) {
+    .sf-grid { grid-template-columns: 1.4fr 1fr 1fr; }
+}
+@media (max-width: 900px) {
+    .sf-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+    .sf-grid { grid-template-columns: 1fr; gap: 26px; }
+    .sf-inner { padding-top: 34px; }
+    .sf-bottom { justify-content: center; text-align: center; }
+    .sf-cta { padding: 20px; }
+    .sf-cta-actions, .sf-btn { width: 100%; }
+}
+
+/* ---------- 10) TÔN TRỌNG NGƯỜI DÙNG TẮT HIỆU ỨNG ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-delay: 0s !important;
+        transition-duration: .01ms !important;
+    }
+}
