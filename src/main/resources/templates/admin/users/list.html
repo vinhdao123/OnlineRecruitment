@@ -114,6 +114,7 @@
 
               <div class="action-divider"></div>
 
+              <!-- SỬA TẠI ĐÂY: Nếu ACTIVE thì hiện nút Deactivate -->
               <form th:if="${u.status.name() == 'ACTIVE'}"
                     th:action="@{'/admin/users/' + ${u.id} + '/lock'}"
                     method="post" style="margin:0;">
@@ -123,7 +124,8 @@
                 </button>
               </form>
 
-              <form th:if="${u.status.name() == 'LOCKED'}"
+              <!-- SỬA TẠI ĐÂY: Nếu KHÁC ACTIVE (PENDING, REJECTED, LOCKED) thì hiện nút Activate -->
+              <form th:if="${u.status.name() != 'ACTIVE'}"
                     th:action="@{'/admin/users/' + ${u.id} + '/unlock'}"
                     method="post" style="margin:0;">
                 <button type="submit" class="action-item action-item-success">

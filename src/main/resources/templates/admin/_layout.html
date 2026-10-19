@@ -36,6 +36,20 @@
             <span>Users</span>
         </a>
 
+        <a th:href="@{/admin/packages}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'packages'} ? 'active' : ''">
+            <span class="icon">💳</span>
+            <span>Gói dịch vụ</span>
+        </a>
+
+        <a th:href="@{/admin/payments}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'payments'} ? 'active' : ''">
+            <span class="icon">💰</span>
+            <span>Giao dịch</span>
+        </a>
+
         <!-- MENU CHA có submenu: Companies -->
         <details class="nav-group" th:attr="open=${activeMenu == 'companies' or activeMenu == 'pending' or activeMenu == 'banned'} ? 'open' : null">
             <summary class="nav-item nav-parent">
