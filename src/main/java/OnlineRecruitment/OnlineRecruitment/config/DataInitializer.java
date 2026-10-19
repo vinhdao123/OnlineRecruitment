@@ -25,12 +25,12 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        // 1. TẠO TÀI KHOẢN NẾU CHƯA CÓ
+        // 1. TẠO TÀI KHOẢN NẾU CHƯA CÓ TRONG DATABASE
         createUserIfMissing("admin01",     "admin123",     "System Admin",          UserRole.ADMIN,     UserStatus.ACTIVE);
         createUserIfMissing("recruiter01", "recruiter123", "Nguyen Van Recruiter",  UserRole.RECRUITER, UserStatus.ACTIVE);
         createUserIfMissing("candidate01", "candidate123", "Tran Thi Candidate",    UserRole.CANDIDATE, UserStatus.ACTIVE);
 
-        // 2. HASH LẠI PASSWORD NẾU CẦN
+        // 2. MÃ HÓA LẠI PASSWORD THEO ĐÚNG HÀM plainPasswordFor DÀNH CHO TẤT CẢ USER
         int hashed = 0;
         for (User u : userRepository.findAll()) {
             String hash = u.getPasswordHash();
@@ -45,32 +45,6 @@ public class DataInitializer implements CommandLineRunner {
                 log.info("Initialized BCrypt password hash for user: {}", u.getUsername());
             }
         }
-
-        User companyUser = userRepository
-                .findByEmail("recruiter_demo@example.com")
-                .orElseThrow(() -> new RuntimeException(
-                        "Khong tim thay tai khoan Recruiter"));
-
-        companyUser.setPasswordHash(
-                passwordEncoder.encode("Recruiter@123")
-        );
-
-        userRepository.save(companyUser);
-
-        log.info("Password reset for recruiter_demo@example.com");
-        User candidateUser = userRepository
-                .findByEmail("candidate01@gmail.com")
-                .orElseThrow(() -> new RuntimeException(
-                        "Khong tim thay tai khoan Candidate"));
-
-        candidateUser.setPasswordHash(
-                passwordEncoder.encode("Candidate@123")
-        );
-
-        userRepository.save(candidateUser);
-
-        log.info("Password reset for candidate01@gmail.com");
-
 
         if (hashed > 0) {
             log.info("Finished initializing {} user passwords to BCrypt.", hashed);
@@ -99,6 +73,10 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private String plainPasswordFor(String username) {
+        if (username == null) {
+            return "password123";
+        }
+
         return switch (username) {
             case "admin01"     -> "admin123";
             case "recruiter01" -> "recruiter123";

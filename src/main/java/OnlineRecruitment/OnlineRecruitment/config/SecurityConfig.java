@@ -63,6 +63,7 @@ public class SecurityConfig {
                                 "/403", "/error", "/companies", "/about",
                                 "/company-profile",
                                 "/css/**", "/js/**", "/images/**", "/static/**",
+                                "/uploads/**",
                                 "/favicon.ico"
                         ).permitAll()
                         .requestMatchers("/jobs/*/apply").hasRole("CANDIDATE")

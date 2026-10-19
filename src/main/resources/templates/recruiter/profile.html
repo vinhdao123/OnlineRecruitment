@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ doanh nghiệp & Nhà tuyển dụng</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+    <!-- Taskbar Header -->
+    <div th:replace="~{fragments/taskbar :: taskbar('profile')}"></div>
+
+    <main class="main-wrapper">
+        <!-- Page Title -->
+        <div class="page-title-box">
+            <h1 class="page-title">Hồ sơ Nhà tuyển dụng & Doanh nghiệp</h1>
+            <p class="page-subtitle">Quản lý thông tin doanh nghiệp để xây dựng thương hiệu uy tín và thu hút ứng viên tài năng.</p>
+        </div>
+
+        <!-- Notification Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Left Column: Recruiter Card -->
+            <aside class="profile-card">
+                <div class="avatar-container">
+                    <img id="avatarPreview" class="avatar-preview-img"
+                         th:src="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)} ? @{${profileUser.avatarUrl}} : 'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${profileUser.username}"
+                         alt="Avatar">
+                    <label for="avatarInput" class="avatar-upload-btn" title="Tải ảnh đại diện người đại diện">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    </label>
+                </div>
+
+                <h2 class="profile-card-name" th:text="${profileUser.fullName}">Trần Tuyển Dụng</h2>
+                <div class="profile-card-role">Nhà tuyển dụng</div>
+
+                <p style="font-size: 13px; color: #6b7280; margin: 0 0 16px 0;">
+                    Trạng thái: 
+                    <span th:if="${profileUser.status.name() == 'ACTIVE'}" style="color: #10b981; font-weight: 600;">● Đang hoạt động</span>
+                    <span th:if="${profileUser.status.name() == 'PENDING'}" style="color: #f59e0b; font-weight: 600;">● Chờ duyệt</span>
+                    <span th:if="${profileUser.status.name() == 'LOCKED'}" style="color: #ef4444; font-weight: 600;">● Bị khóa</span>
+                </p>
+
+                <div class="profile-card-meta">
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <span th:text="${profileUser.email}">recruiter@example.com</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        <span th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa có SĐT'}">0912345678</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                        <span th:text="${company != null ? company.companyName : 'Chưa liên kết công ty'}">Công ty ABC</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>Tham gia: <th:block th:text="${#temporals.format(profileUser.createdAt, 'dd/MM/yyyy')}">01/01/2026</th:block></span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <a th:href="@{/recruiter/change-password}" class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 13px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Đổi mật khẩu
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Right Column: Profile Content -->
+            <section class="profile-content-card">
+                <div class="content-header">
+                    <h2 class="content-title" th:text="${isEditMode ? 'Chỉnh sửa thông tin doanh nghiệp & cá nhân' : 'Thông tin hồ sơ doanh nghiệp'}">Thông tin doanh nghiệp</h2>
+                    <div>
+                        <a th:if="${!isEditMode}" th:href="@{/recruiter/profile(edit=true)}" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Chỉnh sửa thông tin
+                        </a>
+                        <a th:if="${isEditMode}" th:href="@{/recruiter/profile}" class="btn btn-secondary">
+                            ✕ Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- VIEW MODE -->
+                <div th:if="${!isEditMode}">
+                    <!-- Company Information -->
+                    <div class="info-section">
+                        <h3 class="info-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
+                            Thông tin Doanh nghiệp
+                        </h3>
+
+                        <div th:if="${company != null and company.logoUrl != null and !#strings.isEmpty(company.logoUrl)}" style="margin-bottom: 20px; display: flex; align-items: center; gap: 16px;">
+                            <img th:src="@{${company.logoUrl}}" alt="Logo công ty" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb; padding: 4px; background: #fff;">
+                            <div>
+                                <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 700;" th:text="${company.companyName}">Công ty ABC</h4>
+                                <span style="font-size: 13px; color: #6b7280;">Logo chính thức của doanh nghiệp</span>
+                            </div>
+                        </div>
+
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <div class="info-label">Tên công ty</div>
+                                <div class="info-value" th:text="${company != null ? company.companyName : 'Chưa cập nhật'}">Công ty ABC</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Mã số thuế</div>
+                                <div class="info-value" th:classappend="${company == null or company.taxCode == null ? 'empty' : ''}"
+                                     th:text="${company != null and company.taxCode != null ? company.taxCode : 'Chưa cập nhật'}">0123456789</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Email công ty</div>
+                                <div class="info-value" th:classappend="${company == null or company.email == null ? 'empty' : ''}"
+                                     th:text="${company != null and company.email != null ? company.email : 'Chưa cập nhật'}">contact@company.com</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Số điện thoại công ty</div>
+                                <div class="info-value" th:classappend="${company == null or company.phone == null ? 'empty' : ''}"
+                                     th:text="${company != null and company.phone != null ? company.phone : 'Chưa cập nhật'}">024 1234 5678</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Quy mô nhân sự</div>
+                                <div class="info-value" th:classappend="${company == null or company.companySize == null ? 'empty' : ''}"
+                                     th:text="${company != null and company.companySize != null ? company.companySize : 'Chưa cập nhật'}">50-100 nhân viên</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Website</div>
+                                <div class="info-value" th:if="${company != null and company.website != null and !#strings.isEmpty(company.website)}">
+                                    <a th:href="${company.website}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${company.website}"></a>
+                                </div>
+                                <div class="info-value empty" th:if="${company == null or company.website == null or #strings.isEmpty(company.website)}">Chưa cập nhật</div>
+                            </div>
+                            <div class="info-box" style="grid-column: 1 / -1;">
+                                <div class="info-label">Địa chỉ trụ sở công ty</div>
+                                <div class="info-value" th:classappend="${company == null or company.address == null ? 'empty' : ''}"
+                                     th:text="${company != null and company.address != null ? company.address : 'Chưa cập nhật'}">Tầng 5, Tòa nhà ABC, Hà Nội</div>
+                            </div>
+                            <div class="info-box" style="grid-column: 1 / -1;">
+                                <div class="info-label">Mô tả giới thiệu công ty</div>
+                                <div class="info-value" th:classappend="${company == null or company.description == null ? 'empty' : ''}" style="white-space: pre-line;"
+                                     th:text="${company != null and company.description != null ? company.description : 'Chưa có thông tin mô tả công ty.'}">Mô tả...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recruiter Representative Info -->
+                    <div class="info-section">
+                        <h3 class="info-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Thông tin người đại diện tài khoản
+                        </h3>
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <div class="info-label">Họ và tên người đại diện</div>
+                                <div class="info-value" th:text="${profileUser.fullName}">Trần Tuyển Dụng</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Tên tài khoản (Username)</div>
+                                <div class="info-value" th:text="${profileUser.username}">recruiter_user</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Email đăng nhập</div>
+                                <div class="info-value" th:text="${profileUser.email}">email@example.com</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Số điện thoại liên hệ</div>
+                                <div class="info-value" th:classappend="${profileUser.phone == null ? 'empty' : ''}"
+                                     th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật'}">0912345678</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; text-align: center;">
+                        <a th:href="@{/recruiter/profile(edit=true)}" class="btn btn-primary" style="padding: 12px 28px; font-size: 15px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Bấm vào đây để chỉnh sửa thông tin doanh nghiệp
+                        </a>
+                    </div>
+                </div>
+
+                <!-- EDIT MODE -->
+                <form th:if="${isEditMode}" th:action="@{/recruiter/profile}" th:object="${recruiterDto}" method="post" enctype="multipart/form-data">
+                    <input type="file" id="avatarInput" name="avatarFile" class="avatar-file-input" accept="image/*" onchange="previewAvatar(this)">
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">Thông tin Người đại diện</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Họ và tên người đại diện <span class="required">*</span></label>
+                                <input type="text" th:field="*{fullName}" class="form-input" placeholder="Nhập họ và tên người đại diện" required>
+                                <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại liên hệ</label>
+                                <input type="text" th:field="*{phone}" class="form-input" placeholder="Ví dụ: 0912345678">
+                                <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Địa chỉ / Khu vực làm việc</label>
+                                <input type="text" th:field="*{location}" class="form-input" placeholder="Hà Nội, TP.HCM...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">Thông tin Doanh nghiệp & Công ty</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Tên doanh nghiệp / Công ty <span class="required">*</span></label>
+                                <input type="text" th:field="*{companyName}" class="form-input" placeholder="Tên đầy đủ của công ty" required>
+                                <div th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Mã số thuế doanh nghiệp</label>
+                                <input type="text" th:field="*{taxCode}" class="form-input" placeholder="Mã số thuế công ty">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Email liên hệ công ty</label>
+                                <input type="email" th:field="*{companyEmail}" class="form-input" placeholder="tuyendung@congty.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Hotline / Số điện thoại công ty</label>
+                                <input type="text" th:field="*{companyPhone}" class="form-input" placeholder="024 1234 5678">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Website công ty</label>
+                                <input type="url" th:field="*{companyWebsite}" class="form-input" placeholder="https://congty.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Quy mô công ty</label>
+                                <select th:field="*{companySize}" class="form-select">
+                                    <option value="">-- Chọn quy mô --</option>
+                                    <option value="Dưới 10 nhân viên">Dưới 10 nhân viên</option>
+                                    <option value="10-50 nhân viên">10-50 nhân viên</option>
+                                    <option value="50-150 nhân viên">50-150 nhân viên</option>
+                                    <option value="150-500 nhân viên">150-500 nhân viên</option>
+                                    <option value="Trên 500 nhân viên">Trên 500 nhân viên</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Tải lên Logo công ty mới</label>
+                                <input type="file" name="logoFile" class="form-input" accept="image/*" onchange="previewLogo(this)">
+                                <div class="form-hint">Chọn ảnh định dạng .png, .jpg, .webp để cập nhật logo công ty.</div>
+                                <div id="logoPreviewWrapper" style="display: none; margin-top: 10px;">
+                                    <img id="logoPreview" src="#" alt="Logo Preview" style="max-height: 80px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px;">
+                                </div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Địa chỉ trụ sở công ty</label>
+                                <input type="text" th:field="*{companyAddress}" class="form-input" placeholder="Địa chỉ chi tiết văn phòng / chi nhánh">
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Mô tả & Giới thiệu về công ty</label>
+                                <textarea th:field="*{companyDescription}" class="form-textarea" placeholder="Giới thiệu sứ mệnh, lĩnh vực hoạt động, môi trường làm việc..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 28px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            Lưu thay đổi & Cập nhật
+                        </button>
+                        <a th:href="@{/recruiter/profile}" class="btn btn-secondary">Hủy bỏ</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function previewLogo(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('logoPreview');
+                    preview.src = e.target.result;
+                    document.getElementById('logoPreviewWrapper').style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

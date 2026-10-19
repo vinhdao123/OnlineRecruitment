@@ -1,39 +1,66 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Candidate Dashboard — Online Recruitment</title>
-    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 <body>
-    <header class="header">
-        <div class="container header-container">
-            <a th:href="@{/}" class="logo">Online<span>Recruitment</span></a>
-            <nav class="nav">
-                <a th:href="@{/jobs}">Tìm việc làm</a>
-                <a th:href="@{/candidate/dashboard}" class="active">Dashboard</a>
-            </nav>
-            <div class="auth-buttons">
-                <span th:text="${#authentication.name}" style="font-weight: 600; color: #1f2937;">Candidate</span>
-                <form th:action="@{/logout}" method="post" style="display:inline;">
-                    <button type="submit" class="btn-login" style="cursor:pointer; background:none; border:none;">Đăng xuất</button>
-                </form>
-            </div>
+
+    <!-- Taskbar Header with Account Dropdown -->
+    <div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+
+    <main class="main-wrapper">
+        <div class="page-title-box">
+            <h1 class="page-title">Chào mừng trở lại, <span th:text="${currentUser != null ? currentUser.fullName : #authentication.name}">Ứng viên</span>!</h1>
+            <p class="page-subtitle">Quản lý thông tin hồ sơ cá nhân, tìm kiếm việc làm mơ ước và ứng tuyển nhanh chóng.</p>
         </div>
-    </header>
 
-    <main class="container" style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
-        <h2>Chào mừng bạn đến với Candidate Portal</h2>
-        <p style="color: #6b7280; margin-top: 8px;">Quản lý hồ sơ ứng tuyển và tìm kiếm việc làm phù hợp nhất.</p>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px;">
+            <!-- Card 1: Hồ sơ cá nhân -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Hồ sơ cá nhân</h3>
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Cập nhật thông tin liên hệ, mục tiêu nghề nghiệp, kỹ năng và tải lên ảnh đại diện để gây ấn tượng với nhà tuyển dụng.</p>
+                </div>
+                <a th:href="@{/candidate/profile}" class="btn btn-primary" style="justify-content: center;">
+                    Xem & Chỉnh sửa hồ sơ
+                </a>
+            </div>
 
-        <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
-            <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px;">
-                <h3>🔍 Tìm kiếm việc làm</h3>
-                <p style="color: #4b5563; margin: 12px 0;">Khám phá hàng ngàn cơ hội việc làm mới nhất từ các nhà tuyển dụng hàng đầu.</p>
-                <a th:href="@{/jobs}" class="btn-register" style="display:inline-block; padding: 8px 16px;">Xem danh sách việc làm</a>
+            <!-- Card 2: Tìm kiếm việc làm -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Tìm việc làm</h3>
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Khám phá các vị trí tuyển dụng mới nhất từ các doanh nghiệp hàng đầu và nộp đơn ứng tuyển ngay hôm nay.</p>
+                </div>
+                <a th:href="@{/jobs}" class="btn btn-outline" style="justify-content: center;">
+                    Duyệt danh sách việc làm
+                </a>
+            </div>
+
+            <!-- Card 3: Bảo mật & Mật khẩu -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Bảo mật tài khoản</h3>
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Đổi mật khẩu định kỳ và xác thực qua mã OTP Gmail để bảo vệ dữ liệu tài khoản an toàn tuyệt đối.</p>
+                </div>
+                <a th:href="@{/candidate/change-password}" class="btn btn-outline" style="justify-content: center;">
+                    Thay đổi mật khẩu
+                </a>
             </div>
         </div>
     </main>
+
 </body>
 </html>
