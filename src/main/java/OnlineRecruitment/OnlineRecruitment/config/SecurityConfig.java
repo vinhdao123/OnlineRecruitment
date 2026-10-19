@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/login", "/register", "/register/**",
                                 "/verify-otp", "/resend-otp", "/auth/**",
+                                "/forgot-password", "/forgot-password/**",
                                 "/403", "/error", "/companies", "/about",
                                 "/company-profile",
                                 "/css/**", "/js/**", "/images/**", "/static/**",

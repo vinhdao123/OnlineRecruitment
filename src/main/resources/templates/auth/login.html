@@ -39,6 +39,10 @@
         ✅ Đã đăng xuất thành công.
     </div>
 
+    <div th:if="${param.resetSuccess}" class="alert alert-success">
+        ✅ Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.
+    </div>
+
     <!-- Thông báo từ controller -->
     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
@@ -59,7 +63,7 @@
                    placeholder="Nhập mật khẩu" required>
         </div>
 
-        <a href="#" class="forgot-password-link">Quên mật khẩu?</a>
+        <a th:href="@{/forgot-password}" class="forgot-password-link">Quên mật khẩu?</a>
 
         <button type="submit" class="btn btn-primary">Đăng nhập</button>
 
@@ -70,6 +74,13 @@
         <div class="btn-group-row">
             <a th:href="@{/register/candidate}" class="btn btn-secondary">Đăng ký: Candidate</a>
             <a th:href="@{/register/recruiter}" class="btn btn-success">Đăng ký: Recruiter</a>
+        </div>
+
+        <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #dee2e6;">
+            <a th:href="@{/}" style="color: #6c757d; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s ease;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                Quay về trang chủ
+            </a>
         </div>
     </form>
 </div>
