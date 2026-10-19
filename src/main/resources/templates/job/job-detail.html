@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${job.title + ' | OnlineRecruitment'}">Chi tiết tin tuyển dụng</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+        /* ===== NỀN VÀ KHUNG CHUNG ===== */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            color: #1e293b;
+            background: #f8fafc;
+            line-height: 1.6;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .wrap {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ===== THANH ĐẦU TRANG ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .topbar-inner {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            height: 64px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .brand-mark {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .brand-name span { color: #2563eb; }
+
+        .topbar nav {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .topbar nav a {
+            padding: 8px 14px;
+            border-radius: 8px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .topbar nav a:hover {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        /* ===== NÚT ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border: 1.5px solid transparent;
+            border-radius: 10px;
+            background: transparent;
+            font: inherit;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        .btn-outline {
+            background: #fff;
+            border-color: #bfdbfe;
+            color: #2563eb;
+        }
+
+        .btn-outline:hover { background: #2563eb; color: #fff; }
+
+        .btn-danger {
+            background: #fff;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover { background: #dc2626; color: #fff; }
+
+        .btn-block { width: 100%; }
+
+        /* ===== THANH QUAY LẠI ===== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 24px 0 16px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .back-link:hover { color: #2563eb; }
+
+        /* ===== KHỐI TIÊU ĐỀ TIN ===== */
+        .job-hero {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 28px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .job-logo {
+            flex: none;
+            width: 84px;
+            height: 84px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            color: #2563eb;
+            font-size: 34px;
+            font-weight: 800;
+            overflow: hidden;
+        }
+
+        .job-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .job-hero-body { flex: 1; min-width: 0; }
+
+        .job-hero h1 {
+            margin: 0 0 4px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #172554;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+
+        .job-company {
+            margin: 0 0 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .chip {
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .chip-salary { background: #dcfce7; color: #166534; }
+
+        /* ===== NHÃN TRẠNG THÁI ===== */
+        .status {
+            display: inline-flex;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-DRAFT    { background: #f1f5f9; color: #475569; }
+        .status-PENDING  { background: #fff7ed; color: #c2410c; }
+        .status-ACTIVE   { background: #dcfce7; color: #166534; }
+        .status-REJECTED { background: #fee2e2; color: #b91c1c; }
+        .status-CLOSED   { background: #e2e8f0; color: #334155; }
+
+        /* ===== BỐ CỤC 2 CỘT ===== */
+        .detail-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            margin: 24px 0 60px;
+            align-items: start;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            padding: 24px 28px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            padding-left: 12px;
+            border-left: 4px solid #2563eb;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        /* Giữ xuống dòng người nhập */
+        .prose {
+            margin: 0;
+            white-space: pre-line;
+            color: #334155;
+            overflow-wrap: anywhere;
+        }
+
+        /* ===== CỘT PHẢI ===== */
+        .side { position: sticky; top: 84px; }
+
+        .summary-label { color: #64748b; font-size: 13px; }
+
+        .summary-salary {
+            margin-bottom: 14px;
+            font-size: 26px;
+            font-weight: 800;
+            color: #15803d;
+        }
+
+        .summary-list {
+            list-style: none;
+            margin: 0 0 18px;
+            padding: 0;
+        }
+
+        .summary-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid #edf0f4;
+            font-size: 14px;
+        }
+
+        .summary-list span { color: #64748b; }
+        .summary-list strong { text-align: right; }
+
+        .company-name { margin: 0 0 6px; font-weight: 800; }
+
+        .company-info {
+            margin: 4px 0;
+            color: #475569;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .actions { display: flex; flex-direction: column; gap: 10px; }
+        .actions form { margin: 0; }
+
+        /* ===== LÝ DO TỪ CHỐI ===== */
+        .reject-box {
+            margin-bottom: 20px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #fff1f2;
+            color: #be123c;
+            font-size: 14px;
+        }
+
+        /* ===== MÀN HÌNH NHỎ ===== */
+        @media (max-width: 900px) {
+            .detail-layout { grid-template-columns: minmax(0, 1fr); }
+            .side { position: static; }
+            .job-hero { flex-direction: column; align-items: flex-start; }
+            .job-hero h1 { font-size: 23px; }
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+
+<body>
+
+<!-- ================= THANH ĐẦU TRANG ================= -->
+<header class="topbar">
+    <div class="wrap topbar-inner">
+
+        <a th:href="@{/}" class="brand">
+            <span class="brand-mark">OR</span>
+            <span class="brand-name">Online<span>Recruitment</span></span>
+        </a>
+
+        <nav>
+            <a th:href="@{/jobs}">Việc làm</a>
+
+            <!-- Chỉ nhà tuyển dụng mới thấy -->
+            <a sec:authorize="hasRole('RECRUITER')"
+               th:href="@{/recruiter/jobs}">Quản lý tin</a>
+
+            <!-- Chỉ ứng viên mới thấy -->
+            <a sec:authorize="hasRole('CANDIDATE')"
+               th:href="@{/candidate/dashboard}">Dành cho tôi</a>
+
+            <!-- Chỉ người chưa đăng nhập mới thấy -->
+            <a sec:authorize="isAnonymous()" th:href="@{/login}">Đăng nhập</a>
+        </nav>
+    </div>
+</header>
+
+<main class="wrap">
+
+    <!-- Nút quay lại theo vai trò: Recruiter -> /recruiter/jobs, Candidate -> /candidate/dashboard, còn lại -> /jobs -->
+    <a class="back-link" sec:authorize="hasRole('RECRUITER')"
+       th:href="@{/recruiter/jobs}">
+        &larr; Quay lại danh sách
+    </a>
+    <a class="back-link" sec:authorize="hasRole('CANDIDATE')"
+       th:href="@{/candidate/dashboard}">
+        &larr; Quay lại danh sách
+    </a>
+    <a class="back-link" sec:authorize="!hasRole('RECRUITER') and !hasRole('CANDIDATE')"
+       th:href="@{/jobs}">
+        &larr; Quay lại danh sách
+    </a>
+
+    <!-- Thông báo sau khi lưu / bỏ lưu / mở tin -->
+    <p class="reject-box" style="background:#ecf5f2;color:#0b5d4b"
+       th:if="${successMessage != null}" th:text="${successMessage}"></p>
+    <p class="reject-box" th:if="${errorMessage != null}" th:text="${errorMessage}"></p>
+
+    <!-- ================= KHỐI TIÊU ĐỀ ================= -->
+    <section class="job-hero">
+
+        <!-- Logo công ty, không có logo thì hiện chữ cái đầu của tiêu đề -->
+        <div class="job-logo">
+            <img th:if="${job.company != null and job.company.logoUrl != null
+                          and !#strings.isEmpty(job.company.logoUrl)}"
+                 th:src="${job.company.logoUrl}"
+                 th:alt="${job.title}"
+                 onerror="this.style.display='none'">
+            <span th:text="${#strings.toUpperCase(#strings.substring(job.title, 0, 1))}">J</span>
+        </div>
+
+        <div class="job-hero-body">
+            <h1 th:text="${job.title}">Tiêu đề tin tuyển dụng</h1>
+
+            <p class="job-company"
+               th:text="${job.company != null ? job.company.companyName : 'Chưa có công ty'}">
+                Tên công ty
+            </p>
+
+            <div class="chip-row">
+
+                <!-- Lương: Thỏa thuận / Từ X / Tới X / X - Y -->
+                <span class="chip chip-salary"
+                      th:text="${job.salaryMin == null and job.salaryMax == null
+                                ? 'Thỏa thuận'
+                                : (job.salaryMin != null and job.salaryMax != null
+                                    ? #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                      + ' - ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')
+                                    : (job.salaryMin != null
+                                        ? 'Từ ' + #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                        : 'Tới ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')))
+                                  + (job.salaryCurrency != null ? ' ' + job.salaryCurrency : '')}">
+                    Thỏa thuận
+                </span>
+
+                <span class="chip"
+                      th:if="${job.location != null and !#strings.isEmpty(job.location)}"
+                      th:text="${job.location}">Hà Nội</span>
+
+                <span class="chip"
+                      th:if="${job.level != null and !#strings.isEmpty(job.level)}"
+                      th:text="${job.level}">Junior</span>
+
+                <span class="chip"
+                      th:if="${job.category != null}"
+                      th:text="${job.category.name}">Công nghệ thông tin</span>
+            </div>
+        </div>
+
+        <!-- Trạng thái chỉ hiện cho chủ tin / admin -->
+        <span class="status"
+              th:if="${isOwner or isAdmin}"
+              th:classappend="${'status-' + job.status.name()}"
+              th:switch="${job.status.name()}">
+            <span th:case="'DRAFT'">Nháp</span>
+            <span th:case="'PENDING'">Chờ duyệt</span>
+            <span th:case="'ACTIVE'">Đang hiển thị</span>
+            <span th:case="'REJECTED'">Bị từ chối</span>
+            <span th:case="'CLOSED'">Đã đóng</span>
+            <span th:case="*" th:text="${job.status}"></span>
+        </span>
+    </section>
+
+    <div class="detail-layout">
+
+        <!-- ================= CỘT TRÁI: NỘI DUNG ================= -->
+        <div>
+
+            <!-- Lý do từ chối (chỉ chủ tin / admin thấy) -->
+            <div class="reject-box"
+                 th:if="${(isOwner or isAdmin) and job.status.name() == 'REJECTED'
+                         and job.rejectionReason != null
+                         and !#strings.isEmpty(job.rejectionReason)}"
+                 th:text="${'Lý do từ chối: ' + job.rejectionReason}">
+            </div>
+
+            <section class="panel"
+                     th:if="${job.description != null and !#strings.isEmpty(job.description)}">
+                <h2>Mô tả công việc</h2>
+                <p class="prose" th:text="${job.description}">Mô tả</p>
+            </section>
+
+            <section class="panel"
+                     th:if="${job.requirements != null and !#strings.isEmpty(job.requirements)}">
+                <h2>Yêu cầu ứng viên</h2>
+                <p class="prose" th:text="${job.requirements}">Yêu cầu</p>
+            </section>
+
+            <section class="panel"
+                     th:if="${job.benefits != null and !#strings.isEmpty(job.benefits)}">
+                <h2>Quyền lợi</h2>
+                <p class="prose" th:text="${job.benefits}">Quyền lợi</p>
+            </section>
+        </div>
+
+        <!-- ================= CỘT PHẢI: TÓM TẮT ================= -->
+        <aside class="side">
+
+            <!-- Thông tin chung -->
+            <section class="panel">
+                <div class="summary-label">Mức lương</div>
+
+                <div class="summary-salary"
+                     th:text="${job.salaryMin == null and job.salaryMax == null
+                               ? 'Thỏa thuận'
+                               : (job.salaryMin != null and job.salaryMax != null
+                                   ? #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                     + ' - ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')
+                                   : (job.salaryMin != null
+                                       ? 'Từ ' + #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                       : 'Tới ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')))
+                                 + (job.salaryCurrency != null ? ' ' + job.salaryCurrency : '')}">
+                    Thỏa thuận
+                </div>
+
+                <ul class="summary-list">
+                    <li>
+                        <span>Cấp bậc</span>
+                        <strong th:text="${job.level != null and !#strings.isEmpty(job.level)
+                                          ? job.level : 'Chưa cập nhật'}">Junior</strong>
+                    </li>
+                    <li>
+                        <span>Kinh nghiệm</span>
+                        <strong th:text="${job.experience != null and !#strings.isEmpty(job.experience)
+                                          ? job.experience : 'Không yêu cầu'}">1 năm</strong>
+                    </li>
+                    <li>
+                        <span>Hình thức</span>
+                        <strong th:if="${job.employmentType != null}"
+                                th:switch="${job.employmentType.name()}">
+                            <span th:case="'FULL_TIME'">Toàn thời gian</span>
+                            <span th:case="'PART_TIME'">Bán thời gian</span>
+                            <span th:case="'CONTRACT'">Hợp đồng</span>
+                            <span th:case="'INTERNSHIP'">Thực tập</span>
+                            <span th:case="'TEMPORARY'">Thời vụ</span>
+                            <span th:case="'FREELANCE'">Freelance</span>
+                            <span th:case="*" th:text="${job.employmentType}"></span>
+                        </strong>
+                        <strong th:unless="${job.employmentType != null}">Chưa cập nhật</strong>
+                    </li>
+                    <li>
+                        <span>Số lượng tuyển</span>
+                        <strong th:text="${job.quantity != null ? job.quantity + ' người' : 'Chưa cập nhật'}">1 người</strong>
+                    </li>
+                    <li>
+                        <span>Địa điểm</span>
+                        <strong th:text="${job.location != null and !#strings.isEmpty(job.location)
+                                          ? job.location : 'Chưa cập nhật'}">Hà Nội</strong>
+                    </li>
+                    <li>
+                        <span>Hạn nộp hồ sơ</span>
+                        <strong th:text="${job.deadline != null
+                                          ? #temporals.format(job.deadline, 'dd/MM/yyyy')
+                                          : 'Không giới hạn'}">31/12/2026</strong>
+                    </li>
+                    <li>
+                        <span>Ngày đăng</span>
+                        <strong th:text="${job.createdAt != null
+                                          ? #temporals.format(job.createdAt, 'dd/MM/yyyy')
+                                          : '—'}">01/01/2026</strong>
+                    </li>
+                </ul>
+
+                <!-- ===== NÚT THAO TÁC ===== -->
+                <div class="actions">
+
+                    <!-- Ứng viên: nút ứng tuyển, mở trang nộp hồ sơ /candidate-job?jobId=... (chỉ khi tin đang tuyển) -->
+                    <a sec:authorize="hasRole('CANDIDATE')"
+                       th:if="${job.status.name() == 'ACTIVE'}"
+                       class="btn btn-primary btn-block"
+                       th:href="@{/candidate-job(jobId=${job.id})}">
+                        Ứng tuyển ngay
+                    </a>
+
+                    <!-- Ứng viên: lưu / bỏ lưu tin (chỉ tin đang tuyển, hoặc tin đã lưu để bỏ lưu) -->
+                    <form sec:authorize="hasRole('CANDIDATE')"
+                          th:if="${job.status.name() == 'ACTIVE' or saved}"
+                          th:action="@{/candidate/saved/{id}/toggle(id=${job.id})}"
+                          method="post">
+                        <input type="hidden" name="from" value="detail">
+                        <input type="hidden" th:if="${_csrf != null}"
+                               th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" class="btn btn-outline btn-block"
+                                th:text="${saved} ? 'Bỏ lưu tin' : 'Lưu tin'">Lưu tin</button>
+                    </form>
+
+                    <!-- Khách chưa đăng nhập: mời đăng nhập -->
+                    <a sec:authorize="isAnonymous()"
+                       th:if="${job.status.name() == 'ACTIVE'}"
+                       class="btn btn-primary btn-block"
+                       th:href="@{/login}">
+                        Đăng nhập để ứng tuyển
+                    </a>
+
+                    <!-- Chủ tin: sửa / gửi duyệt khi tin là Nháp hoặc Bị từ chối -->
+                    <th:block th:if="${isOwner}">
+
+                        <!-- Sửa: mọi tin chưa đóng (sửa tin đang chạy sẽ gửi lại Admin duyệt) -->
+                        <a th:if="${job.status.name() != 'CLOSED'}"
+                           class="btn btn-outline btn-block"
+                           th:href="@{/recruiter/jobs/{id}/edit(id=${job.id})}">
+                            Sửa tin
+                        </a>
+
+                        <form th:if="${job.status.name() == 'DRAFT'
+                                      or job.status.name() == 'REJECTED'}"
+                              th:action="@{/recruiter/jobs/{id}/submit(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có muốn gửi tin này cho Admin duyệt không?');">
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Gửi duyệt
+                            </button>
+                        </form>
+
+                        <!-- Tin đang hiển thị: có thể đóng -->
+                        <form th:if="${job.status.name() == 'ACTIVE'}"
+                              th:action="@{/recruiter/jobs/{id}/close(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có chắc muốn đóng tin này không?');">
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-danger btn-block">
+                                Đóng tin
+                            </button>
+                        </form>
+
+                        <!-- Tin đã đóng: có thể mở lại -->
+                        <form th:if="${job.status.name() == 'CLOSED'}"
+                              th:action="@{/recruiter/jobs/{id}/reopen(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có muốn mở lại tin này không?');">
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Mở tin
+                            </button>
+                        </form>
+                    </th:block>
+                </div>
+            </section>
+
+            <!-- Thông tin công ty -->
+            <section class="panel" th:if="${job.company != null}">
+                <h2>Về công ty</h2>
+
+                <p class="company-name" th:text="${job.company.companyName}">Tên công ty</p>
+
+                <p class="company-info"
+                   th:if="${job.company.address != null and !#strings.isEmpty(job.company.address)}"
+                   th:text="${'Địa chỉ: ' + job.company.address}">Địa chỉ</p>
+
+                <p class="company-info"
+                   th:if="${job.company.companySize != null and !#strings.isEmpty(job.company.companySize)}"
+                   th:text="${'Quy mô: ' + job.company.companySize}">Quy mô</p>
+
+                <p class="company-info"
+                   th:if="${job.company.website != null and !#strings.isEmpty(job.company.website)}">
+                    Website:
+                    <a th:href="${job.company.website}"
+                       th:text="${job.company.website}"
+                       target="_blank" rel="noopener noreferrer">website</a>
+                </p>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<script th:src="@{/js/ui-polish.js}"></script>
+</body>
+</html>

@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tin tuyển dụng | OnlineRecruitment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/recruiter/jobs.css}">
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <style>
+        /* ===== LƯỚI THẺ: 2 CỘT ===== */
+        .job-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* ===== THẺ THU GỌN (hình chữ nhật ngang) ===== */
+        .job-card {
+            position: relative;              /* để khung chi tiết bám theo thẻ */
+            min-width: 0;
+            box-sizing: border-box;
+            padding: 14px 16px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Thẻ đang được trỏ vào: viền xanh, nổi lên trên các thẻ khác */
+        .job-card:hover,
+        .job-card:has(:focus-visible),
+        .job-card.is-open {
+            z-index: 30;
+            border-color: #93c5fd;
+            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.14);
+        }
+
+        /* Hàng ngang: logo | nội dung | trạng thái */
+        .job-card-compact {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Ô logo chữ cái đầu của tiêu đề */
+        .job-logo {
+            flex: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            color: #2563eb;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .job-compact-body {
+            flex: 1;
+            min-width: 0;                    /* cho phép chữ dài được cắt gọn */
+        }
+
+        /* Tiêu đề: tối đa 2 dòng, dài hơn thì hiện "..." */
+        .job-card-title {
+            margin: 0;
+            color: #172554;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        .job-card-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .job-card-title a:hover {
+            color: #2563eb;
+        }
+
+        /* Dòng tên công ty: 1 dòng, dài thì cắt "..." */
+        .job-compact-company {
+            margin: 2px 0 8px;
+            color: #64748b;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Các nhãn nhỏ: lương, địa điểm, cấp bậc */
+        .job-compact-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .job-chip {
+            max-width: 100%;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .job-chip-salary {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Cột bên phải: nhãn trạng thái */
+        .job-compact-side {
+            flex: none;
+            align-self: flex-start;
+        }
+
+        /* ===== KHUNG CHI TIẾT (hiện khi di chuột vào thẻ) ===== */
+        .job-card-detail {
+            position: absolute;
+            top: calc(100% + 6px);           /* nằm ngay dưới thẻ */
+            left: 0;
+            right: 0;
+            z-index: 40;
+            box-sizing: border-box;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid #93c5fd;
+            border-radius: 12px;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+
+            /* Mặc định ẩn */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            pointer-events: none;
+            transition: opacity 0.15s ease,
+            transform 0.15s ease,
+            visibility 0s linear 0.15s;
+        }
+
+        /* "Cầu nối" vô hình lấp khoảng hở 6px giữa thẻ và khung chi tiết,
+           để di chuột từ thẻ xuống khung không bị đóng giữa chừng */
+        .job-card-detail::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -8px;
+            height: 8px;
+        }
+
+        /* Hiện khung: khi trỏ chuột vào, khi dùng bàn phím, hoặc khi chạm (điện thoại) */
+        .job-card:hover .job-card-detail,
+        .job-card:has(:focus-visible) .job-card-detail,
+        .job-card.is-open .job-card-detail {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+            /* Chờ 0.12 giây mới mở, tránh khung nhấp nháy khi lướt chuột nhanh */
+            transition: opacity 0.15s ease 0.12s,
+            transform 0.15s ease 0.12s,
+            visibility 0s linear 0.12s;
+        }
+
+        .job-detail-id {
+            margin-bottom: 10px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        /* Từng đoạn nội dung: mô tả, yêu cầu, quyền lợi */
+        .detail-section {
+            margin-bottom: 12px;
+        }
+
+        .detail-section h4 {
+            margin: 0 0 4px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* Đoạn văn: tối đa 4 dòng, giữ xuống dòng người nhập */
+        .detail-text {
+            margin: 0;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-line;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        /* Lưới thông tin: người đăng, địa điểm, hạn nộp... */
+        .job-card-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 14px;
+            padding: 12px 0;
+            margin-bottom: 12px;
+            border-top: 1px solid #edf0f4;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .job-meta-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            min-width: 0;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .job-meta-item i {
+            flex-shrink: 0;
+            width: 15px;
+            height: 15px;
+            margin-top: 1px;
+            color: #64748b;
+        }
+
+        .job-meta-label {
+            display: block;
+            margin-bottom: 2px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* ===== NHÃN TRẠNG THÁI ===== */
+        .job-card .status {
+            display: inline-flex;
+            width: fit-content;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .job-card .status-DRAFT {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .job-card .status-PENDING {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .job-card .status-ACTIVE,
+        .job-card .status-APPROVED {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .job-card .status-REJECTED {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .job-card .status-CLOSED {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        /* ===== LÝ DO TỪ CHỐI ===== */
+        .job-rejection-reason {
+            margin-bottom: 12px;
+            padding: 9px 10px;
+            border-radius: 8px;
+            background: #fff1f2;
+            color: #be123c;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        /* ===== NÚT THAO TÁC ===== */
+        .job-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .job-card-actions form {
+            display: inline-flex;
+            margin: 0;
+        }
+
+        .job-card-actions .ui-icon {
+            width: 14px;
+            height: 14px;
+        }
+
+        .job-card-actions button,
+        .job-card-actions a {
+            max-width: 100%;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+
+        .job-list-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .job-list-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 22px;
+        }
+
+        .job-list-heading p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .job-result-count {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ===== PHÂN TRANG ===== */
+        /* Khung chứa thanh phân trang + dòng tóm tắt */
+        .job-pagination-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        /* Hàng các nút số trang */
+        .job-pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Mỗi nút trang */
+        .job-pagination .page-link {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .job-pagination a.page-link:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        /* Trang đang xem */
+        .job-pagination .page-link.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Nút trước/sau khi không còn trang để đi */
+        .job-pagination .page-link.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Dấu ba chấm giữa các số trang */
+        .job-pagination .page-dots {
+            padding: 0 4px;
+            color: #94a3b8;
+        }
+
+        /* Dòng "Hiển thị 1–9 trên 25 tin" */
+        .job-page-summary {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* ===== MÀN HÌNH NHỎ: 1 CỘT ===== */
+        @media (max-width: 760px) {
+            .job-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 12px;
+            }
+
+            .job-card {
+                padding: 12px 14px;
+            }
+
+            .job-logo {
+                width: 48px;
+                height: 48px;
+                font-size: 19px;
+            }
+
+            .job-card-meta {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        /* ===== TÔN TRỌNG THIẾT LẬP GIẢM CHUYỂN ĐỘNG ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .job-card,
+            .job-card-detail,
+            .job-card:hover .job-card-detail,
+            .job-card:has(:focus-visible) .job-card-detail,
+            .job-card.is-open .job-card-detail {
+                transition: none;
+            }
+        }
+
+        /* Khu tài khoản + nút đăng xuất ở đầu trang quản lý */
+        .manage-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .manage-actions form { margin:0; }
+        .recruiter-account { display:flex; align-items:center; gap:8px; padding:8px 12px;
+            border:1px solid #e2e8f0; border-radius:10px; background:#fff; }
+        .recruiter-account span { display:flex; flex-direction:column; line-height:1.25; }
+        .recruiter-account small { color:#64748b; font-size:12px; }
+
+        /* Ảnh logo phủ lên ô chữ cái; ảnh lỗi thì bị ẩn và lộ chữ cái bên dưới */
+        .job-logo { position: relative; overflow: hidden; }
+        .job-logo img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #fff;
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+
+<body>
+
+<div th:replace="~{fragments :: siteHeader('recruiter')}"></div>
+
+<main class="wrap manage-page">
+
+    <!-- ================= KHÁM PHÁ ================= -->
+    <section class="recruiter-discovery">
+
+        <div class="discovery-decoration decoration-left"></div>
+        <div class="discovery-decoration decoration-right"></div>
+
+        <header class="discovery-heading">
+            <span class="discovery-eyebrow">RECRUITER WORKSPACE</span>
+            <h2>Tìm đúng nhân tài, phát triển đội ngũ</h2>
+            <p>Khám phá ứng viên tiềm năng và quản lý tuyển dụng hiệu quả hơn.</p>
+        </header>
+
+        <!-- TÌM KIẾM -->
+        <form class="discovery-search"
+              th:action="@{/recruiter/jobs}"
+              method="get">
+
+            <label class="search-keyword">
+                <span class="search-symbol">
+                    <i data-lucide="search" class="ui-icon"></i>
+                </span>
+
+                <input type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Vị trí tuyển dụng, tên công việc..."
+                       aria-label="Tìm kiếm tin tuyển dụng">
+            </label>
+
+            <label class="search-location">
+                <span class="search-symbol">
+                    <i data-lucide="map-pin" class="ui-icon"></i>
+                </span>
+
+                <input type="text"
+                       name="location"
+                       th:value="${location}"
+                       placeholder="Địa điểm"
+                       aria-label="Địa điểm">
+            </label>
+
+            <input type="hidden" name="status" th:value="${status}">
+
+            <button type="submit" class="discovery-search-button">
+                <i data-lucide="search" class="ui-icon"></i>
+                Tìm kiếm
+            </button>
+        </form>
+
+        <!-- GỢI Ý -->
+        <div class="discovery-suggestions">
+            <strong>Gợi ý:</strong>
+
+            <button type="button"
+                    class="suggestion-chip"
+                    data-keyword="Backend Developer">
+                Backend Developer
+            </button>
+
+            <button type="button"
+                    class="suggestion-chip"
+                    data-keyword="Frontend Developer">
+                Frontend Developer
+            </button>
+
+            <button type="button"
+                    class="suggestion-chip"
+                    data-keyword="Java">
+                Java
+            </button>
+
+            <button type="button"
+                    class="suggestion-chip"
+                    data-keyword="Marketing">
+                Marketing
+            </button>
+        </div>
+
+        <!-- DANH MỤC NGHỀ NGHIỆP -->
+        <div class="discovery-featured">
+
+            <section class="category-panel">
+
+                <div class="category-panel-heading">
+                    <div>
+                        <span class="category-eyebrow">EXPLORE CAREERS</span>
+                        <h3>Danh mục nghề nghiệp</h3>
+                    </div>
+
+                    <span class="category-count">01 / 06</span>
+                </div>
+
+                <div class="category-list">
+
+                    <button type="button"
+                            class="category-item active"
+                            data-title="Công nghệ thông tin"
+                            data-description="Backend, Frontend, Java, Flutter và nhiều vị trí công nghệ khác."
+                            data-keyword="Developer">
+                        <span class="category-icon">
+                            <i data-lucide="code-2"></i>
+                        </span>
+                        <span class="category-copy">
+                            <strong>Công nghệ thông tin</strong>
+                            <small>Developer, IT, Software</small>
+                        </span>
+                        <i data-lucide="chevron-right" class="category-arrow"></i>
+                    </button>
+
+                    <button type="button"
+                            class="category-item"
+                            data-title="Kinh doanh / Bán hàng"
+                            data-description="Khám phá các vị trí kinh doanh, tư vấn và phát triển khách hàng."
+                            data-keyword="Kinh doanh">
+                        <span class="category-icon">
+                            <i data-lucide="briefcase-business"></i>
+                        </span>
+                        <span class="category-copy">
+                            <strong>Kinh doanh / Bán hàng</strong>
+                            <small>Sales, Business Development</small>
+                        </span>
+                        <i data-lucide="chevron-right" class="category-arrow"></i>
+                    </button>
+
+                    <button type="button"
+                            class="category-item"
+                            data-title="Marketing"
+                            data-description="Các vị trí Digital Marketing, Content, SEO và truyền thông."
+                            data-keyword="Marketing">
+                        <span class="category-icon">
+                            <i data-lucide="megaphone"></i>
+                        </span>
+                        <span class="category-copy">
+                            <strong>Marketing</strong>
+                            <small>Content, Digital, SEO</small>
+                        </span>
+                        <i data-lucide="chevron-right" class="category-arrow"></i>
+                    </button>
+
+                    <button type="button"
+                            class="category-item"
+                            data-title="Nhân sự"
+                            data-description="Tìm kiếm nhân tài cho các vị trí tuyển dụng và quản trị nhân sự."
+                            data-keyword="Nhân sự">
+                        <span class="category-icon">
+                            <i data-lucide="users"></i>
+                        </span>
+                        <span class="category-copy">
+                            <strong>Nhân sự</strong>
+                            <small>HR, Recruitment, Talent</small>
+                        </span>
+                        <i data-lucide="chevron-right" class="category-arrow"></i>
+                    </button>
+
+                    <button type="button"
+                            class="category-item"
+                            data-title="Tài chính / Kế toán"
+                            data-description="Khám phá các vị trí kế toán, tài chính và phân tích dữ liệu."
+                            data-keyword="Kế toán">
+                        <span class="category-icon">
+                            <i data-lucide="chart-no-axes-combined"></i>
+                        </span>
+                        <span class="category-copy">
+                            <strong>Tài chính / Kế toán</strong>
+                            <small>Finance, Accounting</small>
+                        </span>
+                        <i data-lucide="chevron-right" class="category-arrow"></i>
+                    </button>
+
+                    <button type="button"
+                            class="category-item"
+                            data-title="Thiết kế / Sáng tạo"
+                            data-description="Các vị trí thiết kế đồ họa, UI/UX và sáng tạo nội dung."
+                            data-keyword="Thiết kế">
+                        <span class="category-icon">
+                            <i data-lucide="palette"></i>
+                        </span>
+                        <span class="category-copy">
+                            <strong>Thiết kế / Sáng tạo</strong>
+                            <small>UI/UX, Graphic Design</small>
+                        </span>
+                        <i data-lucide="chevron-right" class="category-arrow"></i>
+                    </button>
+
+                </div>
+
+                <div class="category-hover-detail">
+                    <span class="detail-label">GỢI Ý NGÀNH NGHỀ</span>
+
+                    <strong id="categoryDetailTitle">Công nghệ thông tin</strong>
+
+                    <p id="categoryDetailDescription">
+                        Backend, Frontend, Java, Flutter và nhiều vị trí công nghệ khác.
+                    </p>
+
+                    <button type="button" id="categorySearchButton">
+                        Tìm theo ngành này
+                        <i data-lucide="arrow-right" class="ui-icon"></i>
+                    </button>
+                </div>
+            </section>
+
+            <!-- CAROUSEL -->
+            <section class="discovery-carousel" id="discoveryCarousel">
+
+                <div class="discovery-slides">
+
+                    <article class="discovery-slide active">
+                        <img src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1400&q=85"
+                             alt="Đội ngũ chuyên nghiệp làm việc cùng nhau">
+                        <div class="slide-shade"></div>
+
+                        <div class="slide-content">
+                            <span class="slide-tag">BUILD YOUR TEAM</span>
+                            <h3>Kết nối những<br>nhân tài xuất sắc</h3>
+                            <p>Tạo nên đội ngũ phù hợp với mục tiêu doanh nghiệp.</p>
+
+                            <a th:href="@{/recruiter/jobs/new}" class="slide-cta">
+                                Đăng tin tuyển dụng
+                                <i data-lucide="arrow-up-right" class="ui-icon"></i>
+                            </a>
+                        </div>
+
+                        <span class="slide-number">01</span>
+                    </article>
+
+                    <article class="discovery-slide">
+                        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1400&q=85"
+                             alt="Đồng nghiệp phối hợp trong dự án">
+                        <div class="slide-shade"></div>
+
+                        <div class="slide-content">
+                            <span class="slide-tag">SMART RECRUITMENT</span>
+                            <h3>Đúng người.<br>Đúng vị trí.</h3>
+                            <p>Tổ chức quy trình tuyển dụng một cách hiệu quả.</p>
+
+                            <a th:href="@{/recruiter/jobs/new}" class="slide-cta">
+                                Bắt đầu ngay
+                                <i data-lucide="arrow-up-right" class="ui-icon"></i>
+                            </a>
+                        </div>
+
+                        <span class="slide-number">02</span>
+                    </article>
+
+                    <article class="discovery-slide">
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&q=85"
+                             alt="Nhóm chuyên gia trao đổi công việc">
+                        <div class="slide-shade"></div>
+
+                        <div class="slide-content">
+                            <span class="slide-tag">GROW TOGETHER</span>
+                            <h3>Cùng nhau<br>phát triển</h3>
+                            <p>Mở rộng đội ngũ và tìm kiếm cơ hội mới cho doanh nghiệp.</p>
+
+                            <a th:href="@{/recruiter/jobs/new}" class="slide-cta">
+                                Tạo tin mới
+                                <i data-lucide="arrow-up-right" class="ui-icon"></i>
+                            </a>
+                        </div>
+
+                        <span class="slide-number">03</span>
+                    </article>
+
+                </div>
+
+                <button type="button"
+                        class="carousel-arrow carousel-prev"
+                        aria-label="Ảnh trước">
+                    <i data-lucide="chevron-left" class="ui-icon"></i>
+                </button>
+
+                <button type="button"
+                        class="carousel-arrow carousel-next"
+                        aria-label="Ảnh tiếp theo">
+                    <i data-lucide="chevron-right" class="ui-icon"></i>
+                </button>
+
+                <div class="carousel-pagination">
+                    <button type="button" class="carousel-dot active" aria-label="Ảnh 1"></button>
+                    <button type="button" class="carousel-dot" aria-label="Ảnh 2"></button>
+                    <button type="button" class="carousel-dot" aria-label="Ảnh 3"></button>
+                </div>
+            </section>
+
+        </div>
+    </section>
+
+    <!-- ================= QUẢN LÝ TIN ================= -->
+    <div class="manage-head">
+        <div>
+            <h1>Quản lý tin tuyển dụng</h1>
+            <p>Danh sách tin tuyển dụng trong hệ thống</p>
+        </div>
+
+        <div class="manage-actions">
+            <!-- Tài khoản đang đăng nhập -->
+            <div class="recruiter-account" th:if="${currentRecruiter != null}">
+                <i data-lucide="user" class="ui-icon"></i>
+                <span>
+                    <strong th:text="${currentRecruiter.fullName != null ? currentRecruiter.fullName : currentRecruiter.email}">Nhà tuyển dụng</strong>
+                    <small th:text="${currentRecruiter.email}">email</small>
+                </span>
+            </div>
+
+            <a th:href="@{/recruiter/jobs/new}" class="btn btn-primary btn-lg">
+                <i data-lucide="plus" class="ui-icon"></i>
+                Đăng tin mới
+            </a>
+
+            <!-- Đăng xuất: Spring Security cần POST /logout kèm CSRF -->
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:if="${_csrf != null}"
+                       th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="btn btn-outline btn-lg">
+                    <i data-lucide="log-out" class="ui-icon"></i>
+                    Đăng xuất
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- THÔNG BÁO -->
+    <div class="alert alert-success"
+         th:if="${successMessage != null}"
+         th:text="${successMessage}"
+         role="status">
+    </div>
+
+    <div class="alert alert-error"
+         th:if="${errorMessage != null}"
+         th:text="${errorMessage}"
+         role="alert">
+    </div>
+
+    <!-- KHÔNG HIỂN THỊ THỐNG KÊ -->
+
+    <!-- BỘ LỌC -->
+    <form class="filter-bar"
+          th:action="@{/recruiter/jobs}"
+          method="get">
+
+        <input type="text"
+               name="keyword"
+               th:value="${keyword}"
+               placeholder="Tìm theo tiêu đề..."
+               aria-label="Tìm theo tiêu đề">
+
+        <input type="text"
+               name="location"
+               th:value="${location}"
+               placeholder="Địa điểm..."
+               aria-label="Lọc theo địa điểm">
+
+        <select name="status" aria-label="Trạng thái">
+            <option value="">Tất cả trạng thái</option>
+            <option value="DRAFT" th:selected="${status == 'DRAFT'}">Nháp</option>
+            <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ duyệt</option>
+            <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Đang hiển thị</option>
+            <option value="REJECTED" th:selected="${status == 'REJECTED'}">Bị từ chối</option>
+            <option value="CLOSED" th:selected="${status == 'CLOSED'}">Đã đóng</option>
+        </select>
+
+        <button type="submit" class="btn btn-outline">
+            <i data-lucide="list-filter" class="ui-icon"></i>
+            Lọc
+        </button>
+
+        <a th:href="@{/recruiter/jobs}" class="btn btn-outline">
+            <i data-lucide="rotate-ccw" class="ui-icon"></i>
+            Xóa bộ lọc
+        </a>
+    </form>
+
+    <!-- TIÊU ĐỀ DANH SÁCH -->
+    <div class="job-list-heading" id="job-list">
+        <div>
+            <h2>Tin tuyển dụng</h2>
+            <p>Các tin lấy trực tiếp từ cơ sở dữ liệu</p>
+        </div>
+
+        <span class="job-result-count"
+              th:text="${jobPage.totalElements + ' tin tuyển dụng'}">
+            0 tin tuyển dụng
+        </span>
+    </div>
+
+    <!-- ================= LƯỚI TIN: THẺ NGANG THU GỌN ================= -->
+    <section class="job-grid"
+             th:if="${jobs != null and !#lists.isEmpty(jobs)}">
+
+        <!-- tabindex="0": cho phép dùng phím Tab để mở chi tiết -->
+        <article class="job-card" th:each="job : ${jobs}" tabindex="0">
+
+            <!-- ===== PHẦN THU GỌN: luôn hiển thị ===== -->
+            <div class="job-card-compact">
+
+                <!-- Logo công ty: có URL logo thì hiện ảnh, nếu ảnh lỗi/không có thì hiện chữ cái đầu -->
+                <div class="job-logo">
+                    <span th:text="${job.title != null and !#strings.isEmpty(job.title)
+                                    ? #strings.toUpperCase(#strings.substring(job.title, 0, 1))
+                                    : '?'}">J</span>
+                    <img th:if="${job.company != null and job.company.logoUrl != null
+                                  and !#strings.isEmpty(job.company.logoUrl)}"
+                         th:src="${job.company.logoUrl}"
+                         th:alt="${job.company.companyName}"
+                         loading="lazy"
+                         onerror="this.style.display='none'">
+                </div>
+
+                <div class="job-compact-body">
+
+                    <!-- Tiêu đề (bấm vào để xem tin) -->
+                    <h3 class="job-card-title">
+                        <a th:href="@{/jobs/{id}(id=${job.id})}"
+                           th:text="${job.title}">
+                            Tiêu đề tin tuyển dụng
+                        </a>
+                    </h3>
+
+                    <!-- Công ty -->
+                    <p class="job-compact-company"
+                       th:text="${job.company != null
+                                ? 'Công ty #' + job.company.id
+                                : 'Chưa có công ty'}">
+                        Công ty
+                    </p>
+
+                    <!-- Nhãn nhỏ: lương, địa điểm, cấp bậc -->
+                    <div class="job-compact-meta">
+
+                        <!-- Lương: Thỏa thuận / Từ X / Tới X / X - Y -->
+                        <span class="job-chip job-chip-salary"
+                              th:text="${job.salaryMin == null and job.salaryMax == null
+                                        ? 'Thỏa thuận'
+                                        : (job.salaryMin != null and job.salaryMax != null
+                                            ? #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                              + ' - ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')
+                                            : (job.salaryMin != null
+                                                ? 'Từ ' + #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                                : 'Tới ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')))
+                                          + (job.salaryCurrency != null ? ' ' + job.salaryCurrency : '')}">
+                            Thỏa thuận
+                        </span>
+
+                        <!-- Địa điểm -->
+                        <span class="job-chip"
+                              th:text="${job.location != null and !#strings.isEmpty(job.location)
+                                        ? job.location : 'Chưa cập nhật'}">
+                            Hà Nội
+                        </span>
+
+                        <!-- Cấp bậc (chỉ hiện khi có) -->
+                        <span class="job-chip"
+                              th:if="${job.level != null and !#strings.isEmpty(job.level)}"
+                              th:text="${job.level}">
+                            Junior
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Nhãn trạng thái -->
+                <div class="job-compact-side">
+                    <span class="status"
+                          th:classappend="${'status-' + job.status}"
+                          th:switch="${job.status.name()}">
+                        <span th:case="'DRAFT'">Nháp</span>
+                        <span th:case="'PENDING'">Chờ duyệt</span>
+                        <span th:case="'ACTIVE'">Đang hiển thị</span>
+                        <span th:case="'REJECTED'">Bị từ chối</span>
+                        <span th:case="'CLOSED'">Đã đóng</span>
+                        <span th:case="*" th:text="${job.status}"></span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- ===== KHUNG CHI TIẾT: chỉ hiện khi di chuột vào thẻ ===== -->
+            <div class="job-card-detail">
+
+                <div class="job-detail-id"
+                     th:text="${'MÃ TIN #' + job.id}">
+                    MÃ TIN #1
+                </div>
+
+                <!-- Mô tả công việc -->
+                <div class="detail-section"
+                     th:if="${job.description != null and !#strings.isEmpty(job.description)}">
+                    <h4>Mô tả công việc</h4>
+                    <p class="detail-text" th:text="${job.description}">Mô tả</p>
+                </div>
+
+                <!-- Yêu cầu ứng viên -->
+                <div class="detail-section"
+                     th:if="${job.requirements != null and !#strings.isEmpty(job.requirements)}">
+                    <h4>Yêu cầu ứng viên</h4>
+                    <p class="detail-text" th:text="${job.requirements}">Yêu cầu</p>
+                </div>
+
+                <!-- Quyền lợi -->
+                <div class="detail-section"
+                     th:if="${job.benefits != null and !#strings.isEmpty(job.benefits)}">
+                    <h4>Quyền lợi</h4>
+                    <p class="detail-text" th:text="${job.benefits}">Quyền lợi</p>
+                </div>
+
+                <!-- Thông tin chi tiết -->
+                <div class="job-card-meta">
+
+                    <div class="job-meta-item">
+                        <i data-lucide="user-round"></i>
+                        <div>
+                            <span class="job-meta-label">Người đăng</span>
+                            <span th:text="${job.recruiter != null
+                                    ? job.recruiter.email
+                                    : 'Không xác định'}">
+                                Recruiter
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="job-meta-item">
+                        <i data-lucide="briefcase"></i>
+                        <div>
+                            <span class="job-meta-label">Kinh nghiệm</span>
+                            <span th:text="${job.experience != null and !#strings.isEmpty(job.experience)
+                                    ? job.experience : 'Không yêu cầu'}">
+                                1 năm
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="job-meta-item">
+                        <i data-lucide="calendar-days"></i>
+                        <div>
+                            <span class="job-meta-label">Hạn ứng tuyển</span>
+                            <span th:text="${job.deadline != null
+                                    ? #temporals.format(job.deadline, 'dd/MM/yyyy')
+                                    : 'Không giới hạn'}">
+                                Hạn nộp
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="job-meta-item">
+                        <i data-lucide="users-round"></i>
+                        <div>
+                            <span class="job-meta-label">Số lượng tuyển</span>
+                            <span th:text="${job.quantity != null
+                                    ? job.quantity + ' người'
+                                    : 'Chưa cập nhật'}">
+                                Số lượng
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="job-meta-item">
+                        <i data-lucide="clock-3"></i>
+                        <div>
+                            <span class="job-meta-label">Ngày tạo</span>
+                            <span th:text="${job.createdAt != null
+                                    ? #temporals.format(job.createdAt, 'dd/MM/yyyy')
+                                    : '—'}">
+                                Ngày tạo
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Lý do từ chối -->
+                <div class="job-rejection-reason"
+                     th:if="${job.status.name() == 'REJECTED'
+                             and job.rejectionReason != null
+                             and !#strings.isEmpty(job.rejectionReason)}"
+                     th:text="${'Lý do từ chối: ' + job.rejectionReason}">
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="job-card-actions">
+
+                    <a class="btn btn-outline btn-sm"
+                       th:href="@{/jobs/{id}(id=${job.id})}">
+                        <i data-lucide="eye" class="ui-icon"></i>
+                        Xem
+                    </a>
+
+                    <!-- Chỉ chủ sở hữu mới được quản lý -->
+                    <th:block th:if="${currentRecruiter != null
+                            and job.recruiter != null
+                            and job.recruiter.id == currentRecruiter.id}">
+
+                        <!-- Nút Sửa: hiện cho mọi tin chưa bị đóng -->
+                        <a th:if="${job.status.name() != 'CLOSED'}"
+                           class="btn btn-outline btn-sm"
+                           th:href="@{/recruiter/jobs/{id}/edit(id=${job.id})}">
+                            <i data-lucide="pencil" class="ui-icon"></i>
+                            Sửa
+                        </a>
+
+                        <form th:if="${job.status.name() == 'DRAFT'
+                                      or job.status.name() == 'REJECTED'}"
+                              th:action="@{/recruiter/jobs/{id}/submit(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có muốn gửi tin này cho Admin duyệt không?');">
+
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i data-lucide="send" class="ui-icon"></i>
+                                Gửi duyệt
+                            </button>
+                        </form>
+
+                        <form th:if="${job.status.name() == 'ACTIVE'}"
+                              th:action="@{/recruiter/jobs/{id}/close(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có chắc muốn đóng tin này không?');">
+
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+
+                            <button type="submit" class="btn-close-job">
+                                <i data-lucide="lock" class="ui-icon"></i>
+                                Đóng tin
+                            </button>
+                        </form>
+
+                        <!-- Nút Mở lại tin: chỉ hiện với tin đã đóng -->
+                        <form th:if="${job.status.name() == 'CLOSED'}"
+                              th:action="@{/recruiter/jobs/{id}/reopen(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có muốn mở lại tin này không?');">
+
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i data-lucide="lock-open" class="ui-icon"></i>
+                                Mở tin
+                            </button>
+                        </form>
+
+                    </th:block>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- ================= PHÂN TRANG ================= -->
+    <div class="job-pagination-wrap"
+         th:if="${jobPage != null and jobPage.totalElements > 0}">
+
+        <nav class="job-pagination"
+             aria-label="Phân trang tin tuyển dụng"
+             th:if="${jobPage.totalPages > 1}">
+
+            <!-- Trang trước -->
+            <a th:if="${jobPage.hasPrevious()}"
+               class="page-link"
+               title="Trang trước"
+               th:href="@{/recruiter/jobs(keyword=${keyword},location=${location},status=${status},page=${jobPage.number - 1},_anchor='job-list')}">
+                &laquo;
+            </a>
+
+            <span th:unless="${jobPage.hasPrevious()}"
+                  class="page-link disabled">&laquo;</span>
+
+            <!-- Trang đầu -->
+            <a th:if="${pageStart > 0}"
+               class="page-link"
+               th:href="@{/recruiter/jobs(keyword=${keyword},location=${location},status=${status},page=0,_anchor='job-list')}">
+                1
+            </a>
+
+            <span th:if="${pageStart > 1}"
+                  class="page-dots">&hellip;</span>
+
+            <!-- Các trang xung quanh trang hiện tại -->
+            <a th:each="i : ${#numbers.sequence(pageStart, pageEnd)}"
+               class="page-link"
+               th:classappend="${i == jobPage.number} ? 'active' : ''"
+               th:attr="aria-current=${i == jobPage.number ? 'page' : null}"
+               th:text="${i + 1}"
+               th:href="@{/recruiter/jobs(keyword=${keyword},location=${location},status=${status},page=${i},_anchor='job-list')}">
+                1
+            </a>
+
+            <!-- Dấu ... -->
+            <span th:if="${pageEnd < jobPage.totalPages - 2}"
+                  class="page-dots">&hellip;</span>
+
+            <!-- Trang cuối -->
+            <a th:if="${pageEnd < jobPage.totalPages - 1}"
+               class="page-link"
+               th:text="${jobPage.totalPages}"
+               th:href="@{/recruiter/jobs(keyword=${keyword},location=${location},status=${status},page=${jobPage.totalPages - 1},_anchor='job-list')}">
+                10
+            </a>
+
+            <!-- Trang sau -->
+            <a th:if="${jobPage.hasNext()}"
+               class="page-link"
+               title="Trang sau"
+               th:href="@{/recruiter/jobs(keyword=${keyword},location=${location},status=${status},page=${jobPage.number + 1},_anchor='job-list')}">
+                &raquo;
+            </a>
+
+            <span th:unless="${jobPage.hasNext()}"
+                  class="page-link disabled">&raquo;</span>
+
+        </nav>
+
+        <!-- Thông tin số tin -->
+        <p class="job-page-summary"
+           th:text="${'Hiển thị '
+           + (jobPage.number * jobPage.size + 1)
+           + '–'
+           + (jobPage.number * jobPage.size + jobPage.numberOfElements)
+           + ' trên '
+           + jobPage.totalElements
+           + ' tin'}">
+            Hiển thị 1–9 trên 25 tin
+        </p>
+
+    </div>
+
+    <!-- DANH SÁCH RỖNG -->
+    <div class="table-wrap empty-state"
+         th:if="${jobs == null or #lists.isEmpty(jobs)}">
+
+        <div class="empty-icon">
+            <i data-lucide="file-search"></i>
+        </div>
+
+        <h3>Không tìm thấy tin tuyển dụng</h3>
+        <p>Thử thay đổi từ khóa hoặc bộ lọc trạng thái.</p>
+
+        <a th:href="@{/recruiter/jobs}" class="btn btn-outline">
+            <i data-lucide="rotate-ccw" class="ui-icon"></i>
+            Xóa bộ lọc
+        </a>
+
+        <a th:href="@{/recruiter/jobs/new}" class="btn btn-primary">
+            <i data-lucide="plus" class="ui-icon"></i>
+            Đăng tin mới
+        </a>
+    </div>
+
+</main>
+
+<div th:replace="~{fragments :: siteFooter}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+
+        // CAROUSEL
+        const carousel = document.getElementById('discoveryCarousel');
+
+        if (carousel) {
+            const slides = Array.from(
+                carousel.querySelectorAll('.discovery-slide')
+            );
+            const dots = Array.from(
+                carousel.querySelectorAll('.carousel-dot')
+            );
+            const previous = carousel.querySelector('.carousel-prev');
+            const next = carousel.querySelector('.carousel-next');
+
+            let current = 0;
+            let timer = null;
+
+            function showSlide(index) {
+                if (!slides.length) return;
+
+                current = (index + slides.length) % slides.length;
+
+                slides.forEach((slide, i) => {
+                    slide.classList.toggle('active', i === current);
+                });
+
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === current);
+                });
+            }
+
+            function stopAutoplay() {
+                if (timer !== null) {
+                    clearInterval(timer);
+                    timer = null;
+                }
+            }
+
+            function startAutoplay() {
+                stopAutoplay();
+
+                if (window.matchMedia(
+                    '(prefers-reduced-motion: reduce)'
+                ).matches) {
+                    return;
+                }
+
+                timer = setInterval(function () {
+                    showSlide(current + 1);
+                }, 5000);
+            }
+
+            previous?.addEventListener('click', function () {
+                showSlide(current - 1);
+                startAutoplay();
+            });
+
+            next?.addEventListener('click', function () {
+                showSlide(current + 1);
+                startAutoplay();
+            });
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', function () {
+                    showSlide(index);
+                    startAutoplay();
+                });
+            });
+
+            carousel.addEventListener('mouseenter', stopAutoplay);
+            carousel.addEventListener('mouseleave', startAutoplay);
+
+            showSlide(0);
+            startAutoplay();
+        }
+
+        // DANH MỤC NGHỀ NGHIỆP
+        const categoryItems = Array.from(
+            document.querySelectorAll('.category-item')
+        );
+        const detailTitle =
+            document.getElementById('categoryDetailTitle');
+        const detailDescription =
+            document.getElementById('categoryDetailDescription');
+        const categorySearchButton =
+            document.getElementById('categorySearchButton');
+        const keywordInput = document.querySelector(
+            '.discovery-search input[name="keyword"]'
+        );
+        const discoveryForm =
+            document.querySelector('.discovery-search');
+
+        let selectedKeyword = 'Developer';
+
+        function activateCategory(item) {
+            categoryItems.forEach(category => {
+                category.classList.toggle('active', category === item);
+            });
+
+            selectedKeyword = item.dataset.keyword || '';
+
+            const count = document.querySelector('.category-count');
+
+            if (count) {
+                const index = categoryItems.indexOf(item) + 1;
+                count.textContent =
+                    String(index).padStart(2, '0') + ' / ' +
+                    String(categoryItems.length).padStart(2, '0');
+            }
+
+            if (detailTitle) {
+                detailTitle.textContent = item.dataset.title || '';
+            }
+
+            if (detailDescription) {
+                detailDescription.textContent =
+                    item.dataset.description || '';
+            }
+        }
+
+        categoryItems.forEach(item => {
+            item.addEventListener(
+                'mouseenter',
+                () => activateCategory(item)
+            );
+            item.addEventListener(
+                'focus',
+                () => activateCategory(item)
+            );
+            item.addEventListener(
+                'click',
+                () => activateCategory(item)
+            );
+        });
+
+        categorySearchButton?.addEventListener('click', function () {
+            if (keywordInput && discoveryForm) {
+                keywordInput.value = selectedKeyword;
+                discoveryForm.requestSubmit();
+            }
+        });
+
+        // THẺ TIN: trên thiết bị cảm ứng (không có chuột) thì chạm vào thẻ để mở/đóng chi tiết.
+        // Trên máy tính, chi tiết tự mở khi di chuột vào và tự đóng khi di chuột ra (làm bằng CSS).
+        const jobCards = Array.from(document.querySelectorAll('.job-card'));
+
+        if (window.matchMedia('(hover: none)').matches) {
+            jobCards.forEach(card => {
+                card.addEventListener('click', function (event) {
+                    // Chạm vào link, nút hoặc form thì để chúng hoạt động bình thường
+                    if (event.target.closest('a, button, form')) return;
+
+                    const willOpen = !card.classList.contains('is-open');
+
+                    // Đóng tất cả thẻ khác, chỉ mở thẻ vừa chạm
+                    jobCards.forEach(other => other.classList.remove('is-open'));
+
+                    if (willOpen) card.classList.add('is-open');
+                });
+            });
+
+            // Chạm ra ngoài thẻ thì đóng chi tiết
+            document.addEventListener('click', function (event) {
+                if (!event.target.closest('.job-card')) {
+                    jobCards.forEach(card => card.classList.remove('is-open'));
+                }
+            });
+        }
+
+        // GỢI Ý TÌM KIẾM
+        document.querySelectorAll('.suggestion-chip').forEach(button => {
+            button.addEventListener('click', function () {
+                if (keywordInput && discoveryForm) {
+                    keywordInput.value = button.dataset.keyword || '';
+                    discoveryForm.requestSubmit();
+                }
+            });
+        });
+    });
+</script>
+
+<script th:src="@{/js/ui-polish.js}"></script>
+</body>
+</html>

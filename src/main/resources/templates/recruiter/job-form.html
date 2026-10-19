@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${jobForm.jobId != null ? 'Chỉnh sửa tin tuyển dụng' : 'Tạo tin tuyển dụng mới'}">
+    Tạo tin tuyển dụng mới
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+  <style>
+    :root {
+      --navy: #243B53;
+      --navy-dark: #192D43;
+      --green: #36765B;
+      --green-dark: #285A44;
+      --teal: #178A8A;
+      --teal-dark: #116B6B;
+      --orange: #C47742;
+      --orange-dark: #9A5529;
+      --body-text: #455468;
+      --muted: #718096;
+      --border: #B2C5B3;
+      --border-strong: #89A98E;
+      --white: #FFFFFF;
+      --surface: #F9FCF8;
+      --success: #24734B;
+      --danger: #B42332;
+      --shadow: 0 18px 45px rgba(36, 59, 83, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      color: var(--body-text);
+      background-color: #DCEBDD;
+      background-image:
+              radial-gradient(circle, rgba(49, 86, 65, 0.16) 1.2px, transparent 1.8px),
+              linear-gradient(90deg, transparent 49.5%, rgba(66, 107, 85, 0.055) 50%, transparent 50.5%),
+              linear-gradient(0deg, transparent 49.5%, rgba(66, 107, 85, 0.055) 50%, transparent 50.5%),
+              radial-gradient(circle at 0% 0%, transparent 0 75px, rgba(66, 107, 85, 0.15) 76px 78px, transparent 79px),
+              radial-gradient(circle at 100% 100%, transparent 0 100px, rgba(66, 107, 85, 0.13) 101px 103px, transparent 104px),
+              radial-gradient(ellipse at 100% 0%, rgba(159, 197, 162, 0.38), transparent 42%),
+              linear-gradient(135deg, #DCEBDD 0%, #C8DFCA 45%, #E5EFE3 100%);
+      background-size:
+              22px 22px,
+              44px 44px,
+              44px 44px,
+              220px 220px,
+              260px 260px,
+              100% 100%,
+              100% 100%;
+      background-attachment: fixed;
+    }
+
+    a {
+      color: var(--teal);
+      text-decoration: none;
+      transition: color .2s ease;
+    }
+
+    a:hover {
+      color: var(--teal-dark);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    .page-wrapper {
+      width: min(1240px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 34px 0 60px;
+    }
+
+    .back-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px;
+      border: 1.5px solid #9EB6A1;
+      border-radius: 10px;
+      color: var(--navy);
+      background: rgba(255, 255, 255, .86);
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(36, 59, 83, .04);
+      transition: .2s ease;
+    }
+
+    .back-btn:hover {
+      color: var(--green-dark);
+      border-color: var(--green);
+      background: var(--white);
+      transform: translateY(-1px);
+    }
+
+    .page-heading {
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      color: var(--teal-dark);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 0 4px rgba(196, 119, 66, .13);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: var(--navy);
+      font-size: clamp(27px, 3.5vw, 38px);
+      line-height: 1.2;
+      font-weight: 800;
+      letter-spacing: -1.2px;
+    }
+
+    .page-heading p {
+      max-width: 690px;
+      margin: 0;
+      color: var(--body-text);
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .page-heading strong {
+      color: var(--green-dark);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      align-items: start;
+      gap: 24px;
+    }
+
+    .form-card,
+    .side-card {
+      background: rgba(255, 255, 255, .97);
+      border: 2px solid var(--border-strong);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .form-card {
+      overflow: hidden;
+    }
+
+    .form-card-header {
+      position: relative;
+      padding: 25px 28px;
+      border-bottom: 1.5px solid #D6E4D6;
+      background:
+              radial-gradient(circle at 100% 0%, rgba(23, 138, 138, .09), transparent 35%),
+              linear-gradient(120deg, #FFFFFF, #F3F9F1);
+    }
+
+    .form-card-header::after {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 110px;
+      height: 4px;
+      content: "";
+      background: linear-gradient(90deg, var(--green), var(--teal), var(--orange));
+      border-radius: 4px 0 0 0;
+    }
+
+    .form-card-header h2 {
+      margin: 0 0 8px;
+      color: var(--green-dark);
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .form-card-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .form-body {
+      padding: 28px;
+    }
+
+    .alert {
+      padding: 14px 16px;
+      margin-bottom: 22px;
+      border: 1.5px solid;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .alert-error {
+      color: var(--danger);
+      background: #FFF1F2;
+      border-color: #F4B8C0;
+    }
+
+    .alert-success {
+      color: var(--success);
+      background: #ECFDF3;
+      border-color: #A6E2BC;
+    }
+
+    .section {
+      margin-bottom: 32px;
+    }
+
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      border-bottom: 1.5px solid #DDE8DD;
+    }
+
+    .section-number {
+      display: grid;
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      border: 1.5px solid #A8C9B1;
+      border-radius: 10px;
+      color: var(--green-dark);
+      background: #EDF7ED;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .section-heading h3 {
+      margin: 0 0 4px;
+      color: var(--navy);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .section-heading p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      min-width: 0;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 9px;
+      color: #34495E;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .required {
+      color: var(--orange-dark);
+      margin-left: 3px;
+    }
+
+    .optional {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .form-control {
+      display: block;
+      width: 100%;
+      min-height: 45px;
+      padding: 11px 13px;
+      border: 1.5px solid #B2C5B3;
+      border-radius: 9px;
+      outline: none;
+      color: var(--navy);
+      background: #FCFEFB;
+      font-size: 12px;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .form-control:hover {
+      border-color: #789C81;
+      background: #FFFFFF;
+    }
+
+    .form-control:focus {
+      border-color: var(--teal);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 4px rgba(23, 138, 138, .11);
+    }
+
+    select.form-control {
+      cursor: pointer;
+    }
+
+    textarea.form-control {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.75;
+    }
+
+    textarea.large-textarea {
+      min-height: 165px;
+    }
+
+    .form-control::placeholder {
+      color: #8997A7;
+      opacity: 1;
+    }
+
+    .field-hint {
+      display: block;
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .field-hint strong {
+      color: var(--teal-dark);
+    }
+
+    .salary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 100px;
+      gap: 10px;
+    }
+
+    .salary-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .salary-label .salary-tag {
+      padding: 3px 7px;
+      border-radius: 5px;
+      color: var(--orange-dark);
+      background: #FFF2E7;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-top: 24px;
+      margin-top: 30px;
+      border-top: 1.5px solid #DDE8DD;
+    }
+
+    .action-note {
+      max-width: 260px;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 43px;
+      padding: 11px 17px;
+      border: 1.5px solid transparent;
+      border-radius: 9px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 800;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-draft {
+      color: var(--navy);
+      background: #FFFFFF;
+      border-color: #A8B8C5;
+    }
+
+    .btn-draft:hover {
+      background: #F0F5F8;
+      box-shadow: 0 5px 12px rgba(36, 59, 83, .08);
+    }
+
+    .btn-submit {
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #36765B, #178A8A);
+      border-color: #36765B;
+      box-shadow: 0 6px 15px rgba(54, 118, 91, .20);
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(135deg, #285A44, #116B6B);
+      box-shadow: 0 9px 20px rgba(54, 118, 91, .25);
+    }
+
+    .sidebar {
+      display: grid;
+      gap: 18px;
+    }
+
+    .side-card {
+      padding: 22px;
+      overflow: hidden;
+    }
+
+    .side-card-header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 16px;
+    }
+
+    .side-icon {
+      display: grid;
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      place-items: center;
+      border: 1.5px solid #B4D3BD;
+      border-radius: 12px;
+      color: var(--green-dark);
+      background: #EEF7EF;
+    }
+
+    .side-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .side-card:nth-child(2) .side-icon {
+      color: var(--teal-dark);
+      background: #E7F7F6;
+      border-color: #A9DAD7;
+    }
+
+    .side-card:nth-child(3) .side-icon {
+      color: var(--orange-dark);
+      background: #FFF2E7;
+      border-color: #E8C7A9;
+    }
+
+    .side-card-header h3 {
+      margin: 0;
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .side-card-header span {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 10px;
+    }
+
+    .side-card p {
+      margin: 0;
+      color: var(--body-text);
+      font-size: 11px;
+      line-height: 1.8;
+    }
+
+    .side-card p strong {
+      color: var(--green-dark);
+    }
+
+    .benefit-list {
+      display: grid;
+      gap: 13px;
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+
+    .benefit-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      color: var(--body-text);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .check-icon {
+      display: grid;
+      flex: 0 0 19px;
+      width: 19px;
+      height: 19px;
+      place-items: center;
+      margin-top: 1px;
+      border-radius: 50%;
+      color: var(--green-dark);
+      background: #E5F4E8;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .steps {
+      display: grid;
+      gap: 15px;
+    }
+
+    .step {
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      display: grid;
+      flex: 0 0 25px;
+      width: 25px;
+      height: 25px;
+      place-items: center;
+      border-radius: 8px;
+      color: #FFFFFF;
+      background: var(--teal);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .step:nth-child(2) .step-number {
+      background: var(--green);
+    }
+
+    .step:nth-child(3) .step-number {
+      background: var(--orange);
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--navy);
+      font-size: 11px;
+    }
+
+    .step span {
+      display: block;
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .tip-card {
+      border-color: #DDBE9E;
+      background:
+              radial-gradient(circle at 100% 0%, rgba(196, 119, 66, .10), transparent 45%),
+              #FFFCF8;
+    }
+
+    .tip-card .side-card-header h3 {
+      color: var(--orange-dark);
+    }
+
+    .tip-card p strong {
+      color: var(--orange-dark);
+    }
+
+    .footer-note {
+      padding: 20px 0 0;
+      color: #5D7565;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+
+    /* Ô nhập URL logo + ảnh xem trước */
+    .logo-field {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-preview {
+      display: none;
+      flex: 0 0 64px;
+      width: 64px;
+      height: 64px;
+      object-fit: contain;
+      padding: 4px;
+      border: 1.5px solid #B2C5B3;
+      border-radius: 12px;
+      background: #FFFFFF;
+    }
+
+    .logo-preview.show {
+      display: block;
+    }
+
+    @media (max-width: 1050px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr) 270px;
+        gap: 18px;
+      }
+
+      .form-body {
+        padding: 23px;
+      }
+
+      .side-card {
+        padding: 18px;
+      }
+    }
+
+    @media (max-width: 800px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .tip-card {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page-wrapper {
+        width: min(100% - 24px, 1240px);
+        padding-top: 22px;
+      }
+
+      .page-heading {
+        margin-bottom: 20px;
+      }
+
+      .form-card,
+      .side-card {
+        border-radius: 13px;
+      }
+
+      .form-card-header {
+        padding: 20px;
+      }
+
+      .form-body {
+        padding: 20px 16px;
+      }
+
+      .form-grid,
+      .sidebar {
+        grid-template-columns: 1fr;
+      }
+
+      .tip-card {
+        grid-column: auto;
+      }
+
+      .salary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .salary-grid .currency-field {
+        grid-column: 1 / -1;
+      }
+
+      .form-actions {
+        align-items: stretch;
+      }
+
+      .action-note {
+        max-width: none;
+      }
+
+      .action-buttons {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+  <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+
+<body>
+<div class="page-wrapper">
+
+  <div class="back-links">
+    <a class="back-btn" th:href="@{/recruiter/jobs}">
+      <span aria-hidden="true">←</span>
+      Quay lại danh sách tin tuyển dụng
+    </a>
+  </div>
+
+  <header class="page-heading">
+    <div class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      RECRUITMENT MANAGEMENT
+    </div>
+
+    <h1 th:text="${jobForm.jobId != null ? 'Chỉnh sửa tin tuyển dụng' : 'Tạo tin tuyển dụng mới'}">
+      Tạo tin tuyển dụng mới
+    </h1>
+
+    <p>
+      Tạo một tin tuyển dụng <strong>chuyên nghiệp và rõ ràng</strong>
+      để tiếp cận ứng viên phù hợp với vị trí của doanh nghiệp.
+    </p>
+  </header>
+
+  <div class="layout">
+
+    <main class="form-card">
+      <div class="form-card-header">
+        <h2>Thông tin tin tuyển dụng</h2>
+        <p>
+          Điền các thông tin bên dưới. Những trường có dấu
+          <span class="required">*</span> là bắt buộc.
+        </p>
+      </div>
+
+      <div class="form-body">
+
+        <div class="alert alert-error"
+             th:if="${errorMessage != null}"
+             th:text="${errorMessage}">
+          Có lỗi xảy ra.
+        </div>
+
+        <div class="alert alert-success"
+             th:if="${successMessage != null}"
+             th:text="${successMessage}">
+          Thao tác thành công.
+        </div>
+
+        <form th:action="@{/recruiter/jobs/save}"
+              th:object="${jobForm}"
+              method="post">
+
+          <input type="hidden" th:field="*{jobId}">
+
+          <input th:if="${_csrf != null}"
+                 type="hidden"
+                 th:name="${_csrf.parameterName}"
+                 th:value="${_csrf.token}">
+
+          <!-- SECTION 1 -->
+          <section class="section">
+            <div class="section-heading">
+              <div class="section-number">01</div>
+              <div>
+                <h3>Thông tin cơ bản</h3>
+                <p>Thông tin nhận diện vị trí đang tuyển dụng.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full">
+                <label for="title">
+                  Tên vị trí tuyển dụng
+                  <span class="required">*</span>
+                </label>
+                <input id="title"
+                       class="form-control"
+                       type="text"
+                       th:field="*{title}"
+                       maxlength="255"
+                       placeholder="Ví dụ: Junior Backend Developer"
+                       required>
+                <span class="field-hint">
+                                    Nên sử dụng tên vị trí ngắn gọn, rõ ràng và dễ tìm kiếm.
+                                </span>
+              </div>
+
+              <div class="form-group">
+                <label for="categoryId">
+                  Danh mục công việc
+                  <span class="required">*</span>
+                </label>
+                <select id="categoryId"
+                        class="form-control"
+                        th:field="*{categoryId}"
+                        required>
+                  <option value="">-- Chọn danh mục --</option>
+                  <option th:each="category : ${categories}"
+                          th:value="${category.id}"
+                          th:text="${category.name}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="employmentType">
+                  Hình thức làm việc
+                  <span class="required">*</span>
+                </label>
+                <select id="employmentType"
+                        class="form-control"
+                        th:field="*{employmentType}"
+                        required>
+                  <option value="">-- Chọn hình thức --</option>
+                  <option th:each="type : ${employmentTypes}"
+                          th:value="${type}"
+                          th:text="${type}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="level">Cấp bậc</label>
+                <select id="level" class="form-control" th:field="*{level}">
+                  <option value="">-- Chọn cấp bậc --</option>
+                  <option value="Intern">Intern</option>
+                  <option value="Fresher">Fresher</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Middle">Middle</option>
+                  <option value="Senior">Senior</option>
+                  <option value="Lead">Team Lead</option>
+                  <option value="Manager">Manager</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="experience">Kinh nghiệm</label>
+                <select id="experience" class="form-control" th:field="*{experience}">
+                  <option value="">-- Chọn kinh nghiệm --</option>
+                  <option value="Không yêu cầu">Không yêu cầu</option>
+                  <option value="Dưới 1 năm">Dưới 1 năm</option>
+                  <option value="1-2 năm">1–2 năm</option>
+                  <option value="2-3 năm">2–3 năm</option>
+                  <option value="3-5 năm">3–5 năm</option>
+                  <option value="Trên 5 năm">Trên 5 năm</option>
+                </select>
+              </div>
+
+              <div class="form-group full">
+                <label for="location">
+                  Địa điểm làm việc
+                  <span class="required">*</span>
+                </label>
+                <input id="location"
+                       class="form-control"
+                       type="text"
+                       th:field="*{location}"
+                       placeholder="Ví dụ: Hà Nội hoặc Hybrid"
+                       required>
+              </div>
+
+              <!-- URL logo công ty: dán link ảnh, để trống = giữ logo hiện tại -->
+              <div class="form-group full">
+                <label for="logoUrl">
+                  Logo công ty (URL ảnh)
+                  <span class="optional">(Không bắt buộc)</span>
+                </label>
+
+                <div class="logo-field">
+                  <!-- Ảnh xem trước: hiện khi có URL hợp lệ -->
+                  <img id="logoPreview"
+                       class="logo-preview"
+                       th:classappend="${jobForm.logoUrl != null and !#strings.isEmpty(jobForm.logoUrl)} ? 'show'"
+                       th:src="${jobForm.logoUrl}"
+                       alt="Xem trước logo">
+
+                  <input id="logoUrl"
+                         class="form-control"
+                         type="url"
+                         th:field="*{logoUrl}"
+                         maxlength="500"
+                         placeholder="https://example.com/logo.png">
+                </div>
+
+                <span class="field-hint">
+                  Dán đường dẫn ảnh logo (bắt đầu bằng <strong>https://</strong>).
+                  Logo thuộc về công ty nên sẽ áp dụng cho tất cả tin của công ty.
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- SECTION 2 -->
+          <section class="section">
+            <div class="section-heading">
+              <div class="section-number">02</div>
+              <div>
+                <h3>Lương và số lượng</h3>
+                <p>Giúp ứng viên nắm được quyền lợi cơ bản.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full">
+                <label class="salary-label" for="salaryMin">
+                  Mức lương
+                  <span class="salary-tag">SALARY</span>
+                </label>
+
+                <div class="salary-grid">
+                  <input id="salaryMin"
+                         class="form-control"
+                         type="number"
+                         th:field="*{salaryMin}"
+                         min="0"
+                         placeholder="Lương tối thiểu">
+
+                  <input id="salaryMax"
+                         class="form-control"
+                         type="number"
+                         th:field="*{salaryMax}"
+                         min="0"
+                         placeholder="Lương tối đa">
+
+                  <div class="currency-field">
+                    <label for="salaryCurrency">Đơn vị</label>
+                    <select id="salaryCurrency"
+                            class="form-control"
+                            th:field="*{salaryCurrency}">
+                      <option value="VND">VND</option>
+                      <option value="USD">USD</option>
+                    </select>
+                  </div>
+                </div>
+
+                <span class="field-hint">
+                                    Có thể để trống nếu doanh nghiệp chưa muốn công khai mức lương.
+                                </span>
+              </div>
+
+              <div class="form-group">
+                <label for="quantity">
+                  Số lượng cần tuyển
+                  <span class="required">*</span>
+                </label>
+                <input id="quantity"
+                       class="form-control"
+                       type="number"
+                       th:field="*{quantity}"
+                       min="1"
+                       required>
+              </div>
+
+              <div class="form-group">
+                <label for="deadline">Hạn nộp hồ sơ</label>
+                <input id="deadline"
+                       class="form-control"
+                       type="date"
+                       th:field="*{deadline}">
+                <span class="field-hint">
+                                    Chọn ngày kết thúc nhận hồ sơ.
+                                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- SECTION 3 -->
+          <section class="section">
+            <div class="section-heading">
+              <div class="section-number">03</div>
+              <div>
+                <h3>Mô tả công việc</h3>
+                <p>Nêu rõ công việc ứng viên sẽ thực hiện.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full">
+                <label for="description">
+                  Mô tả công việc
+                  <span class="required">*</span>
+                </label>
+                <textarea id="description"
+                          class="form-control large-textarea"
+                          th:field="*{description}"
+                          placeholder="Mô tả nhiệm vụ, trách nhiệm và công việc hằng ngày..."
+                          required></textarea>
+              </div>
+
+              <div class="form-group full">
+                <label for="requirements">
+                  Yêu cầu ứng viên
+                  <span class="required">*</span>
+                </label>
+                <textarea id="requirements"
+                          class="form-control"
+                          th:field="*{requirements}"
+                          placeholder="Kỹ năng, kiến thức, bằng cấp và kinh nghiệm cần có..."
+                          required></textarea>
+              </div>
+
+              <div class="form-group full">
+                <label for="benefits">
+                  Quyền lợi
+                  <span class="optional">(Không bắt buộc)</span>
+                </label>
+                <textarea id="benefits"
+                          class="form-control"
+                          th:field="*{benefits}"
+                          placeholder="Lương thưởng, bảo hiểm, đào tạo, môi trường làm việc..."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+            <div class="action-note">
+              Lưu bản nháp để hoàn thiện sau hoặc gửi tin tuyển dụng
+              để xử lý theo quy trình của hệ thống.
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-draft"
+                      type="submit"
+                      name="action"
+                      value="draft">
+                Lưu bản nháp
+              </button>
+
+              <button class="btn btn-submit"
+                      type="submit"
+                      name="action"
+                      value="submit">
+                Gửi tin tuyển dụng
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+    </main>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="3" width="14" height="18" rx="2"/>
+              <path d="M9 8h6M9 12h6M9 16h3"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Tin tuyển dụng chuyên nghiệp</h3>
+            <span>Professional listing</span>
+          </div>
+        </div>
+
+        <p>
+          Một tin tuyển dụng có thông tin rõ ràng giúp ứng viên
+          hiểu đúng vị trí và chủ động ứng tuyển.
+        </p>
+      </section>
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="8" r="3"/>
+              <path d="M3 20v-2a6 6 0 0 1 12 0v2"/>
+              <path d="M16 5.5a3 3 0 0 1 0 5.8M18 14a5 5 0 0 1 3 4.5V20"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Tiếp cận đúng ứng viên</h3>
+            <span>Candidate targeting</span>
+          </div>
+        </div>
+
+        <ul class="benefit-list">
+          <li>
+            <span class="check-icon">✓</span>
+            <span>Chọn đúng danh mục và cấp bậc công việc.</span>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <span>Ghi rõ kỹ năng và kinh nghiệm cần thiết.</span>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <span>Cung cấp địa điểm và quyền lợi minh bạch.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Quy trình đăng tin</h3>
+            <span>Posting workflow</span>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div>
+              <strong>Điền thông tin</strong>
+              <span>Hoàn thiện các trường thông tin cần thiết.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div>
+              <strong>Lưu hoặc gửi tin</strong>
+              <span>Lưu nháp hoặc gửi theo quy trình của hệ thống.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div>
+              <strong>Theo dõi trạng thái</strong>
+              <span>Kiểm tra trạng thái tin trong danh sách quản lý.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="side-card tip-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18h6M10 22h4"/>
+              <path d="M8 14a7 7 0 1 1 8 0c-1 .7-1 2-1 2h-6s0-1.3-1-2Z"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Mẹo nhỏ</h3>
+            <span>Recruitment tip</span>
+          </div>
+        </div>
+
+        <p>
+          Hãy viết phần yêu cầu thành các ý cụ thể, ưu tiên những kỹ năng
+          <strong>thực sự cần thiết</strong> cho công việc.
+          Tránh đưa quá nhiều tiêu chí không liên quan.
+        </p>
+      </section>
+
+    </aside>
+  </div>
+
+  <footer class="footer-note">
+    Recruitment Management System · Quản lý tin tuyển dụng
+  </footer>
+</div>
+
+<script>
+  // Xem trước logo ngay khi người dùng dán/sửa URL
+  (function () {
+    var input = document.getElementById('logoUrl');
+    var preview = document.getElementById('logoPreview');
+
+    if (!input || !preview) return;
+
+    function update() {
+      var url = input.value.trim();
+
+      // Chỉ xem trước khi là link http/https
+      if (/^https?:\/\/\S+$/i.test(url)) {
+        preview.src = url;
+        preview.classList.add('show');
+      } else {
+        preview.classList.remove('show');
+      }
+    }
+
+    // Ảnh lỗi thì ẩn khung xem trước
+    preview.addEventListener('error', function () {
+      preview.classList.remove('show');
+    });
+
+    input.addEventListener('input', update);
+  })();
+</script>
+<script th:src="@{/js/ui-polish.js}"></script>
+</body>
+</html>

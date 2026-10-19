@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head(${company.companyName} + ' — Detail')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+    <div class="topbar">
+        <div>
+            <div class="breadcrumb">
+                <a th:href="@{/admin/companies}">Companies</a>
+                <span>›</span>
+                <b th:text="${company.companyName}">Company Detail</b>
+            </div>
+        </div>
+        <div class="topbar-actions">
+            <div class="topbar-user">
+                <div class="avatar-circle">
+                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                </div>
+                <span th:text="${#authentication.name}">admin</span>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="user-header">
+        <div class="user-avatar-wrap">
+            <div class="user-avatar" style="background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; width:64px; height:64px; border-radius:12px;">
+                <span th:text="${company.companyName.substring(0,1).toUpperCase()}">C</span>
+            </div>
+        </div>
+        <div class="user-title-wrap">
+            <div class="user-name-row">
+                <h1 class="user-name" th:text="${company.companyName}">Company Name</h1>
+                <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(company.status.name())}">
+                    <span th:switch="${company.status.name()}">
+                        <span th:case="'ACTIVE'">● Active</span>
+                        <span th:case="'PENDING'">⏳ Pending</span>
+                        <span th:case="'REJECTED'">✕ Rejected</span>
+                        <span th:case="'LOCKED'">⛔ Locked</span>
+                    </span>
+                </span>
+            </div>
+            <div class="user-meta">
+                <span th:if="${company.taxCode != null}">MST: <b th:text="${company.taxCode}"></b> · </span>
+                <span th:if="${company.website != null}">
+                    <a th:href="${company.website}" target="_blank" th:text="${company.website}"></a> ·
+                </span>
+                <span th:text="${#temporals.format(company.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <!-- PENDING -> APPROVE or REJECT -->
+            <form th:if="${company.status.name() == 'PENDING'}"
+                  th:action="@{'/admin/companies/' + ${company.id} + '/approve'}"
+                  method="post" style="display:inline">
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Duyệt hồ sơ doanh nghiệp này?')">
+                    ✓ Phê Duyệt
+                </button>
+            </form>
+
+            <button th:if="${company.status.name() == 'PENDING'}"
+                    type="button" class="btn btn-danger"
+                    onclick="document.getElementById('rejectModal').style.display='block'">
+                ✕ Từ Chối
+            </button>
+
+            <!-- ACTIVE -> LOCK -->
+            <form th:if="${company.status.name() == 'ACTIVE'}"
+                  th:action="@{'/admin/companies/' + ${company.id} + '/lock'}"
+                  method="post" style="display:inline">
+                <button type="submit" class="btn btn-danger" onclick="return confirm('Khóa doanh nghiệp này?')">
+                    🚫 Khóa Doanh Nghiệp
+                </button>
+            </form>
+
+            <!-- LOCKED -> UNLOCK -->
+            <form th:if="${company.status.name() == 'LOCKED'}"
+                  th:action="@{'/admin/companies/' + ${company.id} + '/unlock'}"
+                  method="post" style="display:inline">
+                <button type="submit" class="btn btn-success" onclick="return confirm('Mở khóa doanh nghiệp này?')">
+                    ✓ Mở Khóa
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thông tin chi tiết -->
+    <div class="info-grid">
+        <div class="info-box">
+            <h3>🏢 Thông Tin Doanh Nghiệp</h3>
+            <div class="info-row">
+                <span class="label">Tên công ty</span>
+                <span class="value" th:text="${company.companyName}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Mã số thuế</span>
+                <span class="value" th:text="${company.taxCode != null ? company.taxCode : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email công ty</span>
+                <span class="value" th:text="${company.email != null ? company.email : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Số điện thoại</span>
+                <span class="value" th:text="${company.phone != null ? company.phone : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Quy mô</span>
+                <span class="value" th:text="${company.companySize != null ? company.companySize : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Địa chỉ</span>
+                <span class="value" th:text="${company.address != null ? company.address : '—'}">—</span>
+            </div>
+            <div class="info-row" th:if="${company.rejectionReason != null}">
+                <span class="label" style="color: #dc2626;">Lý do từ chối</span>
+                <span class="value" style="color: #dc2626;" th:text="${company.rejectionReason}">—</span>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <h3>👤 Người Đại Diện (Recruiter)</h3>
+            <div class="info-row">
+                <span class="label">Họ và tên</span>
+                <span class="value" th:text="${company.recruiter != null ? company.recruiter.fullName : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Username</span>
+                <span class="value" th:text="${company.recruiter != null ? company.recruiter.username : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Email liên hệ</span>
+                <span class="value" th:text="${company.recruiter != null ? company.recruiter.email : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Số điện thoại</span>
+                <span class="value" th:text="${company.recruiter != null && company.recruiter.phone != null ? company.recruiter.phone : '—'}">—</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Trạng thái tài khoản</span>
+                <span class="value">
+                    <span th:if="${company.recruiter != null}" th:text="${company.recruiter.status}"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" style="margin-top: 24px;">
+        <div class="section-title">📄 Mô tả doanh nghiệp</div>
+        <div style="font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-line; padding: 12px 0;"
+             th:text="${company.description != null ? company.description : 'Chưa có thông tin mô tả.'}">
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal từ chối -->
+<div id="rejectModal" style="display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+    <div style="background:#fff; width:450px; margin:100px auto; padding:24px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
+        <h3 style="margin-top:0;">Từ chối duyệt công ty</h3>
+        <form th:action="@{'/admin/companies/' + ${company.id} + '/reject'}" method="post">
+            <div style="margin: 16px 0;">
+                <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Lý do từ chối <span style="color:#d33;">*</span></label>
+                <textarea name="reason" rows="4" required style="width:100%; border:1px solid #d5dde8; border-radius:8px; padding:10px; font-size:14px;" placeholder="Nhập lý do từ chối hồ sơ..."></textarea>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('rejectModal').style.display='none'">Hủy</button>
+                <button type="submit" class="btn btn-danger">Xác Nhận Từ Chối</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

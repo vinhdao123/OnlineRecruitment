@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title th:text="${pageHeading + ' | OnlineRecruitment'}">Kho tin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap"
+          rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+    <link rel="stylesheet" th:href="@{/css/job-archive.css}">
+</head>
+
+<body>
+
+<div class="archive-page">
+
+    <th:block th:if="${mode == 'recruiter'}">
+        <div th:replace="~{fragments :: siteHeader('recruiter')}"></div>
+    </th:block>
+
+    <th:block th:if="${mode == 'candidate'}">
+        <div th:replace="~{fragments :: siteHeader('candidate')}"></div>
+    </th:block>
+
+    <main class="lib-wrap">
+        <div class="lib-container">
+
+            <header class="lib-head">
+                <div class="lib-heading-icon">
+                    <i data-lucide="archive"></i>
+                </div>
+
+                <div>
+                    <span class="lib-eyebrow">ONLINE RECRUITMENT</span>
+
+                    <h1 th:text="${pageHeading}">Kho tin</h1>
+
+                    <p th:text="${pageSub}">
+                        Tin nháp và tin đã đóng của bạn.
+                    </p>
+                </div>
+            </header>
+
+            <nav class="lib-tabs">
+
+                <th:block th:if="${mode == 'recruiter'}">
+
+                    <a class="lib-tab"
+                       th:classappend="${activeTab == 'draft'} ? ' is-active' : ''"
+                       th:href="@{/recruiter/jobs/archive(tab='draft')}">
+
+                        <i data-lucide="file-edit"></i>
+                        <span>Tin nháp</span>
+
+                        <span class="lib-count"
+                              th:text="${tabDraftCount}">0</span>
+                    </a>
+
+                    <a class="lib-tab"
+                       th:classappend="${activeTab == 'closed'} ? ' is-active' : ''"
+                       th:href="@{/recruiter/jobs/archive(tab='closed')}">
+
+                        <i data-lucide="archive"></i>
+                        <span>Tin đã đóng</span>
+
+                        <span class="lib-count"
+                              th:text="${tabClosedCount}">0</span>
+                    </a>
+
+                </th:block>
+
+                <th:block th:if="${mode == 'candidate'}">
+
+                    <a class="lib-tab"
+                       th:classappend="${activeTab == 'open'} ? ' is-active' : ''"
+                       th:href="@{/candidate/saved(tab='open')}">
+
+                        <i data-lucide="bookmark-check"></i>
+                        <span>Đang tuyển</span>
+
+                        <span class="lib-count"
+                              th:text="${tabOpenCount}">0</span>
+                    </a>
+
+                    <a class="lib-tab"
+                       th:classappend="${activeTab == 'closed'} ? ' is-active' : ''"
+                       th:href="@{/candidate/saved(tab='closed')}">
+
+                        <i data-lucide="bookmark"></i>
+                        <span>Đã đóng</span>
+
+                        <span class="lib-count"
+                              th:text="${tabClosedCount}">0</span>
+                    </a>
+
+                </th:block>
+
+            </nav>
+
+            <div class="lib-alert ok"
+                 th:if="${successMessage != null}">
+
+                <i data-lucide="check-circle"></i>
+                <span th:text="${successMessage}"></span>
+            </div>
+
+            <div class="lib-alert err"
+                 th:if="${errorMessage != null}">
+
+                <i data-lucide="alert-circle"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <section class="lib-grid"
+                     th:if="${!jobs.isEmpty()}">
+
+                <article class="lib-card"
+                         th:each="job : ${jobs}">
+
+                    <div class="lib-top">
+
+                        <div class="lib-logo">
+
+                            <img
+                                    th:if="${job.company != null and job.company.logoUrl != null and !#strings.isEmpty(job.company.logoUrl)}"
+                                    th:src="${job.company.logoUrl}"
+                                    alt="Logo công ty"
+                                    onerror="this.style.display='none'">
+
+                            <span th:text="${#strings.toUpperCase(#strings.substring(job.title, 0, 1))}">
+                                J
+                            </span>
+                        </div>
+
+                        <div class="lib-job-info">
+
+                            <h2 class="lib-title">
+
+                                <a th:if="${mode == 'recruiter' or job.status.name() == 'ACTIVE'}"
+                                   th:href="@{/jobs/{id}(id=${job.id})}"
+                                   th:text="${job.title}">
+                                    Tiêu đề công việc
+                                </a>
+
+                                <span th:unless="${mode == 'recruiter' or job.status.name() == 'ACTIVE'}"
+                                      th:text="${job.title}">
+                                    Tiêu đề công việc
+                                </span>
+
+                            </h2>
+
+                            <p class="lib-company"
+                               th:text="${job.company != null ? job.company.companyName : ''}">
+                                Tên công ty
+                            </p>
+
+                        </div>
+                    </div>
+
+                    <div class="lib-meta">
+
+                        <span class="lib-chip"
+                              th:if="${job.location != null and !#strings.isEmpty(job.location)}">
+
+                            <i data-lucide="map-pin"></i>
+                            <span th:text="${job.location}">Hà Nội</span>
+                        </span>
+
+                        <span class="lib-chip"
+                              th:if="${job.level != null and !#strings.isEmpty(job.level)}">
+
+                            <i data-lucide="briefcase-business"></i>
+                            <span th:text="${job.level}">Junior</span>
+                        </span>
+
+                        <span class="lib-chip warn"
+                              th:if="${job.deadline != null}">
+
+                            <i data-lucide="calendar-days"></i>
+
+                            <span th:text="${'Hạn: ' + #temporals.format(job.deadline, 'dd/MM/yyyy')}">
+                                Hạn ứng tuyển
+                            </span>
+                        </span>
+
+                        <span class="lib-chip closed"
+                              th:if="${mode == 'candidate' and job.status.name() != 'ACTIVE'}">
+
+                            <i data-lucide="lock-keyhole"></i>
+                            Đã đóng
+                        </span>
+
+                    </div>
+
+                    <div class="lib-actions"
+                         th:if="${mode == 'recruiter'}">
+
+                        <a th:if="${job.status.name() == 'DRAFT'}"
+                           class="lib-btn primary"
+                           th:href="@{/recruiter/jobs/{id}/edit(id=${job.id})}">
+
+                            <i data-lucide="file-pen-line"></i>
+                            Tiếp tục soạn
+                        </a>
+
+                        <a th:if="${job.status.name() == 'CLOSED'}"
+                           class="lib-btn"
+                           th:href="@{/jobs/{id}(id=${job.id})}">
+
+                            <i data-lucide="eye"></i>
+                            Xem tin
+                        </a>
+
+                        <form th:if="${job.status.name() == 'CLOSED'}"
+                              th:action="@{/recruiter/jobs/{id}/reopen(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có muốn mở lại tin này không?');">
+
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+
+                            <button type="submit" class="lib-btn primary">
+                                <i data-lucide="rotate-ccw"></i>
+                                Mở tin
+                            </button>
+                        </form>
+
+                    </div>
+
+                    <div class="lib-actions"
+                         th:if="${mode == 'candidate'}">
+
+                        <a th:if="${job.status.name() == 'ACTIVE'}"
+                           class="lib-btn primary"
+                           th:href="@{/candidate-job(jobId=${job.id})}">
+
+                            <i data-lucide="send"></i>
+                            Ứng tuyển
+                        </a>
+
+                        <form th:action="@{/candidate/saved/{id}/toggle(id=${job.id})}"
+                              method="post">
+
+                            <input type="hidden"
+                                   name="from"
+                                   value="saved">
+
+                            <input type="hidden"
+                                   th:if="${_csrf != null}"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+
+                            <button type="submit" class="lib-btn danger">
+                                <i data-lucide="bookmark-x"></i>
+                                Bỏ lưu
+                            </button>
+                        </form>
+
+                    </div>
+
+                </article>
+            </section>
+
+            <section class="lib-empty"
+                     th:if="${jobs.isEmpty()}">
+
+                <div class="lib-empty-icon">
+                    <i data-lucide="archive"></i>
+                </div>
+
+                <h2>Chưa có tin nào ở mục này</h2>
+
+                <p th:if="${mode == 'recruiter'}">
+                    Tin nháp và tin đã đóng của bạn sẽ xuất hiện ở đây.
+                </p>
+
+                <p th:if="${mode == 'candidate'}">
+                    Bấm "Lưu tin" ở trang chi tiết để đưa tin vào đây.
+                </p>
+
+                <a th:if="${mode == 'recruiter'}"
+                   class="lib-btn primary empty-action"
+                   th:href="@{/recruiter/jobs}">
+
+                    <i data-lucide="layout-list"></i>
+                    Quản lý tuyển dụng
+                </a>
+
+                <a th:if="${mode == 'candidate'}"
+                   class="lib-btn primary empty-action"
+                   th:href="@{/jobs}">
+
+                    <i data-lucide="search"></i>
+                    Tìm việc làm
+                </a>
+
+            </section>
+
+        </div>
+    </main>
+
+</div>
+
+<div th:replace="~{fragments :: siteFooter}"></div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
+
+<script th:src="@{/js/ui-polish.js}"></script>
+
+</body>
+</html>

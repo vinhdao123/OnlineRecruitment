@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Company Management')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+  <div th:replace="~{admin/_layout :: topbar('Company Management', 'Manage all registered businesses and recruiter requests')}"></div>
+
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+  <form method="get" th:action="@{/admin/companies}" class="filters">
+    <input type="text" name="keyword" class="grow"
+           placeholder="Search by company name, tax code or email..." maxlength="100"
+           th:value="${keyword}">
+
+    <select name="status">
+      <option value="">All Status</option>
+      <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"
+              th:selected="${selectedStatus != null and selectedStatus == s}"></option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <a th:href="@{/admin/companies}" class="btn btn-secondary">Clear</a>
+  </form>
+
+  <p style="font-size: 13px; color: #8895a8; margin-bottom: 12px;">
+    Showing <b th:text="${companies.size()}">0</b> of <b th:text="${totalItems}">0</b> companies
+  </p>
+
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+      <tr>
+        <th>Company Name</th>
+        <th>Tax Code</th>
+        <th>Recruiter / Email</th>
+        <th>Phone</th>
+        <th>Status</th>
+        <th>Created At</th>
+        <th style="width: 80px;">Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="c : ${companies}">
+        <td>
+          <b th:text="${c.companyName}">Company Name</b>
+          <div style="font-size: 12px; color: #8895a8;" th:if="${c.website != null}">
+            <a th:href="${c.website}" target="_blank" th:text="${c.website}">https://...</a>
+          </div>
+        </td>
+        <td th:text="${c.taxCode != null ? c.taxCode : '—'}">0101234567</td>
+        <td>
+          <span th:if="${c.recruiter != null}" th:text="${c.recruiter.fullName}">Recruiter</span>
+          <div style="font-size: 12px; color: #8895a8;" th:text="${c.email != null ? c.email : (c.recruiter != null ? c.recruiter.email : '—')}">email@x.com</div>
+        </td>
+        <td th:text="${c.phone != null ? c.phone : '—'}">0901234567</td>
+        <td>
+          <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(c.status.name())}">
+            <span th:switch="${c.status.name()}">
+              <span th:case="'ACTIVE'">● Active</span>
+              <span th:case="'PENDING'">⏳ Pending</span>
+              <span th:case="'REJECTED'">✕ Rejected</span>
+              <span th:case="'LOCKED'">⛔ Locked</span>
+            </span>
+          </span>
+        </td>
+        <td th:text="${#temporals.format(c.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+        <td style="position: relative;">
+          <details class="action-menu">
+            <summary class="action-trigger" title="Actions">⋮</summary>
+            <div class="action-dropdown">
+              <a th:href="@{'/admin/companies/' + ${c.id}}" class="action-item">
+                <span>👁</span> View Details
+              </a>
+
+              <div class="action-divider"></div>
+
+              <form th:if="${c.status.name() == 'PENDING'}"
+                    th:action="@{'/admin/companies/' + ${c.id} + '/approve'}"
+                    method="post" style="margin:0;">
+                <button type="submit" class="action-item action-item-success"
+                        onclick="return confirm('Duyệt doanh nghiệp này?')">
+                  <span>✓</span> Approve
+                </button>
+              </form>
+
+              <form th:if="${c.status.name() == 'ACTIVE'}"
+                    th:action="@{'/admin/companies/' + ${c.id} + '/lock'}"
+                    method="post" style="margin:0;">
+                <button type="submit" class="action-item action-item-danger"
+                        onclick="return confirm('Khóa doanh nghiệp này?')">
+                  <span>🚫</span> Lock Company
+                </button>
+              </form>
+
+              <form th:if="${c.status.name() == 'LOCKED'}"
+                    th:action="@{'/admin/companies/' + ${c.id} + '/unlock'}"
+                    method="post" style="margin:0;">
+                <button type="submit" class="action-item action-item-success"
+                        onclick="return confirm('Mở khóa doanh nghiệp này?')">
+                  <span>✓</span> Unlock Company
+                </button>
+              </form>
+            </div>
+          </details>
+        </td>
+      </tr>
+      <tr th:if="${companies.isEmpty()}">
+        <td colspan="7" style="text-align:center; color:#8895a8; padding: 40px;">
+          Không có công ty nào phù hợp.
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/admin/companies(page=${currentPage - 1}, keyword=${keyword}, status=${selectedStatus})}"
+       class="page-link">‹ Trước</a>
+
+    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+      <a th:href="@{/admin/companies(page=${i}, keyword=${keyword}, status=${selectedStatus})}"
+         class="page-link"
+         th:classappend="${i == currentPage} ? 'active' : ''"
+         th:text="${i + 1}">1</a>
+    </span>
+
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="@{/admin/companies(page=${currentPage + 1}, keyword=${keyword}, status=${selectedStatus})}"
+       class="page-link">Sau ›</a>
+  </div>
+
+</div>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>
