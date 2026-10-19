@@ -36,6 +36,32 @@ public class DataInitializer implements CommandLineRunner {
             }
         }
 
+        User companyUser = userRepository
+                .findByEmail("recruiter_demo@example.com")
+                .orElseThrow(() -> new RuntimeException(
+                        "Khong tim thay tai khoan Recruiter"));
+
+        companyUser.setPasswordHash(
+                passwordEncoder.encode("Recruiter@123")
+        );
+
+        userRepository.save(companyUser);
+
+        log.info("Password reset for recruiter_demo@example.com");
+        User candidateUser = userRepository
+                .findByEmail("candidate01@gmail.com")
+                .orElseThrow(() -> new RuntimeException(
+                        "Khong tim thay tai khoan Candidate"));
+
+        candidateUser.setPasswordHash(
+                passwordEncoder.encode("Candidate@123")
+        );
+
+        userRepository.save(candidateUser);
+
+        log.info("Password reset for candidate01@gmail.com");
+
+
         if (hashed > 0) {
             log.info("Finished initializing {} user passwords to BCrypt.", hashed);
         }
