@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Kinh nghiệm làm việc - <span th:text="${cv.title}"></span></title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+<header class="header">
+    <div class="container header-container">
+        <a th:href="@{/}" class="logo">Online<span>Recruitment</span></a>
+        <nav class="nav">
+            <a th:href="@{/candidate/cvs}" class="active">Quay lại danh sách CV</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container" style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="margin: 0;">Kinh nghiệm làm việc</h2>
+        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" style="color: #2563EB; text-decoration: none;">&larr; Quay lại chi tiết CV</a>
+    </div>
+    <p style="color: #6b7280; margin-bottom: 24px;">Đang chỉnh sửa cho CV: <b th:text="${cv.title}"></b></p>
+
+    <!-- Thông báo -->
+    <div th:if="${successMessage}" style="color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 12px; border-radius: 8px; margin-bottom: 15px;" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" style="color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 15px;" th:text="${errorMessage}"></div>
+
+    <!-- Form thêm mới -->
+    <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
+        <h3 style="margin-top: 0; font-size: 16px;">Thêm kinh nghiệm mới</h3>
+        <form th:action="@{/candidate/cvs/{id}/work-experiences/add(id=${cv.id})}" th:object="${workRequest}" method="post">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Tên công ty (*)</label>
+                    <input type="text" th:field="*{companyName}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <span th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" style="color:red; font-size:12px;"></span>
+                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Chức danh (*)</label>
+                    <input type="text" th:field="*{jobTitle}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                    <span th:if="${#fields.hasErrors('jobTitle')}" th:errors="*{jobTitle}" style="color:red; font-size:12px;"></span>
+                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Địa điểm</label>
+                    <input type="text" th:field="*{location}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Ngày bắt đầu</label>
+                    <input type="date" th:field="*{startDate}"
+                           th:attr="max=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
+                           style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Ngày kết thúc</label>
+                    <input type="date" th:field="*{endDate}" id="endDateInput" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
+                </div>
+                <div style="display: flex; align-items: center; margin-top: 24px;">
+                    <input type="checkbox" th:field="*{isCurrent}" id="isCurrentCheckbox" style="margin-right: 8px;">
+                    <label for="isCurrentCheckbox" style="font-size: 14px; font-weight: 500;">Hiện đang làm việc tại đây</label>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Mô tả công việc</label>
+                <textarea th:field="*{description}" rows="3" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;"></textarea>
+            </div>
+
+            <button type="submit" style="padding: 8px 16px; background: #2563EB; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Thêm</button>
+        </form>
+    </div>
+
+    <!-- Danh sách đã có -->
+    <h3 style="margin-top: 0; font-size: 16px;">Danh sách kinh nghiệm</h3>
+    <div th:if="${works.isEmpty()}" style="color: #6b7280; font-style: italic; padding: 10px 0;">Chưa có kinh nghiệm nào.</div>
+
+    <div th:each="work : ${works}" style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <h4 style="margin: 0; font-size: 16px; color: #1f2937;" th:text="${work.jobTitle}"></h4>
+            <p style="margin: 4px 0; font-weight: 500; color: #4b5563;" th:text="${work.companyName}"></p>
+            <p style="margin: 4px 0; font-size: 13px; color: #6b7280;">
+                <span th:text="${work.startDate != null ? #temporals.format(work.startDate, 'MM/yyyy') : ''}"></span> -
+                <span th:text="${work.isCurrent ? 'Hiện tại' : (work.endDate != null ? #temporals.format(work.endDate, 'MM/yyyy') : '')}"></span>
+            </p>
+            <p style="margin: 8px 0 0 0; font-size: 14px; color: #374151; white-space: pre-wrap;" th:text="${work.description}"></p>
+        </div>
+        <form th:action="@{/candidate/cvs/{id}/work-experiences/{workId}/delete(id=${cv.id}, workId=${work.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa kinh nghiệm này?');">
+            <button type="submit" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">Xóa</button>
+        </form>
+    </div>
+</main>
+
+<!-- Script xử lý logic Ngày kết thúc / Đang làm việc -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const isCurrentCheckbox = document.getElementById('isCurrentCheckbox');
+        const endDateInput = document.getElementById('endDateInput');
+
+        function toggleEndDateState() {
+            if (isCurrentCheckbox.checked) {
+                // Nếu tick "Đang làm việc": Xóa trắng và khóa ô ngày kết thúc
+                endDateInput.value = '';
+                endDateInput.disabled = true;
+                endDateInput.style.backgroundColor = '#f3f4f6';
+            } else {
+                // Nếu bỏ tick: Mở khóa ô ngày kết thúc
+                endDateInput.disabled = false;
+                endDateInput.style.backgroundColor = 'white';
+            }
+        }
+
+        // Bắt sự kiện khi click vào ô checkbox
+        if (isCurrentCheckbox) {
+            isCurrentCheckbox.addEventListener('change', toggleEndDateState);
+        }
+
+        // Bắt sự kiện khi người dùng nhập ngày kết thúc -> Tự động bỏ tick ô "Đang làm việc"
+        if (endDateInput) {
+            endDateInput.addEventListener('input', function() {
+                if (this.value !== '') {
+                    isCurrentCheckbox.checked = false;
+                    endDateInput.disabled = false;
+                    endDateInput.style.backgroundColor = 'white';
+                }
+            });
+        }
+
+        // Khởi chạy trạng thái ban đầu khi load trang
+        toggleEndDateState();
+    });
+</script>
+</body>
+</html>

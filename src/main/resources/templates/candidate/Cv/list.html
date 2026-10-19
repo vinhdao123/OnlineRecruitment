@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV của tôi — Online Recruitment</title>
+    <!-- Dùng chung file CSS profile của nhóm để đồng bộ font chữ, layout -->
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<!-- Gọi Fragment Taskbar dùng chung, truyền 'cvs' để highlight menu -->
+<div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
+
+<main class="main-wrapper" style="max-width: 1100px; margin: 40px auto; padding: 0 20px;">
+
+    <!-- Page Title -->
+    <div class="page-title-box" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+        <div>
+            <h1 class="page-title" style="margin: 0; font-size: 24px; font-weight: 700; color: #1f2937;">CV của tôi</h1>
+            <p class="page-subtitle" style="margin-top: 6px; color: #6b7280; font-size: 14px;">Quản lý các CV bạn đã tạo.</p>
+        </div>
+        <a th:href="@{/candidate/cvs/new}" style="padding: 10px 20px; background: #2563EB; color: white; border-radius: 6px; text-decoration: none; font-weight: 500; font-size: 14px; display: inline-block;">
+            + Tạo CV mới
+        </a>
+    </div>
+
+    <!-- Thông báo thành công / lỗi -->
+    <div th:if="${successMessage}"
+         style="background: #ecfdf5; border: 1px solid #a7f3d0; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+        <span th:text="${successMessage}">Success</span>
+    </div>
+    <div th:if="${errorMessage}"
+         style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px;">
+        <span th:text="${errorMessage}">Error</span>
+    </div>
+
+    <!-- Empty state -->
+    <div th:unless="${hasCvs}"
+         style="background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 12px; padding: 60px 20px; text-align: center;">
+        <div style="font-size: 48px; margin-bottom: 16px;">📄</div>
+        <h3 style="color: #1f2937; margin-bottom: 8px; font-size: 18px; font-weight: 600;">Bạn chưa có hồ sơ ứng viên hoặc chưa có CV nào</h3>
+        <p style="color: #6b7280; font-size: 14px;">Hãy bấm nút "Tạo CV mới" để bắt đầu.</p>
+    </div>
+
+    <!-- Danh sách CV -->
+    <div th:if="${hasCvs}"
+         style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+            <tr>
+                <th style="padding: 14px 16px; color: #4b5563; font-size: 13px; font-weight: 600; text-transform: uppercase;">Tiêu đề</th>
+                <th style="padding: 14px 16px; color: #4b5563; font-size: 13px; font-weight: 600; text-transform: uppercase;">Chức danh</th>
+                <th style="padding: 14px 16px; color: #4b5563; font-size: 13px; font-weight: 600; text-transform: uppercase;">Trạng thái</th>
+                <th style="padding: 14px 16px; color: #4b5563; font-size: 13px; font-weight: 600; text-transform: uppercase;">Mặc định</th>
+                <th style="padding: 14px 16px; color: #4b5563; font-size: 13px; font-weight: 600; text-transform: uppercase;">Cập nhật</th>
+                <th style="padding: 14px 16px; color: #4b5563; font-size: 13px; font-weight: 600; text-transform: uppercase; text-align: right;">Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="cv : ${cvs}" style="border-bottom: 1px solid #f3f4f6;">
+                <td style="padding: 14px 16px; color: #1f2937; font-weight: 500; font-size: 14px;">
+                    <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" th:text="${cv.title}" style="color: #2563EB; text-decoration: none;">—</a>
+                </td>
+                <td style="padding: 14px 16px; color: #4b5563; font-size: 14px;" th:text="${cv.professionalTitle != null ? cv.professionalTitle : '—'}">—</td>
+                <td style="padding: 14px 16px;">
+                            <span th:if="${cv.status == 'ACTIVE'}"
+                                  style="background: #d1fae5; color: #065f46; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">Hoạt động</span>
+                    <span th:if="${cv.status == 'INACTIVE'}"
+                          style="background: #f3f4f6; color: #6b7280; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">Vô hiệu</span>
+                </td>
+                <td style="padding: 14px 16px;">
+                            <span th:if="${cv.isDefault}"
+                                  style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">Mặc định</span>
+                    <span th:unless="${cv.isDefault}" style="color: #9ca3af;">—</span>
+                </td>
+                <td style="padding: 14px 16px; color: #6b7280; font-size: 13px;"
+                    th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}">—</td>
+
+                <!-- Cột Hành động -->
+                <td style="padding: 14px 16px; text-align: right;">
+                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                        <a th:href="@{/candidate/cvs/{id}/edit(id=${cv.id})}"
+                           style="padding: 4px 10px; background: #f59e0b; color: white; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: 500;">Sửa</a>
+
+                        <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/default(id=${cv.id})}" method="post" style="display:inline; margin: 0;">
+                            <button type="submit" style="padding: 4px 10px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">Mặc định</button>
+                        </form>
+
+                        <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/delete(id=${cv.id})}" method="post" style="display:inline; margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa CV này?');">
+                            <button type="submit" style="padding: 4px 10px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">Xóa</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+
+</body>
+</html>
