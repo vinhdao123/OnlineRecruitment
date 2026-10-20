@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import OnlineRecruitment.OnlineRecruitment.dto.Recruiter.RecruiterProfileDto;
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -25,6 +27,7 @@ public class CompanyService {
     private final OtpTokenRepository otpTokenRepository;
     private final EmailService emailService;
     private final ActivityLogService activityLogService;
+    private final FileStorageService fileStorageService;
 
     @Transactional(readOnly = true)
     public Page<Company> search(String keyword, CompanyStatus status, int page, int size) {
@@ -133,6 +136,45 @@ public class CompanyService {
         activityLogService.log(actor, "UNLOCK_COMPANY",
                 "Đã mở khóa công ty: " + c.getCompanyName(),
                 "COMPANY", c.getId(), "System Update");
+    }
+
+    @Transactional
+    public void updateRecruiterProfile(User recruiter, RecruiterProfileDto dto) throws IOException {
+        recruiter.setFullName(dto.getFullName().trim());
+        recruiter.setPhone(dto.getPhone() != null ? dto.getPhone().trim() : null);
+        recruiter.setLocation(dto.getLocation() != null ? dto.getLocation().trim() : null);
+
+        if (dto.getAvatarFile() != null && !dto.getAvatarFile().isEmpty()) {
+            String avatarUrl = fileStorageService.saveAvatar(dto.getAvatarFile());
+            recruiter.setAvatarUrl(avatarUrl);
+        }
+        userRepository.save(recruiter);
+
+        Company company = companyRepository.findByRecruiterId(recruiter.getId())
+                .orElseGet(() -> {
+                    Company c = new Company();
+                    c.setRecruiter(recruiter);
+                    c.setStatus(CompanyStatus.ACTIVE);
+                    return c;
+                });
+
+        company.setCompanyName(dto.getCompanyName().trim());
+        if (dto.getTaxCode() != null && !dto.getTaxCode().isBlank()) {
+            company.setTaxCode(dto.getTaxCode().trim());
+        }
+        company.setEmail(dto.getCompanyEmail() != null ? dto.getCompanyEmail().trim() : null);
+        company.setPhone(dto.getCompanyPhone() != null ? dto.getCompanyPhone().trim() : null);
+        company.setAddress(dto.getCompanyAddress() != null ? dto.getCompanyAddress().trim() : null);
+        company.setWebsite(dto.getCompanyWebsite() != null ? dto.getCompanyWebsite().trim() : null);
+        company.setCompanySize(dto.getCompanySize());
+        company.setDescription(dto.getCompanyDescription());
+
+        if (dto.getLogoFile() != null && !dto.getLogoFile().isEmpty()) {
+            String logoUrl = fileStorageService.saveCompanyLogo(dto.getLogoFile());
+            company.setLogoUrl(logoUrl);
+        }
+
+        companyRepository.save(company);
     }
 
     public long countAll()                     { return companyRepository.count(); }

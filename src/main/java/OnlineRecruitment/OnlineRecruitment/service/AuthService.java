@@ -195,6 +195,85 @@ public class AuthService {
         return true;
     }
 
+    // 5. Gửi OTP đổi mật khẩu
+    public void sendChangePasswordOtp(User currentUser, String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập địa chỉ Gmail tài khoản!");
+        }
+        if (!currentUser.getEmail().equalsIgnoreCase(email.trim())) {
+            throw new IllegalArgumentException("Email nhập vào không khớp với tài khoản bạn đang đăng nhập!");
+        }
+
+        // Cooldown check
+        otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(currentUser.getEmail()).ifPresent(lastToken -> {
+            if (lastToken.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(RESEND_COOLDOWN_SECONDS))) {
+                throw new IllegalArgumentException("Vui lòng đợi " + RESEND_COOLDOWN_SECONDS + " giây trước khi yêu cầu mã mới!");
+            }
+        });
+
+        int code = secureRandom.nextInt(900000) + 100000;
+        String otp = String.valueOf(code);
+
+        OtpToken otpToken = new OtpToken();
+        otpToken.setEmail(currentUser.getEmail());
+        otpToken.setUser(currentUser);
+        otpToken.setOtpHash(hashOtp(otp));
+        otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        otpToken.setAttemptCount(0);
+        otpTokenRepository.save(otpToken);
+
+        emailService.sendOtpEmail(currentUser.getEmail(),
+                "Mã OTP xác thực thay đổi mật khẩu - Online Recruitment",
+                "Xin chào " + currentUser.getFullName() + ",\n\n" +
+                "Mã OTP xác thực thay đổi mật khẩu của bạn là: " + otp + "\n" +
+                "Mã này có hiệu lực trong vòng 10 phút. Tuyệt đối không chia sẻ mã này cho bất kỳ ai.");
+    }
+
+    // 6. Thực hiện đổi mật khẩu bằng OTP
+    @Transactional
+    public void changePasswordWithOtp(User currentUser, String email, String otp, String newPassword, String confirmPassword) {
+        if (email == null || !currentUser.getEmail().equalsIgnoreCase(email.trim())) {
+            throw new IllegalArgumentException("Email không khớp với tài khoản hiện tại!");
+        }
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự!");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Mật khẩu mới và mật khẩu xác nhận không trùng khớp!");
+        }
+        if (otp == null || otp.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập mã OTP!");
+        }
+
+        OtpToken token = otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(currentUser.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Chưa có mã OTP nào được gửi tới email này. Vui lòng gửi mã OTP trước."));
+
+        if (token.getUsedAt() != null) {
+            throw new IllegalArgumentException("Mã OTP này đã được sử dụng. Vui lòng yêu cầu mã mới.");
+        }
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        if (token.getAttemptCount() >= MAX_ATTEMPTS) {
+            throw new IllegalArgumentException("Bạn đã nhập sai quá " + MAX_ATTEMPTS + " lần. Vui lòng yêu cầu mã OTP mới.");
+        }
+
+        byte[] inputHash = hashOtp(otp);
+        if (!MessageDigest.isEqual(token.getOtpHash(), inputHash)) {
+            token.setAttemptCount(token.getAttemptCount() + 1);
+            otpTokenRepository.save(token);
+            throw new IllegalArgumentException("Mã OTP không chính xác. Số lần thử còn lại: " + (MAX_ATTEMPTS - token.getAttemptCount()));
+        }
+
+        token.setUsedAt(LocalDateTime.now());
+        otpTokenRepository.save(token);
+
+        currentUser.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(currentUser);
+    }
+
     private byte[] hashOtp(String otp) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");

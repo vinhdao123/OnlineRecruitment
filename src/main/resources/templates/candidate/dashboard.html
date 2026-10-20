@@ -26,7 +26,7 @@
 
         /* ===== THẺ THU GỌN (hình chữ nhật ngang) ===== */
         .job-card {
-            position: relative;              /* để khung chi tiết bám theo thẻ */
+            position: relative; /* để khung chi tiết bám theo thẻ */
             min-width: 0;
             box-sizing: border-box;
             padding: 14px 16px;
@@ -70,7 +70,7 @@
 
         .job-compact-body {
             flex: 1;
-            min-width: 0;                    /* cho phép chữ dài được cắt gọn */
+            min-width: 0; /* cho phép chữ dài được cắt gọn */
         }
 
         /* Tiêu đề: tối đa 2 dòng, dài hơn thì hiện "..." */
@@ -140,7 +140,7 @@
         /* ===== KHUNG CHI TIẾT (hiện khi di chuột vào thẻ) ===== */
         .job-card-detail {
             position: absolute;
-            top: calc(100% + 6px);           /* nằm ngay dưới thẻ */
+            top: calc(100% + 6px); /* nằm ngay dưới thẻ */
             left: 0;
             right: 0;
             z-index: 40;
@@ -472,15 +472,44 @@
         }
 
         /* Khu tài khoản + nút đăng xuất ở đầu trang quản lý */
-        .manage-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-        .manage-actions form { margin:0; }
-        .recruiter-account { display:flex; align-items:center; gap:8px; padding:8px 12px;
-            border:1px solid #e2e8f0; border-radius:10px; background:#fff; }
-        .recruiter-account span { display:flex; flex-direction:column; line-height:1.25; }
-        .recruiter-account small { color:#64748b; font-size:12px; }
+        .manage-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .manage-actions form {
+            margin: 0;
+        }
+
+        .recruiter-account {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+        }
+
+        .recruiter-account span {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+        }
+
+        .recruiter-account small {
+            color: #64748b;
+            font-size: 12px;
+        }
 
         /* Ảnh logo phủ lên ô chữ cái; ảnh lỗi thì bị ẩn và lộ chữ cái bên dưới */
-        .job-logo { position: relative; overflow: hidden; }
+        .job-logo {
+            position: relative;
+            overflow: hidden;
+        }
+
         .job-logo img {
             position: absolute;
             inset: 0;
@@ -880,18 +909,27 @@
             <!-- ===== PHẦN THU GỌN: luôn hiển thị ===== -->
             <div class="job-card-compact">
 
-                <!-- Logo công ty: có URL logo thì hiện ảnh, nếu ảnh lỗi/không có thì hiện chữ cái đầu -->
+                <!-- LOGO TỪ DATABASE: ưu tiên jobs.logo_url; nếu trống lấy companies.logo_url. -->
+                <!-- Nếu không có URL hoặc ảnh tải thất bại, chữ đầu tên Job vẫn hiển thị. -->
+
+                <!-- KIỂM TRA LOGO: lấy trực tiếp URL từ Job -->
                 <div class="job-logo">
-                    <span th:text="${job.title != null and !#strings.isEmpty(job.title)
-                                    ? #strings.toUpperCase(#strings.substring(job.title, 0, 1))
-                                    : '?'}">J</span>
-                    <img th:if="${job.company != null and job.company.logoUrl != null
-                                  and !#strings.isEmpty(job.company.logoUrl)}"
-                         th:src="${job.company.logoUrl}"
-                         th:alt="${job.company.companyName}"
+
+                    <!-- Chữ cái dự phòng -->
+                    <span th:text="${job.title != null
+            ? #strings.substring(job.title, 0, 1)
+            : '?'}">
+        J
+    </span>
+
+                    <!-- Không dùng th:if để xem Job thực sự có URL hay không -->
+                    <img th:src="${job.logoUrl}"
+                         th:alt="${job.title}"
                          loading="lazy"
                          onerror="this.style.display='none'">
+
                 </div>
+
 
                 <div class="job-compact-body">
 
@@ -1070,7 +1108,7 @@
             <a th:if="${jobPage.hasPrevious()}"
                class="page-link"
                title="Trang trước"
-               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${jobPage.number - 1})} + '#job-list'">
+               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${jobPage.number - 1})}">
                 &laquo;
             </a>
             <span th:unless="${jobPage.hasPrevious()}"
@@ -1079,7 +1117,7 @@
             <!-- Trang đầu và dấu "..." khi đang ở xa trang đầu -->
             <a th:if="${pageStart > 0}"
                class="page-link"
-               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=0)} + '#job-list'">
+               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=0)}">
                 1
             </a>
             <span th:if="${pageStart > 1}" class="page-dots">&hellip;</span>
@@ -1090,7 +1128,7 @@
                th:classappend="${i == jobPage.number} ? 'active'"
                th:attr="aria-current=${i == jobPage.number} ? 'page' : null"
                th:text="${i + 1}"
-               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${i})} + '#job-list'">
+               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${i})}">
                 1
             </a>
 
@@ -1100,7 +1138,7 @@
             <a th:if="${pageEnd < jobPage.totalPages - 1}"
                class="page-link"
                th:text="${jobPage.totalPages}"
-               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${jobPage.totalPages - 1})} + '#job-list'">
+               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${jobPage.totalPages - 1})}">
                 10
             </a>
 
@@ -1108,7 +1146,7 @@
             <a th:if="${jobPage.hasNext()}"
                class="page-link"
                title="Trang sau"
-               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${jobPage.number + 1})} + '#job-list'">
+               th:href="@{/candidate/dashboard(keyword=${keyword}, location=${location}, page=${jobPage.number + 1})}">
                 &raquo;
             </a>
             <span th:unless="${jobPage.hasNext()}"

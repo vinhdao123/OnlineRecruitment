@@ -26,7 +26,7 @@ import java.util.List;
 public class CandidateDashboardController {
 
     // Số tin hiển thị trên mỗi trang
-    private static final int PAGE_SIZE = 9;
+    private static final int PAGE_SIZE = 6;
 
     private final JobService jobService;
 

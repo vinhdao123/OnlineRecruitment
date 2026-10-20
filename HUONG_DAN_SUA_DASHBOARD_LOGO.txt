@@ -1,0 +1,17 @@
+DA SUA: /candidate/dashboard hien thi danh sach viec lam kem logo tung Job.
+
+1. File giao dien: src/main/resources/templates/candidate/dashboard.html
+   Giao dien: "Viec lam danh cho ban", tim kiem, 2 cot, phan trang.
+   Anh uu tien jobs.logo_url, neu rong -> companies.logo_url;
+   neu anh khong tai duoc -> hien chu cai dau cua tieu de Job.
+2. Khoi phuc CSS ma phien ban ZIP gan nhat thieu:
+   src/main/resources/static/css/recruiter/jobs.css
+3. Giu nguyen Controller /candidate/dashboard va Job.logoUrl cua ban ZIP gan nhat.
+4. Da loai bo thu muc target/ (file build cu) de tranh dung nham HTML cu.
+
+CHAY LAI: Maven Reload > Build/Rebuild > Run OnlineRecruitmentApplication.
+Thuc thi SQL (kiem tra): SELECT id, title, logo_url FROM dbo.jobs ORDER BY id;
+Neu chi hien chu: F12 > Elements > tim img trong .job-logo, kiem tra src;
+F12 > Network > Img xem status; URL logo_url phai la link anh truy cap duoc.
+
+Luu y: Chua kiem thu end-to-end voi SQL Server cua ban.

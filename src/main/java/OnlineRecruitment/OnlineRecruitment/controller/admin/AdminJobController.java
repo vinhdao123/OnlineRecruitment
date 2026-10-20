@@ -2,17 +2,11 @@ package OnlineRecruitment.OnlineRecruitment.controller.admin;
 
 import OnlineRecruitment.OnlineRecruitment.entity.Job;
 import OnlineRecruitment.OnlineRecruitment.service.JobService;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -34,6 +28,7 @@ public class AdminJobController {
      * Tìm kiếm theo tiêu đề, địa điểm hoặc email nhà tuyển dụng.
      */
     @GetMapping
+    // Liệt kê jobs trong luồng tuyển dụng.
     public String listJobs(
             @RequestParam(required = false) String keyword,
             Model model
@@ -76,6 +71,7 @@ public class AdminJobController {
      * Duyệt tin tuyển dụng.
      */
     @PostMapping("/{id}/approve")
+    // Duyệt job trong luồng tuyển dụng.
     public String approveJob(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes
@@ -102,6 +98,7 @@ public class AdminJobController {
      * Từ chối tin tuyển dụng.
      */
     @PostMapping("/{id}/reject")
+    // Từ chối job trong luồng tuyển dụng.
     public String rejectJob(
             @PathVariable Long id,
             @RequestParam(required = false) String reason,

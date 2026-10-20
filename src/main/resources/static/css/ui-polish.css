@@ -3,7 +3,15 @@
    Đặt file này ở: src/main/resources/static/css/ui-polish.css
    Link SAU các file css khác để các quy tắc dưới đây được ưu tiên.
    ===================================================== */
-
+:root {
+    --ink: #0f1b2d;
+    --accent: #0b5d4b;
+    --accent-soft: #ecf5f2;
+    --accent-dark: #084a3c;
+    --line: #e4e7ec;
+    --line-strong: #cfd4dc;
+    --serif: 'Playfair Display', serif;
+}
 /* ---------- 1) NỀN TẢNG ---------- */
 
 /* Cuộn mượt khi bấm link dạng #job-list */
@@ -415,4 +423,40 @@ button.is-loading::after, .btn.is-loading::after {
         animation-delay: 0s !important;
         transition-duration: .01ms !important;
     }
+
+    .site-header .site-nav a i,
+    .site-header .site-logo .logo-mark i {
+        transition: transform 0.25s ease, color 0.25s ease;
+    }
+
+    .site-header .site-nav a:hover i {
+        transform: scale(1.18);
+    }
+
+    .site-header .site-nav a:active i {
+        transform: scale(0.9);
+    }
+
+    .site-header .nav-post i {
+        transition: transform 0.3s ease;
+    }
+
+    .site-header .nav-post:hover i {
+        transform: rotate(90deg);
+    }
+
+    .site-header .site-nav a {
+        transition: background-color 0.25s ease, color 0.25s ease;
+    }
+
+    .site-header .site-nav a:hover {
+        background-color: #e8f7f1;
+        color: #009b75;
+    }
+
+    .site-header .site-nav a:focus-visible {
+        outline: 2px solid #009b75;
+        outline-offset: 3px;
+    }
+
 }

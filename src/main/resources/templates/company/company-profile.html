@@ -1,0 +1,279 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách công ty | OnlineRecruitment</title>
+    <link rel="stylesheet" th:href="@{/css/company/company-profile.css}">
+</head>
+
+<body>
+
+<header class="header">
+    <nav class="navbar">
+
+        <a class="logo-brand" th:href="@{/}">
+            Online<span>Recruitment</span>
+        </a>
+
+        <div class="nav-links">
+            <a th:href="@{/jobs}">Việc làm</a>
+            <a th:href="@{/company-profile}" class="active">Công ty</a>
+            <a th:href="@{/}">Trang chủ</a>
+        </div>
+
+        <div class="nav-actions">
+
+            <!-- Chưa đăng nhập -->
+            <div sec:authorize="isAnonymous()" class="guest-menu">
+                <a class="btn" th:href="@{/login}">Đăng nhập</a>
+                <a class="btn btn-primary" th:href="@{/register}">Đăng ký</a>
+            </div>
+
+            <!-- Đã đăng nhập -->
+            <div sec:authorize="isAuthenticated()" class="user-menu">
+                <span class="username" sec:authentication="name">
+                    Tên đăng nhập
+                </span>
+
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn">Đăng xuất</button>
+                </form>
+            </div>
+
+        </div>
+
+    </nav>
+</header>
+
+<main>
+
+
+    <!-- Banner  saech công ty đỉa điểm-->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Danh sách công ty</h1>
+            <p>Khám phá các công ty và tìm hiểu môi trường làm việc phù hợp với bạn.</p>
+
+            <form class="search-form"
+                  th:action="@{/company-profile}"
+                  method="get">
+
+                <!-- Tìm theo tên công ty -->
+                <input type="text"
+                       name="keyword"
+                       th:value="${keyword}"
+                       placeholder="Nhập tên công ty..."
+                       aria-label="Tìm theo tên công ty">
+
+                <!-- Tìm theo địa điểm -->
+                <input type="text"
+                       name="location"
+                       th:value="${location}"
+                       placeholder="Nhập địa điểm, ví dụ: Hà Nội..."
+                       aria-label="Tìm theo địa điểm">
+
+                <button type="submit" class="btn btn-primary">
+                    Tìm kiếm
+                </button>
+
+            </form>
+        </div>
+    </section>
+
+
+    <section class="companies-section">
+        <h2>Các công ty tuyển dụng</h2>
+
+        <!-- Có công ty ACTIVE -->
+        <div class="company-grid" th:if="${not #lists.isEmpty(companies)}">
+
+            <div class="company-card" th:each="company : ${companies}">
+
+                <div class="company-logo">
+                    <img th:if="${company.logoUrl != null
+                              and !#strings.isEmpty(company.logoUrl)}"
+                         th:src="${company.logoUrl}"
+                         th:alt="${company.companyName}">
+
+                    <span th:unless="${company.logoUrl != null
+                                   and !#strings.isEmpty(company.logoUrl)}">
+                    <span th:text="${#strings.substring(company.companyName, 0, 1)}">C</span>
+                </span>
+                </div>
+
+                <div class="company-info">
+                    <h3 th:text="${company.companyName}">
+                        Tên công ty
+                    </h3>
+
+                    <p class="company-address">
+                        <span>Địa chỉ: </span>
+                        <span th:text="${company.address != null
+                                    ? company.address
+                                    : 'Chưa cập nhật'}">
+                        Hà Nội
+                    </span>
+                    </p>
+
+                    <p class="company-description"
+                       th:text="${company.description != null
+                             ? company.description
+                             : 'Chưa có mô tả công ty.'}">
+                        Mô tả công ty
+                    </p>
+
+                    <p class="company-size"
+                       th:if="${company.companySize != null}">
+                        <span>Quy mô: </span>
+                        <span th:text="${company.companySize}"></span>
+                    </p>
+
+                    <a class="company-detail-btn"
+                       th:href="@{/company-profile/{id}(id=${company.id})}">
+                        Xem thông tin
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Không có công ty ACTIVE -->
+        <div class="empty-state"
+             th:if="${#lists.isEmpty(companies)}">
+
+            <div class="empty-icon">⌕</div>
+
+            <h3>Chưa tìm thấy công ty</h3>
+
+            <p>Hiện chưa có công ty nào đang hoạt động.</p>
+
+        </div>
+    </section>
+
+<!--    &lt;!&ndash; Danh sách công ty &ndash;&gt;-->
+<!--    <section class="companies-section">-->
+
+<!--        <div class="section-heading">-->
+<!--            <div>-->
+<!--                <h2>Các công ty tuyển dụng</h2>-->
+<!--                <p class="muted" th:if="${companies != null}">-->
+<!--                    Tổng số:-->
+<!--                    <strong th:text="${companies.size()}">0</strong> công ty-->
+<!--                </p>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Có công ty &ndash;&gt;-->
+<!--        <div class="company-grid"-->
+<!--             th:if="${companies != null and !companies.isEmpty()}">-->
+
+<!--            <article class="company-card" th:each="company : ${companies}">-->
+
+<!--                <div class="company-card-top">-->
+<!--                    <div class="company-logo">-->
+<!--                        <span th:text="${company.companyName != null-->
+<!--                            and !company.companyName.isEmpty()-->
+<!--                            ? #strings.substring(company.companyName, 0, 1)-->
+<!--                            : 'C'}">C</span>-->
+<!--                    </div>-->
+
+<!--                    <div class="company-main-info">-->
+<!--                        <h3 th:text="${company.companyName}">-->
+<!--                            Tên công ty-->
+<!--                        </h3>-->
+
+<!--                        <span class="company-status"-->
+<!--                              th:if="${company.status != null}"-->
+<!--                              th:text="${company.status}">-->
+<!--                            Trạng thái-->
+<!--                        </span>-->
+<!--                    </div>-->
+<!--                </div>-->
+
+<!--                <div class="company-description"-->
+<!--                     th:text="${company.description != null-->
+<!--                         and !company.description.isEmpty()-->
+<!--                         ? company.description-->
+<!--                         : 'Công ty chưa cập nhật phần giới thiệu.'}">-->
+<!--                    Mô tả công ty-->
+<!--                </div>-->
+
+<!--                <div class="company-details">-->
+
+<!--                    <div class="detail">-->
+<!--                        <span class="detail-icon">⌖</span>-->
+<!--                        <span th:text="${company.address != null-->
+<!--                            and !company.address.isEmpty()-->
+<!--                            ? company.address-->
+<!--                            : 'Chưa cập nhật địa chỉ'}">-->
+<!--                            Địa chỉ-->
+<!--                        </span>-->
+<!--                    </div>-->
+
+<!--                    <div class="detail"-->
+<!--                         th:if="${company.companySize != null-->
+<!--                             and !company.companySize.isEmpty()}">-->
+<!--                        <span class="detail-icon">♙</span>-->
+<!--                        <span th:text="${company.companySize}">-->
+<!--                            Quy mô công ty-->
+<!--                        </span>-->
+<!--                    </div>-->
+
+<!--                    <div class="detail"-->
+<!--                         th:if="${company.website != null-->
+<!--                             and !company.website.isEmpty()}">-->
+<!--                        <span class="detail-icon">◎</span>-->
+<!--                        <a th:href="${company.website}"-->
+<!--                           th:text="${company.website}"-->
+<!--                           target="_blank"-->
+<!--                           rel="noopener noreferrer">-->
+<!--                            Website-->
+<!--                        </a>-->
+<!--                    </div>-->
+
+<!--                </div>-->
+
+<!--                <div class="company-card-footer">-->
+<!--                    <span class="company-label">Hồ sơ công ty</span>-->
+
+<!--                    <a class="btn btn-outline"-->
+<!--                       th:href="@{/company-profile}">-->
+<!--                        Xem hồ sơ-->
+<!--                    </a>-->
+<!--                </div>-->
+
+<!--            </article>-->
+
+<!--        </div>-->
+
+<!--        &lt;!&ndash; Chưa có công ty hoặc không tìm thấy &ndash;&gt;-->
+<!--        <div class="empty-state"-->
+<!--             th:if="${companies == null or companies.isEmpty()}">-->
+
+<!--            <div class="empty-icon">⌕</div>-->
+<!--            <h3>Chưa tìm thấy công ty</h3>-->
+<!--            <p>-->
+<!--                Không có công ty phù hợp với từ khóa của bạn,-->
+<!--                hoặc hệ thống chưa có dữ liệu công ty.-->
+<!--            </p>-->
+
+<!--            <a th:href="@{/company-profile}" class="btn btn-primary">-->
+<!--                Xem tất cả công ty-->
+<!--            </a>-->
+<!--        </div>-->
+
+<!--    </section>-->
+
+</main>
+
+<footer class="footer">
+    <p>© 2026 OnlineRecruitment · Kết nối ứng viên với cơ hội nghề nghiệp</p>
+</footer>
+
+</body>
+</html>

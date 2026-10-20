@@ -52,6 +52,10 @@ public class Job {
     @Column(name = "location", length = 500)
     private String location;
 
+    // Logo rieng cho tung tin; neu null giao dien su dung logo cua cong ty.
+    @Column(name = "logo_url", length = 500)
+    private String logoUrl;
+
     @Column(name = "salary_min")
     private BigDecimal salaryMin;
 
@@ -64,7 +68,7 @@ public class Job {
     @Column(name = "experience", length = 255)
     private String experience;
 
-    @Column(name = "level")
+    @Column(name = "level", length = 100)
     private String level;
 
     @Enumerated(EnumType.STRING)

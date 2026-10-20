@@ -58,4 +58,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
         ORDER BY c.createdAt DESC
     """)
     List<Company> findRecent(Pageable pageable);
+
+     // seach company
+    List<Company> findByStatus(CompanyStatus status);
 }

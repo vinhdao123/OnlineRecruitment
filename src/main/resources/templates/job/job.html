@@ -624,6 +624,12 @@
                     J
 
                 </span>
+                <!-- Ưu tiên logo riêng của Job; nếu trống thì dùng logo công ty. -->
+                <img th:if="${job.logoUrl != null or (job.company != null and job.company.logoUrl != null)}"
+                     th:src="${job.logoUrl != null and !#strings.isEmpty(job.logoUrl) ? job.logoUrl : (job.company != null ? job.company.logoUrl : null)}"
+                     th:alt="${job.title}"
+                     loading="lazy"
+                     onerror="this.style.display='none'">
 
             </div>
 

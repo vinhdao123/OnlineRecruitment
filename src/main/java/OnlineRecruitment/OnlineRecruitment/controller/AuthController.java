@@ -13,11 +13,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
+
     private final AuthService authService;
-    @GetMapping("/login")
-    public String showLoginPage() {
-        return "auth/login";
-    }
+
     @GetMapping("/verify-otp")
     public String showVerifyOtpForm(@RequestParam(value = "email", required = false) String email, Model model) {
         if (!model.containsAttribute("verifyDto")) {

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Quản lý Giao dịch')}"></head>
+<body class="admin">
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+<div class="main">
+    <div th:replace="~{admin/_layout :: topbar('Quản lý Giao dịch', 'Theo dõi doanh thu và lịch sử mua gói')}"></div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <!-- Thẻ hiển thị tổng doanh thu -->
+    <div class="cards-grid" style="grid-template-columns: repeat(1, 300px); margin-bottom: 24px;">
+        <div class="stat-card ok">
+            <div>
+                <div class="stat-label">Tổng doanh thu</div>
+                <div class="stat-value" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+            </div>
+            <div class="stat-icon">💵</div>
+        </div>
+    </div>
+
+    <div class="table-wrap" style="overflow: visible;">
+        <table class="data">
+            <thead>
+            <tr>
+                <th>Mã GD</th>
+                <th>Khách hàng</th>
+                <th>Gói dịch vụ</th>
+                <th>Số tiền</th>
+                <th>Ngày giao dịch</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${payments}">
+                <td th:text="'#' + ${p.id}"></td>
+                <td>
+                    <div style="font-weight: 600;" th:text="${p.user.username}"></div>
+                    <div style="font-size: 12px; color: #8895a8;" th:text="${p.user.email}"></div>
+                </td>
+                <td th:text="${p.servicePackage.name}"></td>
+                <td style="font-weight: bold; color: #2a6df4;" th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <span class="badge badge-pending" th:if="${p.status == 'PENDING'}">Chờ thanh toán</span>
+                    <span class="badge" style="background: #fff4e6; color: #b87c1f;" th:if="${p.status == 'WAITING_CONFIRM'}">Chờ Admin duyệt</span>
+                    <span class="badge badge-active" th:if="${p.status == 'SUCCESS'}">Thành công</span>
+                    <span class="badge badge-locked" th:if="${p.status == 'FAILED'}">Thất bại</span>
+                </td>
+                <td>
+                    <!-- Cho phép Admin duyệt cả hóa đơn PENDING (nếu khách chuyển khoản mà không bấm nút) và WAITING_CONFIRM -->
+                    <form th:if="${p.status == 'WAITING_CONFIRM' or p.status == 'PENDING'}"
+                          th:action="@{'/admin/payments/' + ${p.id} + '/approve'}"
+                          method="post" style="margin: 0;">
+                        <button type="submit" class="btn btn-success" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Xác nhận đã nhận được tiền?')">
+                            ✓ Duyệt
+                        </button>
+                    </form>
+                    <span th:if="${p.status == 'SUCCESS'}" style="color: #8895a8; font-size: 12px;">Hoàn tất</span>
+                </td>
+            </tr>
+            <tr th:if="${payments.isEmpty()}">
+                <td colspan="7" style="text-align: center; color: #8895a8; padding: 40px;">Chưa có giao dịch nào.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

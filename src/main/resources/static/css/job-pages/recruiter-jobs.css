@@ -1,0 +1,476 @@
+        /* ===== LƯỚI THẺ: 2 CỘT ===== */
+        .job-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* ===== THẺ THU GỌN (hình chữ nhật ngang) ===== */
+        .job-card {
+            position: relative;              /* để khung chi tiết bám theo thẻ */
+            min-width: 0;
+            box-sizing: border-box;
+            padding: 14px 16px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Thẻ đang được trỏ vào: viền xanh, nổi lên trên các thẻ khác */
+        .job-card:hover,
+        .job-card:has(:focus-visible),
+        .job-card.is-open {
+            z-index: 30;
+            border-color: #93c5fd;
+            box-shadow: 0 10px 28px rgba(37, 99, 235, 0.14);
+        }
+
+        /* Hàng ngang: logo | nội dung | trạng thái */
+        .job-card-compact {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        /* Ô logo chữ cái đầu của tiêu đề */
+        .job-logo {
+            flex: none;
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            color: #2563eb;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .job-compact-body {
+            flex: 1;
+            min-width: 0;                    /* cho phép chữ dài được cắt gọn */
+        }
+
+        /* Tiêu đề: tối đa 2 dòng, dài hơn thì hiện "..." */
+        .job-card-title {
+            margin: 0;
+            color: #172554;
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        .job-card-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .job-card-title a:hover {
+            color: #2563eb;
+        }
+
+        /* Dòng tên công ty: 1 dòng, dài thì cắt "..." */
+        .job-compact-company {
+            margin: 2px 0 8px;
+            color: #64748b;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Các nhãn nhỏ: lương, địa điểm, cấp bậc */
+        .job-compact-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .job-chip {
+            max-width: 100%;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .job-chip-salary {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* Cột bên phải: nhãn trạng thái */
+        .job-compact-side {
+            flex: none;
+            align-self: flex-start;
+        }
+
+        /* ===== KHUNG CHI TIẾT (hiện khi di chuột vào thẻ) ===== */
+        .job-card-detail {
+            position: absolute;
+            top: calc(100% + 6px);           /* nằm ngay dưới thẻ */
+            left: 0;
+            right: 0;
+            z-index: 40;
+            box-sizing: border-box;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid #93c5fd;
+            border-radius: 12px;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.18);
+
+            /* Mặc định ẩn */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            pointer-events: none;
+            transition: opacity 0.15s ease,
+            transform 0.15s ease,
+            visibility 0s linear 0.15s;
+        }
+
+        /* "Cầu nối" vô hình lấp khoảng hở 6px giữa thẻ và khung chi tiết,
+           để di chuột từ thẻ xuống khung không bị đóng giữa chừng */
+        .job-card-detail::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: -8px;
+            height: 8px;
+        }
+
+        /* Hiện khung: khi trỏ chuột vào, khi dùng bàn phím, hoặc khi chạm (điện thoại) */
+        .job-card:hover .job-card-detail,
+        .job-card:has(:focus-visible) .job-card-detail,
+        .job-card.is-open .job-card-detail {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+            pointer-events: auto;
+            /* Chờ 0.12 giây mới mở, tránh khung nhấp nháy khi lướt chuột nhanh */
+            transition: opacity 0.15s ease 0.12s,
+            transform 0.15s ease 0.12s,
+            visibility 0s linear 0.12s;
+        }
+
+        .job-detail-id {
+            margin-bottom: 10px;
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        /* Từng đoạn nội dung: mô tả, yêu cầu, quyền lợi */
+        .detail-section {
+            margin-bottom: 12px;
+        }
+
+        .detail-section h4 {
+            margin: 0 0 4px;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        /* Đoạn văn: tối đa 4 dòng, giữ xuống dòng người nhập */
+        .detail-text {
+            margin: 0;
+            color: #334155;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-line;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere;
+        }
+
+        /* Lưới thông tin: người đăng, địa điểm, hạn nộp... */
+        .job-card-meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 14px;
+            padding: 12px 0;
+            margin-bottom: 12px;
+            border-top: 1px solid #edf0f4;
+            border-bottom: 1px solid #edf0f4;
+        }
+
+        .job-meta-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            min-width: 0;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .job-meta-item i {
+            flex-shrink: 0;
+            width: 15px;
+            height: 15px;
+            margin-top: 1px;
+            color: #64748b;
+        }
+
+        .job-meta-label {
+            display: block;
+            margin-bottom: 2px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        /* ===== NHÃN TRẠNG THÁI ===== */
+        .job-card .status {
+            display: inline-flex;
+            width: fit-content;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .job-card .status-DRAFT {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .job-card .status-PENDING {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .job-card .status-ACTIVE,
+        .job-card .status-APPROVED {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .job-card .status-REJECTED {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .job-card .status-CLOSED {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        /* ===== LÝ DO TỪ CHỐI ===== */
+        .job-rejection-reason {
+            margin-bottom: 12px;
+            padding: 9px 10px;
+            border-radius: 8px;
+            background: #fff1f2;
+            color: #be123c;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        /* ===== NÚT THAO TÁC ===== */
+        .job-card-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .job-card-actions form {
+            display: inline-flex;
+            margin: 0;
+        }
+
+        .job-card-actions .ui-icon {
+            width: 14px;
+            height: 14px;
+        }
+
+        .job-card-actions button,
+        .job-card-actions a {
+            max-width: 100%;
+            font-family: inherit;
+            font-size: 12px;
+        }
+
+
+        .job-list-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 28px;
+        }
+
+        .job-list-heading h2 {
+            margin: 0;
+            color: #172554;
+            font-size: 22px;
+        }
+
+        .job-list-heading p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .job-result-count {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ===== PHÂN TRANG ===== */
+        /* Khung chứa thanh phân trang + dòng tóm tắt */
+        .job-pagination-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        /* Hàng các nút số trang */
+        .job-pagination {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Mỗi nút trang */
+        .job-pagination .page-link {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fff;
+            color: #334155;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .job-pagination a.page-link:hover {
+            border-color: #2563eb;
+            color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        /* Trang đang xem */
+        .job-pagination .page-link.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        /* Nút trước/sau khi không còn trang để đi */
+        .job-pagination .page-link.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        /* Dấu ba chấm giữa các số trang */
+        .job-pagination .page-dots {
+            padding: 0 4px;
+            color: #94a3b8;
+        }
+
+        /* Dòng "Hiển thị 1–9 trên 25 tin" */
+        .job-page-summary {
+            margin: 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* ===== MÀN HÌNH NHỎ: 1 CỘT ===== */
+        @media (max-width: 760px) {
+            .job-grid {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 12px;
+            }
+
+            .job-card {
+                padding: 12px 14px;
+            }
+
+            .job-logo {
+                width: 48px;
+                height: 48px;
+                font-size: 19px;
+            }
+
+            .job-card-meta {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        /* ===== TÔN TRỌNG THIẾT LẬP GIẢM CHUYỂN ĐỘNG ===== */
+        @media (prefers-reduced-motion: reduce) {
+            .job-card,
+            .job-card-detail,
+            .job-card:hover .job-card-detail,
+            .job-card:has(:focus-visible) .job-card-detail,
+            .job-card.is-open .job-card-detail {
+                transition: none;
+            }
+        }
+
+        /* Khu tài khoản + nút đăng xuất ở đầu trang quản lý */
+        .manage-actions { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+        .manage-actions form { margin:0; }
+        .recruiter-account { display:flex; align-items:center; gap:8px; padding:8px 12px;
+            border:1px solid #e2e8f0; border-radius:10px; background:#fff; }
+        .recruiter-account span { display:flex; flex-direction:column; line-height:1.25; }
+        .recruiter-account small { color:#64748b; font-size:12px; }
+
+        /* Ảnh logo phủ lên ô chữ cái; ảnh lỗi thì bị ẩn và lộ chữ cái bên dưới */
+        .job-logo { position: relative; overflow: hidden; }
+        .job-logo img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #fff;
+        }
+    

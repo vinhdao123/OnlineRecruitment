@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch sử giao dịch</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body style="background: #f4f6fa; margin: 0; padding: 40px 20px;">
+
+<div style="max-width: 900px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <h2 style="color: #1a2b4a; margin: 0;">Lịch sử giao dịch</h2>
+        <a th:href="@{/pricing}" class="btn btn-secondary">Quay lại Bảng giá</a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+    <div class="table-wrap" style="background:#fff; border-radius:12px; padding: 20px; overflow: visible;">
+        <table class="data" style="width: 100%;">
+            <thead>
+            <tr>
+                <th>Mã GD</th>
+                <th>Tên Gói</th>
+                <th>Số tiền</th>
+                <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${payments}">
+                <td th:text="'#' + ${p.id}"></td>
+                <td th:text="${p.servicePackage.name}"></td>
+                <td style="font-weight: bold; color: #2a6df4;" th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
+                <td>
+                    <span class="badge badge-pending" th:if="${p.status == 'PENDING'}">Chờ thanh toán</span>
+                    <span class="badge" style="background: #fff4e6; color: #b87c1f;" th:if="${p.status == 'WAITING_CONFIRM'}">Chờ Admin duyệt</span>
+                    <span class="badge badge-active" th:if="${p.status == 'SUCCESS'}">Thành công</span>
+                    <span class="badge badge-locked" th:if="${p.status == 'FAILED'}">Thất bại</span>
+                </td>
+                <!-- CỘT HÀNH ĐỘNG MỚI -->
+                <td>
+                    <div th:if="${p.status == 'PENDING'}" style="display: flex; gap: 8px;">
+                        <a th:href="@{'/pricing/resume/' + ${p.id}}" class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;">Thanh toán</a>
+
+                        <form th:action="@{'/pricing/cancel/' + ${p.id}}" method="post" style="margin: 0;">
+                            <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Bạn có chắc muốn hủy hóa đơn này?')">Hủy</button>
+                        </form>
+                    </div>
+                    <span th:if="${p.status == 'SUCCESS'}" style="color: #2a8c2a; font-size: 13px; font-weight: 600;">Đã kích hoạt</span>
+                </td>
+            </tr>
+            <tr th:if="${payments.isEmpty()}">
+                <td colspan="6" style="text-align: center; color: #8895a8; padding: 20px;">Chưa có giao dịch nào.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

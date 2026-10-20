@@ -1,7 +1,9 @@
 
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{admin/_layout :: head('Dashboard')}"></head>
+
 <body class="admin">
 
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
@@ -11,9 +13,12 @@
     <div th:replace="~{admin/_layout :: topbar('Dashboard', 'Overview')}"></div>
 
     <!-- ==================== WELCOME BANNER ==================== -->
-    <div class="section" style="background: linear-gradient(135deg, #e6efff 0%, #f0f6ff 100%);
-                                border: none;">
+    <div class="section"
+         style="background: linear-gradient(135deg, #e6efff 0%, #f0f6ff 100%);
+                border: none;">
+
         <div style="display: flex; justify-content: space-between; align-items: center;">
+
             <div>
                 <h2 style="font-size: 24px; font-weight: 700; color: #1a2b4a; margin-bottom: 8px;">
                     Welcome Back!
@@ -28,15 +33,30 @@
                     total items that require your attention.
                 </p>
 
-                <!-- ĐÃ SỬA: Chuyển đến trang duyệt tin tuyển dụng -->
-                <a th:href="@{/admin/jobs}"
-                   class="btn btn-primary"
-                   style="margin-top: 16px;">
-                    Review Pending →
-                </a>
+                <!--
+                    HAI NÚT QUẢN LÝ ADMIN
+                    1. Review Pending: mở danh sách tin đang chờ duyệt.
+                    2. Job Categories: mở trang quản lý danh mục.
+                -->
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
+
+                    <!-- Duyệt tin tuyển dụng -->
+                    <a th:href="@{/admin/jobs(status='PENDING')}"
+                       class="btn btn-primary">
+                        Review Pending →
+                    </a>
+
+                    <!-- Quản lý danh mục ngành nghề -->
+                    <a th:href="@{/admin/categories}"
+                       class="btn btn-primary">
+                        Job Categories →
+                    </a>
+
+                </div>
             </div>
 
             <div style="font-size: 64px; opacity: 0.3;">📋</div>
+
         </div>
     </div>
 
@@ -88,14 +108,14 @@
     <!-- ==================== CHARTS ==================== -->
     <div class="chart-grid">
 
-        <!-- Line chart: User Growth -->
+        <!-- Biểu đồ tăng trưởng người dùng -->
         <div class="chart-box">
             <h3>User Growth</h3>
             <p class="sub">Registration statistics over the last 6 months</p>
             <canvas id="growthChart"></canvas>
         </div>
 
-        <!-- Donut chart: User Roles -->
+        <!-- Biểu đồ phân bố vai trò -->
         <div class="chart-box">
             <h3>User Roles</h3>
             <p class="sub">Distribution by system privilege</p>
@@ -106,10 +126,13 @@
 
     <!-- ==================== RECENT ACTIVITY ==================== -->
     <div class="section">
+
         <div class="section-header">
             <div>
                 <div class="section-title">Recent Activity</div>
-                <div class="section-sub">Latest updates across the recruitment platform</div>
+                <div class="section-sub">
+                    Latest updates across the recruitment platform
+                </div>
             </div>
 
             <a th:href="@{/admin/activities}">View All →</a>
@@ -121,19 +144,30 @@
         </div>
 
         <div th:each="a : ${recentActivities}" class="activity-item">
+
             <div class="avatar"
                  th:text="${a.user != null and a.user.fullName != null and !a.user.fullName.isEmpty()
                            ? a.user.fullName.substring(0,1).toUpperCase()
-                           : 'S'}">A</div>
+                           : 'S'}">
+                A
+            </div>
 
             <div class="body">
-                <div class="action" th:text="${a.description}">Description</div>
-                <div class="time" th:text="${a.createdAt}">time</div>
+                <div class="action" th:text="${a.description}">
+                    Description
+                </div>
+
+                <div class="time" th:text="${a.createdAt}">
+                    time
+                </div>
             </div>
 
             <span class="tag"
                   th:if="${a.statusTag}"
-                  th:text="${a.statusTag}">Tag</span>
+                  th:text="${a.statusTag}">
+                Tag
+            </span>
+
         </div>
     </div>
 
@@ -145,16 +179,22 @@
 <script th:inline="javascript">
     /*<![CDATA[*/
 
-    const growthLabels = /*[[${growthLabels}]]*/ ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const growthData = /*[[${growthData}]]*/ [0, 0, 0, 0, 0, 0];
+    // Dữ liệu tăng trưởng do AdminDashboardController truyền xuống.
+    const growthLabels =
+        /*[[${growthLabels}]]*/ ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
 
+    const growthData =
+        /*[[${growthData}]]*/ [0, 0, 0, 0, 0, 0];
+
+    // Thống kê số tài khoản theo từng vai trò.
     const roleData = [
         /*[[${totalCandidates}]]*/ 0,
         /*[[${totalRecruiters}]]*/ 0,
         /*[[${totalAdmins}]]*/ 0
     ];
 
-    // ---- Line chart ----
+    // ==================== LINE CHART ====================
+    // Hiển thị số lượng người dùng đăng ký trong 6 tháng.
     const growthCtx = document.getElementById('growthChart');
 
     if (growthCtx) {
@@ -199,7 +239,8 @@
         });
     }
 
-    // ---- Donut chart ----
+    // ==================== DONUT CHART ====================
+    // Hiển thị tỷ lệ Candidate, Recruiter và Admin.
     const rolesCtx = document.getElementById('rolesChart');
 
     if (rolesCtx) {
@@ -209,7 +250,11 @@
                 labels: ['Candidate', 'Recruiter', 'Admin'],
                 datasets: [{
                     data: roleData,
-                    backgroundColor: ['#2a6df4', '#e6a23c', '#7a3cd3'],
+                    backgroundColor: [
+                        '#2a6df4',
+                        '#e6a23c',
+                        '#7a3cd3'
+                    ],
                     borderWidth: 0
                 }]
             },

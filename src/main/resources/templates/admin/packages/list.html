@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Quản lý Gói dịch vụ')}"></head>
+<body class="admin">
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+<div class="main">
+    <div th:replace="~{admin/_layout :: topbar('Quản lý Gói dịch vụ', 'Danh sách các gói dành cho Recruiter và Candidate')}"></div>
+
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <a th:href="@{/admin/packages/new}" class="btn btn-primary">+ Thêm Gói Mới</a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <div class="table-wrap" style="overflow: visible;">
+        <table class="data">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên Gói</th>
+                <th>Dành Cho</th>
+                <th>Giá (VNĐ)</th>
+                <th>Thời Hạn</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${packages}">
+                <td th:text="${p.id}"></td>
+                <td>
+                    <strong th:text="${p.name}"></strong><br>
+                    <small style="color: #8895a8;" th:text="${p.description}"></small>
+                </td>
+                <td>
+                    <span class="badge badge-candidate" th:if="${p.targetRole.name() == 'CANDIDATE'}">Candidate</span>
+                    <span class="badge badge-recruiter" th:if="${p.targetRole.name() == 'RECRUITER'}">Recruiter</span>
+                    <span class="badge" style="background:#eee;" th:if="${p.targetRole.name() == 'ADMIN'}">Tất cả</span>
+                </td>
+                <td th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                <td th:text="${p.durationDays} + ' ngày'"></td>
+                <td>
+                    <span class="badge badge-active" th:if="${p.isActive}">Đang bán</span>
+                    <span class="badge badge-locked" th:if="${!p.isActive}">Tạm ẩn</span>
+                </td>
+                <td>
+                    <a th:href="@{/admin/packages/{id}/edit(id=${p.id})}" class="btn btn-secondary" style="padding: 4px 8px; font-size:12px;">Sửa</a>
+                    <form th:action="@{/admin/packages/{id}/toggle(id=${p.id})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn" th:classappend="${p.isActive} ? 'btn-danger' : 'btn-success'" style="padding: 4px 8px; font-size:12px;">
+                            <span th:text="${p.isActive} ? 'Ẩn' : 'Bán'"></span>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

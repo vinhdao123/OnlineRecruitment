@@ -7,22 +7,14 @@ import OnlineRecruitment.OnlineRecruitment.entity.JobStatus;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import OnlineRecruitment.OnlineRecruitment.service.JobService;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -36,13 +28,14 @@ public class RecruiterJobController {
     private final UserRepository userRepository;
 
     // Số tin hiển thị trên mỗi trang
-    private static final int PAGE_SIZE = 9;
+    private static final int PAGE_SIZE = 6;
 
     // =====================================================
     // HIỂN THỊ TẤT CẢ TIN TUYỂN DỤNG TỪ DATABASE
     // =====================================================
 
     @GetMapping
+    // Liệt kê jobs trong luồng tuyển dụng.
     public String listJobs(
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String location,
@@ -124,6 +117,7 @@ public class RecruiterJobController {
     // =====================================================
 
     @GetMapping("/new")
+    // Tạo form trong luồng tuyển dụng.
     public String createForm(Model model) {
         model.addAttribute("jobForm", new RecruiterJobForm());
         model.addAttribute("categories", jobService.getActiveCategories());
@@ -138,6 +132,7 @@ public class RecruiterJobController {
     // =====================================================
 
     @GetMapping("/{id}/edit")
+    // Xử lý form trong luồng tuyển dụng.
     public String editForm(
             @PathVariable Long id,
             Authentication authentication,
@@ -183,11 +178,6 @@ public class RecruiterJobController {
             form.setQuantity(job.getQuantity());
             form.setDeadline(job.getDeadline());
 
-            // Đưa URL logo hiện tại của công ty lên form
-            if (job.getCompany() != null) {
-                form.setLogoUrl(job.getCompany().getLogoUrl());
-            }
-
             model.addAttribute("jobForm", form);
             model.addAttribute(
                     "categories",
@@ -218,6 +208,12 @@ public class RecruiterJobController {
     // LƯU BẢN NHÁP HOẶC GỬI TIN CHO ADMIN DUYỆT
     // =====================================================
 
+    /**
+     * Lưu bản nháp hoặc gửi tin chờ Admin duyệt.
+     * action=submit: lưu và chuyển trạng thái PENDING.
+     * action=draft: chỉ lưu nháp.
+     * Kết quả được lưu vào Flash Attribute để hiển thị sau redirect.
+     */
     @PostMapping("/save")
     public String saveJob(
             @ModelAttribute("jobForm") RecruiterJobForm form,
@@ -255,15 +251,12 @@ public class RecruiterJobController {
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    e.getMessage()
+                    "Không thể lưu tin tuyển dụng: " + e.getMessage()
             );
 
-            if (form.getJobId() != null) {
-                return "redirect:/recruiter/jobs/"
-                        + form.getJobId() + "/edit";
-            }
-
-            return "redirect:/recruiter/jobs/new";
+            // Chuyển về danh sách để hiện thông báo lỗi rõ ràng.
+            // Không báo thành công nếu dữ liệu chưa được lưu.
+            return "redirect:/recruiter/jobs";
         }
     }
 
@@ -272,6 +265,7 @@ public class RecruiterJobController {
     // =====================================================
 
     @PostMapping("/{id}/submit")
+    // Xử lý job trong luồng tuyển dụng.
     public String submitJob(
             @PathVariable Long id,
             Authentication authentication,
@@ -304,6 +298,7 @@ public class RecruiterJobController {
 
     // POST /recruiter/jobs/{id}/reopen : mở lại tin đã đóng
     @PostMapping("/{id}/reopen")
+    // Xử lý job trong luồng tuyển dụng.
     public String reopenJob(
             @PathVariable Long id,
             Authentication authentication,
@@ -332,6 +327,7 @@ public class RecruiterJobController {
     }
 
     @PostMapping("/{id}/close")
+    // Đóng job trong luồng tuyển dụng.
     public String closeJob(
             @PathVariable Long id,
             Authentication authentication,
@@ -365,6 +361,7 @@ public class RecruiterJobController {
             Authentication authentication
     ) {
         if (authentication == null) {
+            // Chặn thao tác nếu phiên đăng nhập không tồn tại.
             throw new IllegalArgumentException(
                     "Bạn cần đăng nhập để thực hiện thao tác này."
             );

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bảng giá dịch vụ</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <style>
+        .pricing-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .pricing-header { text-align: center; margin-bottom: 40px; }
+        .pricing-header h1 { font-size: 32px; color: #1a2b4a; margin-bottom: 10px; }
+        .pricing-header p { color: #8895a8; font-size: 16px; }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .price-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid #eef1f6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .price-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(42,109,244,0.1);
+            border-color: #2a6df4;
+        }
+
+        .price-card h3 { font-size: 20px; color: #1a2b4a; margin-bottom: 10px; }
+        .price-card .desc { font-size: 14px; color: #8895a8; min-height: 40px; margin-bottom: 20px; }
+        .price-card .price { font-size: 36px; font-weight: 700; color: #2a6df4; margin-bottom: 5px; }
+        .price-card .duration { font-size: 14px; color: #4a5568; margin-bottom: 30px; }
+
+        .btn-buy {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #2a6df4;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.15s;
+        }
+        .btn-buy:hover { background: #1d5ad6; }
+
+        .current-role-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: #e6efff;
+            color: #2a6df4;
+            font-weight: 600;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body style="background: #f4f6fa; margin: 0;">
+
+<div class="pricing-container">
+    <div class="pricing-header">
+        <h1>Nâng cấp tài khoản của bạn</h1>
+        <p>Chọn gói dịch vụ phù hợp để mở khóa các tính năng đặc biệt</p>
+        <div class="current-role-badge">
+            Bạn đang đăng nhập với vai trò:
+            <span th:text="${currentUser.role}"></span>
+        </div>
+    </div>
+
+    <div class="pricing-grid">
+        <!-- Vòng lặp hiển thị các gói -->
+        <div class="price-card" th:each="p : ${packages}">
+            <h3 th:text="${p.name}">Tên gói</h3>
+            <div class="desc" th:text="${p.description}">Mô tả</div>
+
+            <div class="price">
+                <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">0</span> đ
+            </div>
+            <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'"></div>
+
+            <!-- Nút mua gói -->
+            <a th:href="@{/pricing/checkout/{id}(id=${p.id})}" class="btn-buy">
+                Mua gói này
+            </a>
+        </div>
+
+        <!-- Nếu không có gói nào -->
+        <div th:if="${packages.isEmpty()}" style="grid-column: 1 / -1; text-align: center; color: #8895a8; padding: 40px;">
+            Hiện chưa có gói dịch vụ nào dành cho vai trò của bạn.
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px;">
+        <a th:href="@{/}" style="color: #2a6df4; text-decoration: none;">&larr; Quay lại trang chủ</a>
+    </div>
+</div>
+
+</body>
+</html>

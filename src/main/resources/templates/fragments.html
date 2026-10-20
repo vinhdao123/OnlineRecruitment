@@ -42,19 +42,32 @@
         <nav class="site-nav" aria-label="Điều hướng chính">
 
             <!-- Trang công khai: không hiển thị ở khu vực Admin -->
+
+            <!--
+                NÚT TRANG CHỦ
+                - Recruiter: chuyển về trang quản lý tuyển dụng.
+                - Candidate và người dùng khác: chuyển về trang chủ chung.
+            -->
             <a th:if="${activePage != 'admin'}"
-               th:href="@{/}"
+               th:href="${activePage == 'recruiter'} ? @{/recruiter/jobs} : @{/}"
                th:classappend="${activePage == 'home'} ? ' active' : ''">
                 <i data-lucide="house"></i>
                 <span>Trang chủ</span>
             </a>
 
+
+            <!--
+                NÚT VIỆC LÀM
+                - Recruiter: chuyển đến trang quản lý Job.
+                - Candidate và người dùng khác: xem danh sách việc làm công khai.
+            -->
             <a th:if="${activePage != 'admin'}"
-               th:href="@{/jobs}"
+               th:href="${activePage == 'recruiter'} ? @{/recruiter/jobs} : @{/jobs}"
                th:classappend="${activePage == 'jobs'} ? ' active' : ''">
                 <i data-lucide="search"></i>
                 <span>Việc làm</span>
             </a>
+
 
             <a th:if="${activePage != 'admin'}"
                th:href="@{/companies}"
@@ -71,6 +84,13 @@
                 <span>Dành cho tôi</span>
             </a>
 
+            <!-- MỚI: Tin đã lưu của ứng viên -->
+            <a th:if="${activePage == 'candidate'}"
+               th:href="@{/candidate/saved}">
+                <i data-lucide="bookmark"></i>
+                <span>Tin đã lưu</span>
+            </a>
+
             <!-- Khu vực Recruiter -->
             <a th:if="${activePage == 'recruiter'}"
                th:href="@{/recruiter/jobs}"
@@ -78,6 +98,13 @@
                th:classappend="${activePage == 'recruiter'} ? ' active' : ''">
                 <i data-lucide="layout-dashboard"></i>
                 <span>Quản lý tuyển dụng</span>
+            </a>
+
+            <!-- MỚI: Kho tin (nháp + đã đóng) -->
+            <a th:if="${activePage == 'recruiter'}"
+               th:href="@{/recruiter/jobs/archive}">
+                <i data-lucide="archive"></i>
+                <span>Kho tin</span>
             </a>
 
             <a th:if="${activePage == 'recruiter'}"
