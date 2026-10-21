@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recruiter Dashboard — Kênh tuyển dụng</title>
     <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
 </head>
 <body>
 
@@ -57,6 +58,23 @@
                 </div>
                 <a th:href="@{/recruiter/change-password}" class="btn btn-outline" style="justify-content: center;">
                     Thay đổi mật khẩu
+                </a>
+            </div>
+            <!-- Card 4: ứng vử viên  -->
+            <!-- Ứng viên chờ duyệt -->
+            <div class="dashboard-card">
+                <div class="card-icon">👥</div>
+
+                <h3>Ứng viên chờ duyệt</h3>
+
+                <p>
+                    Xem tất cả hồ sơ ứng tuyển đang chờ duyệt,
+                    kiểm tra thông tin ứng viên và cập nhật trạng thái hồ sơ.
+                </p>
+
+                <a th:href="@{/recruiter/applications?status=SUBMITTED}"
+                   class="btn btn-outline">
+                    Xem ứng viên chờ duyệt
                 </a>
             </div>
         </div>

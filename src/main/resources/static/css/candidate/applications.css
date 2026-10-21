@@ -1,0 +1,381 @@
+
+    /* =========================
+       CẤU HÌNH CHUNG
+    ========================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f3f7fc;
+    color: #172b4d;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* =========================
+   KHUNG TRANG
+========================= */
+
+.applications-wrapper {
+    max-width: 1250px;
+    margin: 40px auto;
+    padding: 0 24px 40px;
+}
+
+/* =========================
+   TIÊU ĐỀ
+========================= */
+
+.applications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.applications-header h1 {
+    margin: 0 0 12px;
+    font-size: 30px;
+    font-weight: 700;
+    color: #10254a;
+}
+
+.applications-header p {
+    margin: 0;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.7;
+}
+
+/* Tổng số đơn */
+
+.application-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: #ffffff;
+    border: 1px solid #e1eaf7;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+    color: #17366b;
+    white-space: nowrap;
+}
+
+.application-count strong {
+    color: #2563eb;
+    font-size: 18px;
+}
+
+.count-icon {
+    font-size: 25px;
+    color: #2563eb;
+}
+
+/* =========================
+   DANH SÁCH ĐƠN
+========================= */
+
+.applications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.application-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 26px 30px;
+    background: #ffffff;
+    border: 1px solid #e2eaf5;
+    border-radius: 16px;
+    box-shadow: 0 5px 18px rgba(15, 23, 42, 0.04);
+    transition: transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.application-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 9px 24px rgba(15, 23, 42, 0.08);
+}
+
+/* Logo công ty */
+
+.company-logo {
+    width: 100px;
+    min-width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f1f6ff;
+    border: 1px solid #e5edfa;
+    border-radius: 13px;
+    color: #2563eb;
+    font-size: 38px;
+}
+
+/* Nội dung đơn */
+
+.application-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.application-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5edf7;
+}
+
+.job-information h2 {
+    margin: 0 0 9px;
+    color: #10254a;
+    font-size: 21px;
+    line-height: 1.4;
+}
+
+.company-name {
+    margin: 0;
+    color: #2563eb;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Trạng thái */
+
+.status-information {
+    text-align: right;
+    min-width: 145px;
+}
+
+.status {
+    display: inline-block;
+    padding: 9px 15px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-submitted {
+    color: #b45309;
+    background: #fef3c7;
+}
+
+.status-approved {
+    color: #047857;
+    background: #d1fae5;
+}
+
+.status-rejected {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+.status-other {
+    color: #475569;
+    background: #f1f5f9;
+}
+
+.applied-date {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* =========================
+   THÔNG TIN CHI TIẾT
+========================= */
+
+.application-meta {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 0.6fr;
+    gap: 20px;
+    padding-top: 20px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.meta-icon {
+    color: #6796d8;
+    font-size: 26px;
+}
+
+.meta-item div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.meta-item small {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.meta-item strong {
+    color: #172b4d;
+    font-size: 13px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* =========================
+   CHƯA CÓ ĐƠN ỨNG TUYỂN
+========================= */
+
+.empty-state {
+    padding: 55px 24px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px dashed #93baff;
+    border-radius: 16px;
+}
+
+.empty-icon {
+    width: 76px;
+    height: 76px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: #e7f1ff;
+    color: #2563eb;
+    font-size: 35px;
+}
+
+.empty-state h2 {
+    margin: 0 0 12px;
+    color: #172b4d;
+    font-size: 22px;
+}
+
+.empty-state p {
+    margin: 0 0 24px;
+    color: #64748b;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+/* Nút khám phá việc làm */
+
+.btn-jobs {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 22px;
+    color: #ffffff;
+    background: #2563eb;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 600;
+    transition: background 0.2s ease;
+}
+
+.btn-jobs:hover {
+    background: #1d4ed8;
+}
+
+/* =========================
+   QUAY LẠI
+========================= */
+
+.back-link {
+    margin-top: 28px;
+}
+
+.back-link a {
+    color: #2563eb;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.back-link a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+    .application-card {
+        padding: 22px;
+        gap: 18px;
+    }
+
+    .company-logo {
+        width: 75px;
+        min-width: 75px;
+        height: 75px;
+    }
+
+    .application-top {
+        flex-direction: column;
+    }
+
+    .status-information {
+        text-align: left;
+    }
+
+    .application-meta {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .applications-wrapper {
+        margin-top: 25px;
+        padding: 0 14px 30px;
+    }
+
+    .applications-header h1 {
+        font-size: 24px;
+    }
+
+    .application-card {
+        flex-direction: column;
+        padding: 18px;
+    }
+
+    .company-logo {
+        width: 65px;
+        min-width: 65px;
+        height: 65px;
+        font-size: 30px;
+    }
+
+    .job-information h2 {
+        font-size: 18px;
+    }
+
+    .application-meta {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .application-count {
+        padding: 12px 16px;
+    }
+}

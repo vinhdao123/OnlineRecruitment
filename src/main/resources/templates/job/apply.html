@@ -1,0 +1,436 @@
+
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ứng tuyển công việc | Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/job/apply.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+</head>
+<body>
+
+<!-- Thanh điều hướng dùng chung -->
+<div th:replace="~{fragments/taskbar :: taskbar('jobs')}"></div>
+
+<main class="apply-page">
+
+    <nav class="breadcrumb" aria-label="Điều hướng">
+        <a th:href="@{/jobs}">Tìm việc làm</a>
+        <span>/</span>
+        <span>Ứng tuyển</span>
+    </nav>
+
+
+    <div class="alert alert-success"
+         role="status"
+         th:if="${successMessage != null}"
+         th:text="${successMessage}"></div>
+
+    <div class="alert alert-error"
+         role="alert"
+         th:if="${errorMessage != null}"
+         th:text="${errorMessage}"></div>
+
+    <!-- Không tìm thấy công việc -->
+    <section class="empty-job" th:if="${job == null}">
+        <div class="empty-icon">!</div>
+        <h2>Không tìm thấy công việc</h2>
+        <p>Công việc có thể đã bị xóa hoặc không còn tồn tại.</p>
+        <a class="button button-primary" th:href="@{/jobs}">
+            Quay lại danh sách việc làm
+        </a>
+    </section>
+
+    <!-- Form ứng tuyển -->
+    <form th:if="${job != null}"
+          th:action="@{/applications/submit}"
+          method="post"
+          class="application-layout">
+
+        <!-- CSRF của Spring Security -->
+        <input type="hidden"
+               th:if="${_csrf != null}"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <!-- Chỉ gửi ID công việc, không gửi candidate ID -->
+        <input type="hidden" name="jobId" th:value="${job.id}">
+
+        <!-- CỘT TRÁI -->
+        <div class="main-column">
+
+            <!-- Thông tin công việc -->
+            <section class="content-card">
+                <div class="section-heading">
+                    <span class="section-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="7" width="18" height="14" rx="2"/>
+                            <path d="M8 7V4h8v3M3 12h18M10 12v2h4v-2"/>
+                        </svg>
+                    </span>
+                    <h2>Thông tin công việc</h2>
+                </div>
+
+                <div class="job-information">
+                    <div class="company-logo">
+                        <span th:text="${job.company != null
+                            and job.company.companyName != null
+                            and !#strings.isEmpty(job.company.companyName)
+                            ? #strings.substring(job.company.companyName, 0, 1)
+                            : 'C'}">C</span>
+                    </div>
+
+                    <div class="job-content">
+                        <h3 th:text="${job.title}">Tên công việc</h3>
+
+                        <p class="company-name"
+                           th:text="${job.company != null
+                               and job.company.companyName != null
+                               ? job.company.companyName
+                               : 'Công ty tuyển dụng'}">
+                            Tên công ty
+                        </p>
+
+                        <div class="job-meta">
+                            <span>
+                                <span class="meta-symbol location">●</span>
+                                <span th:text="${job.location != null
+                                    ? job.location : 'Chưa cập nhật'}">
+                                    Địa điểm
+                                </span>
+                            </span>
+
+                            <span>
+                                <span class="meta-symbol salary">₫</span>
+
+                                <span th:if="${job.salaryMin != null
+                                              and job.salaryMax != null}"
+                                      th:text="${#numbers.formatDecimal(job.salaryMin / 1000000.0, 1, 1)
+                                          + ' - '
+                                          + #numbers.formatDecimal(job.salaryMax / 1000000.0, 1, 1)
+                                          + ' triệu'}">
+                                    Mức lương
+                                </span>
+
+                                <span th:if="${job.salaryMin == null
+                                              or job.salaryMax == null}">
+                                    Thỏa thuận
+                                </span>
+                            </span>
+
+                            <span>
+                                <span class="meta-symbol">◷</span>
+                                <span th:text="${job.experience != null
+                                    ? job.experience : 'Chưa yêu cầu'}">
+                                    Kinh nghiệm
+                                </span>
+                            </span>
+
+                            <span>
+    <span class="meta-symbol">▣</span>
+    <span>Hình thức làm việc</span>
+</span>
+                        </div>
+
+                        <p class="job-description"
+                           th:if="${job.description != null
+                                   and !#strings.isEmpty(job.description)}"
+                           th:text="${job.description}">
+                            Mô tả công việc
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Thông tin ứng viên -->
+            <section class="content-card">
+                <div class="section-heading">
+                    <span class="section-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4"/>
+                            <path d="M4 21v-2a8 8 0 0 1 16 0v2z"/>
+                        </svg>
+                    </span>
+
+                    <h2>Thông tin ứng viên</h2>
+
+
+                    <a class="edit-link" th:href="@{/candidate/profile}">
+                        Chỉnh sửa hồ sơ →
+                    </a>
+
+                </div>
+
+                <div class="candidate-grid">
+                    <div class="info-item">
+                        <span class="info-label">Họ và tên</span>
+                        <strong th:text="${candidateName != null
+                            ? candidateName : 'Chưa cập nhật'}">
+                            Họ tên
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Email</span>
+                        <strong th:text="${candidateEmail != null
+                            ? candidateEmail : 'Chưa cập nhật'}">
+                            Email
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Vị trí mong muốn</span>
+                        <strong th:text="${candidate != null
+                            and candidate.desiredPosition != null
+                            ? candidate.desiredPosition : 'Chưa cập nhật'}">
+                            Vị trí mong muốn
+                        </strong>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Địa chỉ</span>
+                        <strong th:text="${candidate != null
+                            and candidate.address != null
+                            ? candidate.address : 'Chưa cập nhật'}">
+                            Địa chỉ
+                        </strong>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chọn CV -->
+            <section class="content-card">
+                <div class="section-heading">
+                    <span class="section-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 3h9l4 4v14H6z"/>
+                            <path d="M15 3v5h4M9 12h7M9 16h7"/>
+                        </svg>
+                    </span>
+
+                    <div class="heading-content">
+                        <h2>Chọn CV ứng tuyển</h2>
+                        <p>Chọn một CV của bạn để gửi cho nhà tuyển dụng.</p>
+                    </div>
+
+                    <a class="edit-link" th:href="@{/candidate/cvs/new}">
+                        Tạo CV mới →
+                    </a>
+
+                </div>
+
+                <div class="empty-cv"
+                     th:if="${cvs == null or #lists.isEmpty(cvs)}">
+                    <div class="empty-cv-icon">▤</div>
+                    <h3>Bạn chưa có CV</h3>
+                    <p>Hãy tạo CV trước khi ứng tuyển công việc này.</p>
+                    <a class="button button-outline" th:href="@{/cv}">
+                        Tạo CV ngay
+                    </a>
+                </div>
+
+                <div class="cv-list"
+                     th:if="${cvs != null and !#lists.isEmpty(cvs)}">
+
+                    <label class="cv-option"
+                           th:each="cv, iter : ${cvs}">
+
+                        <input type="radio"
+                               name="cvId"
+                               th:value="${cv.id}"
+                               th:checked="${iter.first}"
+                               required>
+
+                        <span class="cv-file-icon">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M6 3h9l4 4v14H6z"/>
+                                <path d="M15 3v5h4M9 12h7M9 16h7"/>
+                            </svg>
+                        </span>
+
+                        <span class="cv-information">
+                            <strong th:text="${cv.title != null
+                                ? cv.title : 'CV cá nhân'}">
+                                CV xin việc
+                            </strong>
+                            <small>CV cá nhân</small>
+                        </span>
+
+                        <span class="cv-selected-label">Chọn CV</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Thư giới thiệu -->
+            <section class="content-card">
+                <div class="section-heading">
+                    <span class="section-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <rect x="3" y="5" width="18" height="14" rx="2"/>
+                            <path d="m4 7 8 6 8-6"/>
+                        </svg>
+                    </span>
+
+                    <div class="heading-content">
+                        <h2>
+                            Thư giới thiệu
+                            <span class="optional">(không bắt buộc)</span>
+                        </h2>
+                        <p>
+                            Giới thiệu ngắn gọn về bản thân và lý do bạn phù hợp
+                            với công việc.
+                        </p>
+                    </div>
+                </div>
+
+                <textarea id="coverLetter"
+                          name="coverLetter"
+                          maxlength="1000"
+                          rows="5"
+                          placeholder="Ví dụ: Tôi quan tâm đến vị trí này vì có kinh nghiệm phù hợp..."></textarea>
+
+                <div class="textarea-footer">
+                    <span>Tối đa 1000 ký tự</span>
+                    <span id="charCount">0/1000</span>
+                </div>
+            </section>
+        </div>
+
+        <!-- CỘT PHẢI: XÁC NHẬN ỨNG TUYỂN -->
+        <aside class="sidebar-column">
+            <section class="content-card summary-card">
+                <div class="section-heading">
+                    <span class="section-icon">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M6 3h9l4 4v14H6z"/>
+                            <path d="M15 3v5h4M9 12h7M9 16h7"/>
+                        </svg>
+                    </span>
+
+                    <div class="heading-content">
+                        <h2>Xác nhận ứng tuyển</h2>
+                        <p>Kiểm tra lại thông tin trước khi gửi hồ sơ.</p>
+                    </div>
+                </div>
+
+                <div class="summary-details">
+                    <div class="summary-item">
+                        <span class="summary-icon blue">▣</span>
+                        <div>
+                            <span class="info-label">Vị trí ứng tuyển</span>
+                            <strong th:text="${job.title}">Tên công việc</strong>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-icon navy">▦</span>
+                        <div>
+                            <span class="info-label">Công ty</span>
+                            <strong th:text="${job.company != null
+                                and job.company.companyName != null
+                                ? job.company.companyName
+                                : 'Công ty tuyển dụng'}">
+                                Tên công ty
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-icon pink">●</span>
+                        <div>
+                            <span class="info-label">Địa điểm</span>
+                            <strong th:text="${job.location != null
+                                ? job.location : 'Chưa cập nhật'}">
+                                Địa điểm
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-icon yellow">₫</span>
+                        <div>
+                            <span class="info-label">Mức lương</span>
+
+                            <strong th:if="${job.salaryMin != null
+                                            and job.salaryMax != null}"
+                                    th:text="${#numbers.formatDecimal(job.salaryMin / 1000000.0, 1, 1)
+                                        + ' - '
+                                        + #numbers.formatDecimal(job.salaryMax / 1000000.0, 1, 1)
+                                        + ' triệu'}">
+                                Mức lương
+                            </strong>
+
+                            <strong th:if="${job.salaryMin == null
+                                            or job.salaryMax == null}">
+                                Thỏa thuận
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="summary-item">
+                        <span class="summary-icon navy">◷</span>
+                        <div>
+                            <span class="info-label">Kinh nghiệm</span>
+                            <strong th:text="${job.experience != null
+                                ? job.experience : 'Chưa yêu cầu'}">
+                                Kinh nghiệm
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notice-box">
+                    <span class="notice-icon">i</span>
+                    <p>
+                        Nhà tuyển dụng sẽ xem xét hồ sơ của bạn sau khi gửi.
+                    </p>
+                </div>
+
+                <label class="confirm-option">
+                    <input type="checkbox"
+                           name="confirmInformation"
+                           value="true"
+                           required>
+                    <span>
+                        Tôi xác nhận thông tin đã cung cấp là chính xác.
+                    </span>
+                </label>
+
+                <button type="submit"
+                        class="submit-button"
+                        th:disabled="${cvs == null or #lists.isEmpty(cvs)}">
+                    <span aria-hidden="true">➤</span>
+                    Gửi hồ sơ ứng tuyển
+                </button>
+
+                <a class="back-button" th:href="@{/jobs}">
+                    Quay lại danh sách việc làm
+                </a>
+
+                <p class="privacy-note">
+                    Hồ sơ CV được gửi sẽ gắn với đơn ứng tuyển của bạn.
+                </p>
+            </section>
+        </aside>
+    </form>
+</main>
+
+<script>
+    const coverLetter = document.getElementById("coverLetter");
+    const charCount = document.getElementById("charCount");
+
+    if (coverLetter && charCount) {
+        const updateCount = () => {
+            charCount.textContent = coverLetter.value.length + "/1000";
+        };
+
+        coverLetter.addEventListener("input", updateCount);
+        updateCount();
+    }
+</script>
+
+</body>
+</html>

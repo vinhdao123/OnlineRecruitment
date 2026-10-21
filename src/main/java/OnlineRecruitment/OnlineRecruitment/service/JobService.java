@@ -267,4 +267,8 @@ public class JobService {
 
         return numbers;
     }
+
+    public Optional<Job> findJobById(Long id) {
+        return jobRepository.findById(id);
+    }
 }
