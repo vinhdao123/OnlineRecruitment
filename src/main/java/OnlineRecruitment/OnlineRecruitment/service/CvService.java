@@ -29,9 +29,14 @@ public class CvService {
                 .findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(candidate.getId(), "ACTIVE")
                 .stream()
                 .map(cv -> new CvSummaryVm(
-                        cv.getId(), cv.getTitle(), cv.getProfessionalTitle(), cv.getStatus(), cv.getIsDefault(),
+                        cv.getId(),
+                        cv.getTitle(),
+                        cv.getProfessionalTitle(),
+                        cv.getStatus(),
+                        cv.getIsDefault(),
                         cv.getUpdatedAt(),
-                        cv.getTemplateVersion() != null ? cv.getTemplateVersion().getTemplate().getName() : "N/A"
+                        cv.getTemplateVersion() != null ? cv.getTemplateVersion().getTemplate().getName() : "N/A",
+                        cv.getAvatarUrl() // Truyền thêm avatarUrl
                 ))
                 .toList();
     }
@@ -75,6 +80,7 @@ public class CvService {
         cv.setAccentColor(req.getAccentColor());
         cv.setStatus("ACTIVE");
         cv.setIsDefault(isFirstCv); // CV đầu tiên tự động làm mặc định
+        cv.setAvatarUrl(req.getAvatarUrl());
 
         cvRepository.save(cv);
     }
@@ -82,8 +88,10 @@ public class CvService {
     @Transactional
     public void updateCv(Long cvId, UpdateCvRequest req, Long userId) {
         Candidate candidate = getCandidate(userId);
+
         Cv cv = cvRepository.findByIdAndCandidateId(cvId, candidate.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CV"));
+        cv.setAvatarUrl(req.getAvatarUrl());
 
         if (!"ACTIVE".equals(cv.getStatus())) {
             throw new IllegalArgumentException("Không thể sửa CV đã bị vô hiệu hóa");
@@ -193,6 +201,7 @@ public class CvService {
 
         workRepo.save(work);
     }
+
 
     @Transactional
     public void deleteWorkExperience(Long cvId, Long workId, Long userId) {
@@ -383,4 +392,31 @@ public class CvService {
 
         return model;
     }
+
+    @Transactional(readOnly = true)
+    public java.util.Map<Long, java.util.Map<String, Object>> getCvListWithDetails(Long userId) {
+        OnlineRecruitment.OnlineRecruitment.entity.Candidate candidate = getCandidate(userId);
+
+        // Lấy danh sách CV cơ bản
+        java.util.List<OnlineRecruitment.OnlineRecruitment.entity.Cv> cvs =
+                cvRepository.findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(candidate.getId(), "ACTIVE");
+
+        // Dùng Map để chứa dữ liệu chi tiết của từng CV (Key: cvId)
+        java.util.Map<Long, java.util.Map<String, Object>> cvDataMap = new java.util.HashMap<>();
+
+        for (OnlineRecruitment.OnlineRecruitment.entity.Cv cv : cvs) {
+            java.util.Map<String, Object> detail = new java.util.HashMap<>();
+            detail.put("cv", cv);
+            // Lấy dữ liệu con (tái sử dụng các hàm đã viết ở GĐ3)
+            detail.put("works", getWorkExperiences(cv.getId(), userId));
+            detail.put("educations", getEducations(cv.getId(), userId));
+            detail.put("skills", getSkills(cv.getId(), userId));
+            detail.put("projects", getProjects(cv.getId(), userId));
+
+            cvDataMap.put(cv.getId(), detail);
+        }
+
+        return cvDataMap;
+    }
+
 }

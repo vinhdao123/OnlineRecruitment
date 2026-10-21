@@ -3,7 +3,10 @@ package OnlineRecruitment.OnlineRecruitment.dto.candidate;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class UpdateCvRequest {
     @NotBlank(message = "Tiêu đề không được để trống")
     @Size(max = 255, message = "Tiêu đề không quá 255 ký tự")
@@ -17,4 +20,6 @@ public class UpdateCvRequest {
     @NotBlank(message = "Màu chủ đạo không được để trống")
     @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Màu phải có dạng #RRGGBB")
     private String accentColor;
+
+    private String avatarUrl;
 }

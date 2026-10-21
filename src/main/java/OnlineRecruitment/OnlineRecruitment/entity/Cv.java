@@ -56,6 +56,9 @@ public class Cv {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(name = "avatar_url", length = 500)
+    private String avatarUrl;
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
@@ -67,4 +70,5 @@ public class Cv {
     public void preUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
 }

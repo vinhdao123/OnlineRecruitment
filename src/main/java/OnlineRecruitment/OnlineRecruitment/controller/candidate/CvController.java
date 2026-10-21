@@ -32,9 +32,16 @@ public class CvController {
     @GetMapping
     public String list(Authentication auth, Model model) {
         try {
-            var cvs = cvService.listMyCvs(getUserId(auth));
+            User user = userRepository.findByEmail(auth.getName())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
+
+            var cvs = cvService.listMyCvs(user.getId());
+            var cvDataMap = cvService.getCvListWithDetails(user.getId());
+
             model.addAttribute("cvs", cvs);
             model.addAttribute("hasCvs", !cvs.isEmpty());
+            model.addAttribute("profileUser", user);
+            model.addAttribute("cvDataMap", cvDataMap);
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("hasCvs", false);
@@ -70,11 +77,20 @@ public class CvController {
         }
     }
 
+    // ĐÃ SỬA: Trang chi tiết kiêm luôn chức năng Sửa (nếu có ?edit=true)
     @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
+    public String detail(@PathVariable Long id,
+                         @RequestParam(value = "edit", required = false, defaultValue = "false") boolean isEdit,
+                         Authentication auth, Model model, RedirectAttributes ra) {
         try {
             Cv cv = cvService.getCvDetail(id, getUserId(auth));
             model.addAttribute("cv", cv);
+            model.addAttribute("isEditMode", isEdit);
+
+            if (isEdit) {
+                // Nếu là chế độ sửa, chuẩn bị dữ liệu cho form
+                UpdateCvRequest req = new UpdateCvRequest(cv.getTitle(), cv.getProfessionalTitle(), cv.getSummary(), cv.getAccentColor(), cv.getAvatarUrl());                model.addAttribute("cvRequest", req);
+            }
             return "candidate/cv/detail";
         } catch (Exception e) {
             ra.addFlashAttribute("errorMessage", e.getMessage());
@@ -82,38 +98,48 @@ public class CvController {
         }
     }
 
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
-        try {
-            Cv cv = cvService.getCvDetail(id, getUserId(auth));
-            UpdateCvRequest req = new UpdateCvRequest(cv.getTitle(), cv.getProfessionalTitle(), cv.getSummary(), cv.getAccentColor());
-            model.addAttribute("cvRequest", req);
-            model.addAttribute("cvId", id);
-            model.addAttribute("isEdit", true);
-            return "candidate/cv/form";
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/candidate/cvs";
-        }
-    }
-
     @PostMapping("/{id}/update")
-    public String update(@PathVariable Long id, @Valid @ModelAttribute("cvRequest") UpdateCvRequest req,
-                         BindingResult result, Authentication auth, Model model, RedirectAttributes ra) {
+    public String update(@PathVariable Long id,
+                         @Valid @ModelAttribute("cvRequest") UpdateCvRequest req,
+                         BindingResult result,
+                         @RequestParam(value = "avatarFile", required = false) org.springframework.web.multipart.MultipartFile avatarFile,
+                         Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("cvId", id);
-            model.addAttribute("isEdit", true);
-            return "candidate/cv/form";
+            model.addAttribute("isEditMode", true);
+            model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
+            return "candidate/cv/detail";
         }
         try {
+            // Xử lý upload ảnh
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                try {
+                    // Lưu vào thư mục "uploads" ở thư mục gốc của project
+                    String uploadDir = System.getProperty("user.dir") + "/uploads/";
+                    java.io.File dir = new java.io.File(uploadDir);
+                    if (!dir.exists()) dir.mkdirs();
+
+                    // Đổi tên file để tránh trùng lặp
+                    String fileName = System.currentTimeMillis() + "_" + avatarFile.getOriginalFilename();
+                    java.nio.file.Path path = java.nio.file.Paths.get(uploadDir + fileName);
+                    java.nio.file.Files.copy(avatarFile.getInputStream(), path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+                    // Lưu đường dẫn ảnh vào DB
+                    req.setAvatarUrl("/uploads/" + fileName);
+                } catch (java.io.IOException e) {
+                    throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
+                }
+            }
+
             cvService.updateCv(id, req, getUserId(auth));
-            ra.addFlashAttribute("successMessage", "Cập nhật CV thành công!");
+            ra.addFlashAttribute("successMessage", "Cập nhật thông tin CV thành công!");
             return "redirect:/candidate/cvs/" + id;
         } catch (Exception e) {
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("cvId", id);
-            model.addAttribute("isEdit", true);
-            return "candidate/cv/form";
+            model.addAttribute("isEditMode", true);
+            model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
+            return "candidate/cv/detail";
         }
     }
 
@@ -138,16 +164,29 @@ public class CvController {
         }
         return "redirect:/candidate/cvs";
     }
-    @org.springframework.beans.factory.annotation.Autowired
-    private OnlineRecruitment.OnlineRecruitment.repository.candidate.CvWorkExperienceRepository workRepo;
-    // (Hoặc inject qua constructor nếu bạn muốn, nhưng dùng @Autowired cho nhanh ở bước này)
+
+    // ==========================================
+    // CÁC ROUTE CHO PHẦN NỘI DUNG CV (WORK, EDU, SKILL, PROJECT)
+    // ==========================================
+
+    @GetMapping("/{id}/preview")
+    public String previewCv(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
+        try {
+            java.util.Map<String, Object> cvData = cvService.getFullCvForPreview(id, getUserId(auth));
+            model.addAllAttributes(cvData);
+            return "candidate/cv/preview";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/candidate/cvs";
+        }
+    }
 
     @GetMapping("/{id}/work-experiences")
     public String listWorkExp(@PathVariable Long id, Authentication auth, Model model) {
         try {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("works", cvService.getWorkExperiences(id, getUserId(auth)));
-            model.addAttribute("workRequest", new OnlineRecruitment.OnlineRecruitment.dto.candidate.WorkExperienceRequest());
+            model.addAttribute("workRequest", new WorkExperienceRequest());
             return "candidate/cv/work-experience";
         } catch (Exception e) {
             return "redirect:/candidate/cvs";
@@ -155,10 +194,8 @@ public class CvController {
     }
 
     @PostMapping("/{id}/work-experiences/add")
-    public String addWorkExp(@PathVariable Long id,
-                             @jakarta.validation.Valid @ModelAttribute("workRequest") OnlineRecruitment.OnlineRecruitment.dto.candidate.WorkExperienceRequest req,
-                             org.springframework.validation.BindingResult result,
-                             Authentication auth, Model model, RedirectAttributes ra) {
+    public String addWorkExp(@PathVariable Long id, @Valid @ModelAttribute("workRequest") WorkExperienceRequest req,
+                             BindingResult result, Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("works", cvService.getWorkExperiences(id, getUserId(auth)));
@@ -183,12 +220,13 @@ public class CvController {
         }
         return "redirect:/candidate/cvs/" + id + "/work-experiences";
     }
+
     @GetMapping("/{id}/educations")
     public String listEdu(@PathVariable Long id, Authentication auth, Model model) {
         try {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("educations", cvService.getEducations(id, getUserId(auth)));
-            model.addAttribute("eduRequest", new OnlineRecruitment.OnlineRecruitment.dto.candidate.EducationRequest());
+            model.addAttribute("eduRequest", new EducationRequest());
             return "candidate/cv/education";
         } catch (Exception e) {
             return "redirect:/candidate/cvs";
@@ -196,10 +234,8 @@ public class CvController {
     }
 
     @PostMapping("/{id}/educations/add")
-    public String addEdu(@PathVariable Long id,
-                         @jakarta.validation.Valid @ModelAttribute("eduRequest") OnlineRecruitment.OnlineRecruitment.dto.candidate.EducationRequest req,
-                         org.springframework.validation.BindingResult result,
-                         Authentication auth, Model model, RedirectAttributes ra) {
+    public String addEdu(@PathVariable Long id, @Valid @ModelAttribute("eduRequest") EducationRequest req,
+                         BindingResult result, Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("educations", cvService.getEducations(id, getUserId(auth)));
@@ -224,13 +260,14 @@ public class CvController {
         }
         return "redirect:/candidate/cvs/" + id + "/educations";
     }
+
     @GetMapping("/{id}/skills")
     public String listSkills(@PathVariable Long id, Authentication auth, Model model) {
         try {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("cvSkills", cvService.getSkills(id, getUserId(auth)));
             model.addAttribute("allSkills", cvService.getAllAvailableSkills());
-            model.addAttribute("skillRequest", new OnlineRecruitment.OnlineRecruitment.dto.candidate.SkillRequest());
+            model.addAttribute("skillRequest", new SkillRequest());
             return "candidate/cv/skills";
         } catch (Exception e) {
             return "redirect:/candidate/cvs";
@@ -238,10 +275,8 @@ public class CvController {
     }
 
     @PostMapping("/{id}/skills/add")
-    public String addSkill(@PathVariable Long id,
-                           @jakarta.validation.Valid @ModelAttribute("skillRequest") OnlineRecruitment.OnlineRecruitment.dto.candidate.SkillRequest req,
-                           org.springframework.validation.BindingResult result,
-                           Authentication auth, Model model, RedirectAttributes ra) {
+    public String addSkill(@PathVariable Long id, @Valid @ModelAttribute("skillRequest") SkillRequest req,
+                           BindingResult result, Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("cvSkills", cvService.getSkills(id, getUserId(auth)));
@@ -267,12 +302,13 @@ public class CvController {
         }
         return "redirect:/candidate/cvs/" + id + "/skills";
     }
+
     @GetMapping("/{id}/projects")
     public String listProjects(@PathVariable Long id, Authentication auth, Model model) {
         try {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("projects", cvService.getProjects(id, getUserId(auth)));
-            model.addAttribute("projectRequest", new OnlineRecruitment.OnlineRecruitment.dto.candidate.ProjectRequest());
+            model.addAttribute("projectRequest", new ProjectRequest());
             return "candidate/cv/project";
         } catch (Exception e) {
             return "redirect:/candidate/cvs";
@@ -280,10 +316,8 @@ public class CvController {
     }
 
     @PostMapping("/{id}/projects/add")
-    public String addProject(@PathVariable Long id,
-                             @jakarta.validation.Valid @ModelAttribute("projectRequest") OnlineRecruitment.OnlineRecruitment.dto.candidate.ProjectRequest req,
-                             org.springframework.validation.BindingResult result,
-                             Authentication auth, Model model, RedirectAttributes ra) {
+    public String addProject(@PathVariable Long id, @Valid @ModelAttribute("projectRequest") ProjectRequest req,
+                             BindingResult result, Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
             model.addAttribute("projects", cvService.getProjects(id, getUserId(auth)));
@@ -309,15 +343,8 @@ public class CvController {
         return "redirect:/candidate/cvs/" + id + "/projects";
     }
 
-    @GetMapping("/{id}/preview")
-    public String previewCv(@PathVariable Long id, Authentication auth, Model model, RedirectAttributes ra) {
-        try {
-            java.util.Map<String, Object> cvData = cvService.getFullCvForPreview(id, getUserId(auth));
-            model.addAllAttributes(cvData);
-            return "candidate/cv/preview";
-        } catch (Exception e) {
-            ra.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/candidate/cvs";
-        }
+    @GetMapping("/cv-templates")
+    public String listTemplates() {
+        return "candidate/cv/templates";
     }
 }
