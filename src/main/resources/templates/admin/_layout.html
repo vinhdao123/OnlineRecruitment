@@ -1,9 +1,16 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<!-- ==================== HEAD FRAGMENT ==================== -->
 <head th:fragment="head(title)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${title} + ' — Online Recruitment Admin'">Admin</title>
+
+    <title th:text="${title} + ' — Online Recruitment Admin'">
+        Admin
+    </title>
+
     <link rel="stylesheet" th:href="@{/css/admin.css}">
 </head>
 
@@ -11,175 +18,331 @@
 
 <!-- ==================== SIDEBAR FRAGMENT ==================== -->
 <aside class="sidebar" th:fragment="sidebar">
+
+    <!-- LOGO ADMIN -->
     <div class="sidebar-logo">
         <div class="logo-icon">OR</div>
+
         <div>
             <div class="logo-text">RecruitAdmin</div>
             <div class="logo-sub">Pro</div>
         </div>
     </div>
 
+    <!-- ==================== NAVIGATION ==================== -->
     <nav>
+
         <!-- ========== MENU CHÍNH ========== -->
 
+        <!-- Dashboard -->
         <a th:href="@{/admin/dashboard}"
            class="nav-item"
            th:classappend="${activeMenu == 'dashboard'} ? 'active' : ''">
+
             <span class="icon">📊</span>
             <span>Dashboard</span>
         </a>
 
+        <!-- Quản lý người dùng -->
         <a th:href="@{/admin/users}"
            class="nav-item"
            th:classappend="${activeMenu == 'users'} ? 'active' : ''">
+
             <span class="icon">👥</span>
             <span>Users</span>
         </a>
 
+        <!-- Xem các đường dẫn ảnh hiện có trong database -->
+        <a th:href="@{/admin/images}" class="nav-item"
+           th:classappend="${activeMenu == 'images'} ? 'active' : ''">
+            <span class="icon">🖼️</span>
+            <span>Thư viện ảnh</span>
+        </a>
+
+        <!-- Quản lý gói dịch vụ -->
         <a th:href="@{/admin/packages}"
            class="nav-item"
            th:classappend="${activeMenu == 'packages'} ? 'active' : ''">
+
             <span class="icon">💳</span>
             <span>Gói dịch vụ</span>
         </a>
 
+        <!-- Quản lý giao dịch -->
         <a th:href="@{/admin/payments}"
            class="nav-item"
            th:classappend="${activeMenu == 'payments'} ? 'active' : ''">
+
             <span class="icon">💰</span>
             <span>Giao dịch</span>
         </a>
 
-        <!-- MENU CHA có submenu: Companies -->
-        <details class="nav-group" th:attr="open=${activeMenu == 'companies' or activeMenu == 'pending' or activeMenu == 'banned'} ? 'open' : null">
-            <summary class="nav-item nav-parent">
-                <span class="icon">🏢</span>
-                <span>Companies</span>
-                <span class="chevron">›</span>
-            </summary>
-            <div class="nav-submenu">
-                <a th:href="@{/admin/companies}"
-                   class="nav-sub-item"
-                   th:classappend="${activeMenu == 'companies'} ? 'active' : ''">
-                    Tất cả công ty
-                </a>
-                <a th:href="@{/admin/companies?status=PENDING}"
-                   class="nav-sub-item"
-                   th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
-                    Chờ duyệt
-                </a>
-                <a th:href="@{/admin/companies?status=LOCKED}"
-                   class="nav-sub-item"
-                   th:classappend="${activeMenu == 'banned'} ? 'active' : ''">
-                    Đã khóa
-                </a>
-            </div>
-        </details>
+        <!-- ==================== JOBS MENU ==================== -->
+        <!--
+            Menu Jobs chứa 3 mục:
+            - Tất cả job
+            - Chờ duyệt
+            - Đã đóng
 
-        <!-- MENU CHA có submenu: Jobs (nếu có) -->
-        <details class="nav-group" th:attr="open=${activeMenu == 'jobs'} ? 'open' : null">
+            Khi activeMenu thuộc một trong ba giá trị,
+            menu Jobs sẽ tự mở ra.
+        -->
+        <details class="nav-group"
+                 th:attr="open=${activeMenu == 'jobs'
+                                or activeMenu == 'jobs-pending'
+                                or activeMenu == 'jobs-closed'}
+                                ? 'open' : null">
+
             <summary class="nav-item nav-parent">
                 <span class="icon">💼</span>
                 <span>Jobs</span>
                 <span class="chevron">›</span>
             </summary>
+
             <div class="nav-submenu">
-                <a href="#" class="nav-sub-item">Tất cả job</a>
-                <a href="#" class="nav-sub-item">Chờ duyệt</a>
-                <a href="#" class="nav-sub-item">Đã đóng</a>
+
+                <!-- Tất cả tin tuyển dụng -->
+                <a th:href="@{/admin/jobs}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs'} ? 'active' : ''">
+                    Tất cả job
+                </a>
+
+                <!-- Tin đang chờ Admin duyệt -->
+                <a th:href="@{/admin/jobs(status='PENDING')}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs-pending'} ? 'active' : ''">
+                    Chờ duyệt
+                </a>
+
+                <!-- Tin tuyển dụng đã đóng -->
+                <a th:href="@{/admin/jobs(status='CLOSED')}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs-closed'} ? 'active' : ''">
+                    Đã đóng
+                </a>
+
             </div>
         </details>
 
+        <!-- ==================== NÚT DUYỆT TIN ==================== -->
+        <!--
+            Nút riêng cho Admin duyệt tin.
+            Khi bấm, chuyển đến danh sách Job trạng thái PENDING.
+            Không xóa mục Chờ duyệt đã có trong menu Jobs.
+        -->
+        <a th:href="@{/admin/jobs(status='PENDING')}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'jobs-pending'} ? 'active' : ''">
+
+            <span class="icon">✅</span>
+            <span>Duyệt tin</span>
+        </a>
+
+        <!-- ==================== SYSTEM ==================== -->
         <div class="nav-section">SYSTEM</div>
 
+        <!-- ==================== JOB CATEGORIES ==================== -->
+        <!--
+            Chức năng quản lý danh mục ngành nghề.
+            Dùng th:href để tự nhận đúng domain và cổng hiện tại.
+            Ví dụ: localhost:8082/admin/categories
+        -->
+        <a th:href="@{/admin/categories}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'categories'} ? 'active' : ''">
+
+            <span class="icon">📂</span>
+            <span>Job Categories</span>
+        </a>
+
+        <!-- Cài đặt -->
         <a href="#" class="nav-item">
             <span class="icon">⚙️</span>
             <span>Settings</span>
         </a>
 
-        <form th:action="@{/logout}" method="post" style="margin:0; padding:0;">
-            <button type="submit" class="nav-item" style="width:100%; text-align:left; background:none; border:none; cursor:pointer; font:inherit; color:inherit;">
+        <!-- ==================== ĐĂNG XUẤT ==================== -->
+        <!--
+            Đăng xuất bằng POST /logout.
+            Spring Security hỗ trợ CSRF thông qua Thymeleaf.
+        -->
+        <form th:action="@{/logout}"
+              method="post"
+              style="margin:0; padding:0;">
+
+            <button type="submit"
+                    class="nav-item"
+                    style="width:100%;
+                           text-align:left;
+                           background:none;
+                           border:none;
+                           cursor:pointer;
+                           font:inherit;
+                           color:inherit;">
+
                 <span class="icon">🚪</span>
                 <span>Đăng xuất</span>
             </button>
         </form>
+
     </nav>
 </aside>
 
+
 <!-- ==================== TOPBAR FRAGMENT ==================== -->
 <div class="topbar" th:fragment="topbar(title, subtitle)">
+
     <div class="topbar-title">
         <span th:text="${title}">Title</span>
-        <small th:if="${subtitle != null}" th:text="${subtitle}"></small>
+
+        <small th:if="${subtitle != null}"
+               th:text="${subtitle}">
+        </small>
     </div>
+
     <div class="topbar-actions">
+
+        <!-- Ô tìm kiếm chung -->
         <div class="search-global">
-            <input type="text" placeholder="Search candidates, companies..." maxlength="100">
+            <input type="text"
+                   placeholder="Search candidates, companies..."
+                   maxlength="100">
         </div>
-        <!-- User dropdown -->
+
+        <!-- ==================== USER DROPDOWN ==================== -->
         <div class="user-dropdown" id="userDropdown">
-            <button type="button" class="topbar-user" onclick="toggleUserMenu(event)">
+
+            <!--
+                Nút thông tin tài khoản.
+                Khi nhấn gọi toggleUserMenu(event)
+                để mở hoặc đóng menu tài khoản.
+            -->
+            <button type="button"
+                    class="topbar-user"
+                    onclick="toggleUserMenu(event)">
+
                 <div class="avatar-circle">
-                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">
+                        A
+                    </span>
                 </div>
-                <span th:text="${#authentication.name}">admin</span>
-                <span style="font-size:10px; opacity:0.6;">▼</span>
+
+                <span th:text="${#authentication.name}">
+                    admin
+                </span>
+
+                <span style="font-size:10px; opacity:0.6;">
+                    ▼
+                </span>
             </button>
 
+            <!-- Menu tài khoản -->
             <div class="dropdown-menu" id="userMenu">
+
                 <div class="dropdown-header">
-                    <div class="avatar-circle" style="width:36px; height:36px; font-size:14px;">
-                        <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+                    <div class="avatar-circle"
+                         style="width:36px; height:36px; font-size:14px;">
+
+                        <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">
+                            A
+                        </span>
                     </div>
+
                     <div>
                         <div style="font-weight:600; font-size:13px;"
-                             th:text="${#authentication.name}">admin</div>
+                             th:text="${#authentication.name}">
+                            admin
+                        </div>
+
                         <div style="font-size:11px; color:#8895a8;"
-                             th:text="${#authentication.authorities[0].authority}">ROLE_ADMIN</div>
+                             th:text="${#authentication.authorities[0].authority}">
+                            ROLE_ADMIN
+                        </div>
                     </div>
                 </div>
 
+                <!-- Settings -->
                 <a href="#" class="dropdown-item">
-                    <span>⚙</span> Settings
+                    <span>⚙</span>
+                    Settings
                 </a>
 
+                <!-- Profile -->
                 <a href="#" class="dropdown-item">
-                    <span>👤</span> Profile
+                    <span>👤</span>
+                    Profile
                 </a>
 
                 <div class="dropdown-divider"></div>
 
-                <form th:action="@{/logout}" method="post" style="margin:0;">
-                    <button type="submit" class="dropdown-item dropdown-item-danger">
-                        <span>🚪</span> Đăng xuất
+                <!-- Đăng xuất từ dropdown -->
+                <form th:action="@{/logout}"
+                      method="post"
+                      style="margin:0;">
+
+                    <button type="submit"
+                            class="dropdown-item dropdown-item-danger">
+
+                        <span>🚪</span>
+                        Đăng xuất
                     </button>
                 </form>
+
             </div>
         </div>
     </div>
 </div>
 
+
+<!-- ==================== JAVASCRIPT FRAGMENT ==================== -->
 <script th:fragment="scripts">
+
+    /**
+     * Mở hoặc đóng menu tài khoản Admin.
+     *
+     * event: sự kiện click nút tài khoản.
+     * stopPropagation(): không cho sự kiện click
+     * truyền ra ngoài làm menu đóng ngay lập tức.
+     */
     function toggleUserMenu(event) {
         event.stopPropagation();
+
         const menu = document.getElementById('userMenu');
-        if (menu) menu.classList.toggle('open');
+
+        if (menu) {
+            menu.classList.toggle('open');
+        }
     }
 
+    /**
+     * Đóng menu tài khoản khi người dùng
+     * nhấn chuột ra bên ngoài khu vực dropdown.
+     */
     document.addEventListener('click', function(e) {
+
         const menu = document.getElementById('userMenu');
         const dropdown = document.getElementById('userDropdown');
+
         if (dropdown && menu && !dropdown.contains(e.target)) {
             menu.classList.remove('open');
         }
     });
 
+    /**
+     * Đóng menu tài khoản khi nhấn phím ESC.
+     */
     document.addEventListener('keydown', function(e) {
+
         if (e.key === 'Escape') {
             const menu = document.getElementById('userMenu');
-            if (menu) menu.classList.remove('open');
+
+            if (menu) {
+                menu.classList.remove('open');
+            }
         }
     });
+
 </script>
 
 </body>

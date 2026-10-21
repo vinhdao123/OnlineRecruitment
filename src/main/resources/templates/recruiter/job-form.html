@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${jobForm.jobId != null ? 'Chỉnh sửa tin tuyển dụng' : 'Tạo tin tuyển dụng mới'}">
+    Tạo tin tuyển dụng mới
+  </title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+  <link rel="stylesheet" th:href="@{/css/job-pages/recruiter-job-form.css}">
+  <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+
+<body>
+<div class="page-wrapper">
+
+  <div class="back-links">
+    <a class="back-btn" th:href="@{/recruiter/jobs}">
+      <span aria-hidden="true">←</span>
+      Quay lại danh sách tin tuyển dụng
+    </a>
+  </div>
+
+  <header class="page-heading">
+    <div class="eyebrow">
+      <span class="eyebrow-dot"></span>
+      RECRUITMENT MANAGEMENT
+    </div>
+
+    <h1 th:text="${jobForm.jobId != null ? 'Chỉnh sửa tin tuyển dụng' : 'Tạo tin tuyển dụng mới'}">
+      Tạo tin tuyển dụng mới
+    </h1>
+
+    <p>
+      Tạo một tin tuyển dụng <strong>chuyên nghiệp và rõ ràng</strong>
+      để tiếp cận ứng viên phù hợp với vị trí của doanh nghiệp.
+    </p>
+  </header>
+
+  <div class="layout">
+
+    <main class="form-card">
+      <div class="form-card-header">
+        <h2>Thông tin tin tuyển dụng</h2>
+        <p>
+          Điền các thông tin bên dưới. Những trường có dấu
+          <span class="required">*</span> là bắt buộc.
+        </p>
+      </div>
+
+      <div class="form-body">
+
+        <div class="alert alert-error"
+             th:if="${errorMessage != null}"
+             th:text="${errorMessage}">
+          Có lỗi xảy ra.
+        </div>
+
+        <div class="alert alert-success"
+             th:if="${successMessage != null}"
+             th:text="${successMessage}">
+          Thao tác thành công.
+        </div>
+
+        <form th:action="@{/recruiter/jobs/save}"
+              th:object="${jobForm}"
+              method="post"
+              enctype="multipart/form-data">
+
+          <input type="hidden" th:field="*{jobId}">
+
+          <input th:if="${_csrf != null}"
+                 type="hidden"
+                 th:name="${_csrf.parameterName}"
+                 th:value="${_csrf.token}">
+
+          <!-- SECTION 1 -->
+          <section class="section">
+            <div class="section-heading">
+              <div class="section-number">01</div>
+              <div>
+                <h3>Thông tin cơ bản</h3>
+                <p>Thông tin nhận diện vị trí đang tuyển dụng.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full">
+                <label for="title">
+                  Tên vị trí tuyển dụng
+                  <span class="required">*</span>
+                </label>
+                <input id="title"
+                       class="form-control"
+                       type="text"
+                       th:field="*{title}"
+                       maxlength="255"
+                       placeholder="Ví dụ: Junior Backend Developer"
+                       required>
+                <span class="field-hint">
+                                    Nên sử dụng tên vị trí ngắn gọn, rõ ràng và dễ tìm kiếm.
+                                </span>
+              </div>
+
+              <div class="form-group">
+                <label for="categoryId">
+                  Danh mục công việc
+                  <span class="required">*</span>
+                </label>
+                <select id="categoryId"
+                        class="form-control"
+                        th:field="*{categoryId}"
+                        required>
+                  <option value="">-- Chọn danh mục --</option>
+                  <option th:each="category : ${categories}"
+                          th:value="${category.id}"
+                          th:text="${category.name}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="employmentType">
+                  Hình thức làm việc
+                  <span class="required">*</span>
+                </label>
+                <select id="employmentType"
+                        class="form-control"
+                        th:field="*{employmentType}"
+                        required>
+                  <option value="">-- Chọn hình thức --</option>
+                  <option th:each="type : ${employmentTypes}"
+                          th:value="${type}"
+                          th:text="${type}">
+                  </option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="level">Cấp bậc</label>
+                <select id="level" class="form-control" th:field="*{level}">
+                  <option value="">-- Chọn cấp bậc --</option>
+                  <option value="Intern">Intern</option>
+                  <option value="Fresher">Fresher</option>
+                  <option value="Junior">Junior</option>
+                  <option value="Middle">Middle</option>
+                  <option value="Senior">Senior</option>
+                  <option value="Lead">Team Lead</option>
+                  <option value="Manager">Manager</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="experience">Kinh nghiệm</label>
+                <select id="experience" class="form-control" th:field="*{experience}">
+                  <option value="">-- Chọn kinh nghiệm --</option>
+                  <option value="Không yêu cầu">Không yêu cầu</option>
+                  <option value="Dưới 1 năm">Dưới 1 năm</option>
+                  <option value="1-2 năm">1–2 năm</option>
+                  <option value="2-3 năm">2–3 năm</option>
+                  <option value="3-5 năm">3–5 năm</option>
+                  <option value="Trên 5 năm">Trên 5 năm</option>
+                </select>
+              </div>
+
+              <div class="form-group full">
+                <label for="location">
+                  Địa điểm làm việc
+                  <span class="required">*</span>
+                </label>
+                <input id="location"
+                       class="form-control"
+                       type="text"
+                       th:field="*{location}"
+                       placeholder="Ví dụ: Hà Nội hoặc Hybrid"
+                       required>
+              </div>
+
+              <!-- Upload anh rieng cho Job; khong thay doi logo cong ty. -->
+              <div class="form-group full">
+                <label for="jobImageFile">Ảnh riêng của tin tuyển dụng <span class="optional">(Không bắt buộc)</span></label>
+                <input id="jobImageFile" class="form-control" type="file"
+                       th:field="*{jobImageFile}" accept="image/jpeg,image/png,image/gif,image/webp">
+                <span class="field-hint">Chọn JPG, PNG, GIF hoặc WebP, tối đa 10 MB. Ảnh được lưu trong uploads/jobs/.</span>
+                <img id="jobImagePreview" alt="Ảnh Job đang chọn"
+                     style="display:none;max-width:180px;max-height:120px;object-fit:contain;margin-top:10px;border-radius:8px">
+                <img th:if="${currentJobImageUrl != null}"
+                     th:src="${currentJobImageUrl}" alt="Ảnh Job hiện tại"
+                     style="max-width:180px;max-height:120px;object-fit:contain;margin-top:10px;border-radius:8px">
+              </div>
+
+              <!-- URL logo công ty: dán link ảnh, để trống = giữ logo hiện tại -->
+              <div class="form-group full">
+                <label for="logoUrl">
+                  Logo công ty (URL ảnh)
+                  <span class="optional">(Không bắt buộc)</span>
+                </label>
+
+                <div class="logo-field">
+                  <!-- Ảnh xem trước: hiện khi có URL hợp lệ -->
+                  <img id="logoPreview"
+                       class="logo-preview"
+                       th:classappend="${jobForm.logoUrl != null and !#strings.isEmpty(jobForm.logoUrl)} ? 'show'"
+                       th:src="${jobForm.logoUrl}"
+                       alt="Xem trước logo">
+
+                  <input id="logoUrl"
+                         class="form-control"
+                         type="url"
+                         th:field="*{logoUrl}"
+                         maxlength="500"
+                         placeholder="https://example.com/logo.png">
+                </div>
+
+                <span class="field-hint">
+                  Dán đường dẫn ảnh logo (bắt đầu bằng <strong>https://</strong>).
+                  Logo thuộc về công ty nên sẽ áp dụng cho tất cả tin của công ty.
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- SECTION 2 -->
+          <section class="section">
+            <div class="section-heading">
+              <div class="section-number">02</div>
+              <div>
+                <h3>Lương và số lượng</h3>
+                <p>Giúp ứng viên nắm được quyền lợi cơ bản.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full">
+                <label class="salary-label" for="salaryMin">
+                  Mức lương
+                  <span class="salary-tag">SALARY</span>
+                </label>
+
+                <div class="salary-grid">
+                  <input id="salaryMin"
+                         class="form-control"
+                         type="number"
+                         th:field="*{salaryMin}"
+                         min="0"
+                         placeholder="Lương tối thiểu">
+
+                  <input id="salaryMax"
+                         class="form-control"
+                         type="number"
+                         th:field="*{salaryMax}"
+                         min="0"
+                         placeholder="Lương tối đa">
+
+                  <div class="currency-field">
+                    <label for="salaryCurrency">Đơn vị</label>
+                    <select id="salaryCurrency"
+                            class="form-control"
+                            th:field="*{salaryCurrency}">
+                      <option value="VND">VND</option>
+                      <option value="USD">USD</option>
+                    </select>
+                  </div>
+                </div>
+
+                <span class="field-hint">
+                                    Có thể để trống nếu doanh nghiệp chưa muốn công khai mức lương.
+                                </span>
+              </div>
+
+              <div class="form-group">
+                <label for="quantity">
+                  Số lượng cần tuyển
+                  <span class="required">*</span>
+                </label>
+                <input id="quantity"
+                       class="form-control"
+                       type="number"
+                       th:field="*{quantity}"
+                       min="1"
+                       required>
+              </div>
+
+              <div class="form-group">
+                <label for="deadline">Hạn nộp hồ sơ</label>
+                <input id="deadline"
+                       class="form-control"
+                       type="date"
+                       th:field="*{deadline}">
+                <span class="field-hint">
+                                    Chọn ngày kết thúc nhận hồ sơ.
+                                </span>
+              </div>
+            </div>
+          </section>
+
+          <!-- SECTION 3 -->
+          <section class="section">
+            <div class="section-heading">
+              <div class="section-number">03</div>
+              <div>
+                <h3>Mô tả công việc</h3>
+                <p>Nêu rõ công việc ứng viên sẽ thực hiện.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group full">
+                <label for="description">
+                  Mô tả công việc
+                  <span class="required">*</span>
+                </label>
+                <textarea id="description"
+                          class="form-control large-textarea"
+                          th:field="*{description}"
+                          placeholder="Mô tả nhiệm vụ, trách nhiệm và công việc hằng ngày..."
+                          required></textarea>
+              </div>
+
+              <div class="form-group full">
+                <label for="requirements">
+                  Yêu cầu ứng viên
+                  <span class="required">*</span>
+                </label>
+                <textarea id="requirements"
+                          class="form-control"
+                          th:field="*{requirements}"
+                          placeholder="Kỹ năng, kiến thức, bằng cấp và kinh nghiệm cần có..."
+                          required></textarea>
+              </div>
+
+              <div class="form-group full">
+                <label for="benefits">
+                  Quyền lợi
+                  <span class="optional">(Không bắt buộc)</span>
+                </label>
+                <textarea id="benefits"
+                          class="form-control"
+                          th:field="*{benefits}"
+                          placeholder="Lương thưởng, bảo hiểm, đào tạo, môi trường làm việc..."></textarea>
+              </div>
+            </div>
+          </section>
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+            <div class="action-note">
+              Lưu bản nháp để hoàn thiện sau hoặc gửi tin tuyển dụng
+              để xử lý theo quy trình của hệ thống.
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn btn-draft"
+                      type="submit"
+                      name="action"
+                      value="draft">
+                Lưu bản nháp
+              </button>
+
+              <button class="btn btn-submit"
+                      type="submit"
+                      name="action"
+                      value="submit">
+                Gửi tin tuyển dụng
+                <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+
+          <script>
+            document.getElementById('jobImageFile')?.addEventListener('change', function () {
+              const file = this.files && this.files[0];
+              const preview = document.getElementById('jobImagePreview');
+              if (preview.dataset.previewUrl) URL.revokeObjectURL(preview.dataset.previewUrl);
+              if (!file) { preview.style.display = 'none'; return; }
+              const objectUrl = URL.createObjectURL(file);
+              preview.dataset.previewUrl = objectUrl;
+              preview.src = objectUrl;
+              preview.style.display = 'block';
+            });
+          </script>
+        </form>
+      </div>
+    </main>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <rect x="5" y="3" width="14" height="18" rx="2"/>
+              <path d="M9 8h6M9 12h6M9 16h3"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Tin tuyển dụng chuyên nghiệp</h3>
+            <span>Professional listing</span>
+          </div>
+        </div>
+
+        <p>
+          Một tin tuyển dụng có thông tin rõ ràng giúp ứng viên
+          hiểu đúng vị trí và chủ động ứng tuyển.
+        </p>
+      </section>
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="8" r="3"/>
+              <path d="M3 20v-2a6 6 0 0 1 12 0v2"/>
+              <path d="M16 5.5a3 3 0 0 1 0 5.8M18 14a5 5 0 0 1 3 4.5V20"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Tiếp cận đúng ứng viên</h3>
+            <span>Candidate targeting</span>
+          </div>
+        </div>
+
+        <ul class="benefit-list">
+          <li>
+            <span class="check-icon">✓</span>
+            <span>Chọn đúng danh mục và cấp bậc công việc.</span>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <span>Ghi rõ kỹ năng và kinh nghiệm cần thiết.</span>
+          </li>
+          <li>
+            <span class="check-icon">✓</span>
+            <span>Cung cấp địa điểm và quyền lợi minh bạch.</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="side-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/>
+              <path d="m9 12 2 2 4-4"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Quy trình đăng tin</h3>
+            <span>Posting workflow</span>
+          </div>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <div>
+              <strong>Điền thông tin</strong>
+              <span>Hoàn thiện các trường thông tin cần thiết.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">2</div>
+            <div>
+              <strong>Lưu hoặc gửi tin</strong>
+              <span>Lưu nháp hoặc gửi theo quy trình của hệ thống.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-number">3</div>
+            <div>
+              <strong>Theo dõi trạng thái</strong>
+              <span>Kiểm tra trạng thái tin trong danh sách quản lý.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="side-card tip-card">
+        <div class="side-card-header">
+          <div class="side-icon">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18h6M10 22h4"/>
+              <path d="M8 14a7 7 0 1 1 8 0c-1 .7-1 2-1 2h-6s0-1.3-1-2Z"/>
+            </svg>
+          </div>
+          <div>
+            <h3>Mẹo nhỏ</h3>
+            <span>Recruitment tip</span>
+          </div>
+        </div>
+
+        <p>
+          Hãy viết phần yêu cầu thành các ý cụ thể, ưu tiên những kỹ năng
+          <strong>thực sự cần thiết</strong> cho công việc.
+          Tránh đưa quá nhiều tiêu chí không liên quan.
+        </p>
+      </section>
+
+    </aside>
+  </div>
+
+  <footer class="footer-note">
+    Recruitment Management System · Quản lý tin tuyển dụng
+  </footer>
+</div>
+
+<script th:src="@{/js/job-pages/recruiter-job-form.js}"></script>
+<script th:src="@{/js/ui-polish.js}"></script>
+</body>
+</html>

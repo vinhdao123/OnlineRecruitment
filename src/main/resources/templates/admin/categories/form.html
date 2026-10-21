@@ -1,0 +1,121 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle}">Job Category</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f5f7fb;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: auto;
+            background: white;
+            padding: 24px;
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        textarea {
+            min-height: 130px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 14px;
+            border: 0;
+            border-radius: 5px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .error {
+            color: #b91c1c;
+            font-size: 14px;
+        }
+
+        .alert {
+            background: #fee2e2;
+            padding: 10px;
+            color: #991b1b;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1 th:text="${pageTitle}">Job Category</h1>
+
+    <div class="alert"
+         th:if="${errorMessage}"
+         th:text="${errorMessage}"></div>
+
+    <form th:object="${categoryForm}"
+          th:action="${categoryId == null}
+              ? @{/admin/categories}
+              : @{/admin/categories/{id}(id=${categoryId})}"
+          method="post">
+
+        <label for="name">Category Name</label>
+        <input id="name"
+               type="text"
+               th:field="*{name}"
+               maxlength="150"
+               placeholder="Example: IT, Marketing, HR"
+               required>
+
+        <div class="error"
+             th:if="${#fields.hasErrors('name')}"
+             th:errors="*{name}"></div>
+
+        <label for="description">Description</label>
+        <textarea id="description"
+                  th:field="*{description}"
+                  placeholder="Enter category description"></textarea>
+
+        <!-- Trạng thái chỉ chỉnh sửa cho Category đã tồn tại -->
+        <div th:if="${categoryId != null}">
+            <label for="status">Status</label>
+            <select id="status" th:field="*{status}"
+                    style="box-sizing:border-box;width:100%;padding:10px;margin-top:6px;border:1px solid #ccc;border-radius:5px;">
+                <option value="ACTIVE">ACTIVE - Cho phép đăng tin mới</option>
+                <option value="INACTIVE">INACTIVE - Không cho đăng tin mới</option>
+            </select>
+            <p style="font-size:12px;color:#64748b;">
+                Tin tuyển dụng cũ vẫn giữ Category này; Recruiter không thể dùng Category INACTIVE cho tin mới.
+            </p>
+        </div>
+
+        <button class="btn" type="submit">Save</button>
+
+        <a class="btn"
+           style="background:#64748b"
+           th:href="@{/admin/categories}">
+            Cancel
+        </a>
+    </form>
+</div>
+</body>
+</html>

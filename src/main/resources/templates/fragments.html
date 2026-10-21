@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- ================= HEADER ================= -->
+<header th:fragment="siteHeader(activePage)" class="site-header">
+    <div class="header-inner">
+
+        <!-- LOGO -->
+        <a th:href="@{/}" class="site-logo">
+            <span class="logo-mark">
+                <i data-lucide="briefcase-business"></i>
+            </span>
+
+            <span class="logo-text">
+                <span class="logo-online">Online</span><span class="logo-highlight">Recruitment</span>
+            </span>
+
+            <span class="logo-subtitle"
+                  th:if="${activePage == 'admin'}">
+                ADMIN WORKSPACE
+            </span>
+
+            <span class="logo-subtitle"
+                  th:if="${activePage == 'recruiter'}">
+                RECRUITER WORKSPACE
+            </span>
+
+            <!-- MỚI: nhãn cho khu vực ứng viên -->
+            <span class="logo-subtitle"
+                  th:if="${activePage == 'candidate'}">
+                CANDIDATE PORTAL
+            </span>
+
+            <span class="logo-subtitle"
+                  th:if="${activePage != 'admin' and activePage != 'recruiter' and activePage != 'candidate'}">
+                CAREER PLATFORM
+            </span>
+        </a>
+
+        <!-- NAVIGATION -->
+        <nav class="site-nav" aria-label="Điều hướng chính">
+
+            <!-- Trang công khai: không hiển thị ở khu vực Admin -->
+
+            <!--
+                NÚT TRANG CHỦ
+                - Recruiter: chuyển về trang quản lý tuyển dụng.
+                - Candidate và người dùng khác: chuyển về trang chủ chung.
+            -->
+            <a th:if="${activePage != 'admin'}"
+               th:href="${activePage == 'recruiter'} ? @{/recruiter/jobs} : @{/}"
+               th:classappend="${activePage == 'home'} ? ' active' : ''">
+                <i data-lucide="house"></i>
+                <span>Trang chủ</span>
+            </a>
+
+
+            <!--
+                NÚT VIỆC LÀM
+                - Recruiter: chuyển đến trang quản lý Job.
+                - Candidate và người dùng khác: xem danh sách việc làm công khai.
+            -->
+            <a th:if="${activePage != 'admin'}"
+               th:href="${activePage == 'recruiter'} ? @{/recruiter/jobs} : @{/jobs}"
+               th:classappend="${activePage == 'jobs'} ? ' active' : ''">
+                <i data-lucide="search"></i>
+                <span>Việc làm</span>
+            </a>
+
+
+            <a th:if="${activePage != 'admin'}"
+               th:href="@{/companies}"
+               th:classappend="${activePage == 'companies'} ? ' active' : ''">
+                <i data-lucide="building-2"></i>
+                <span>Công ty</span>
+            </a>
+
+            <!-- MỚI: khu vực Candidate (trang việc làm dành cho ứng viên) -->
+            <a th:if="${activePage == 'candidate'}"
+               th:href="@{/candidate/dashboard}"
+               class="candidate-nav active">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Dành cho tôi</span>
+            </a>
+
+            <!-- MỚI: Tin đã lưu của ứng viên -->
+            <a th:if="${activePage == 'candidate'}"
+               th:href="@{/candidate/saved}">
+                <i data-lucide="bookmark"></i>
+                <span>Tin đã lưu</span>
+            </a>
+
+            <!-- Khu vực Recruiter -->
+            <a th:if="${activePage == 'recruiter'}"
+               th:href="@{/recruiter/jobs}"
+               class="recruiter-nav"
+               th:classappend="${activePage == 'recruiter'} ? ' active' : ''">
+                <i data-lucide="layout-dashboard"></i>
+                <span>Quản lý tuyển dụng</span>
+            </a>
+
+            <!-- MỚI: Kho tin (nháp + đã đóng) -->
+            <a th:if="${activePage == 'recruiter'}"
+               th:href="@{/recruiter/jobs/archive}">
+                <i data-lucide="archive"></i>
+                <span>Kho tin</span>
+            </a>
+
+            <a th:if="${activePage == 'recruiter'}"
+               th:href="@{/recruiter/jobs/new}"
+               class="nav-post">
+                <i data-lucide="plus"></i>
+                <span>Đăng tin mới</span>
+            </a>
+
+            <!-- Khu vực Admin -->
+            <a th:if="${activePage == 'admin'}"
+               th:href="@{/admin/jobs}"
+               class="admin-nav active">
+                <i data-lucide="clipboard-check"></i>
+                <span>Duyệt tin</span>
+            </a>
+
+        </nav>
+    </div>
+</header>
+
+<!-- ================= FOOTER ================= -->
+<footer th:fragment="siteFooter" class="site-footer sf">
+    <div class="sf-inner">
+
+        <!-- Dải kêu gọi hành động phía trên -->
+        <div class="sf-cta">
+            <div>
+                <h3>Sẵn sàng cho bước tiến tiếp theo?</h3>
+                <p>Tìm công việc phù hợp hoặc đăng tin để gặp đúng ứng viên ngay hôm nay.</p>
+            </div>
+            <div class="sf-cta-actions">
+                <a th:href="@{/jobs}" class="sf-btn sf-btn-primary">Tìm việc ngay</a>
+                <a th:href="@{/recruiter/jobs/new}" class="sf-btn sf-btn-ghost">Đăng tin tuyển dụng</a>
+            </div>
+        </div>
+
+        <div class="sf-grid">
+
+            <!-- Cột 1: thương hiệu + mô tả + mạng xã hội -->
+            <div>
+                <a th:href="@{/}" class="sf-brand">Online<span>Recruitment</span></a>
+                <p class="sf-desc">
+                    Nền tảng kết nối nhà tuyển dụng và ứng viên: đăng tin nhanh chóng,
+                    tìm việc dễ dàng, quy trình duyệt tin minh bạch.
+                </p>
+
+                <!-- Mạng xã hội (thay href="#" bằng link thật của bạn) -->
+                <div class="sf-social">
+                    <a href="#" aria-label="Facebook" title="Facebook"><i data-lucide="facebook"></i></a>
+                    <a href="#" aria-label="LinkedIn" title="LinkedIn"><i data-lucide="linkedin"></i></a>
+                    <a href="#" aria-label="YouTube" title="YouTube"><i data-lucide="youtube"></i></a>
+                    <a href="#" aria-label="Email" title="Email"><i data-lucide="mail"></i></a>
+                </div>
+            </div>
+
+            <!-- Cột 2: dành cho ứng viên -->
+            <div class="sf-col">
+                <h4>Ứng viên</h4>
+                <ul>
+                    <li><a th:href="@{/jobs}">Tìm việc làm</a></li>
+                    <li><a th:href="@{/companies}">Danh sách công ty</a></li>
+                    <li><a th:href="@{/register/candidate}">Tạo hồ sơ ứng viên</a></li>
+                    <li><a th:href="@{/profile}">Hồ sơ của tôi</a></li>
+                </ul>
+            </div>
+
+            <!-- Cột 3: dành cho nhà tuyển dụng -->
+            <div class="sf-col">
+                <h4>Nhà tuyển dụng</h4>
+                <ul>
+                    <li><a th:href="@{/recruiter/jobs/new}">Đăng tin tuyển dụng</a></li>
+                    <li><a th:href="@{/recruiter/jobs}">Quản lý tin</a></li>
+                    <li><a th:href="@{/recruiter/company}">Hồ sơ công ty</a></li>
+                    <li><a th:href="@{/login}">Đăng nhập</a></li>
+                </ul>
+            </div>
+
+            <!-- Cột 4: về chúng tôi -->
+            <div class="sf-col">
+                <h4>Về chúng tôi</h4>
+                <ul>
+                    <li><a href="#">Giới thiệu</a></li>
+                    <li><a href="#">Câu hỏi thường gặp</a></li>
+                    <li><a href="#">Hướng dẫn sử dụng</a></li>
+                    <li><a href="#">Liên hệ hỗ trợ</a></li>
+                </ul>
+            </div>
+
+            <!-- Cột 5: liên hệ -->
+            <div class="sf-col">
+                <h4>Liên hệ</h4>
+                <ul class="sf-contact">
+                    <li><i data-lucide="mail"></i><span>hr@onlinerecruitment.example</span></li>
+                    <li><i data-lucide="phone"></i><span>0123 456 789</span></li>
+                    <li><i data-lucide="map-pin"></i><span>Việt Nam</span></li>
+                    <li><i data-lucide="clock-3"></i><span>Thứ 2 – Thứ 6: 8:00 – 17:30</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Dòng bản quyền + chính sách -->
+        <div class="sf-bottom">
+            <span>© 2026 OnlineRecruitment. Đã đăng ký bản quyền.</span>
+
+            <nav class="sf-legal" aria-label="Chính sách">
+                <a href="#">Điều khoản sử dụng</a>
+                <a href="#">Chính sách bảo mật</a>
+                <a href="#">Quy chế hoạt động</a>
+            </nav>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

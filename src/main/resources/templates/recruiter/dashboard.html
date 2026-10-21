@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recruiter Dashboard — Kênh tuyển dụng</title>
     <link rel="stylesheet" th:href="@{/css/profile.css}">
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
 </head>
 <body>
 
@@ -42,9 +41,18 @@
                     <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Việc làm & Ứng viên</h3>
                     <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Xem danh sách tin tuyển dụng trên thị trường và theo dõi trạng thái các hồ sơ ứng tuyển.</p>
                 </div>
-                <a th:href="@{/jobs}" class="btn btn-outline" style="justify-content: center;">
+
+                <!--
+                    Chuyển nhà tuyển dụng đến trang quản lý tin tuyển dụng.
+                    /recruiter/jobs: xem danh sách Job, tạo tin mới,
+                    sửa tin, gửi duyệt và quản lý trạng thái tuyển dụng.
+                -->
+                <a th:href="@{/recruiter/jobs}"
+                   class="btn btn-outline"
+                   style="justify-content: center;">
                     Xem danh sách việc làm
                 </a>
+
             </div>
 
             <!-- Card 3: Bảo mật & Mật khẩu -->
@@ -60,20 +68,19 @@
                     Thay đổi mật khẩu
                 </a>
             </div>
-            <!-- Card 4: ứng vử viên  -->
-            <!-- Ứng viên chờ duyệt -->
-            <div class="dashboard-card">
-                <div class="card-icon">👥</div>
-
-                <h3>Ứng viên chờ duyệt</h3>
-
-                <p>
-                    Xem tất cả hồ sơ ứng tuyển đang chờ duyệt,
-                    kiểm tra thông tin ứng viên và cập nhật trạng thái hồ sơ.
-                </p>
-
-                <a th:href="@{/recruiter/applications?status=SUBMITTED}"
-                   class="btn btn-outline">
+            <!-- Card 4: Ứng viên chờ duyệt (khôi phục từ bản (3), đồng bộ giao diện) -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="4" y="3" width="16" height="18" rx="2"></rect>
+                            <path d="M8 8h8M8 12h8M8 16h5"></path>
+                        </svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Ứng viên chờ duyệt</h3>
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Xem tất cả hồ sơ ứng tuyển đang chờ duyệt, kiểm tra thông tin ứng viên và cập nhật trạng thái hồ sơ.</p>
+                </div>
+                <a th:href="@{/recruiter/applications(status='SUBMITTED')}" class="btn btn-outline" style="justify-content: center;">
                     Xem ứng viên chờ duyệt
                 </a>
             </div>

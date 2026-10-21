@@ -25,6 +25,10 @@ public class FileStorageService {
         return saveFile(file, "logos");
     }
 
+    public String saveJobImage(MultipartFile file) throws IOException {
+        return saveFile(file, "jobs");
+    }
+
     public String saveFile(MultipartFile file, String subDirectory) throws IOException {
         if (file == null || file.isEmpty()) {
             return null;
