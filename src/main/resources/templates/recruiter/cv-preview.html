@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Xem hồ sơ ứng viên | Online Recruitment</title>
+
+    <link rel="stylesheet" th:href="@{/css/recruiter/cv-preview.css}">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 32px 20px;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f1f5f9;
+            color: #172b4d;
+        }
+
+        .preview-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 36px;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.07);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 28px;
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding-bottom: 26px;
+            margin-bottom: 26px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .avatar {
+            width: 72px;
+            height: 72px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #e8efff;
+            color: #2563eb;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .profile-header h1 {
+            margin: 0 0 8px;
+            font-size: 27px;
+            overflow-wrap: anywhere;
+        }
+
+        .profile-header p {
+            margin: 0;
+            color: #64748b;
+        }
+
+        .info-card {
+            margin-bottom: 24px;
+            padding: 24px 28px;
+            border: 1px solid #dfe7f2;
+            border-radius: 15px;
+        }
+
+        .info-card h2 {
+            margin: 0 0 20px;
+            font-size: 21px;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: minmax(150px, 230px) minmax(0, 1fr);
+            gap: 16px;
+            padding: 13px 0;
+            border-bottom: 1px solid #edf2f7;
+            line-height: 1.5;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-row span {
+            color: #64748b;
+        }
+
+        .info-row strong {
+            color: #172b4d;
+            font-weight: 600;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .summary {
+            margin-top: 22px;
+        }
+
+        .summary h3 {
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+
+        .summary p {
+            margin: 0;
+            color: #334155;
+            line-height: 1.8;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
+        }
+
+        .empty-value {
+            color: #94a3b8;
+            font-weight: 400 !important;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px 10px;
+            }
+
+            .preview-container {
+                padding: 22px 16px;
+            }
+
+            .info-card {
+                padding: 20px 16px;
+            }
+
+            .info-row {
+                grid-template-columns: 1fr;
+                gap: 5px;
+            }
+
+            .profile-header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="preview-container">
+
+    <a class="back-link" th:href="@{/recruiter/applications}">
+        ← Quay lại danh sách
+    </a>
+
+    <!-- THÔNG TIN CHÍNH CỦA ỨNG VIÊN -->
+    <header class="profile-header">
+
+        <div class="avatar"
+             th:text="${applicationData['candidateName'] != null
+                 and !#strings.isEmpty(applicationData['candidateName'])
+                 ? #strings.substring(applicationData['candidateName'], 0, 1)
+                 : 'U'}">
+            U
+        </div>
+
+        <div>
+            <h1 th:text="${applicationData['candidateName'] != null
+                    ? applicationData['candidateName']
+                    : 'Chưa cập nhật'}">
+                Tên ứng viên
+            </h1>
+
+            <p th:text="${applicationData['professionalTitle'] != null
+                    ? applicationData['professionalTitle']
+                    : 'Ứng viên'}">
+                Chức danh nghề nghiệp
+            </p>
+        </div>
+
+    </header>
+
+    <!-- THÔNG TIN ỨNG VIÊN -->
+    <section class="info-card">
+
+        <h2>Thông tin ứng viên</h2>
+
+        <div class="info-row">
+            <span>Email</span>
+            <strong th:text="${applicationData['email'] != null
+                    ? applicationData['email']
+                    : 'Chưa cập nhật'}">
+                Email
+            </strong>
+        </div>
+
+        <div class="info-row">
+            <span>Số điện thoại</span>
+            <strong th:text="${applicationData['phone'] != null
+                    ? applicationData['phone']
+                    : 'Chưa cập nhật'}">
+                Số điện thoại
+            </strong>
+        </div>
+
+        <div class="info-row">
+            <span>Mã ứng viên</span>
+            <strong th:text="${applicationData['candidateId'] != null
+                    ? applicationData['candidateId']
+                    : 'Chưa cập nhật'}">
+                Mã ứng viên
+            </strong>
+        </div>
+
+    </section>
+
+    <!-- THÔNG TIN ỨNG TUYỂN -->
+    <section class="info-card">
+
+        <h2>Thông tin ứng tuyển</h2>
+
+        <div class="info-row">
+            <span>Vị trí ứng tuyển</span>
+            <strong th:text="${applicationData['jobTitle'] != null
+                    ? applicationData['jobTitle']
+                    : 'Chưa cập nhật'}">
+                Vị trí ứng tuyển
+            </strong>
+        </div>
+
+        <div class="info-row">
+            <span>Công ty</span>
+            <strong th:text="${applicationData['companyName'] != null
+                    ? applicationData['companyName']
+                    : 'Chưa cập nhật'}">
+                Công ty
+            </strong>
+        </div>
+
+        <div class="info-row">
+            <span>Mã đơn ứng tuyển</span>
+            <strong th:text="${applicationData['applicationId'] != null
+                    ? applicationData['applicationId']
+                    : 'Chưa cập nhật'}">
+                Mã đơn ứng tuyển
+            </strong>
+        </div>
+
+    </section>
+
+    <!-- CV ĐÃ GỬI -->
+    <section class="info-card">
+
+        <h2>CV đã gửi</h2>
+
+        <div class="info-row">
+            <span>Mã CV</span>
+            <strong th:classappend="${applicationData['cvId'] == null
+                    ? 'empty-value' : ''}"
+                    th:text="${applicationData['cvId'] != null
+                    ? applicationData['cvId']
+                    : 'Chưa có CV'}">
+                Mã CV
+            </strong>
+        </div>
+
+        <div class="info-row">
+            <span>Tên CV</span>
+            <strong th:text="${applicationData['cvTitle'] != null
+                    ? applicationData['cvTitle']
+                    : 'CV đã lưu theo đơn ứng tuyển'}">
+                Tên CV
+            </strong>
+        </div>
+
+        <div class="info-row">
+            <span>Chức danh nghề nghiệp</span>
+            <strong th:text="${applicationData['professionalTitle'] != null
+                    ? applicationData['professionalTitle']
+                    : 'Chưa cập nhật'}">
+                Chức danh nghề nghiệp
+            </strong>
+        </div>
+
+        <div class="summary">
+            <h3>Giới thiệu bản thân</h3>
+
+            <p th:text="${applicationData['summary'] != null
+                    and !#strings.isEmpty(applicationData['summary'])
+                    ? applicationData['summary']
+                    : 'Chưa có thông tin'}">
+                Giới thiệu bản thân
+            </p>
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

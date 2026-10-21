@@ -1,0 +1,237 @@
+/* Thanh điều hướng dùng chung */
+.taskbar {
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    width: 100%;
+    position: relative;
+    z-index: 100;
+}
+
+.taskbar-container {
+    max-width: 1440px;
+    min-height: 102px;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    box-sizing: border-box;
+}
+
+.taskbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #172b4d;
+    font-size: 25px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.taskbar-brand-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2864ed;
+    color: white;
+    border-radius: 14px;
+    font-size: 18px;
+}
+
+.taskbar-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 38px;
+}
+
+.taskbar-nav a {
+    color: #334155;
+    text-decoration: none;
+    font-size: 17px;
+    white-space: nowrap;
+}
+
+.taskbar-nav a:hover,
+.taskbar-nav a.active {
+    color: #2563eb;
+}
+
+.user-dropdown-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.user-trigger {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 40px;
+    cursor: pointer;
+    background: #f8fafc;
+}
+
+.user-avatar-small {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #e8eef8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    color: #2563eb;
+    flex-shrink: 0;
+}
+
+.user-avatar-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-info-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-display-name {
+    color: #172b4d;
+    font-weight: 600;
+}
+
+.user-role-badge {
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.dropdown-arrow {
+    color: #94a3b8;
+    font-size: 13px;
+}
+
+.user-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 280px;
+    padding: 16px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+.user-dropdown-wrapper:hover .user-dropdown-menu,
+.user-dropdown-wrapper:focus-within .user-dropdown-menu {
+    display: block;
+}
+
+.menu-header {
+    padding-bottom: 14px;
+    border-bottom: 1px solid #e2e8f0;
+    overflow-wrap: anywhere;
+}
+
+.menu-header-name {
+    font-weight: 700;
+    color: #172b4d;
+}
+
+.menu-header-email {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.menu-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-top: 10px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #334155;
+    text-decoration: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.menu-item:hover {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.menu-item svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+.menu-divider {
+    border-top: 1px solid #e2e8f0;
+    margin: 8px 0;
+}
+
+.logout-item {
+    color: #dc2626;
+}
+
+@media (max-width: 1000px) {
+    .taskbar-container {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 16px 20px;
+        gap: 18px;
+    }
+
+    .taskbar-nav {
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .taskbar-brand {
+        font-size: 21px;
+    }
+}
+
+@media (max-width: 600px) {
+    .taskbar-container {
+        flex-direction: column;
+    }
+
+    .taskbar-nav {
+        gap: 14px;
+    }
+
+    .taskbar-nav a {
+        font-size: 14px;
+    }
+
+    .user-dropdown-menu {
+        right: 50%;
+        transform: translateX(50%);
+    }
+}

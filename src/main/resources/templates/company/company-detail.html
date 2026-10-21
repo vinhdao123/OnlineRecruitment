@@ -1,6 +1,7 @@
-
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,28 +11,14 @@
     </title>
 
     <link rel="stylesheet" th:href="@{/css/company/company-detail.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
 </head>
 
 <body>
 
-<header class="header">
-    <nav class="navbar">
-        <a class="logo" th:href="@{/}">
-            Online<span>Recruitment</span>
-        </a>
+<div th:replace="~{fragments/taskbar :: taskbar('companies')}"></div>
 
-        <div class="nav-links">
-            <a th:href="@{/}">Trang chủ</a>
-            <a th:href="@{/jobs}">Việc làm</a>
-            <a th:href="@{/company-profile}">Công ty</a>
-        </div>
 
-        <div class="nav-actions">
-            <a class="btn btn-login" th:href="@{/login}">Đăng nhập</a>
-            <a class="btn btn-register" th:href="@{/register}">Đăng ký</a>
-        </div>
-    </nav>
-</header>
 
 <main class="detail-container">
 
@@ -100,7 +87,8 @@
                     </p>
 
                     <div class="detail-actions">
-                        <a class="btn btn-primary" th:href="@{/jobs}">
+                        <a class="btn btn-primary"
+                           th:href="@{/jobs(companyId=${company.id})}">
                             Xem việc làm
                         </a>
 
