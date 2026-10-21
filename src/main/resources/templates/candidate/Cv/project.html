@@ -1,115 +1,102 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Dự án - <span th:text="${cv.title}"></span></title>
-    <link rel="stylesheet" th:href="@{/css/home.css}">
+    <title>Dự án — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
 </head>
 <body>
-<header class="header">
-    <div class="container header-container">
-        <a th:href="@{/}" class="logo">Online<span>Recruitment</span></a>
-        <nav class="nav">
-            <a th:href="@{/candidate/cvs}" class="active">Quay lại danh sách CV</a>
-        </nav>
-    </div>
-</header>
+<div style="position: relative; z-index: 1000; width: 100%;">
+    <div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
+</div>
 
-<main class="container" style="padding: 40px 20px; max-width: 900px; margin: 0 auto;">
-
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">Dự án đã thực hiện</h2>
-        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" style="color: #2563EB; text-decoration: none;">&larr; Quay lại chi tiết CV</a>
-    </div>
-    <p style="color: #6b7280; margin-bottom: 24px;">Đang chỉnh sửa cho CV: <b th:text="${cv.title}"></b></p>
-
-    <!-- Thông báo -->
-    <div th:if="${successMessage}" style="color: #065f46; background: #ecfdf5; border: 1px solid #a7f3d0; padding: 12px; border-radius: 8px; margin-bottom: 15px;" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" style="color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; padding: 12px; border-radius: 8px; margin-bottom: 15px;" th:text="${errorMessage}"></div>
-
-    <!-- Form thêm mới -->
-    <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin-bottom: 30px;">
-        <h3 style="margin-top: 0; font-size: 16px;">Thêm dự án mới</h3>
-        <form th:action="@{/candidate/cvs/{id}/projects/add(id=${cv.id})}" th:object="${projectRequest}" method="post">
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                <div style="grid-column: span 2;">
-                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Tên dự án (*)</label>
-                    <input type="text" th:field="*{name}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                    <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" style="color:red; font-size:12px;"></span>
-                </div>
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Vai trò của bạn</label>
-                    <input type="text" th:field="*{role}" placeholder="VD: Backend Developer" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                </div>
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Công nghệ sử dụng</label>
-                    <input type="text" th:field="*{technologies}" placeholder="VD: Spring Boot, React" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                </div>
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Ngày bắt đầu</label>
-                    <input type="date" th:field="*{startDate}" th:attr="max=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                </div>
-                <div>
-                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Ngày kết thúc</label>
-                    <input type="date" th:field="*{endDate}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                </div>
-                <div style="grid-column: span 2;">
-                    <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Đường dẫn dự án (URL)</label>
-                    <input type="url" th:field="*{projectUrl}" placeholder="https://github.com/..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;">
-                </div>
-            </div>
-
-            <div style="margin-bottom: 16px;">
-                <label style="font-weight: 600; font-size: 13px; display: block; margin-bottom: 4px;">Mô tả dự án</label>
-                <textarea th:field="*{description}" rows="3" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px;"></textarea>
-            </div>
-
-            <button type="submit" style="padding: 8px 16px; background: #2563EB; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Thêm</button>
-        </form>
-    </div>
-
-    <!-- Danh sách đã có -->
-    <h3 style="margin-top: 0; font-size: 16px;">Danh sách dự án</h3>
-    <div th:if="${projects.isEmpty()}" style="color: #6b7280; font-style: italic; padding: 10px 0;">Chưa có dự án nào.</div>
-
-    <div th:each="proj : ${projects}" style="border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white; display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-            <h4 style="margin: 0; font-size: 16px; color: #1f2937;">
-                <span th:text="${proj.name}"></span>
-                <a th:if="${proj.projectUrl != null && !proj.projectUrl.isEmpty()}" th:href="${proj.projectUrl}" target="_blank" style="font-size: 13px; color: #2563EB; text-decoration: none; margin-left: 8px;">(Xem dự án)</a>
-            </h4>
-            <p style="margin: 4px 0; font-weight: 500; color: #4b5563;">
-                <span th:if="${proj.role != null}" th:text="'Vai trò: ' + ${proj.role}"></span>
-            </p>
-            <p style="margin: 4px 0; font-size: 13px; color: #6b7280;">
-                <span th:text="${proj.startDate != null ? #temporals.format(proj.startDate, 'MM/yyyy') : ''}"></span> -
-                <span th:text="${proj.endDate != null ? #temporals.format(proj.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
-            </p>
-            <p style="margin: 4px 0; font-size: 13px; color: #2563EB; font-weight: 500;" th:if="${proj.technologies != null && !proj.technologies.isEmpty()}" th:text="'Công nghệ: ' + ${proj.technologies}"></p>
-            <p style="margin: 8px 0 0 0; font-size: 14px; color: #374151; white-space: pre-wrap;" th:text="${proj.description}"></p>
+<div class="cv-dashboard-layout">
+    <aside class="cv-sidebar">
+        <div class="cv-sidebar-menu">
+            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                CV của tôi
+            </a>
+            <a th:href="@{/candidate/cv-templates}" class="cv-sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                Hồ sơ mẫu
+            </a>
         </div>
-        <form th:action="@{/candidate/cvs/{id}/projects/{projectId}/delete(id=${cv.id}, projectId=${proj.id})}" method="post" onsubmit="return confirm('Bạn có chắc chắn muốn xóa dự án này?');">
-            <button type="submit" style="padding: 6px 12px; background: #ef4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">Xóa</button>
-        </form>
-    </div>
-</main>
+    </aside>
 
-<!-- Script kiểm tra ngày tháng -->
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const startDate = document.querySelector('input[name="startDate"]');
-        const endDate = document.querySelector('input[name="endDate"]');
+    <main class="cv-main-content">
+        <div class="cv-page-header">
+            <div>
+                <h2 class="cv-page-title">Dự án đã thực hiện</h2>
+                <p style="color: #64748b; font-size: 14px; margin-top: 4px;">Đang chỉnh sửa cho CV: <b th:text="${cv.title}"></b></p>
+            </div>
+            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="cv-btn-link">&larr; Quay lại chi tiết CV</a>
+        </div>
 
-        if (endDate) {
-            endDate.addEventListener('change', function() {
-                if (startDate.value && this.value && startDate.value > this.value) {
-                    alert('Ngày kết thúc không được nhỏ hơn ngày bắt đầu!');
-                    this.value = '';
-                }
-            });
-        }
-    });
-</script>
+        <div th:if="${successMessage}" class="cv-alert cv-alert-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="cv-alert cv-alert-danger" th:text="${errorMessage}"></div>
+
+        <div class="cv-form-container">
+            <h3 class="cv-form-title">Thêm dự án mới</h3>
+            <form th:action="@{/candidate/cvs/{id}/projects/add(id=${cv.id})}" th:object="${projectRequest}" method="post">
+                <div class="cv-form-grid">
+                    <div class="cv-form-group full-width">
+                        <label class="cv-form-label">Tên dự án (*)</label>
+                        <input type="text" th:field="*{name}" class="cv-form-control">
+                    </div>
+                    <div class="cv-form-group">
+                        <label class="cv-form-label">Vai trò của bạn</label>
+                        <input type="text" th:field="*{role}" class="cv-form-control" placeholder="VD: Backend Developer">
+                    </div>
+                    <div class="cv-form-group">
+                        <label class="cv-form-label">Công nghệ sử dụng</label>
+                        <input type="text" th:field="*{technologies}" class="cv-form-control" placeholder="VD: Spring Boot, React">
+                    </div>
+                    <div class="cv-form-group">
+                        <label class="cv-form-label">Ngày bắt đầu</label>
+                        <input type="date" th:field="*{startDate}" class="cv-form-control">
+                    </div>
+                    <div class="cv-form-group">
+                        <label class="cv-form-label">Ngày kết thúc</label>
+                        <input type="date" th:field="*{endDate}" class="cv-form-control">
+                    </div>
+                    <div class="cv-form-group full-width">
+                        <label class="cv-form-label">Đường dẫn dự án (URL)</label>
+                        <input type="url" th:field="*{projectUrl}" class="cv-form-control" placeholder="https://github.com/...">
+                    </div>
+                    <div class="cv-form-group full-width">
+                        <label class="cv-form-label">Mô tả dự án</label>
+                        <textarea th:field="*{description}" class="cv-form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="cv-btn-submit">Thêm dự án</button>
+            </form>
+        </div>
+
+        <h3 class="cv-section-title">Danh sách dự án</h3>
+        <div th:if="${projects.isEmpty()}" class="cv-empty-text">Chưa có dự án nào.</div>
+        <div th:each="proj : ${projects}" class="cv-item-card">
+            <div>
+                <h4 class="cv-item-title">
+                    <span th:text="${proj.name}"></span>
+                    <a th:if="${proj.projectUrl != null && !proj.projectUrl.isEmpty()}" th:href="${proj.projectUrl}" target="_blank" style="font-size: 13px; color: #2563eb; text-decoration: none; margin-left: 8px;">(Xem dự án)</a>
+                </h4>
+                <p class="cv-item-subtitle" th:if="${proj.role != null}" th:text="'Vai trò: ' + ${proj.role}"></p>
+                <p class="cv-item-meta">
+                    <span th:text="${proj.startDate != null ? #temporals.format(proj.startDate, 'MM/yyyy') : ''}"></span> -
+                    <span th:text="${proj.endDate != null ? #temporals.format(proj.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
+                </p>
+                <p class="cv-item-subtitle" th:if="${proj.technologies != null && !proj.technologies.isEmpty()}" th:text="'Công nghệ: ' + ${proj.technologies}" style="color: #2563eb; font-weight: 500; margin-top: 8px;"></p>
+                <p class="cv-item-desc" th:text="${proj.description}"></p>
+            </div>
+            <form th:action="@{/candidate/cvs/{id}/projects/{projectId}/delete(id=${cv.id}, projectId=${proj.id})}" method="post" onsubmit="return confirm('Xóa dự án này?');">
+                <button type="submit" class="cv-btn-delete">Xóa</button>
+            </form>
+        </div>
+    </main>
+</div>
 </body>
 </html>

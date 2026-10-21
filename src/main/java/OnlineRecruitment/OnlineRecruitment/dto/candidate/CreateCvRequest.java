@@ -20,4 +20,6 @@ public class CreateCvRequest {
     @NotBlank(message = "Màu chủ đạo không được để trống")
     @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Màu phải có dạng #RRGGBB")
     private String accentColor = "#2563EB";
+
+    private String avatarUrl;
 }

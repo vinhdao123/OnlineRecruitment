@@ -19,4 +19,6 @@ public class CvSummaryVm {
     private Boolean isDefault;
     private LocalDateTime updatedAt;
     private String templateName;
+    private String avatarUrl;
+
 }
