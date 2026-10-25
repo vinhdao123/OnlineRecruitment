@@ -19,6 +19,14 @@
     <h1 class="auth-title">Đăng Nhập</h1>
 
     <!-- Thông báo lỗi cụ thể theo param URL -->
+    <div th:if="${param.rejected}" class="alert alert-danger">
+        ❌ Hồ sơ đăng ký công ty của bạn đã bị từ chối phê duyệt. Vui lòng kiểm tra email của bạn để xem lý do và liên kết chỉnh sửa gửi lại hồ sơ.
+    </div>
+
+    <div th:if="${param.resubmitSuccess}" class="alert alert-success">
+        ✅ Bạn đã gửi lại hồ sơ thành công! Vui lòng chờ Quản trị viên xét duyệt.
+    </div>
+
     <div th:if="${param.locked}" class="alert alert-danger">
         🔒 Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.
     </div>

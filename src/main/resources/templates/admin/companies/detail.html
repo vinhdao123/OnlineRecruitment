@@ -60,6 +60,7 @@
             <form th:if="${company.status.name() == 'PENDING'}"
                   th:action="@{'/admin/companies/' + ${company.id} + '/approve'}"
                   method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="btn btn-primary" onclick="return confirm('Duyệt hồ sơ doanh nghiệp này?')">
                     ✓ Phê Duyệt
                 </button>
@@ -75,6 +76,7 @@
             <form th:if="${company.status.name() == 'ACTIVE'}"
                   th:action="@{'/admin/companies/' + ${company.id} + '/lock'}"
                   method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="btn btn-danger" onclick="return confirm('Khóa doanh nghiệp này?')">
                     🚫 Khóa Doanh Nghiệp
                 </button>
@@ -84,6 +86,7 @@
             <form th:if="${company.status.name() == 'LOCKED'}"
                   th:action="@{'/admin/companies/' + ${company.id} + '/unlock'}"
                   method="post" style="display:inline">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="btn btn-success" onclick="return confirm('Mở khóa doanh nghiệp này?')">
                     ✓ Mở Khóa
                 </button>
@@ -162,21 +165,55 @@
 </div>
 
 <!-- Modal từ chối -->
-<div id="rejectModal" style="display:none; position:fixed; z-index:999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-    <div style="background:#fff; width:450px; margin:100px auto; padding:24px; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.15);">
-        <h3 style="margin-top:0;">Từ chối duyệt công ty</h3>
+<div id="rejectModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+    <div style="background:#fff; width:520px; max-width:90%; margin:80px auto; padding:24px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #e5e7eb;">
+            <h3 style="margin:0; font-size:18px; color:#111827;">✕ Từ Chối Phê Duyệt Doanh Nghiệp</h3>
+            <span onclick="document.getElementById('rejectModal').style.display='none'" style="cursor:pointer; font-size:20px; color:#9ca3af; font-weight:700;">&times;</span>
+        </div>
+
+        <p style="font-size:13px; color:#6b7280; margin-bottom:14px;">
+            Hệ thống sẽ gửi email kèm lý do từ chối và <strong>đường dẫn biểu mẫu</strong> để nhà tuyển dụng có thể chỉnh sửa lại thông tin và gửi lại xét duyệt mà không phải đăng ký mới từ đầu.
+        </p>
+
         <form th:action="@{'/admin/companies/' + ${company.id} + '/reject'}" method="post">
-            <div style="margin: 16px 0;">
-                <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Lý do từ chối <span style="color:#d33;">*</span></label>
-                <textarea name="reason" rows="4" required style="width:100%; border:1px solid #d5dde8; border-radius:8px; padding:10px; font-size:14px;" placeholder="Nhập lý do từ chối hồ sơ..."></textarea>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div style="margin-bottom: 12px;">
+                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Lý do từ chối (Không bắt buộc)</label>
+                <textarea id="detailModalReason" name="reason" rows="4" 
+                          style="width:100%; box-sizing:border-box; border:1px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;" 
+                          placeholder="Nhập lý do từ chối hồ sơ (nếu có)..."></textarea>
             </div>
-            <div style="display:flex; justify-content:flex-end; gap:10px;">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('rejectModal').style.display='none'">Hủy</button>
-                <button type="submit" class="btn btn-danger">Xác Nhận Từ Chối</button>
+
+            <!-- Gợi ý lý do nhanh -->
+            <div style="margin-bottom:16px;">
+                <span style="font-size:12px; color:#6b7280; font-weight:600;">Gợi ý lý do nhanh:</span>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Mã số thuế không hợp lệ hoặc không tồn tại trên Cổng thông tin Quốc gia.')">Mã số thuế không hợp lệ</button>
+                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Thông tin người đại diện hoặc số điện thoại liên hệ chưa chính xác.')">Sai thông tin liên hệ</button>
+                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Tên doanh nghiệp chưa khớp với giấy phép đăng ký kinh doanh.')">Sai tên doanh nghiệp</button>
+                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Địa chỉ trụ sở công ty chưa cụ thể hoặc thiếu website chính thức.')">Thiếu địa chỉ/website</button>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:12px; border-top:1px solid #e5e7eb;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('rejectModal').style.display='none'">Hủy bỏ</button>
+                <button type="submit" class="btn btn-danger" style="background:#dc2626; color:#fff; font-weight:600;">✕ Xác Nhận Từ Chối & Gửi Mail</button>
             </div>
         </form>
     </div>
 </div>
+
+<script>
+    function addDetailQuickReason(text) {
+        const area = document.getElementById('detailModalReason');
+        if (area.value.trim() === '') {
+            area.value = text;
+        } else {
+            area.value += ' ' + text;
+        }
+    }
+</script>
 
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
 </body>

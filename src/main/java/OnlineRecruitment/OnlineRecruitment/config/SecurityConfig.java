@@ -1,5 +1,6 @@
 package OnlineRecruitment.OnlineRecruitment.config;
 
+import OnlineRecruitment.OnlineRecruitment.exception.AccountRejectedException;
 import OnlineRecruitment.OnlineRecruitment.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,13 +37,11 @@ public class SecurityConfig {
                 cause = cause.getCause();
             }
 
-            if (cause instanceof LockedException) {
+            if (cause instanceof AccountRejectedException || exception instanceof AccountRejectedException) {
+                error = "rejected";
+            } else if (cause instanceof LockedException || exception instanceof LockedException) {
                 error = "locked";
-            } else if (cause instanceof DisabledException) {
-                error = "inactive";
-            } else if (exception instanceof LockedException) {
-                error = "locked";
-            } else if (exception instanceof DisabledException) {
+            } else if (cause instanceof DisabledException || exception instanceof DisabledException) {
                 error = "inactive";
             }
 
