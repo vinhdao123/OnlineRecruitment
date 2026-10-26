@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,9 +73,15 @@ public class AuthService {
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("Mật khẩu xác nhận không khớp!");
         }
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        
+        Optional<User> existingUser = userRepository.findByEmail(dto.getEmail());
+        if (existingUser.isPresent()) {
+            if (existingUser.get().getStatus() == UserStatus.REJECTED) {
+                throw new IllegalArgumentException("Hồ sơ đăng ký của email này đã bị từ chối trước đó. Vui lòng kiểm tra email của bạn để sử dụng đường dẫn chỉnh sửa và gửi lại hồ sơ mà không cần đăng ký mới!");
+            }
             throw new IllegalArgumentException("Email tài khoản đã tồn tại!");
         }
+        
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new IllegalArgumentException("Username đã được sử dụng!");
         }
