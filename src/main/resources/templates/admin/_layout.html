@@ -90,6 +90,22 @@
             </div>
         </details>
 
+                <div class="nav-section">TUYỂN DỤNG & ĐÁNH GIÁ</div>
+
+        <a th:href="@{/admin/interview-questions}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'interview-questions'} ? 'active' : ''">
+            <span class="icon">📚</span>
+            <span>Câu hỏi phỏng vấn</span>
+        </a>
+
+        <a th:href="@{/admin/skill-tests}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'skill-tests'} ? 'active' : ''">
+            <span class="icon">🎯</span>
+            <span>Đề thi kỹ năng</span>
+        </a>
+
         <div class="nav-section">SYSTEM</div>
 
         <a href="#" class="nav-item">

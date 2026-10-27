@@ -62,12 +62,15 @@ public class SecurityConfig {
                                 "/forgot-password", "/forgot-password/**",
                                 "/403", "/error", "/companies", "/about",
                                 "/company-profile",
+                                "/interview-questions", "/interview-questions/**",
+                                "/skill-tests", "/skill-tests/{id:[0-9]+}",
                                 "/css/**", "/js/**", "/images/**", "/static/**",
                                 "/uploads/**",
                                 "/favicon.ico"
                         ).permitAll()
                         .requestMatchers("/jobs/*/apply").hasRole("CANDIDATE")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/jobs", "/jobs/**").permitAll()
+                        .requestMatchers("/skill-tests/*/take", "/skill-tests/*/submit", "/skill-tests/result/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/recruiter/**").hasRole("RECRUITER")
                         .requestMatchers("/candidate/**").hasRole("CANDIDATE")

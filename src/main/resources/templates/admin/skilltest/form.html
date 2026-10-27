@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head(${test.id == null ? 'Tạo đề thi mới' : 'Chỉnh sửa đề thi'})}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+  <div th:replace="~{admin/_layout :: topbar(${test.id == null ? 'Tạo bộ đề thi kỹ năng mới' : 'Chỉnh sửa bộ đề thi'}, 'Cấu hình thời gian, số câu hỏi random từ ngân hàng và điểm đạt')}"></div>
+
+  <div style="max-width:850px; background:#fff; border-radius:14px; border:1px solid #e5eaf2; padding:30px; margin-top:20px; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+
+    <form th:action="${test.id == null} ? @{/admin/skill-tests/create} : @{'/admin/skill-tests/' + ${test.id} + '/edit'}"
+          th:object="${test}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Tiêu đề bài thi <span style="color:#ef4444;">*</span>
+        </label>
+        <input type="text" th:field="*{title}" required
+               style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:15px;"
+               placeholder="VD: Đề thi đánh giá kỹ năng Lập trình Java">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Tên kỹ năng (Skill Name) <span style="color:#ef4444;">*</span>
+          </label>
+          <input type="text" th:field="*{skillName}" required
+                 style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;"
+                 placeholder="VD: Java, Git, MySQL, Agile, Python...">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Phân loại kỹ năng <span style="color:#ef4444;">*</span>
+          </label>
+          <select th:field="*{category}" style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+            <option value="Kỹ năng công nghệ">Kỹ năng công nghệ</option>
+            <option value="Kỹ năng mềm">Kỹ năng mềm</option>
+            <option value="Kỹ năng chuyên môn">Kỹ năng chuyên môn</option>
+            <option value="Ngoại ngữ">Ngoại ngữ</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px;">
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Độ khó
+          </label>
+          <select th:field="*{difficulty}" style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+            <option value="Cơ bản">Cơ bản</option>
+            <option value="Trung bình">Trung bình</option>
+            <option value="Nâng cao">Nâng cao</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Thời gian làm bài (Phút) <span style="color:#ef4444;">*</span>
+          </label>
+          <input type="number" th:field="*{durationMinutes}" min="1" max="180" required
+                 style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Số câu hỏi bốc Random <span style="color:#ef4444;">*</span>
+          </label>
+          <input type="number" th:field="*{totalQuestionsPerTest}" min="1" max="100" required
+                 style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;"
+                 title="Hệ thống sẽ bốc ngẫu nhiên số lượng câu này từ pool cho mỗi ứng viên">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:18px;">
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Điểm đạt tối thiểu (/100) <span style="color:#ef4444;">*</span>
+          </label>
+          <input type="number" th:field="*{passingScore}" min="1" max="100" required
+                 style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Màu nhận diện thẻ (HEX)
+          </label>
+          <input type="color" th:field="*{badgeColor}"
+                 style="width:100%; height:42px; padding:2px 4px; border:1.5px solid #d1d5db; border-radius:8px; cursor:pointer;">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Trạng thái
+          </label>
+          <select th:field="*{status}" style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+            <option value="ACTIVE">Hoạt động (ACTIVE)</option>
+            <option value="DRAFT">Bản nháp (DRAFT)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Mô tả nội dung bài thi
+        </label>
+        <textarea th:field="*{description}" rows="3"
+                  style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; font-family:inherit;"
+                  placeholder="Giới thiệu các phạm vi kiến thức được kiểm tra trong bài test..."></textarea>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; padding-top:16px; border-top:1px solid #e5eaf2;">
+        <a th:href="@{/admin/skill-tests}" class="btn btn-secondary">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary" style="font-weight:700;">
+          Lưu bộ đề thi
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+</div>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

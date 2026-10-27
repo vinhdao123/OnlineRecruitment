@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head(${question.id == null ? 'Thêm câu hỏi mới' : 'Chỉnh sửa câu hỏi'})}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+  <div th:replace="~{admin/_layout :: topbar(${question.id == null ? 'Thêm câu hỏi phỏng vấn mới' : 'Chỉnh sửa câu hỏi phỏng vấn'}, 'Cung cấp ý đồ phỏng vấn và câu trả lời mẫu cho ứng viên')}"></div>
+
+  <div style="max-width:850px; background:#fff; border-radius:14px; border:1px solid #e5eaf2; padding:30px; margin-top:20px; box-shadow:0 4px 15px rgba(0,0,0,0.03);">
+
+    <form th:action="${question.id == null} ? @{/admin/interview-questions/create} : @{'/admin/interview-questions/' + ${question.id} + '/edit'}"
+          th:object="${question}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Tiêu đề câu hỏi phỏng vấn <span style="color:#ef4444;">*</span>
+        </label>
+        <input type="text" th:field="*{question}" required
+               style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:15px;"
+               placeholder="VD: Hãy giới thiệu ngắn gọn về bản thân bạn?">
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Danh mục / Chủ đề <span style="color:#ef4444;">*</span>
+          </label>
+          <input type="text" th:field="*{category}" required list="catList"
+                 style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;"
+                 placeholder="VD: Phỏng vấn chung, Tình huống, Kỹ thuật...">
+          <datalist id="catList">
+            <option value="Phỏng vấn chung">
+            <option value="Tình huống & Hành vi">
+            <option value="Kỹ thuật / IT">
+            <option value="Đàm phán lương">
+            <option value="Định hướng nghề nghiệp">
+            <option value="Kỹ năng mềm">
+          </datalist>
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Cấp độ áp dụng
+          </label>
+          <select th:field="*{targetLevel}" style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+            <option value="Mọi cấp bậc">Mọi cấp bậc</option>
+            <option value="Fresher / Thực tập sinh">Fresher / Thực tập sinh</option>
+            <option value="Junior / Middle">Junior / Middle</option>
+            <option value="Senior / Lead">Senior / Lead</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Ý đồ của nhà tuyển dụng khi hỏi câu này
+        </label>
+        <textarea th:field="*{purpose}" rows="2"
+                  style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; font-family:inherit;"
+                  placeholder="Giải thích vì sao HR hỏi câu này và họ kỳ vọng điều gì..."></textarea>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Gợi ý & Dàn ý trả lời chi tiết
+        </label>
+        <textarea th:field="*{tips}" rows="3"
+                  style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; font-family:inherit;"
+                  placeholder="Dàn ý câu trả lời theo các bước (ví dụ mô hình STAR, Hiện tại - Quá khứ - Tương lai)..."></textarea>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Câu trả lời mẫu ấn tượng
+        </label>
+        <textarea th:field="*{sampleAnswer}" rows="4"
+                  style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; font-family:inherit;"
+                  placeholder="Đoạn văn mẫu minh họa cách trả lời tự tin, đúng trọng tâm..."></textarea>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+          Những điều nên tránh khi trả lời
+        </label>
+        <textarea th:field="*{pitfalls}" rows="2"
+                  style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px; font-family:inherit;"
+                  placeholder="Những lỗi phổ biến khiến ứng viên mất điểm..."></textarea>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Thứ tự hiển thị
+          </label>
+          <input type="number" th:field="*{displayOrder}"
+                 style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+        </div>
+
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:700; margin-bottom:6px; color:#1a2b4a;">
+            Trạng thái
+          </label>
+          <select th:field="*{status}" style="width:100%; padding:10px 14px; border:1.5px solid #d1d5db; border-radius:8px; font-size:14px;">
+            <option value="ACTIVE">Hiển thị (ACTIVE)</option>
+            <option value="HIDDEN">Ẩn tạm thời (HIDDEN)</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:12px; padding-top:16px; border-top:1px solid #e5eaf2;">
+        <a th:href="@{/admin/interview-questions}" class="btn btn-secondary">Hủy bỏ</a>
+        <button type="submit" class="btn btn-primary" style="font-weight:700;">
+          Lưu câu hỏi
+        </button>
+      </div>
+    </form>
+
+  </div>
+
+</div>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${question.question} + ' — Online Recruitment'">Chi tiết câu hỏi phỏng vấn</title>
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+</head>
+<body class="page-wrapper">
+
+<!-- TASKBAR -->
+<header th:replace="~{fragments/taskbar :: taskbar('interview')}"></header>
+
+<div style="max-width: 980px; margin: 30px auto; padding: 0 20px;">
+
+    <!-- BREADCRUMB -->
+    <div style="font-size:14px; color:#64748b; margin-bottom:20px;">
+        <a th:href="@{/}" style="color:#64748b; text-decoration:none;">Trang chủ</a> ›
+        <a th:href="@{/interview-questions}" style="color:#64748b; text-decoration:none;">Câu hỏi phỏng vấn</a> ›
+        <span th:text="${question.category}" style="color:#00b14f; font-weight:600;">Danh mục</span>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="interview-card" style="padding: 32px;">
+        <div style="display:flex; gap:8px; margin-bottom:12px;">
+            <span class="q-tag q-tag-cat" th:text="${question.category}">Phỏng vấn chung</span>
+            <span class="q-tag q-tag-level" th:if="${question.targetLevel != null}" th:text="${question.targetLevel}">Mọi cấp bậc</span>
+            <span style="font-size:12px; color:#94a3b8; margin-left:auto;">
+                👁 <span th:text="${question.viewCount}">0</span> lượt xem
+            </span>
+        </div>
+
+        <h1 style="font-size:24px; font-weight:800; color:#0f172a; line-height:1.4; margin-bottom:24px;" th:text="${question.question}">
+            Câu hỏi phỏng vấn?
+        </h1>
+
+        <!-- PURPOSE -->
+        <div class="section-box purpose" th:if="${question.purpose != null and !#strings.isEmpty(question.purpose)}">
+            <div class="section-label">
+                <span>💡</span> Ý đồ thực sự của nhà tuyển dụng
+            </div>
+            <div th:text="${question.purpose}" style="font-size:15px;">Mục đích của câu hỏi...</div>
+        </div>
+
+        <!-- TIPS -->
+        <div class="section-box tips" th:if="${question.tips != null and !#strings.isEmpty(question.tips)}">
+            <div class="section-label">
+                <span>📝</span> Gợi ý & Dàn ý trả lời chi tiết
+            </div>
+            <div th:text="${question.tips}" style="font-size:15px; white-space:pre-line;">Hướng dẫn trả lời...</div>
+        </div>
+
+        <!-- SAMPLE -->
+        <div class="section-box sample" th:if="${question.sampleAnswer != null and !#strings.isEmpty(question.sampleAnswer)}">
+            <div class="section-label">
+                <span>⭐</span> Câu trả lời mẫu gây ấn tượng
+            </div>
+            <div th:text="${question.sampleAnswer}" style="font-size:15px; white-space:pre-line; font-style:italic;">
+                "Câu trả lời mẫu..."
+            </div>
+        </div>
+
+        <!-- PITFALLS -->
+        <div class="section-box pitfalls" th:if="${question.pitfalls != null and !#strings.isEmpty(question.pitfalls)}">
+            <div class="section-label">
+                <span>⚠️</span> Những lỗi sai thường gặp cần tránh
+            </div>
+            <div th:text="${question.pitfalls}" style="font-size:15px;">Lỗi sai...</div>
+        </div>
+
+        <!-- ACTIONS -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:30px; padding-top:20px; border-top:1px solid #e2e8f0;">
+            <a th:href="@{/interview-questions}" class="btn-search" style="background:#64748b; text-decoration:none;">
+                ← Quay lại danh sách câu hỏi
+            </a>
+            <a th:href="@{/skill-tests}" class="btn-search" style="text-decoration:none;">
+                Làm bài test kỹ năng liên quan →
+            </a>
+        </div>
+    </div>
+
+    <!-- POPULAR QUESTIONS -->
+    <div class="side-widget" style="margin-top:24px;" th:if="${!#lists.isEmpty(popularQuestions)}">
+        <h3 class="widget-title">
+            <span>🔥</span> Có thể bạn quan tâm
+        </h3>
+        <ul class="guide-list">
+            <li th:each="pop : ${popularQuestions}" class="guide-item">
+                <span>❓</span>
+                <a th:href="@{'/interview-questions/' + ${pop.id}}" th:text="${pop.question}">Câu hỏi khác...</a>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>
