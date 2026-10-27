@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Dự án — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+</head>
+<body>
+
+<!-- TASKBAR -->
+<header class="header">
+    <div class="header-container">
+        <a th:href="@{/}" class="logo"><div class="logo-icon">OR</div> Online Recruitment</a>
+        <nav class="nav">
+            <a th:href="@{/}">Trang chủ</a>
+            <a th:href="@{/jobs}">Tìm việc làm</a>
+            <a th:href="@{/candidate/dashboard}">Bảng điều khiển</a>
+            <a th:href="@{/candidate/profile}">Hồ sơ của tôi</a>
+            <a th:href="@{/candidate/cvs}" class="active">CV</a>
+        </nav>
+        <div class="user-menu">
+            <div class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">C</div>
+            <div class="user-info">
+                <span class="user-name" th:text="${#authentication.name}">candidate</span>
+                <span class="user-role">ỨNG VIÊN</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Dự án đã thực hiện</h2>
+            <p class="page-subtitle">Đang chỉnh sửa cho CV: <b th:text="${cv.title}"></b></p>
+        </div>
+        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-link">&larr; Quay lại chi tiết CV</a>
+    </div>
+
+    <div th:if="${successMessage}" style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" style="background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${errorMessage}"></div>
+
+    <div class="form-card">
+        <h3 class="form-title">Thêm dự án mới</h3>
+        <form th:action="@{/candidate/cvs/{id}/projects/add(id=${cv.id})}" th:object="${projectRequest}" method="post">
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label class="form-label">Tên dự án (*)</label>
+                    <input type="text" th:field="*{name}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Vai trò của bạn</label>
+                    <input type="text" th:field="*{role}" class="form-control" placeholder="VD: Backend Developer">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Công nghệ sử dụng</label>
+                    <input type="text" th:field="*{technologies}" class="form-control" placeholder="VD: Spring Boot, React">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ngày bắt đầu</label>
+                    <input type="date" th:field="*{startDate}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ngày kết thúc</label>
+                    <input type="date" th:field="*{endDate}" class="form-control">
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">Đường dẫn dự án (URL)</label>
+                    <input type="url" th:field="*{projectUrl}" class="form-control" placeholder="https://github.com/...">
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">Mô tả dự án</label>
+                    <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Thêm dự án</button>
+        </form>
+    </div>
+
+    <h3 class="item-list-title">Danh sách dự án</h3>
+    <div th:if="${projects.isEmpty()}" style="color: #64748b; font-style: italic;">Chưa có dự án nào.</div>
+    <div th:each="proj : ${projects}" class="item-card">
+        <div>
+            <h4 class="item-title">
+                <span th:text="${proj.name}"></span>
+                <a th:if="${proj.projectUrl != null && !proj.projectUrl.isEmpty()}" th:href="${proj.projectUrl}" target="_blank" style="font-size: 13px; color: #2563eb; text-decoration: none; margin-left: 8px;">(Xem dự án)</a>
+            </h4>
+            <p class="item-subtitle" th:if="${proj.role != null}" th:text="'Vai trò: ' + ${proj.role}"></p>
+            <p class="item-meta">
+                <span th:text="${proj.startDate != null ? #temporals.format(proj.startDate, 'MM/yyyy') : ''}"></span> -
+                <span th:text="${proj.endDate != null ? #temporals.format(proj.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
+            </p>
+            <p class="item-subtitle" th:if="${proj.technologies != null && !proj.technologies.isEmpty()}" th:text="'Công nghệ: ' + ${proj.technologies}" style="color: #2563eb; font-weight: 500; margin-top: 8px;"></p>
+            <p class="item-desc" th:text="${proj.description}"></p>
+        </div>
+        <form th:action="@{/candidate/cvs/{id}/projects/{projectId}/delete(id=${cv.id}, projectId=${proj.id})}" method="post" onsubmit="return confirm('Xóa dự án này?');">
+            <button type="submit" class="btn-delete">Xóa</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

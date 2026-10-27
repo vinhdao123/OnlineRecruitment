@@ -22,4 +22,6 @@ public class CreateCvRequest {
     private String accentColor = "#2563EB";
 
     private String avatarUrl;
+
+
 }

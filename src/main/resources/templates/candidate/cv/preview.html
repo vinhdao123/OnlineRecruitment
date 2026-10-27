@@ -4,39 +4,31 @@
     <meta charset="UTF-8">
     <title>Xem trước CV — Online Recruitment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chỉ gọi cv-dashboard.css -->
     <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
 </head>
 <body class="preview-body-bg">
-<body>
 
-<!-- Thanh công cụ (Không bị in ra khi in PDF) -->
 <div class="preview-toolbar">
     <button onclick="window.print()" class="preview-btn preview-btn-primary">In / Lưu PDF</button>
     <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="preview-btn preview-btn-secondary">Quay lại</a>
 </div>
 
 <div class="preview-container">
-
-    <!-- Header: Ảnh, Tên và chức danh -->
     <div class="preview-header" th:style="'border-color: ' + ${cv.accentColor}">
-        <!-- Hiển thị ảnh Avatar nếu có -->
         <img th:if="${cv.avatarUrl != null}" th:src="@{${cv.avatarUrl}}" alt="Avatar" class="preview-avatar">
-
         <div>
             <h1 class="preview-title" th:text="${cv.title}"></h1>
             <p class="preview-subtitle" th:text="${cv.professionalTitle}"></p>
         </div>
     </div>
 
-    <div class="preview-body">
-
-        <!-- Tóm tắt -->
+    <div class="preview-body-content">
         <div class="preview-section" th:if="${cv.summary != null && !cv.summary.isEmpty()}">
             <h2 class="preview-section-title" th:style="'color: ' + ${cv.accentColor} + '; border-color: ' + ${cv.accentColor} + '33;'">Giới thiệu bản thân</h2>
             <p class="preview-item-desc" th:text="${cv.summary}"></p>
         </div>
 
-        <!-- Kinh nghiệm làm việc -->
         <div class="preview-section" th:if="${not #lists.isEmpty(works)}">
             <h2 class="preview-section-title" th:style="'color: ' + ${cv.accentColor} + '; border-color: ' + ${cv.accentColor} + '33;'">Kinh nghiệm làm việc</h2>
             <div class="preview-item" th:each="work : ${works}">
@@ -46,15 +38,14 @@
                         <p class="preview-item-subtitle" th:text="${work.companyName}"></p>
                     </div>
                     <span class="preview-item-date">
-                        <span th:text="${work.startDate != null ? #temporals.format(work.startDate, 'MM/yyyy') : ''}"></span> -
-                        <span th:text="${work.isCurrent ? 'Hiện tại' : (work.endDate != null ? #temporals.format(work.endDate, 'MM/yyyy') : '')}"></span>
-                    </span>
+                            <span th:text="${work.startDate != null ? #temporals.format(work.startDate, 'MM/yyyy') : ''}"></span> -
+                            <span th:text="${work.isCurrent ? 'Hiện tại' : (work.endDate != null ? #temporals.format(work.endDate, 'MM/yyyy') : '')}"></span>
+                        </span>
                 </div>
                 <p class="preview-item-desc" th:if="${work.description != null && !work.description.isEmpty()}" th:text="${work.description}"></p>
             </div>
         </div>
 
-        <!-- Học vấn -->
         <div class="preview-section" th:if="${not #lists.isEmpty(educations)}">
             <h2 class="preview-section-title" th:style="'color: ' + ${cv.accentColor} + '; border-color: ' + ${cv.accentColor} + '33;'">Học vấn</h2>
             <div class="preview-item" th:each="edu : ${educations}">
@@ -67,15 +58,14 @@
                         </p>
                     </div>
                     <span class="preview-item-date">
-                        <span th:text="${edu.startDate != null ? #temporals.format(edu.startDate, 'MM/yyyy') : ''}"></span> -
-                        <span th:text="${edu.endDate != null ? #temporals.format(edu.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
-                    </span>
+                            <span th:text="${edu.startDate != null ? #temporals.format(edu.startDate, 'MM/yyyy') : ''}"></span> -
+                            <span th:text="${edu.endDate != null ? #temporals.format(edu.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
+                        </span>
                 </div>
                 <p class="preview-item-desc" th:if="${edu.grade != null && !edu.grade.isEmpty()}" th:text="'Xếp loại: ' + ${edu.grade}"></p>
             </div>
         </div>
 
-        <!-- Dự án -->
         <div class="preview-section" th:if="${not #lists.isEmpty(projects)}">
             <h2 class="preview-section-title" th:style="'color: ' + ${cv.accentColor} + '; border-color: ' + ${cv.accentColor} + '33;'">Dự án tiêu biểu</h2>
             <div class="preview-item" th:each="proj : ${projects}">
@@ -83,33 +73,13 @@
                     <div>
                         <h3 class="preview-item-title">
                             <span th:text="${proj.name}"></span>
-                            <a th:if="${proj.projectUrl != null && !proj.projectUrl.isEmpty()}" th:href="${proj.projectUrl}" target="_blank" class="preview-link">(Xem chi tiết)</a>
+                            <a th:if="${proj.projectUrl != null && !proj.projectUrl.isEmpty()}" th:href="${proj.projectUrl}" target="_blank" style="font-size: 13px; color: #2563eb; text-decoration: none;">(Xem chi tiết)</a>
                         </h3>
                         <p class="preview-item-subtitle" th:if="${proj.role != null}" th:text="${proj.role}"></p>
                     </div>
                     <span class="preview-item-date">
-                        <span th:text="${proj.startDate != null ? #temporals.format(proj.startDate, 'MM/yyyy') : ''}"></span> -
-                        <span th:text="${proj.endDate != null ? #temporals.format(proj.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
-                    </span>
+                            <span th:text="${proj.startDate != null ? #temporals.format(proj.startDate, 'MM/yyyy') : ''}"></span> -
+                            <span th:text="${proj.endDate != null ? #temporals.format(proj.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
+                        </span>
                 </div>
-                <p class="preview-item-desc" th:if="${proj.technologies != null && !proj.technologies.isEmpty()}" style="font-weight: 500; color: #2563EB;" th:text="'Công nghệ: ' + ${proj.technologies}"></p>
-                <p class="preview-item-desc" th:if="${proj.description != null && !proj.description.isEmpty()}" th:text="${proj.description}"></p>
-            </div>
-        </div>
-
-        <!-- Kỹ năng -->
-        <div class="preview-section" th:if="${not #lists.isEmpty(skills)}">
-            <h2 class="preview-section-title" th:style="'color: ' + ${cv.accentColor} + '; border-color: ' + ${cv.accentColor} + '33;'">Kỹ năng chuyên môn</h2>
-            <div class="preview-skills-list">
-                <div class="preview-skill-tag" th:each="cs : ${skills}">
-                    <span th:text="${cs.skill != null ? cs.skill.name : 'Kỹ năng'}"></span>
-                    <span class="preview-skill-level" th:text="'(' + ${cs.proficiency} + ')'"></span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-</div>
-
-</body>
-</html>
+                <p class="preview-item-desc" th:if="${

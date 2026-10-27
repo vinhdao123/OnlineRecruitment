@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${isEdit} ? 'Chỉnh sửa CV — Online Recruitment' : 'Tạo CV mới — Online Recruitment'"></title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CHỈ GỌI FILE CSS -->
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+</head>
+<body>
+
+<!-- TASKBAR -->
+<header class="header">
+    <div class="header-container">
+        <a th:href="@{/}" class="logo"><div class="logo-icon">OR</div> Online Recruitment</a>
+        <nav class="nav">
+            <a th:href="@{/}">Trang chủ</a>
+            <a th:href="@{/jobs}">Tìm việc làm</a>
+            <a th:href="@{/candidate/dashboard}">Bảng điều khiển</a>
+            <a th:href="@{/candidate/profile}">Hồ sơ của tôi</a>
+            <a th:href="@{/candidate/cvs}" class="active">CV</a>
+        </nav>
+        <div class="user-menu">
+            <div class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">C</div>
+            <div class="user-info">
+                <span class="user-name" th:text="${#authentication.name}">candidate</span>
+                <span class="user-role">ỨNG VIÊN</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- LAYOUT CHÍNH (Căn giữa) -->
+<div class="page-container">
+
+    <div class="page-header">
+        <div>
+            <h2 class="page-title" th:text="${isEdit} ? 'Chỉnh sửa thông tin CV' : 'Tạo CV mới'"></h2>
+        </div>
+        <a th:href="@{/candidate/cvs}" class="btn-link">&larr; Quay lại danh sách</a>
+    </div>
+
+    <div th:if="${errorMessage}" style="background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-size: 14px;" th:text="${errorMessage}"></div>
+
+    <div class="form-card">
+        <form th:action="${isEdit} ? @{/candidate/cvs/{id}/update(id=${cvId})} : @{/candidate/cvs/create}"
+              th:object="${cvRequest}" method="post" enctype="multipart/form-data">
+
+            <!-- Chọn Template (Chỉ hiện khi Tạo mới) -->
+            <div class="form-group" th:if="${!isEdit}">
+                <label class="form-label">Mẫu CV <span style="color: red;">*</span></label>
+                <select th:field="*{templateVersionId}" class="form-control">
+                    <option value="">-- Chọn mẫu CV --</option>
+                    <option th:each="t : ${templates}" th:value="${t.id}"
+                            th:text="${t.templateName + ' (Phiên bản ' + t.versionNumber + ')'}"></option>
+                </select>
+                <span th:if="${#fields.hasErrors('templateVersionId')}" th:errors="*{templateVersionId}" style="color: red; font-size: 13px;"></span>
+            </div>
+
+            <!-- Tiêu đề -->
+            <div class="form-group">
+                <label class="form-label">Tiêu đề CV <span style="color: red;">*</span></label>
+                <input type="text" th:field="*{title}" class="form-control" placeholder="VD: CV Java Developer">
+                <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" style="color: red; font-size: 13px;"></span>
+            </div>
+
+            <!-- Chức danh -->
+            <div class="form-group">
+                <label class="form-label">Chức danh nghề nghiệp</label>
+                <input type="text" th:field="*{professionalTitle}" class="form-control" placeholder="VD: Backend Developer">
+                <span th:if="${#fields.hasErrors('professionalTitle')}" th:errors="*{professionalTitle}" style="color: red; font-size: 13px;"></span>
+            </div>
+
+            <!-- Tóm tắt -->
+            <div class="form-group">
+                <label class="form-label">Tóm tắt bản thân</label>
+                <textarea th:field="*{summary}" class="form-control" rows="4" placeholder="Mô tả ngắn gọn về kinh nghiệm, kỹ năng và mục tiêu nghề nghiệp của bạn..."></textarea>
+                <span th:if="${#fields.hasErrors('summary')}" th:errors="*{summary}" style="color: red; font-size: 13px;"></span>
+            </div>
+
+            <!-- Màu chủ đạo -->
+            <div class="form-group">
+                <label class="form-label">Màu chủ đạo CV</label>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <input type="color" th:field="*{accentColor}" style="width: 50px; height: 40px; padding: 0; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer;">
+                    <span style="font-size: 14px; color: #64748b;">Chọn màu sắc yêu thích cho CV của bạn.</span>
+                </div>
+                <span th:if="${#fields.hasErrors('accentColor')}" th:errors="*{accentColor}" style="color: red; font-size: 13px;"></span>
+            </div>
+
+            <!-- Nút Hành động -->
+            <div style="display: flex; gap: 12px; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e2e8f0;">
+                <button type="submit" class="btn-submit" style="margin-top: 0;">
+                    <span th:text="${isEdit} ? 'Lưu thay đổi' : 'Tạo CV'"></span>
+                </button>
+                <a th:href="${isEdit} ? @{/candidate/cvs/{id}(id=${cvId})} : @{/candidate/cvs}" class="btn-link" style="padding: 10px 24px; border: 1px solid #d1d5db; border-radius: 8px; color: #374151; text-decoration: none;">Hủy bỏ</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

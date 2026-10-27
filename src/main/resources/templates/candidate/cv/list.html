@@ -6,12 +6,13 @@
     <title>CV của tôi — Online Recruitment</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Gọi CSS của chúng ta -->
+    <!-- Gọi CSS chuẩn -->
     <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
 </head>
 <body>
 
-<!-- TASKBAR -->
+<!-- ================= TASKBAR ================= -->
 <header class="header">
     <div class="header-container">
         <a th:href="@{/}" class="logo"><div class="logo-icon">OR</div> Online Recruitment</a>
@@ -32,24 +33,24 @@
     </div>
 </header>
 
-<!-- LAYOUT CHÍNH -->
-<div class="dashboard-layout">
+<!-- ================= LAYOUT CHÍNH ================= -->
+<div class="cv-dashboard-layout">
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-menu">
-            <a th:href="@{/candidate/cvs}" class="sidebar-item active">
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="cv-sidebar">
+        <div class="cv-sidebar-menu">
+            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item active">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                CV của tôi
+                My CV
             </a>
-            <a th:href="@{/candidate/cv-templates}" class="sidebar-item">
+            <a th:href="@{/candidate/templates}" class="cv-sidebar-item">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                Hồ sơ mẫu
+                Template CV
             </a>
         </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- ================= NỘI DUNG CHÍNH ================= -->
     <main class="main-content">
 
         <div class="page-header">
@@ -68,7 +69,22 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Tạo CV mới
             </a>
+
+            <!-- Nút Upload CV -->
+            <!-- Nút Upload CV đẹp mắt -->
+            <form th:action="@{/candidate/cvs/upload}" method="post" enctype="multipart/form-data" id="uploadForm" style="display:inline-block; margin-left: 12px;">
+                <input type="file" name="cvFile" id="cvFileInput" accept=".pdf,.doc,.docx" style="display: none;" required onchange="document.getElementById('uploadForm').submit();">
+                <button type="button" class="btn-primary" style="background: #10b981; cursor: pointer;" onclick="document.getElementById('cvFileInput').click();">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Tải CV lên
+                </button>
+            </form>
         </div>
+
 
         <!-- Thông báo -->
         <div th:if="${successMessage}" class="alert alert-success" style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${successMessage}"></div>
@@ -81,60 +97,42 @@
             <p style="color: #64748b; font-size: 14px;">Hãy bấm nút "Tạo CV mới" để bắt đầu.</p>
         </div>
 
-        <!-- Grid CV -->
+        <!-- GRID CV -->
         <div class="cv-grid" th:if="${hasCvs}">
             <div th:each="cv : ${cvs}" class="cv-card" th:with="detail=${cvDataMap.get(cv.id)}">
 
                 <!-- Preview Box -->
-                <div class="cv-preview" style="padding: 0; height: 240px; display: flex; flex-direction: column; position: relative; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-
-                    <!-- Header màu theo CV -->
-                    <div th:style="'background-color: ' + ${detail['cv'].accentColor} + '15; border-bottom: 2px solid ' + ${detail['cv'].accentColor} + '; padding: 16px; display: flex; align-items: center; gap: 12px;'">
-                        <img th:if="${cv.avatarUrl != null}" th:src="@{${cv.avatarUrl}}" alt="Avatar"
-                             style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); flex-shrink: 0;">
-
-                        <!-- Nếu không có ảnh, hiển thị chữ cái đầu -->
-                        <div th:if="${cv.avatarUrl == null}"
-                             th:style="'width: 50px; height: 50px; border-radius: 50%; background: ' + ${detail['cv'].accentColor} + '; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; flex-shrink: 0;'"
-                             th:text="${#strings.substring(profileUser.fullName, 0, 1).toUpperCase()}">C</div>
-
-                        <div style="overflow: hidden; width: 100%;">
-                            <h3 th:text="${profileUser.fullName}" style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Nguyễn Văn A</h3>
-                            <p th:text="${cv.professionalTitle != null ? cv.professionalTitle : 'Chưa cập nhật'}" style="margin: 2px 0 0 0; font-size: 12px; color: #475569; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></p>
+                <div class="cv-preview-card">
+                    <div class="cv-preview-header" th:style="'background-color: ' + ${detail['cv'].accentColor} + '15; border-bottom: 2px solid ' + ${detail['cv'].accentColor} + ';'">
+                        <img th:if="${cv.avatarUrl != null}" th:src="@{${cv.avatarUrl}}" alt="Avatar" class="cv-preview-avatar">
+                        <div th:if="${cv.avatarUrl == null}" class="cv-preview-avatar-fallback" th:style="'background: ' + ${detail['cv'].accentColor}" th:text="${#strings.substring(profileUser.fullName, 0, 1).toUpperCase()}">C</div>
+                        <div class="cv-preview-info">
+                            <h3 th:text="${profileUser.fullName}" class="cv-preview-name">Nguyễn Văn A</h3>
+                            <p th:text="${cv.professionalTitle != null ? cv.professionalTitle : 'Chưa cập nhật'}" class="cv-preview-title"></p>
                         </div>
                     </div>
 
-                    <!-- Nội dung tóm tắt -->
-                    <div style="padding: 16px; font-size: 11px; color: #334155; overflow: hidden; flex-grow: 1;">
-
-                        <!-- Mục tiêu -->
-                        <div th:if="${detail['cv'].summary != null && !detail['cv'].summary.isEmpty()}" style="margin-bottom: 12px;">
-                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; font-size: 10px; text-transform: uppercase;">Mục tiêu nghề nghiệp</div>
-                            <p style="margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;" th:text="${detail['cv'].summary}"></p>
+                    <div class="cv-preview-body">
+                        <div th:if="${detail['cv'].summary != null && !detail['cv'].summary.isEmpty()}">
+                            <div class="cv-preview-section-title">Mục tiêu nghề nghiệp</div>
+                            <p class="cv-preview-text" th:text="${detail['cv'].summary}"></p>
                         </div>
-
-                        <!-- Kinh nghiệm -->
-                        <div th:if="${not #lists.isEmpty(detail['works'])}" style="margin-bottom: 12px;">
-                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; font-size: 10px; text-transform: uppercase;">Kinh nghiệm làm việc</div>
+                        <div th:if="${not #lists.isEmpty(detail['works'])}">
+                            <div class="cv-preview-section-title">Kinh nghiệm làm việc</div>
                             <div th:each="work, iter : ${detail['works']}" th:if="${iter.index < 1}">
-                                <p style="font-weight: 600; margin: 0; color: #1e293b;" th:text="${work.jobTitle}"></p>
-                                <p style="margin: 0; color: #64748b;" th:text="${work.companyName}"></p>
+                                <p class="cv-preview-item-title" th:text="${work.jobTitle}"></p>
+                                <p class="cv-preview-item-sub" th:text="${work.companyName}"></p>
                             </div>
                         </div>
-
-                        <!-- Học vấn -->
                         <div th:if="${not #lists.isEmpty(detail['educations'])}">
-                            <div style="font-weight: 700; color: #0f172a; margin-bottom: 4px; font-size: 10px; text-transform: uppercase;">Học vấn</div>
+                            <div class="cv-preview-section-title">Học vấn</div>
                             <div th:each="edu, iter : ${detail['educations']}" th:if="${iter.index < 1}">
-                                <p style="font-weight: 600; margin: 0; color: #1e293b;" th:text="${edu.institution}"></p>
-                                <p style="margin: 0; color: #64748b;" th:text="${edu.degree}"></p>
+                                <p class="cv-preview-item-title" th:text="${edu.institution}"></p>
+                                <p class="cv-preview-item-sub" th:text="${edu.degree}"></p>
                             </div>
                         </div>
-
                     </div>
-
-                    <!-- Lớp phủ mờ dần ở dưới đáy -->
-                    <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 30px; background: linear-gradient(transparent, #f8fafc); pointer-events: none;"></div>
+                    <div class="cv-preview-gradient"></div>
                 </div>
 
                 <!-- Footer Card -->
@@ -143,6 +141,8 @@
                         <div style="display: flex; align-items: center; margin-bottom: 4px;">
                             <h3 class="cv-card-title" th:text="${cv.title}">Tên CV</h3>
                             <span th:if="${cv.isDefault}" class="badge-default">Mặc định</span>
+                            <!-- Thêm badge File cho CV upload -->
+                            <span th:if="${cv.isUploaded}" class="badge-default" style="background: #ecfdf5; color: #065f46;">📎 File</span>
                         </div>
                         <div class="cv-card-date">
                             Cập nhật: <span th:text="${detail['cv'].updatedAt != null ? #temporals.format(detail['cv'].updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span>
@@ -150,16 +150,10 @@
                     </div>
 
                     <div class="cv-card-actions">
-                        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-outline-sm" style="background:#2563eb; color:white; border-color:#2563eb; text-decoration: none; display: flex; align-items: center; justify-content: center;">Chi tiết</a>
-
-                        <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/default(id=${cv.id})}" method="post" style="flex:1; display:flex; margin:0;">
-                            <button type="submit" class="btn-outline-sm" style="width:100%;">Đặt mặc định</button>
-                        </form>
-                        <a th:if="${cv.isDefault}" href="javascript:void(0);" class="btn-outline-sm" style="flex:1; opacity:0.5; cursor:not-allowed; text-align:center; display: flex; align-items: center; justify-content: center;">Đã mặc định</a>
-
-                        <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/delete(id=${cv.id})}" method="post" style="flex:0.5; display:flex; margin:0;" onsubmit="return confirm('Xóa CV này?');">
-                            <button type="submit" class="btn-outline-sm" style="width:100%; color:#ef4444; border-color:#fecaca;">Xóa</button>
-                        </form>
+                        <!-- Nếu là CV upload, hiện nút Tải về thay vì Chi tiết -->
+                        <a th:if="${cv.isUploaded}" th:href="@{${cv.fileUrl}}" target="_blank" class="btn-outline-sm" style="background:#10b981; color:white; border-color:#10b981;">Tải về</a>
+                        <a th:unless="${cv.isUploaded}" th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-outline-sm" style="background:#2563eb; color:white; border-color:#2563eb;">Chi tiết</a>
+                        ...
                     </div>
                 </div>
             </div>

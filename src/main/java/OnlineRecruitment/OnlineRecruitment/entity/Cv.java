@@ -59,6 +59,18 @@ public class Cv {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
+    @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
+    private String content;
+
+    @Column(name = "template", length = 255)
+    private String template;
+
+    @Column(name = "file_url", length = 500)
+    private String fileUrl;
+
+    @Column(name = "is_uploaded")
+    private Boolean isUploaded = false;
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();

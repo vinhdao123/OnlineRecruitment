@@ -1,0 +1,54 @@
+/* 1. Khung chứa toàn bộ (Sidebar + Nội dung) */
+.cv-dashboard-layout {
+    display: flex;          /* Bắt buộc phải có để chia 2 cột */
+    flex-direction: row;    /* Xếp ngang */
+    max-width: 1200px;
+    margin: 24px auto;      /* Căn giữa trang */
+    padding: 0 20px;
+    gap: 24px;              /* Khoảng cách giữa Sidebar và Nội dung */
+    align-items: flex-start;
+}
+
+/* 2. Cột Sidebar (Bên trái) */
+.cv-sidebar {
+    width: 260px;
+    flex-shrink: 0;         /* Không cho phép co lại */
+}
+
+.cv-sidebar-menu {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+}
+
+.cv-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    color: #475569;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    white-space: nowrap;
+}
+
+.cv-sidebar-item.active {
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.cv-sidebar-item svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+/* 3. Cột Nội dung (Bên phải) */
+.main-content {
+    flex-grow: 1;           /* Chiếm toàn bộ phần còn lại */
+    min-width: 0;
+}

@@ -20,5 +20,6 @@ public class CvSummaryVm {
     private LocalDateTime updatedAt;
     private String templateName;
     private String avatarUrl;
+    private Boolean isUploaded;
 
 }

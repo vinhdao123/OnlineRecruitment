@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -50,23 +51,45 @@ public class CvController {
     }
 
     @GetMapping("/new")
-    public String showCreateForm(Authentication auth, Model model) {
-        model.addAttribute("cvRequest", new CreateCvRequest());
+    public String showCreateForm(
+            @RequestParam(value = "templateId", required = false) Long templateId,
+            @RequestParam(value = "sourceCvId", required = false) Long sourceCvId,
+            Authentication auth, Model model) {
+
+        CreateCvRequest req = new CreateCvRequest();
+
+        if (templateId != null) {
+            req.setTemplateVersionId(templateId);
+        }
+
+        model.addAttribute("cvRequest", req);
         model.addAttribute("templates", cvService.getAvailableTemplates());
         model.addAttribute("isEdit", false);
+
+        if (sourceCvId != null) {
+            model.addAttribute("sourceCvId", sourceCvId);
+        }
+
         return "candidate/cv/form";
     }
 
     @PostMapping("/create")
     public String create(@Valid @ModelAttribute("cvRequest") CreateCvRequest req,
-                         BindingResult result, Authentication auth, Model model, RedirectAttributes ra) {
+                         BindingResult result,
+                         @RequestParam(value = "sourceCvId", required = false) Long sourceCvId,
+                         Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("templates", cvService.getAvailableTemplates());
             model.addAttribute("isEdit", false);
             return "candidate/cv/form";
         }
         try {
-            cvService.createCv(req, getUserId(auth));
+            Long newCvId = cvService.createCvAndReturnId(req, getUserId(auth));
+
+            if (sourceCvId != null) {
+                cvService.copyCvData(sourceCvId, newCvId, getUserId(auth));
+            }
+
             ra.addFlashAttribute("successMessage", "Tạo CV thành công!");
             return "redirect:/candidate/cvs";
         } catch (Exception e) {
@@ -77,7 +100,6 @@ public class CvController {
         }
     }
 
-    // ĐÃ SỬA: Trang chi tiết kiêm luôn chức năng Sửa (nếu có ?edit=true)
     @GetMapping("/{id}")
     public String detail(@PathVariable Long id,
                          @RequestParam(value = "edit", required = false, defaultValue = "false") boolean isEdit,
@@ -88,8 +110,8 @@ public class CvController {
             model.addAttribute("isEditMode", isEdit);
 
             if (isEdit) {
-                // Nếu là chế độ sửa, chuẩn bị dữ liệu cho form
-                UpdateCvRequest req = new UpdateCvRequest(cv.getTitle(), cv.getProfessionalTitle(), cv.getSummary(), cv.getAccentColor(), cv.getAvatarUrl());                model.addAttribute("cvRequest", req);
+                UpdateCvRequest req = new UpdateCvRequest(cv.getTitle(), cv.getProfessionalTitle(), cv.getSummary(), cv.getAccentColor(), cv.getAvatarUrl());
+                model.addAttribute("cvRequest", req);
             }
             return "candidate/cv/detail";
         } catch (Exception e) {
@@ -102,7 +124,7 @@ public class CvController {
     public String update(@PathVariable Long id,
                          @Valid @ModelAttribute("cvRequest") UpdateCvRequest req,
                          BindingResult result,
-                         @RequestParam(value = "avatarFile", required = false) org.springframework.web.multipart.MultipartFile avatarFile,
+                         @RequestParam(value = "avatarFile", required = false) MultipartFile avatarFile,
                          Authentication auth, Model model, RedirectAttributes ra) {
         if (result.hasErrors()) {
             model.addAttribute("cvId", id);
@@ -111,20 +133,16 @@ public class CvController {
             return "candidate/cv/detail";
         }
         try {
-            // Xử lý upload ảnh
             if (avatarFile != null && !avatarFile.isEmpty()) {
                 try {
-                    // Lưu vào thư mục "uploads" ở thư mục gốc của project
                     String uploadDir = System.getProperty("user.dir") + "/uploads/";
                     java.io.File dir = new java.io.File(uploadDir);
                     if (!dir.exists()) dir.mkdirs();
 
-                    // Đổi tên file để tránh trùng lặp
                     String fileName = System.currentTimeMillis() + "_" + avatarFile.getOriginalFilename();
                     java.nio.file.Path path = java.nio.file.Paths.get(uploadDir + fileName);
                     java.nio.file.Files.copy(avatarFile.getInputStream(), path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
-                    // Lưu đường dẫn ảnh vào DB
                     req.setAvatarUrl("/uploads/" + fileName);
                 } catch (java.io.IOException e) {
                     throw new RuntimeException("Lỗi khi lưu ảnh: " + e.getMessage());
@@ -166,7 +184,7 @@ public class CvController {
     }
 
     // ==========================================
-    // CÁC ROUTE CHO PHẦN NỘI DUNG CV (WORK, EDU, SKILL, PROJECT)
+    // CÁC ROUTE CHO PHẦN NỘI DUNG CV
     // ==========================================
 
     @GetMapping("/{id}/preview")
@@ -343,8 +361,39 @@ public class CvController {
         return "redirect:/candidate/cvs/" + id + "/projects";
     }
 
-    @GetMapping("/cv-templates")
+    @GetMapping("/templates")
     public String listTemplates() {
         return "candidate/cv/templates";
+    }
+
+    @PostMapping("/upload")
+    public String uploadCv(@RequestParam("cvFile") MultipartFile file, Authentication auth, RedirectAttributes ra) {
+        try {
+            if (file.isEmpty()) {
+                ra.addFlashAttribute("errorMessage", "Vui lòng chọn file!");
+                return "redirect:/candidate/cvs";
+            }
+
+            String originalName = file.getOriginalFilename();
+            if (originalName == null || !(originalName.endsWith(".pdf") || originalName.endsWith(".doc") || originalName.endsWith(".docx"))) {
+                ra.addFlashAttribute("errorMessage", "Chỉ chấp nhận file PDF hoặc Word!");
+                return "redirect:/candidate/cvs";
+            }
+
+            String uploadDir = System.getProperty("user.dir") + "/uploads/cv/";
+            java.io.File dir = new java.io.File(uploadDir);
+            if (!dir.exists()) dir.mkdirs();
+            String fileName = System.currentTimeMillis() + "_" + originalName;
+            java.nio.file.Path path = java.nio.file.Paths.get(uploadDir + fileName);
+            java.nio.file.Files.copy(file.getInputStream(), path, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
+            // Gọi hàm với 2 tham số
+            cvService.uploadCvFile("/uploads/cv/" + fileName, getUserId(auth));
+
+            ra.addFlashAttribute("successMessage", "Tải CV lên thành công!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Lỗi tải file: " + e.getMessage());
+        }
+        return "redirect:/candidate/cvs";
     }
 }
