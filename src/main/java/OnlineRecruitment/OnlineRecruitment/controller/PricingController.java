@@ -13,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.*;
+
 @Controller
 @RequestMapping("/pricing")
 @RequiredArgsConstructor
@@ -30,32 +32,28 @@ public class PricingController {
         return "pricing/index";
     }
 
-    // Chuyển hướng sang trang Thanh toán
     @GetMapping("/checkout/{id}")
     public String checkout(@PathVariable Long id,
                            @AuthenticationPrincipal UserDetails principal,
                            Model model) {
         User user = userService.getByEmail(principal.getUsername());
         Payment payment = paymentService.createPendingPayment(user, id);
-
         model.addAttribute("payment", payment);
         return "pricing/checkout";
     }
 
-    // Xử lý khi User bấm nút "Tôi đã chuyển khoản"
+    // Hàm này dùng để User bấm nút xác nhận (nếu bạn vẫn giữ giao diện cũ)
     @PostMapping("/confirm/{paymentId}")
     public String confirmPayment(@PathVariable Long paymentId, RedirectAttributes ra) {
         try {
-            // Gọi hàm userRequestConfirm thay vì confirmPayment cũ
-            paymentService.userRequestConfirm(paymentId);
-            ra.addFlashAttribute("success", "Đã ghi nhận. Vui lòng chờ Admin kiểm tra và duyệt giao dịch!");
+            paymentService.confirmPayment(paymentId); // Đã sửa thành confirmPayment để kích hoạt luôn
+            ra.addFlashAttribute("success", "Thanh toán thành công! Gói đã được kích hoạt.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/pricing/history";
     }
 
-    // Xem lịch sử giao dịch
     @GetMapping("/history")
     public String history(@AuthenticationPrincipal UserDetails principal, Model model) {
         User user = userService.getByEmail(principal.getUsername());
@@ -63,21 +61,16 @@ public class PricingController {
         return "pricing/history";
     }
 
-    // 1. Thanh toán tiếp hóa đơn cũ
     @GetMapping("/resume/{paymentId}")
     public String resumePayment(@PathVariable Long paymentId, Model model) {
         Payment payment = paymentService.getPaymentById(paymentId);
-
-        // Chỉ cho phép thanh toán tiếp nếu đang PENDING
         if (!"PENDING".equals(payment.getStatus())) {
             return "redirect:/pricing/history";
         }
-
         model.addAttribute("payment", payment);
-        return "pricing/checkout"; // Trả về lại trang QR cũ
+        return "pricing/checkout";
     }
 
-    // 2. Hủy hóa đơn
     @PostMapping("/cancel/{paymentId}")
     public String cancelPayment(@PathVariable Long paymentId, RedirectAttributes ra) {
         paymentService.cancelPayment(paymentId);
@@ -85,6 +78,14 @@ public class PricingController {
         return "redirect:/pricing/history";
     }
 
-
-
+    // ==========================================
+    // HÀM API MỚI: DÀNH CHO JAVASCRIPT Ở TRANG CHECKOUT
+    // (Hàm này giúp trình duyệt tự động kiểm tra xem gói đã được kích hoạt chưa)
+    // ==========================================
+    @GetMapping("/api/payment-status/{paymentId}")
+    @ResponseBody
+    public Map<String, String> checkPaymentStatus(@PathVariable Long paymentId) {
+        Payment payment = paymentService.getPaymentById(paymentId);
+        return Map.of("status", payment.getStatus());
+    }
 }

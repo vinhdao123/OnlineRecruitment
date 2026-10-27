@@ -6,10 +6,6 @@
 <div class="main">
     <div th:replace="~{admin/_layout :: topbar('Quản lý Gói dịch vụ', 'Danh sách các gói dành cho Recruiter và Candidate')}"></div>
 
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-        <a th:href="@{/admin/packages/new}" class="btn btn-primary">+ Thêm Gói Mới</a>
-    </div>
-
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
     <div class="table-wrap" style="overflow: visible;">

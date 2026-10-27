@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer; // Thêm import
 
 @Configuration
 @EnableWebSecurity
@@ -26,17 +27,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** Custom failure handler — phân biệt loại lỗi. */
     private AuthenticationFailureHandler failureHandler() {
         return (request, response, exception) -> {
             String error = "badCredentials";
-
-            // Lấy root cause (exception gốc)
             Throwable cause = exception;
             while (cause.getCause() != null && cause != cause.getCause()) {
                 cause = cause.getCause();
             }
-
             if (cause instanceof AccountRejectedException || exception instanceof AccountRejectedException) {
                 error = "rejected";
             } else if (cause instanceof LockedException || exception instanceof LockedException) {
@@ -44,7 +41,6 @@ public class SecurityConfig {
             } else if (cause instanceof DisabledException || exception instanceof DisabledException) {
                 error = "inactive";
             }
-
             response.sendRedirect(request.getContextPath() + "/login?" + error);
         };
     }
@@ -54,8 +50,15 @@ public class SecurityConfig {
 
         http
                 .userDetailsService(userDetailsService)
+                // 1. TẮT CSRF CHO API WEBHOOK
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/sepay-webhook")
+                )
 
                 .authorizeHttpRequests(auth -> auth
+                        // 2. CHO PHÉP TRUY CẬP TỰ DO VÀO WEBHOOK VÀ API PAYMENT STATUS
+                        .requestMatchers("/api/sepay-webhook", "/pricing/api/payment-status/**").permitAll()
+
                         .requestMatchers(
                                 "/", "/login", "/register", "/register/**",
                                 "/verify-otp", "/resend-otp", "/auth/**",
@@ -66,6 +69,7 @@ public class SecurityConfig {
                                 "/uploads/**",
                                 "/favicon.ico"
                         ).permitAll()
+
                         .requestMatchers("/jobs/*/apply").hasRole("CANDIDATE")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/jobs", "/jobs/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")

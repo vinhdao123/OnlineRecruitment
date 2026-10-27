@@ -97,6 +97,9 @@ public class Job {
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
 
+    @Column(name = "is_pinned")
+    private Boolean isPinned = false;
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
