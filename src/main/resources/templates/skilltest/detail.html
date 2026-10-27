@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${test.title} + ' — Online Recruitment'">Thông tin bài thi</title>
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+</head>
+<body class="page-wrapper">
+
+<!-- TASKBAR -->
+<header th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></header>
+
+<div style="max-width: 860px; margin: 30px auto; padding: 0 20px;">
+
+    <!-- BREADCRUMB -->
+    <div style="font-size:14px; color:#64748b; margin-bottom:20px;">
+        <a th:href="@{/}" style="color:#64748b; text-decoration:none;">Trang chủ</a> ›
+        <a th:href="@{/skill-tests}" style="color:#64748b; text-decoration:none;">Đánh giá kỹ năng</a> ›
+        <span th:text="${test.skillName}" style="color:#00b14f; font-weight:600;">Skill</span>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger" style="background:#fef2f2; border:1px solid #f87171; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:20px;" th:text="${errorMessage}"></div>
+
+    <!-- MAIN CARD -->
+    <div style="background:#fff; border-radius:16px; border:1px solid var(--border-color); overflow:hidden; box-shadow:var(--card-shadow);">
+        <!-- BANNER -->
+        <div class="test-card-banner"
+             th:classappend="${'badge-' + #strings.toLowerCase(test.skillName)}"
+             th:style="${test.badgeColor != null ? 'background: linear-gradient(135deg, ' + test.badgeColor + ' 0%, #1e293b 100%); padding: 32px 28px;' : 'padding: 32px 28px;'}">
+            <div>
+                <span class="test-badge-title" th:text="${test.category}">KỸ NĂNG CÔNG NGHỆ</span>
+                <h1 style="font-size:30px; font-weight:900; color:#fff; margin-top:6px;" th:text="${test.title}">
+                    Đề thi đánh giá kỹ năng Java
+                </h1>
+            </div>
+            <div class="test-banner-icon" style="width:68px; height:68px; font-size:36px;">
+                <span th:switch="${#strings.toLowerCase(test.skillName)}">
+                    <span th:case="'java'">☕</span>
+                    <span th:case="'javascript'">⚡</span>
+                    <span th:case="'git'">🌿</span>
+                    <span th:case="'mysql'">🐬</span>
+                    <span th:case="'html'">🌐</span>
+                    <span th:case="'agile'">🔄</span>
+                    <span th:case="*">💻</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- DETAILS -->
+        <div style="padding: 32px;">
+            <p style="font-size:15px; color:#475569; line-height:1.6; margin-bottom:24px;" th:text="${test.description}">
+                Mô tả chi tiết bài thi...
+            </p>
+
+            <h3 style="font-size:17px; font-weight:700; color:#0f172a; margin-bottom:16px;">
+                📋 Thông tin & Quy định bài thi
+            </h3>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:28px;">
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Thời gian làm bài</div>
+                    <div style="font-size:20px; font-weight:800; color:#0f172a; margin-top:4px;" th:text="${test.durationMinutes + ' phút'}">15 phút</div>
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Số lượng câu hỏi</div>
+                    <div style="font-size:20px; font-weight:800; color:#0f172a; margin-top:4px;" th:text="${test.totalQuestionsPerTest + ' câu'}">10 câu</div>
+                    <small style="color:#00b14f; font-weight:600;">(Bốc ngẫu nhiên từ ngân hàng <span th:text="${poolCount}">20</span> câu)</small>
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Điểm tối thiểu đạt</div>
+                    <div style="font-size:20px; font-weight:800; color:#00b14f; margin-top:4px;" th:text="${test.passingScore + '/100 điểm'}">60/100</div>
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
+                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Cấp độ bài thi</div>
+                    <div style="font-size:20px; font-weight:800; color:#b45309; margin-top:4px;" th:text="${test.difficulty}">Trung bình</div>
+                </div>
+            </div>
+
+            <!-- LƯU Ý KHI LÀM BÀI -->
+            <div style="background:#eff6ff; border-left:4px solid #2563eb; padding:16px 20px; border-radius:8px; margin-bottom:30px; font-size:14px; color:#1e40af; line-height:1.6;">
+                <strong>⚠️ Lưu ý quan trọng:</strong>
+                <ul style="margin:8px 0 0 20px;">
+                    <li>Mỗi lần làm bài, hệ thống sẽ <strong>ngẫu nhiên lựa chọn các câu hỏi khác nhau</strong> từ ngân hàng đề thi của quản trị viên.</li>
+                    <li>Đồng hồ đếm ngược sẽ bắt đầu chạy ngay khi bạn nhấn <strong>"Bắt đầu làm bài"</strong>.</li>
+                    <li>Hệ thống sẽ tự động thu bài khi hết giờ nếu bạn chưa bấm nộp bài.</li>
+                    <li>Sau khi nộp bài, bạn sẽ được xem ngay kết quả, thang điểm đánh giá và lời giải thích chi tiết cho từng câu hỏi.</li>
+                </ul>
+            </div>
+
+            <!-- BUTTONS -->
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <a th:href="@{/skill-tests}" style="color:#64748b; text-decoration:none; font-weight:600; font-size:14.5px;">
+                    ← Quay lại danh sách bài test
+                </a>
+
+                <a th:href="@{'/skill-tests/' + ${test.id} + '/take'}"
+                   class="btn-search"
+                   style="font-size:16px; padding:14px 32px; border-radius:10px; text-decoration:none;">
+                    🚀 Bắt đầu làm bài thi ngay
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Đang làm bài thi: ' + ${test.title}">Làm bài thi đánh giá kỹ năng</title>
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+</head>
+<body style="background:#f4f6f8; min-height:100vh; padding-bottom:60px;">
+
+<!-- TOP BAR -->
+<div style="background:#0f172a; color:#fff; padding:16px 24px; position:sticky; top:0; z-index:100; box-shadow:0 2px 10px rgba(0,0,0,0.15);">
+    <div style="max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a th:href="@{'/skill-tests/' + ${test.id}}" style="color:#94a3b8; text-decoration:none; font-size:14px;" onclick="return confirm('Bạn có chắc muốn thoát? Bài thi hiện tại sẽ không được lưu!')">
+                ✕ Thoát
+            </a>
+            <span style="color:#475569;">|</span>
+            <span style="font-weight:700; font-size:16px;" th:text="${test.title}">Đề thi đánh giá kỹ năng Java</span>
+            <span class="meta-pill difficulty" th:text="${test.difficulty}" style="font-size:11px;">Trung bình</span>
+        </div>
+        <div style="font-size:13px; color:#38bdf8; font-weight:600;">
+            🎲 Đề thi được bốc ngẫu nhiên từ ngân hàng câu hỏi
+        </div>
+    </div>
+</div>
+
+<div class="quiz-container" style="margin-top: 24px;">
+
+    <!-- FORM NỘP BÀI -->
+    <form id="quizForm" th:action="@{'/skill-tests/' + ${test.id} + '/submit'}" method="post" style="display:contents;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <input type="hidden" name="timeSpentSeconds" id="timeSpentSeconds" value="0">
+
+        <!-- MAIN QUESTIONS CARD -->
+        <div class="quiz-main-card">
+
+            <div th:each="q, stat : ${questions}" class="question-block" th:id="'q-block-' + ${stat.index}"
+                 th:classappend="${stat.index == 0} ? 'active' : ''">
+
+                <div class="q-header">
+                    <span class="q-index-tag" th:text="'Câu hỏi ' + (${stat.index + 1}) + ' / ' + ${totalQuestions}">Câu 1 / 10</span>
+                    <span style="font-size:13px; color:#64748b; font-weight:600;">Chọn 1 đáp án đúng duy nhất</span>
+                </div>
+
+                <div class="q-content" th:text="${q.questionText}">
+                    Nội dung câu hỏi trắc nghiệm...
+                </div>
+
+                <div class="options-list">
+                    <!-- Option A -->
+                    <label class="option-card" th:for="'opt-a-' + ${q.id}" onclick="selectOption(this, [[${stat.index}]])">
+                        <input type="radio" th:name="'q_' + ${q.id}" th:id="'opt-a-' + ${q.id}" value="A">
+                        <span class="option-key">A.</span>
+                        <span class="option-text" th:text="${q.optionA}">Phương án A</span>
+                    </label>
+
+                    <!-- Option B -->
+                    <label class="option-card" th:for="'opt-b-' + ${q.id}" onclick="selectOption(this, [[${stat.index}]])">
+                        <input type="radio" th:name="'q_' + ${q.id}" th:id="'opt-b-' + ${q.id}" value="B">
+                        <span class="option-key">B.</span>
+                        <span class="option-text" th:text="${q.optionB}">Phương án B</span>
+                    </label>
+
+                    <!-- Option C -->
+                    <label class="option-card" th:for="'opt-c-' + ${q.id}" onclick="selectOption(this, [[${stat.index}]])">
+                        <input type="radio" th:name="'q_' + ${q.id}" th:id="'opt-c-' + ${q.id}" value="C">
+                        <span class="option-key">C.</span>
+                        <span class="option-text" th:text="${q.optionC}">Phương án C</span>
+                    </label>
+
+                    <!-- Option D -->
+                    <label class="option-card" th:for="'opt-d-' + ${q.id}" onclick="selectOption(this, [[${stat.index}]])">
+                        <input type="radio" th:name="'q_' + ${q.id}" th:id="'opt-d-' + ${q.id}" value="D">
+                        <span class="option-key">D.</span>
+                        <span class="option-text" th:text="${q.optionD}">Phương án D</span>
+                    </label>
+                </div>
+
+                <!-- PREV / NEXT BUTTONS -->
+                <div class="quiz-nav-buttons">
+                    <button type="button" class="btn-search" style="background:#94a3b8; font-size:13.5px;"
+                            th:disabled="${stat.index == 0}"
+                            th:onclick="'goToQuestion(' + (${stat.index - 1}) + ')'">
+                        ← Câu trước
+                    </button>
+
+                    <span style="font-size:13px; color:#64748b;">
+                        Câu <b th:text="${stat.index + 1}">1</b> / <span th:text="${totalQuestions}">10</span>
+                    </span>
+
+                    <button type="button" class="btn-search" style="font-size:13.5px;"
+                            th:if="${stat.index < totalQuestions - 1}"
+                            th:onclick="'goToQuestion(' + (${stat.index + 1}) + ')'">
+                        Câu tiếp theo →
+                    </button>
+
+                    <button type="button" class="btn-search" style="background:#00b14f; font-size:13.5px;"
+                            th:if="${stat.index == totalQuestions - 1}"
+                            onclick="confirmSubmit()">
+                        ✓ Hoàn tất & Nộp bài
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SIDEBAR PALETTE & TIMER -->
+        <div class="quiz-sidebar">
+
+            <!-- COUNTDOWN TIMER -->
+            <div class="timer-box">
+                <div class="timer-label">⏱ Thời gian còn lại</div>
+                <div class="timer-digits" id="timerDisplay">15:00</div>
+            </div>
+
+            <!-- QUESTION PALETTE -->
+            <div class="palette-card">
+                <div class="palette-title">
+                    <span>📌</span> Danh sách câu hỏi
+                </div>
+
+                <div class="palette-grid">
+                    <button type="button" th:each="q, stat : ${questions}"
+                            class="palette-btn" th:id="'palette-btn-' + ${stat.index}"
+                            th:classappend="${stat.index == 0} ? 'active' : ''"
+                            th:onclick="'goToQuestion(' + ${stat.index} + ')'"
+                            th:text="${stat.index + 1}">
+                        1
+                    </button>
+                </div>
+
+                <div style="font-size:13px; color:#64748b; margin-bottom:16px; display:flex; justify-content:space-between;">
+                    <span>Tiến độ bài thi:</span>
+                    <strong id="progressCount" style="color:#00b14f;">0 / [[${totalQuestions}]] câu</strong>
+                </div>
+
+                <button type="button" class="btn-submit-test" onclick="confirmSubmit()">
+                    Nộp bài thi
+                </button>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+
+<!-- CONFIRM SUBMIT MODAL -->
+<div id="confirmModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px);">
+    <div style="background:#fff; width:440px; max-width:90%; margin:120px auto; padding:28px; border-radius:14px; box-shadow:0 15px 35px rgba(0,0,0,0.2); text-align:center;">
+        <div style="font-size:42px; margin-bottom:10px;">📋</div>
+        <h3 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:8px;">Xác nhận nộp bài thi?</h3>
+        <p id="modalStatusText" style="font-size:14.5px; color:#475569; margin-bottom:24px; line-height:1.5;">
+            Bạn đã trả lời được <b id="modalAnswered">0</b> / <b th:text="${totalQuestions}">10</b> câu hỏi.
+        </p>
+
+        <div style="display:flex; justify-content:center; gap:12px;">
+            <button type="button" class="btn-search" style="background:#94a3b8; border:none;" onclick="document.getElementById('confirmModal').style.display='none'">
+                Tiếp tục làm bài
+            </button>
+            <button type="button" class="btn-search" style="background:#00b14f; border:none;" onclick="actuallySubmit()">
+                Xác nhận nộp bài
+            </button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    const totalQuestions = /*[[${totalQuestions}]]*/ 10;
+    const durationMinutes = /*[[${durationMinutes}]]*/ 15;
+    let totalSeconds = durationMinutes * 60;
+    let timeSpent = 0;
+    let currentIndex = 0;
+    let answeredSet = new Set();
+
+    // 1. Timer Logic
+    const timerDisplay = document.getElementById('timerDisplay');
+    const timerInterval = setInterval(function() {
+        if (totalSeconds <= 0) {
+            clearInterval(timerInterval);
+            alert('Đã hết thời gian làm bài! Hệ thống sẽ tự động thu bài của bạn.');
+            actuallySubmit();
+            return;
+        }
+        totalSeconds--;
+        timeSpent++;
+        document.getElementById('timeSpentSeconds').value = timeSpent;
+
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        timerDisplay.textContent = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+
+        if (totalSeconds <= 120) {
+            timerDisplay.classList.add('warning');
+        }
+    }, 1000);
+
+    // 2. Navigation
+    function goToQuestion(index) {
+        if (index < 0 || index >= totalQuestions) return;
+
+        // Hide current block
+        document.getElementById('q-block-' + currentIndex).classList.remove('active');
+        document.getElementById('palette-btn-' + currentIndex).classList.remove('active');
+
+        // Show target block
+        currentIndex = index;
+        document.getElementById('q-block-' + currentIndex).classList.add('active');
+        document.getElementById('palette-btn-' + currentIndex).classList.add('active');
+    }
+
+    // 3. Select Option
+    function selectOption(labelEl, questionIndex) {
+        // Remove 'selected' style from siblings
+        const parent = labelEl.closest('.options-list');
+        parent.querySelectorAll('.option-card').forEach(el => el.classList.remove('selected'));
+        labelEl.classList.add('selected');
+
+        // Mark palette button as answered
+        answeredSet.add(questionIndex);
+        const btn = document.getElementById('palette-btn-' + questionIndex);
+        btn.classList.add('answered');
+
+        // Update progress count
+        document.getElementById('progressCount').textContent = answeredSet.size + ' / ' + totalQuestions + ' câu';
+    }
+
+    // 4. Confirm Submit Modal
+    function confirmSubmit() {
+        const answeredCount = answeredSet.size;
+        const unanswered = totalQuestions - answeredCount;
+        document.getElementById('modalAnswered').textContent = answeredCount;
+
+        if (unanswered > 0) {
+            document.getElementById('modalStatusText').innerHTML =
+                'Bạn đã hoàn thành <b style="color:#00b14f;">' + answeredCount + '</b> câu hỏi. Còn <b style="color:#ef4444;">' + unanswered + '</b> câu chưa trả lời. Bạn có chắc chắn muốn nộp bài?';
+        } else {
+            document.getElementById('modalStatusText').innerHTML =
+                'Tuyệt vời! Bạn đã hoàn thành tất cả <b style="color:#00b14f;">' + totalQuestions + '/' + totalQuestions + '</b> câu hỏi. Bạn có muốn nộp bài để xem kết quả ngay không?';
+        }
+        document.getElementById('confirmModal').style.display = 'block';
+    }
+
+    function actuallySubmit() {
+        clearInterval(timerInterval);
+        document.getElementById('quizForm').submit();
+    }
+</script>
+
+</body>
+</html>

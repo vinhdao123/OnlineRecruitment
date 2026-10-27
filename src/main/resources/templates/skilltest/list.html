@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh giá kỹ năng ứng viên & Bài test năng lực - Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+</head>
+<body class="page-wrapper">
+
+<!-- TASKBAR -->
+<header th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></header>
+
+<!-- BANNER -->
+<section class="page-header-banner">
+    <div class="banner-container">
+        <div>
+            <h1 class="banner-title">
+                <span class="icon-badge">🎯</span>
+                <span>Đánh Giá Năng Lực & Kỹ Năng Nghề Nghiệp</span>
+            </h1>
+            <p class="banner-subtitle">
+                Tham gia các bài kiểm tra trắc nghiệm chuyên môn chuẩn hóa (Java, JavaScript, Git, MySQL, HTML/CSS, Agile) được thiết kế bởi chuyên gia. Khẳng định trình độ, bổ sung huy hiệu vào hồ sơ ứng tuyển!
+            </p>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/skill-tests/history}" class="btn-start-test" style="background:#2563eb; color:#fff; border:none; padding:12px 18px;">
+                📜 Lịch sử làm bài thi
+            </a>
+            <a th:href="@{/interview-questions}" class="btn-start-test" style="background:rgba(255,255,255,0.15); color:#fff; border:none; padding:12px 18px;">
+                📚 Bộ câu hỏi phỏng vấn
+            </a>
+        </div>
+    </div>
+</section>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+
+    <!-- SEARCH & FILTER -->
+    <div class="filter-search-box">
+        <form th:action="@{/skill-tests}" method="get" class="search-form-row">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Nhập kỹ năng bạn muốn tìm kiếm (Java, Git, MySQL, HTML...)...">
+            </div>
+
+            <select name="category" class="filter-select">
+                <option value="">Tất cả kĩ năng</option>
+                <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                        th:selected="${selectedCategory == cat}"></option>
+            </select>
+
+            <button type="submit" class="btn-search">
+                Tìm kiếm
+            </button>
+            <a th:href="@{/skill-tests}" class="btn-search" style="background:#64748b;">
+                Tất cả
+            </a>
+        </form>
+
+        <div class="category-pills">
+            <a th:href="@{/skill-tests}" class="category-pill" th:classappend="${selectedCategory == null} ? 'active' : ''">Tất cả</a>
+            <a th:each="cat : ${categories}"
+               th:href="@{/skill-tests(category=${cat})}"
+               class="category-pill"
+               th:classappend="${selectedCategory == cat} ? 'active' : ''"
+               th:text="${cat}">Danh mục</a>
+        </div>
+    </div>
+
+    <!-- SECTION TITLE -->
+    <div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+            <h2 style="font-size:22px; font-weight:800; color:#0f172a;" th:text="${selectedCategory != null ? selectedCategory : 'Tất cả bài thi đánh giá kỹ năng'}">
+                Kỹ năng công nghệ
+            </h2>
+            <p style="font-size:14px; color:#64748b; margin-top:4px;">
+                Đề thi trắc nghiệm khách quan với ngân hàng câu hỏi ngẫu nhiên và chấm điểm tự động.
+            </p>
+        </div>
+        <span style="font-size:14px; color:#64748b; font-weight:600;">
+            Hiển thị <b th:text="${totalItems}">0</b> bài thi
+        </span>
+    </div>
+
+    <!-- EMPTY NOTICE -->
+    <div th:if="${#lists.isEmpty(tests)}" style="background:#fff; border-radius:14px; padding:60px 20px; text-align:center; color:#64748b;">
+        <p style="font-size:17px; margin-bottom:14px;">Không tìm thấy bài thi kỹ năng nào phù hợp với từ khóa tìm kiếm.</p>
+        <a th:href="@{/skill-tests}" class="category-pill active">Xem tất cả bài thi</a>
+    </div>
+
+    <!-- TESTS GRID (TOPCV STYLE) -->
+    <div class="test-grid">
+        <div th:each="t : ${tests}" class="test-card">
+            <!-- Dynamic Colored Banner -->
+            <div class="test-card-banner"
+                 th:classappend="${'badge-' + #strings.toLowerCase(t.skillName)}"
+                 th:style="${t.badgeColor != null ? 'background: linear-gradient(135deg, ' + t.badgeColor + ' 0%, #1e293b 100%);' : ''}">
+                <div>
+                    <div class="test-badge-title">Đề thi đánh giá kỹ năng</div>
+                    <div class="test-skill-name" th:text="${#strings.toUpperCase(t.skillName)}">JAVA</div>
+                </div>
+                <div class="test-banner-icon">
+                    <span th:switch="${#strings.toLowerCase(t.skillName)}">
+                        <span th:case="'java'">☕</span>
+                        <span th:case="'javascript'">⚡</span>
+                        <span th:case="'git'">🌿</span>
+                        <span th:case="'mysql'">🐬</span>
+                        <span th:case="'html'">🌐</span>
+                        <span th:case="'agile'">🔄</span>
+                        <span th:case="*">💻</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Card Body -->
+            <div class="test-card-body">
+                <div class="test-category-label" th:text="${t.category}">Kỹ năng công nghệ</div>
+                <h3 class="test-card-title" th:text="${t.title}">Đề thi đánh giá kỹ năng Java</h3>
+                <p class="test-card-desc" th:text="${t.description}">Mô tả nội dung bài thi...</p>
+
+                <div class="test-meta-pills">
+                    <span class="meta-pill difficulty" th:text="${t.difficulty}">Trung bình</span>
+                    <span class="meta-pill participants" th:text="${t.participantCount != null ? t.participantCount + '+ ứng viên' : '1000+ ứng viên'}">1400+ ứng viên</span>
+                    <span class="meta-pill time" th:text="${t.durationMinutes + ' phút (' + t.totalQuestionsPerTest + ' câu)'}">15 phút</span>
+                </div>
+
+                <a th:href="@{'/skill-tests/' + ${t.id}}" class="btn-start-test">
+                    Làm bài thi →
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div th:if="${totalPages > 1}" style="display:flex; justify-content:center; gap:8px; margin-top:40px;">
+        <a th:if="${currentPage > 0}" th:href="@{/skill-tests(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
+           class="category-pill">‹ Trước</a>
+
+        <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/skill-tests(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
+               class="category-pill" th:classappend="${i == currentPage} ? 'active' : ''" th:text="${i + 1}">1</a>
+        </span>
+
+        <a th:if="${currentPage < totalPages - 1}" th:href="@{/skill-tests(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
+           class="category-pill">Sau ›</a>
+    </div>
+
+</div>
+
+</body>
+</html>
