@@ -88,4 +88,10 @@ public class PricingController {
         Payment payment = paymentService.getPaymentById(paymentId);
         return Map.of("status", payment.getStatus());
     }
+
+    @GetMapping("/success")
+    public String paymentSuccess() {
+        return "pricing/success"; // Trả về file success.html
+    }
+
 }

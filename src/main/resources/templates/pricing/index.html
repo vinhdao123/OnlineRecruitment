@@ -4,96 +4,260 @@
     <meta charset="UTF-8">
     <title>Bảng giá dịch vụ</title>
     <link rel="stylesheet" th:href="@{/css/admin.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .pricing-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            font-family: 'Segoe UI', sans-serif;
+        body {
+            background-color: #f8fafc;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 60px 20px;
+            color: #1e293b;
         }
-        .pricing-header { text-align: center; margin-bottom: 40px; }
-        .pricing-header h1 { font-size: 32px; color: #1a2b4a; margin-bottom: 10px; }
-        .pricing-header p { color: #8895a8; font-size: 16px; }
+        .pricing-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
 
+        /* Header */
+        .pricing-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .pricing-header h1 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .pricing-header p {
+            color: #64748b;
+            font-size: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Grid */
         .pricing-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 30px;
+            align-items: stretch;
         }
 
+        /* Card */
         .price-card {
             background: #fff;
-            border-radius: 16px;
-            padding: 30px;
-            border: 1px solid #eef1f6;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
+            border-radius: 20px;
+            padding: 40px 30px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
         }
         .price-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(42,109,244,0.1);
-            border-color: #2a6df4;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1);
+            border-color: #cbd5e1;
         }
 
-        .price-card h3 { font-size: 20px; color: #1a2b4a; margin-bottom: 10px; }
-        .price-card .desc { font-size: 14px; color: #8895a8; min-height: 40px; margin-bottom: 20px; }
-        .price-card .price { font-size: 36px; font-weight: 700; color: #2a6df4; margin-bottom: 5px; }
-        .price-card .duration { font-size: 14px; color: #4a5568; margin-bottom: 30px; }
+        /* Gói Pro nổi bật */
+        .price-card.pro {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 15px 35px -5px rgba(245, 158, 11, 0.15);
+        }
+        .badge-popular {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #f59e0b;
+            color: #fff;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+        }
 
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .card-desc {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            min-height: 42px;
+        }
+
+        /* Price */
+        .price {
+            font-size: 40px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+        .price span {
+            font-size: 16px;
+            font-weight: 500;
+            color: #64748b;
+        }
+        .duration {
+            color: #94a3b8;
+            font-size: 14px;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        /* Features */
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+            flex-grow: 1;
+        }
+        .features-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 15px;
+            color: #334155;
+            font-weight: 500;
+        }
+        .features-list li svg {
+            width: 20px;
+            height: 20px;
+            color: #10b981; /* Màu xanh lá */
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .features-list li.disabled {
+            color: #94a3b8;
+            text-decoration: line-through;
+        }
+        .features-list li.disabled svg {
+            color: #cbd5e1;
+        }
+
+        /* Button */
         .btn-buy {
             display: block;
             width: 100%;
-            padding: 12px;
-            background: #2a6df4;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
             font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
+            font-weight: 700;
             text-decoration: none;
-            transition: background 0.15s;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-sizing: border-box;
         }
-        .btn-buy:hover { background: #1d5ad6; }
 
-        .current-role-badge {
+        /* Nút cho gói thường */
+        .btn-buy.normal {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+        }
+        .btn-buy.normal:hover {
+            background: #e2e8f0;
+        }
+
+        /* Nút cho gói Pro */
+        .btn-buy.primary {
+            background: #f59e0b;
+            color: #fff;
+            border: 1px solid #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+        .btn-buy.primary:hover {
+            background: #d97706;
+            border-color: #d97706;
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        /* Current Role Badge */
+        .role-badge {
             display: inline-block;
-            padding: 6px 16px;
+            background: #e0f2fe;
+            color: #0284c7;
+            padding: 8px 20px;
             border-radius: 20px;
-            background: #e6efff;
-            color: #2a6df4;
             font-weight: 600;
             font-size: 14px;
-            margin-top: 10px;
+            margin-top: 20px;
         }
     </style>
 </head>
-<body style="background: #f4f6fa; margin: 0;">
+<body>
 
 <div class="pricing-container">
     <div class="pricing-header">
         <h1>Nâng cấp tài khoản của bạn</h1>
-        <p>Chọn gói dịch vụ phù hợp để mở khóa các tính năng đặc biệt</p>
-        <div class="current-role-badge">
-            Bạn đang đăng nhập với vai trò:
-            <span th:text="${currentUser.role}"></span>
+        <p>Chọn gói dịch vụ phù hợp để mở khóa các tính năng tuyển dụng vượt trội.</p>
+
+        <div class="role-badge" th:if="${currentUser != null}">
+            Vai trò của bạn: <span th:text="${currentUser.role}">RECRUITER</span>
         </div>
     </div>
 
     <div class="pricing-grid">
         <!-- Vòng lặp hiển thị các gói -->
-        <div class="price-card" th:each="p : ${packages}">
-            <h3 th:text="${p.name}">Tên gói</h3>
-            <div class="desc" th:text="${p.description}">Mô tả</div>
+        <div class="price-card" th:each="p : ${packages}" th:classappend="${p.name == 'Recruiter Pro' or p.name == 'Candidate Pro'} ? 'pro' : ''">
+
+            <!-- Nhãn phổ biến cho gói Pro -->
+            <div class="badge-popular" th:if="${p.name == 'Recruiter Pro' or p.name == 'Candidate Pro'}">Phổ biến nhất</div>
+
+            <h3 class="card-title" th:text="${p.name}">Tên gói</h3>
+            <div class="card-desc" th:text="${p.description}">Mô tả</div>
 
             <div class="price">
-                <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">0</span> đ
+                <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">0</span>
+                <span>VNĐ</span>
             </div>
-            <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'"></div>
+            <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'">Thời hạn: 30 ngày</div>
+
+            <!-- Danh sách quyền lợi (Dựa vào tên gói để hiển thị) -->
+            <ul class="features-list">
+                <li>
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    <span th:if="${p.maxJobs > 100}">Đăng tin <b>không giới hạn</b></span>
+                    <span th:if="${p.maxJobs <= 100}">Đăng tối đa <b th:text="${p.maxJobs}"></b> tin / tháng</span>
+                </li>
+                <li>
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Quản lý danh sách ứng viên</span>
+                </li>
+
+                <!-- Đặc quyền gói Pro -->
+                <li th:if="${p.name == 'Recruiter Pro' or p.name == 'Candidate Pro'}">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    <span style="color: #d97706; font-weight: 600;">Đặc quyền Ghim tin lên Top</span>
+                </li>
+                <li th:if="${p.name != 'Recruiter Pro' and p.name != 'Candidate Pro'}" class="disabled">
+                    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <span>Không có tính năng Ghim tin</span>
+                </li>
+            </ul>
 
             <!-- Nút mua gói -->
-            <a th:href="@{/pricing/checkout/{id}(id=${p.id})}" class="btn-buy">
+            <a th:href="@{/pricing/checkout/{id}(id=${p.id})}"
+               class="btn-buy"
+               th:classappend="${p.name == 'Recruiter Pro' or p.name == 'Candidate Pro'} ? 'primary' : 'normal'">
                 Mua gói này
             </a>
         </div>
@@ -104,8 +268,10 @@
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 40px;">
-        <a th:href="@{/}" style="color: #2a6df4; text-decoration: none;">&larr; Quay lại trang chủ</a>
+    <div style="text-align: center; margin-top: 50px;">
+        <a th:href="@{/pricing/history}" style="color: #64748b; text-decoration: none; font-weight: 600;">
+            Xem lịch sử giao dịch của bạn →
+        </a>
     </div>
 </div>
 

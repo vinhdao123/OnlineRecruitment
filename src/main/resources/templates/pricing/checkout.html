@@ -11,20 +11,24 @@
     <h2 style="color: #1a2b4a;">Thanh toán đơn hàng #<span th:text="${payment.id}"></span></h2>
 
     <div style="margin: 20px 0;">
-        <!-- Nhớ thay số tài khoản và tên của bạn vào đây -->
-        <img th:src="|https://img.vietqr.io/image/VCB-0123456789-compact2.png?amount=${payment.amount}&addInfo=MUA${payment.id}&accountName=NGUYEN VAN HAI|"
+        <!-- Mã QR đã cập nhật đúng thông tin ngân hàng của bạn -->
+        <img th:src="|https://img.vietqr.io/image/ICB-9704150133382773-compact2.png?amount=${payment.amount}&addInfo=MUA GOI ${payment.id}&accountName=NGUYEN VAN HAI|"
              alt="QR Code" style="width: 300px; border-radius: 8px; border: 1px solid #eef1f6;">
     </div>
 
-    <div style="background: #f7f9fc; padding: 16px; border-radius: 8px; margin-bottom: 20px; text-align: left;">
-        <p><b>Số tiền:</b> <span style="color: #d33; font-weight: bold;" th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span></p>
-        <p><b>Nội dung:</b> <span style="color: #2a6df4; font-weight: bold;" th:text="'MUA GOI ' + ${payment.id}"></span></p>
+    <!-- Khung thông tin chuyển khoản -->
+    <div style="background: #f7f9fc; padding: 16px; border-radius: 8px; margin-bottom: 20px; text-align: left; border: 1px dashed #2a6df4;">
+        <p style="margin-bottom: 8px;"><b>Ngân hàng:</b> Vietinbank (ICB)</p>
+        <p style="margin-bottom: 8px;"><b>Số tài khoản:</b> 9704150133382773</p>
+        <p style="margin-bottom: 8px;"><b>Chủ tài khoản:</b> NGUYEN VAN HAI</p>
+        <p style="margin-bottom: 8px;"><b>Số tiền:</b> <span style="color: #d33; font-weight: bold;" th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span></p>
+        <p style="margin-bottom: 0;"><b>Nội dung:</b> <span style="color: #2a6df4; font-weight: bold;" th:text="'MUA GOI ' + ${payment.id}"></span></p>
     </div>
 
     <div style="color: #2a6df4; font-weight: bold; font-size: 16px;">
         ⏳ Đang chờ xác nhận thanh toán...
         <p style="font-size: 13px; color: #8895a8; font-weight: normal; margin-top: 5px;">
-            Hệ thống sẽ tự động chuyển trang ngay khi nhận được tiền.
+            Hệ thống sẽ tự động chuyển trang ngay khi nhận được tiền. Vui lòng không tắt trình duyệt.
         </p>
     </div>
 </div>
@@ -39,7 +43,7 @@
             .then(data => {
                 if (data.status === 'SUCCESS') {
                     clearInterval(checkStatus);
-                    window.location.href = '/pricing/history?success=true';
+                    window.location.href = '/pricing/success';
                 }
             })
             .catch(err => console.error(err));
