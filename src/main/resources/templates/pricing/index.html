@@ -10,7 +10,8 @@
             background-color: #f8fafc;
             font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 60px 20px;
+            /* Thêm padding-top để không bị Taskbar đè lên */
+            padding: 100px 20px 60px 20px;
             color: #1e293b;
         }
         .pricing-container {
@@ -205,6 +206,9 @@
 </head>
 <body>
 
+<!-- Thêm Taskbar -->
+<div th:replace="~{fragments/taskbar :: taskbar('pricing')}"></div>
+
 <div class="pricing-container">
     <div class="pricing-header">
         <h1>Nâng cấp tài khoản của bạn</h1>
@@ -231,7 +235,7 @@
             </div>
             <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'">Thời hạn: 30 ngày</div>
 
-            <!-- Danh sách quyền lợi (Dựa vào tên gói để hiển thị) -->
+            <!-- Danh sách quyền lợi -->
             <ul class="features-list">
                 <li>
                     <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>

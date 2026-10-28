@@ -10,7 +10,8 @@
             background-color: #f3f4f6;
             font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            /* Thêm padding-top để không bị Taskbar đè lên */
+            padding: 100px 20px 40px 20px;
         }
         .container {
             max-width: 1000px;
@@ -101,7 +102,7 @@
         }
         .td-amount {
             font-weight: 700;
-            color: #2563eb; /* Màu xanh dương nổi bật */
+            color: #2563eb;
             font-size: 15px;
         }
 
@@ -156,6 +157,9 @@
     </style>
 </head>
 <body>
+
+<!-- Thêm Taskbar -->
+<div th:replace="~{fragments/taskbar :: taskbar('history')}"></div>
 
 <div class="container">
     <!-- Header -->
