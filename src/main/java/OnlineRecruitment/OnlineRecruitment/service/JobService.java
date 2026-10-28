@@ -730,8 +730,22 @@ public class JobService {
         );
         job.setDeadline(form.getDeadline());
 
+
         // Anh cho rieng Job: luu file o uploads/jobs va URL vao jobs.logo_url.
         // Khong cap nhat companies.logo_url tu file anh Job.
+        if (form.getIsPinned() != null && form.getIsPinned()) {
+            UserPackage activePkg = servicePackageService.getActivePackage(recruiter);
+            if (activePkg == null || !"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
+                throw new IllegalArgumentException("Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
+            }
+            job.setIsPinned(true);
+        } else {
+            job.setIsPinned(false);
+        }
+
+        // ==========================================
+        // 2. XỬ LÝ ẢNH (GIỮ NGUYÊN)
+        // ==========================================
         if (form.getJobImageFile() != null && !form.getJobImageFile().isEmpty()) {
             try {
                 String jobImageUrl = fileStorageService.saveJobImage(form.getJobImageFile());
@@ -741,9 +755,10 @@ public class JobService {
             }
         }
 
-        // Sửa tin đang hiển thị/chờ duyệt: gửi lại Admin duyệt (PENDING), dù bấm nút nào
+        // ==========================================
+        // 3. XỬ LÝ TRẠNG THÁI (ĐẶT XUỐNG DƯỚI)
+        // ==========================================
         if (submitForReview || wasLiveOrPending) {
-    // Xử lý company can publish trong luồng tuyển dụng.
             ensureCompanyCanPublish(company);
             job.setStatus(JobStatus.PENDING);
             job.setRejectionReason(null);
@@ -752,16 +767,6 @@ public class JobService {
             job.setStatus(JobStatus.DRAFT);
             job.setRejectionReason(null);
             job.setPublishedAt(null);
-        }
-
-        if (form.getIsPinned() != null && form.getIsPinned()) {
-            UserPackage activePkg = servicePackageService.getActivePackage(recruiter);
-            if (activePkg == null || !"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
-                throw new IllegalArgumentException("Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
-            }
-            job.setIsPinned(true);
-        } else {
-            job.setIsPinned(false);
         }
 
         return jobRepository.save(job);

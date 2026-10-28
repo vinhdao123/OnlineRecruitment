@@ -154,19 +154,29 @@ public class JobController {
                 return "redirect:/pricing";
             }
 
-            // 3. Đếm số bài đã đăng và kiểm tra giới hạn
+            // 3. Đếm số bài đã đăng và kiểm tra giới hạn (FIX LỖI NULL)
             long currentJobCount = jobService.countMyJobs(recruiter.getId());
-            int maxJobs = activePkg.getServicePackage().getMaxJobs();
+            Integer maxJobsObj = activePkg.getServicePackage().getMaxJobs();
+            int maxJobs = (maxJobsObj != null) ? maxJobsObj : 0; // Nếu null thì coi như 0 (vô hạn)
+
             if (maxJobs > 0 && currentJobCount >= maxJobs) {
                 ra.addFlashAttribute("error", "Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " +
                         activePkg.getServicePackage().getName() + ". Vui lòng nâng cấp gói!");
                 return "redirect:/pricing";
             }
 
-            // 4. Gán thông tin và lưu (Mở comment 2 dòng quan trọng này)
+            // 4. KIỂM TRA QUYỀN GHIM TIN (Bảo mật)
+            if (job.getIsPinned() != null && job.getIsPinned()) {
+                if (!"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
+                    ra.addFlashAttribute("error", "Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
+                    return "redirect:/pricing";
+                }
+            }
+
+            // 5. Gán thông tin và lưu
             job.setRecruiter(recruiter);
-            job.setCompany(company); // Gán công ty vừa tìm được
-            job.setStatus(JobStatus.PENDING); // Hoặc ACTIVE tùy vào quy trình duyệt của bạn
+            job.setCompany(company);
+            job.setStatus(JobStatus.PENDING);
 
             jobService.saveJob(job);
 

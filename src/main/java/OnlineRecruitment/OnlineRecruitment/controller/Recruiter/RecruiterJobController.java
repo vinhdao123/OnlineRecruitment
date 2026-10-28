@@ -177,6 +177,7 @@ public class RecruiterJobController {
             form.setEmploymentType(job.getEmploymentType());
             form.setQuantity(job.getQuantity());
             form.setDeadline(job.getDeadline());
+            form.setIsPinned(job.getIsPinned());
 
             model.addAttribute("jobForm", form);
             model.addAttribute("currentJobImageUrl", job.getLogoUrl());
