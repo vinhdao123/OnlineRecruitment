@@ -1,13 +1,7 @@
 package OnlineRecruitment.OnlineRecruitment.service;
 
 import OnlineRecruitment.OnlineRecruitment.dto.RecruiterJobForm;
-import OnlineRecruitment.OnlineRecruitment.entity.Company;
-import OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus;
-import OnlineRecruitment.OnlineRecruitment.entity.EmploymentType;
-import OnlineRecruitment.OnlineRecruitment.entity.Job;
-import OnlineRecruitment.OnlineRecruitment.entity.JobCategory;
-import OnlineRecruitment.OnlineRecruitment.entity.JobStatus;
-import OnlineRecruitment.OnlineRecruitment.entity.User;
+import OnlineRecruitment.OnlineRecruitment.entity.*;
 import OnlineRecruitment.OnlineRecruitment.repository.CompanyRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.JobCategoryRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.JobRepository;
@@ -45,18 +39,23 @@ public class JobService {
     private final JobCategoryRepository jobCategoryRepository;
     private final CompanyRepository companyRepository;
     private final FileStorageService fileStorageService;
+    private final ServicePackageService servicePackageService;
+
 
     // Xử lý service trong luồng tuyển dụng.
     public JobService(
             JobRepository jobRepository,
             JobCategoryRepository jobCategoryRepository,
             CompanyRepository companyRepository,
-            FileStorageService fileStorageService
+            FileStorageService fileStorageService,
+            ServicePackageService servicePackageService
     ) {
         this.jobRepository = jobRepository;
         this.jobCategoryRepository = jobCategoryRepository;
         this.companyRepository = companyRepository;
         this.fileStorageService = fileStorageService;
+        this.servicePackageService = servicePackageService;
+
     }
 
     // =====================================================
@@ -609,6 +608,23 @@ public class JobService {
             );
         }
 
+        if (form.getJobId() == null && submitForReview) {
+            // Cần tiêm ServicePackageService vào JobService để dùng (xem Bước 2 bên dưới)
+            UserPackage activePkg = servicePackageService.getActivePackage(recruiter);
+
+            if (activePkg == null) {
+                throw new IllegalArgumentException("Bạn chưa có gói dịch vụ nào. Vui lòng mua gói để đăng bài!");
+            }
+
+            long currentJobCount = jobRepository.countByRecruiter_Id(recruiter.getId());
+            int maxJobs = activePkg.getServicePackage().getMaxJobs();
+
+            if (maxJobs > 0 && currentJobCount >= maxJobs) {
+                throw new IllegalArgumentException("Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " +
+                        activePkg.getServicePackage().getName() + ". Vui lòng nâng cấp gói!");
+            }
+        }
+
     // Xử lý job form trong luồng tuyển dụng.
         validateJobForm(form, submitForReview);
 
@@ -714,8 +730,22 @@ public class JobService {
         );
         job.setDeadline(form.getDeadline());
 
+
         // Anh cho rieng Job: luu file o uploads/jobs va URL vao jobs.logo_url.
         // Khong cap nhat companies.logo_url tu file anh Job.
+        if (form.getIsPinned() != null && form.getIsPinned()) {
+            UserPackage activePkg = servicePackageService.getActivePackage(recruiter);
+            if (activePkg == null || !"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
+                throw new IllegalArgumentException("Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
+            }
+            job.setIsPinned(true);
+        } else {
+            job.setIsPinned(false);
+        }
+
+        // ==========================================
+        // 2. XỬ LÝ ẢNH (GIỮ NGUYÊN)
+        // ==========================================
         if (form.getJobImageFile() != null && !form.getJobImageFile().isEmpty()) {
             try {
                 String jobImageUrl = fileStorageService.saveJobImage(form.getJobImageFile());
@@ -725,9 +755,10 @@ public class JobService {
             }
         }
 
-        // Sửa tin đang hiển thị/chờ duyệt: gửi lại Admin duyệt (PENDING), dù bấm nút nào
+        // ==========================================
+        // 3. XỬ LÝ TRẠNG THÁI (ĐẶT XUỐNG DƯỚI)
+        // ==========================================
         if (submitForReview || wasLiveOrPending) {
-    // Xử lý company can publish trong luồng tuyển dụng.
             ensureCompanyCanPublish(company);
             job.setStatus(JobStatus.PENDING);
             job.setRejectionReason(null);
@@ -1068,4 +1099,9 @@ public class JobService {
     public Optional<Job> findJobById(Long id) {
         return jobRepository.findById(id);
     }
+
+    public Job saveJob(Job job) {
+        return jobRepository.save(job);
+    }
+
 }

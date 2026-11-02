@@ -53,4 +53,7 @@ public class RecruiterJobForm {
 
     // Anh rieng cua Job, upload tu may tinh (tuy chon).
     private MultipartFile jobImageFile;
+
+    // ==== THÊM DÒNG NÀY ĐỂ LÀM TÍNH NĂNG GHIM TIN ====
+    private Boolean isPinned = false;
 }

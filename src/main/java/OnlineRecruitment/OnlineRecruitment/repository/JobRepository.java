@@ -59,9 +59,10 @@ public interface JobRepository extends JpaRepository<Job, Long> {
         WHERE j.status = OnlineRecruitment.OnlineRecruitment.entity.JobStatus.ACTIVE
           AND c.status = OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus.ACTIVE
           AND (j.deadline IS NULL OR j.deadline >= CURRENT_DATE)
-        ORDER BY j.createdAt DESC
+        ORDER BY j.isPinned DESC, j.createdAt DESC
     """)
     // Tìm active jobs trong luồng tuyển dụng.
+
     List<Job> findActiveJobs();
 
     // ================= RECRUITER: QUẢN LÝ TẤT CẢ TIN =================
