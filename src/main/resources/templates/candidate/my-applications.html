@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Việc làm đã ứng tuyển — Online Recruitment</title>
+
+    <link rel="stylesheet" th:href="@{/css/candidate/applications.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+</head>
+<body>
+
+<!-- Thanh điều hướng dùng chung -->
+<div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+
+<main class="applications-wrapper">
+
+    <!-- Tiêu đề -->
+    <header class="applications-header">
+        <div>
+            <h1>Việc làm đã ứng tuyển</h1>
+            <p>
+                Theo dõi các công việc bạn đã nộp hồ sơ
+                và trạng thái xử lý từ nhà tuyển dụng.
+            </p>
+        </div>
+
+        <div class="application-count">
+            <span class="count-icon">▤</span>
+            <span>
+                Tổng số đơn:
+                <strong th:text="${#lists.size(applications)}">0</strong>
+            </span>
+        </div>
+    </header>
+
+    <!-- Danh sách đơn ứng tuyển -->
+    <section class="applications-list"
+             th:if="${not #lists.isEmpty(applications)}">
+
+        <article class="application-card"
+                 th:each="app : ${applications}">
+
+            <div class="company-logo">
+                <span>▣</span>
+            </div>
+
+            <div class="application-content">
+
+                <div class="application-top">
+                    <div class="job-information">
+                        <h2 th:text="${app.jobTitle}">
+                            Nhân viên phát triển phần mềm
+                        </h2>
+
+                        <p class="company-name"
+                           th:text="${app.companyName}">
+                            Tên công ty
+                        </p>
+                    </div>
+
+                    <div class="status-information">
+                        <span class="status"
+                              th:classappend="${app.status == 'SUBMITTED'
+                                  ? ' status-submitted'
+                                  : (app.status == 'APPROVED'
+                                      ? ' status-approved'
+                                      : (app.status == 'REJECTED'
+                                          ? ' status-rejected'
+                                          : ' status-other'))}"
+                              th:text="${app.status == 'SUBMITTED'
+                                  ? 'Chờ xử lý'
+                                  : (app.status == 'APPROVED'
+                                      ? 'Đã duyệt'
+                                      : (app.status == 'REJECTED'
+                                          ? 'Đã từ chối'
+                                          : app.status))}">
+                            Chờ xử lý
+                        </span>
+
+                        <p class="applied-date">
+                            Đã ứng tuyển vào
+
+                            <span th:text="${app.appliedAt != null
+    ? #dates.format(app.appliedAt, 'dd/MM/yyyy')
+    : 'Chưa có thông tin'}">20/10/2026</span>
+
+                        </p>
+                    </div>
+                </div>
+
+                <div class="application-meta">
+
+                    <div class="meta-item">
+                        <span class="meta-icon">▤</span>
+                        <div>
+                            <small>CV đã gửi</small>
+                            <strong th:text="${app.cvTitle != null
+                                ? app.cvTitle : 'CV ứng tuyển'}">
+                                CV cá nhân
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-icon">▦</span>
+                        <div>
+                            <small>Ngày ứng tuyển</small>
+                            <strong th:text="${app.appliedAt != null
+                                ? #dates.format(app.appliedAt, 'dd/MM/yyyy HH:mm')
+                                : 'Chưa có thông tin'}">
+                                20/10/2026 09:38
+                            </strong>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <span class="meta-icon">▤</span>
+                        <div>
+                            <small>Mã đơn</small>
+                            <strong th:text="'#' + ${app.id}">#1</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </article>
+
+    </section>
+
+    <!-- Chưa có đơn ứng tuyển -->
+    <section class="empty-state"
+             th:if="${#lists.isEmpty(applications)}">
+
+        <div class="empty-icon">▣</div>
+
+        <h2>Bạn chưa ứng tuyển công việc nào</h2>
+
+        <p>
+            Hãy khám phá các vị trí phù hợp và gửi hồ sơ ngay hôm nay.
+        </p>
+
+        <a th:href="@{/jobs}" class="btn-jobs">
+            Khám phá việc làm <span>→</span>
+        </a>
+
+    </section>
+
+    <!-- Nút quay lại -->
+    <div class="back-link">
+        <a th:href="@{/candidate/dashboard}">
+            ← Quay lại trang cá nhân
+        </a>
+    </div>
+
+</main>
+
+</body>
+</html>

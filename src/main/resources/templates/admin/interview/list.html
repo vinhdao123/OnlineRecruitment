@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Quản lý Bộ câu hỏi phỏng vấn')}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+  <div th:replace="~{admin/_layout :: topbar('Quản lý Bộ câu hỏi phỏng vấn', 'Ngân hàng câu hỏi tuyển dụng & câu trả lời mẫu hỗ trợ ứng viên')}"></div>
+
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <form method="get" th:action="@{/admin/interview-questions}" class="filters" style="margin:0; flex:1;">
+      <input type="text" name="keyword" class="grow"
+             placeholder="Tìm kiếm câu hỏi, từ khóa..." maxlength="100"
+             th:value="${keyword}">
+
+      <select name="category">
+        <option value="">Tất cả danh mục</option>
+        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                th:selected="${selectedCategory == cat}"></option>
+      </select>
+
+      <button type="submit" class="btn btn-primary">Lọc</button>
+      <a th:href="@{/admin/interview-questions}" class="btn btn-secondary">Đặt lại</a>
+    </form>
+
+    <a th:href="@{/admin/interview-questions/create}" class="btn btn-primary" style="margin-left:16px; white-space:nowrap;">
+      + Thêm câu hỏi mới
+    </a>
+  </div>
+
+  <p style="font-size: 13px; color: #8895a8; margin-bottom: 12px;">
+    Hiển thị <b th:text="${questions.size()}">0</b> trên tổng số <b th:text="${totalItems}">0</b> câu hỏi
+  </p>
+
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+      <tr>
+        <th style="width: 50px;">STT</th>
+        <th>Câu hỏi phỏng vấn</th>
+        <th>Danh mục</th>
+        <th>Cấp độ</th>
+        <th>Lượt xem</th>
+        <th>Trạng thái</th>
+        <th style="width: 140px; text-align:right;">Thao tác</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="q, stat : ${questions}">
+        <td th:text="${currentPage * 15 + stat.index + 1}">1</td>
+        <td>
+          <b th:text="${q.question}">Câu hỏi?</b>
+          <div style="font-size:12px; color:#8895a8; margin-top:4px;" th:if="${q.purpose != null}" th:text="${#strings.abbreviate(q.purpose, 90)}">Ý đồ...</div>
+        </td>
+        <td>
+          <span class="badge badge-active" th:text="${q.category}">Phỏng vấn chung</span>
+        </td>
+        <td th:text="${q.targetLevel != null ? q.targetLevel : 'Mọi cấp bậc'}">Mọi cấp bậc</td>
+        <td th:text="${q.viewCount}">0</td>
+        <td>
+          <span class="badge" th:classappend="${q.status == 'ACTIVE'} ? 'badge-active' : 'badge-banned'"
+                th:text="${q.status}">ACTIVE</span>
+        </td>
+        <td style="text-align:right; white-space:nowrap;">
+          <a th:href="@{'/admin/interview-questions/' + ${q.id} + '/edit'}" class="btn btn-secondary" style="font-size:12px; padding:4px 8px;">
+            Sửa
+          </a>
+          <form th:action="@{'/admin/interview-questions/' + ${q.id} + '/delete'}" method="post" style="display:inline;"
+                onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn btn-danger" style="font-size:12px; padding:4px 8px;">
+              Xóa
+            </button>
+          </form>
+        </td>
+      </tr>
+      <tr th:if="${questions.isEmpty()}">
+        <td colspan="7" style="text-align:center; color:#8895a8; padding: 40px;">
+          Chưa có câu hỏi phỏng vấn nào.
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" th:if="${totalPages > 1}">
+    <a th:if="${currentPage > 0}"
+       th:href="@{/admin/interview-questions(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
+       class="page-link">‹ Trước</a>
+
+    <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+      <a th:href="@{/admin/interview-questions(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
+         class="page-link"
+         th:classappend="${i == currentPage} ? 'active' : ''"
+         th:text="${i + 1}">1</a>
+    </span>
+
+    <a th:if="${currentPage < totalPages - 1}"
+       th:href="@{/admin/interview-questions(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
+       class="page-link">Sau ›</a>
+  </div>
+
+</div>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

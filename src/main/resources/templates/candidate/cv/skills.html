@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Kỹ năng — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+</head>
+<body>
+
+<!-- TASKBAR -->
+<header class="header">
+    <div class="header-container">
+        <a th:href="@{/}" class="logo"><div class="logo-icon">OR</div> Online Recruitment</a>
+        <nav class="nav">
+            <a th:href="@{/}">Trang chủ</a>
+            <a th:href="@{/jobs}">Tìm việc làm</a>
+            <a th:href="@{/candidate/dashboard}">Bảng điều khiển</a>
+            <a th:href="@{/candidate/profile}">Hồ sơ của tôi</a>
+            <a th:href="@{/candidate/cvs}" class="active">CV</a>
+        </nav>
+        <div class="user-menu">
+            <div class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">C</div>
+            <div class="user-info">
+                <span class="user-name" th:text="${#authentication.name}">candidate</span>
+                <span class="user-role">ỨNG VIÊN</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="page-container">
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Kỹ năng chuyên môn</h2>
+            <p class="page-subtitle">Đang chỉnh sửa cho CV: <b th:text="${cv.title}"></b></p>
+        </div>
+        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-link">&larr; Quay lại chi tiết CV</a>
+    </div>
+
+    <div th:if="${successMessage}" style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" style="background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${errorMessage}"></div>
+
+    <div class="form-card">
+        <h3 class="form-title">Thêm kỹ năng mới</h3>
+        <form th:action="@{/candidate/cvs/{id}/skills/add(id=${cv.id})}" th:object="${skillRequest}" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Chọn kỹ năng (*)</label>
+                    <select th:field="*{skillId}" class="form-control">
+                        <option value="">-- Chọn kỹ năng --</option>
+                        <option th:each="s : ${allSkills}" th:value="${s.id}" th:text="${s.name}"></option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Mức độ thành thạo (*)</label>
+                    <select th:field="*{proficiency}" class="form-control">
+                        <option value="">-- Chọn mức độ --</option>
+                        <option value="BEGINNER">Beginner (Mới bắt đầu)</option>
+                        <option value="INTERMEDIATE">Intermediate (Trung cấp)</option>
+                        <option value="ADVANCED">Advanced (Nâng cao)</option>
+                        <option value="EXPERT">Expert (Chuyên gia)</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Thêm kỹ năng</button>
+        </form>
+    </div>
+
+    <h3 class="item-list-title">Danh sách kỹ năng</h3>
+    <div th:if="${cvSkills.isEmpty()}" style="color: #64748b; font-style: italic;">Chưa có kỹ năng nào.</div>
+    <div th:each="cs : ${cvSkills}" class="item-card" style="align-items: center;">
+        <div>
+            <h4 class="item-title" th:text="${cs.skill != null ? cs.skill.name : 'Kỹ năng không xác định'}"></h4>
+            <p class="item-subtitle" style="margin-top: 4px;">Mức độ: <b th:text="${cs.proficiency}"></b></p>
+        </div>
+        <form th:action="@{/candidate/cvs/{id}/skills/{skillId}/delete(id=${cv.id}, skillId=${cs.id.skillId})}" method="post" onsubmit="return confirm('Xóa kỹ năng này?');">
+            <button type="submit" class="btn-delete">Xóa</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

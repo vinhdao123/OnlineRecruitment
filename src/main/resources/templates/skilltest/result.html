@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Kết quả bài thi: ' + ${test.title}">Kết quả bài thi đánh giá năng lực</title>
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+</head>
+<body class="page-wrapper">
+
+<!-- TASKBAR -->
+<header th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></header>
+
+<div style="max-width: 960px; margin: 30px auto; padding: 0 20px;">
+
+    <!-- RESULT SUMMARY CARD -->
+    <div class="result-header-card">
+        <!-- SCORE CIRCLE -->
+        <div class="score-circle" th:classappend="${attempt.isPassed} ? 'pass' : 'fail'">
+            <div class="score-number" th:text="${#numbers.formatDecimal(attempt.score, 0, 0)}">80</div>
+            <div class="score-label">/ 100 Điểm</div>
+        </div>
+
+        <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
+            <span th:if="${attempt.isPassed}">🎉 Chúc mừng bạn đã hoàn thành bài thi!</span>
+            <span th:if="${!attempt.isPassed}">💪 Rất tiếc, bạn chưa đạt điểm tối thiểu!</span>
+        </h1>
+
+        <p style="font-size: 15px; color: #64748b; margin-bottom: 24px;">
+            Bài thi: <strong style="color: #0f172a;" th:text="${test.title}">Đề thi đánh giá kỹ năng Java</strong> ·
+            Xếp loại: <strong th:text="${attempt.performanceRating}"
+                             th:style="${attempt.isPassed ? 'color:#00b14f;' : 'color:#ef4444;'}">Khá</strong>
+        </p>
+
+        <!-- STATS ROW -->
+        <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom: 28px;">
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 24px; border-radius:10px;">
+                <div style="font-size:12px; color:#64748b; font-weight:600;">Số câu trả lời đúng</div>
+                <div style="font-size:22px; font-weight:800; color:#00b14f;" th:text="${attempt.correctAnswers + ' / ' + attempt.totalQuestions}">8 / 10</div>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 24px; border-radius:10px;">
+                <div style="font-size:12px; color:#64748b; font-weight:600;">Thời gian làm bài</div>
+                <div style="font-size:22px; font-weight:800; color:#2563eb;"
+                     th:text="${(attempt.timeSpentSeconds / 60) + ' phút ' + (attempt.timeSpentSeconds % 60) + ' giây'}">5 phút 20 giây</div>
+            </div>
+
+            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 24px; border-radius:10px;">
+                <div style="font-size:12px; color:#64748b; font-weight:600;">Kết quả chung</div>
+                <div style="font-size:22px; font-weight:800;"
+                     th:text="${attempt.isPassed ? 'ĐẠT' : 'CHƯA ĐẠT'}"
+                     th:style="${attempt.isPassed ? 'color:#00b14f;' : 'color:#ef4444;'}">ĐẠT</div>
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:12px;">
+            <a th:href="@{'/skill-tests/' + ${test.id} + '/take'}" class="btn-search" style="text-decoration:none;">
+                🔄 Thi lại bài này (Bốc đề mới)
+            </a>
+            <a th:href="@{/skill-tests}" class="btn-search" style="background:#2563eb; text-decoration:none;">
+                🎯 Khám phá các bài test khác
+            </a>
+            <a th:href="@{/candidate/skill-tests/history}" class="btn-search" style="background:#64748b; text-decoration:none;">
+                📜 Xem lịch sử thi của bạn
+            </a>
+        </div>
+    </div>
+
+    <!-- DETAILED REVIEW SECTION -->
+    <div style="margin-bottom: 24px;">
+        <h2 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:6px;">
+            🔍 Xem lại chi tiết từng câu hỏi & Lời giải thích
+        </h2>
+        <p style="font-size:14px; color:#64748b;">
+            Xem lại phương án bạn đã chọn so với đáp án chính xác kèm giải thích chi tiết từ chuyên gia.
+        </p>
+    </div>
+
+    <div th:each="item, stat : ${reviewItems}" class="review-item"
+         th:classappend="${item.isCorrect} ? 'correct' : 'incorrect'">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span class="question-number-badge"
+                  th:text="'Câu ' + (${stat.index + 1})"
+                  th:style="${item.isCorrect ? '' : 'background:#fee2e2; color:#ef4444;'}">Câu 1</span>
+
+            <span th:if="${item.isCorrect}" style="font-weight:700; color:#00b14f; font-size:14px;">
+                ✓ Trả lời chính xác (+1 điểm)
+            </span>
+            <span th:if="${!item.isCorrect}" style="font-weight:700; color:#ef4444; font-size:14px;">
+                ✕ Trả lời chưa đúng (0 điểm)
+            </span>
+        </div>
+
+        <div style="font-size:16px; font-weight:700; color:#0f172a; line-height:1.5; margin-bottom:14px;"
+             th:text="${item.questionText}">
+            Nội dung câu hỏi...
+        </div>
+
+        <!-- 4 OPTIONS REVIEW -->
+        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
+            <!-- Option A -->
+            <div class="review-choice"
+                 th:classappend="${item.selectedOption == 'A' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'A' ? 'correct-ans' : '')}">
+                <b>A.</b> <span th:text="${item.optionA}">Phương án A</span>
+                <span th:if="${item.selectedOption == 'A' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
+                <span th:if="${item.correctOption == 'A'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+            </div>
+
+            <!-- Option B -->
+            <div class="review-choice"
+                 th:classappend="${item.selectedOption == 'B' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'B' ? 'correct-ans' : '')}">
+                <b>B.</b> <span th:text="${item.optionB}">Phương án B</span>
+                <span th:if="${item.selectedOption == 'B' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
+                <span th:if="${item.correctOption == 'B'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+            </div>
+
+            <!-- Option C -->
+            <div class="review-choice"
+                 th:classappend="${item.selectedOption == 'C' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'C' ? 'correct-ans' : '')}">
+                <b>C.</b> <span th:text="${item.optionC}">Phương án C</span>
+                <span th:if="${item.selectedOption == 'C' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
+                <span th:if="${item.correctOption == 'C'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+            </div>
+
+            <!-- Option D -->
+            <div class="review-choice"
+                 th:classappend="${item.selectedOption == 'D' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'D' ? 'correct-ans' : '')}">
+                <b>D.</b> <span th:text="${item.optionD}">Phương án D</span>
+                <span th:if="${item.selectedOption == 'D' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
+                <span th:if="${item.correctOption == 'D'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+            </div>
+        </div>
+
+        <!-- EXPLANATION -->
+        <div class="section-box tips" th:if="${item.explanation != null and !#strings.isEmpty(item.explanation)}" style="margin-bottom:0;">
+            <div class="section-label">
+                <span>💡</span> Lời giải thích từ chuyên gia
+            </div>
+            <div th:text="${item.explanation}">Giải thích vì sao đáp án này là đúng...</div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

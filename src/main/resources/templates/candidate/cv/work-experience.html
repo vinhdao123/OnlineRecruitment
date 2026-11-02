@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Kinh nghiệm làm việc — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+</head>
+<body>
+
+<!-- TASKBAR -->
+<header class="header">
+    <div class="header-container">
+        <a th:href="@{/}" class="logo"><div class="logo-icon">OR</div> Online Recruitment</a>
+        <nav class="nav">
+            <a th:href="@{/}">Trang chủ</a>
+            <a th:href="@{/jobs}">Tìm việc làm</a>
+            <a th:href="@{/candidate/dashboard}">Bảng điều khiển</a>
+            <a th:href="@{/candidate/profile}">Hồ sơ của tôi</a>
+            <a th:href="@{/candidate/cvs}" class="active">CV</a>
+        </nav>
+        <div class="user-menu">
+            <div class="user-avatar" th:text="${#strings.substring(#authentication.name, 0, 1).toUpperCase()}">C</div>
+            <div class="user-info">
+                <span class="user-name" th:text="${#authentication.name}">candidate</span>
+                <span class="user-role">ỨNG VIÊN</span>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- FORM NẰM GIỮA (Không có Sidebar) -->
+<div class="page-container">
+
+    <div class="page-header">
+        <div>
+            <h2 class="page-title">Kinh nghiệm làm việc</h2>
+            <p class="page-subtitle">Đang chỉnh sửa cho CV: <b th:text="${cv.title}"></b></p>
+        </div>
+        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-link">&larr; Quay lại chi tiết CV</a>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success" style="background: #ecfdf5; color: #065f46; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-danger" style="background: #fef2f2; color: #b91c1c; padding: 12px; border-radius: 8px; margin-bottom: 20px;" th:text="${errorMessage}"></div>
+
+    <div class="form-card">
+        <h3 class="form-title">Thêm kinh nghiệm mới</h3>
+        <form th:action="@{/candidate/cvs/{id}/work-experiences/add(id=${cv.id})}" th:object="${workRequest}" method="post">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Tên công ty (*)</label>
+                    <input type="text" th:field="*{companyName}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Chức danh (*)</label>
+                    <input type="text" th:field="*{jobTitle}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Địa điểm</label>
+                    <input type="text" th:field="*{location}" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ngày bắt đầu</label>
+                    <input type="date" th:field="*{startDate}" id="startDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Ngày kết thúc</label>
+                    <input type="date" th:field="*{endDate}" id="endDate" class="form-control">
+                </div>
+                <div class="form-group" style="display: flex; align-items: center; margin-top: 20px;">
+                    <input type="checkbox" th:field="*{isCurrent}" id="isCurrent" style="margin-right: 8px;">
+                    <label for="isCurrent" style="font-weight: 500; font-size: 14px; cursor: pointer;">Hiện đang làm việc tại đây</label>
+                </div>
+                <div class="form-group full-width">
+                    <label class="form-label">Mô tả công việc</label>
+                    <textarea th:field="*{description}" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn-submit">Thêm kinh nghiệm</button>
+        </form>
+    </div>
+
+    <h3 class="item-list-title">Danh sách kinh nghiệm</h3>
+    <div th:if="${works.isEmpty()}" style="color: #64748b; font-style: italic;">Chưa có kinh nghiệm nào.</div>
+    <div th:each="work : ${works}" class="item-card">
+        <div>
+            <h4 class="item-title" th:text="${work.jobTitle}"></h4>
+            <p class="item-subtitle" th:text="${work.companyName}"></p>
+            <p class="item-meta">
+                <span th:text="${work.startDate != null ? #temporals.format(work.startDate, 'MM/yyyy') : ''}"></span> -
+                <span th:text="${work.isCurrent ? 'Hiện tại' : (work.endDate != null ? #temporals.format(work.endDate, 'MM/yyyy') : '')}"></span>
+            </p>
+            <p class="item-desc" th:text="${work.description}"></p>
+        </div>
+        <form th:action="@{/candidate/cvs/{id}/work-experiences/{workId}/delete(id=${cv.id}, workId=${work.id})}" method="post" onsubmit="return confirm('Xóa kinh nghiệm này?');">
+            <button type="submit" class="btn-delete">Xóa</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

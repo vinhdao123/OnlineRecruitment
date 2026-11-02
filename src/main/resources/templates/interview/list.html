@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Các câu hỏi phỏng vấn thường gặp & Cách trả lời ấn tượng - Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+</head>
+<body class="page-wrapper">
+
+<!-- TASKBAR -->
+<header th:replace="~{fragments/taskbar :: taskbar('interview')}"></header>
+
+<!-- BANNER -->
+<section class="page-header-banner">
+    <div class="banner-container">
+        <div>
+            <h1 class="banner-title">
+                <span class="icon-badge">🎯</span>
+                <span>Các Câu Hỏi Phỏng Vấn Thường Gặp & Cách Trả Lời Ấn Tượng</span>
+            </h1>
+            <p class="banner-subtitle">
+                Tổng hợp ngân hàng câu hỏi phỏng vấn tuyển dụng chuẩn từ các chuyên gia HR, kèm theo ý đồ nhà tuyển dụng, gợi ý dàn ý và câu trả lời mẫu xuất sắc giúp bạn tự tin chinh phục mọi nhà tuyển dụng.
+            </p>
+        </div>
+        <div>
+            <a th:href="@{/skill-tests}" class="btn-start-test" style="background:#00b14f; color:#fff; border:none; padding:12px 20px;">
+                ✍️ Làm bài test đánh giá kỹ năng →
+            </a>
+        </div>
+    </div>
+</section>
+
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+
+    <!-- SEARCH & FILTER BOX -->
+    <div class="filter-search-box">
+        <form th:action="@{/interview-questions}" method="get" class="search-form-row">
+            <div class="search-input-wrap">
+                <span class="search-icon">🔍</span>
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm câu hỏi phỏng vấn, từ khóa...">
+            </div>
+
+            <select name="category" class="filter-select">
+                <option value="">-- Tất cả danh mục --</option>
+                <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                        th:selected="${selectedCategory == cat}"></option>
+            </select>
+
+            <button type="submit" class="btn-search">
+                Tìm kiếm
+            </button>
+            <a th:href="@{/interview-questions}" class="btn-search" style="background:#64748b;">
+                Làm mới
+            </a>
+        </form>
+
+        <!-- Category Pills -->
+        <div class="category-pills">
+            <a th:href="@{/interview-questions}" class="category-pill" th:classappend="${selectedCategory == null} ? 'active' : ''">Tất cả</a>
+            <a th:each="cat : ${categories}"
+               th:href="@{/interview-questions(category=${cat})}"
+               class="category-pill"
+               th:classappend="${selectedCategory == cat} ? 'active' : ''"
+               th:text="${cat}">Danh mục</a>
+        </div>
+    </div>
+
+    <!-- MAIN TWO-COLUMN LAYOUT -->
+    <div class="interview-layout">
+
+        <!-- LEFT COLUMN: QUESTION CARDS -->
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+                <h2 style="font-size:20px; font-weight:700; color:#0f172a;">
+                    Danh sách câu hỏi phỏng vấn (<span th:text="${totalItems}">0</span>)
+                </h2>
+                <span style="font-size:13px; color:#64748b;">Nhấn vào câu hỏi để xem gợi ý & câu trả lời mẫu</span>
+            </div>
+
+            <div th:if="${#lists.isEmpty(questions)}" style="background:#fff; border-radius:12px; padding:40px; text-align:center; color:#64748b;">
+                <p style="font-size:16px; margin-bottom:12px;">Không tìm thấy câu hỏi phỏng vấn nào phù hợp với từ khóa.</p>
+                <a th:href="@{/interview-questions}" class="category-pill active">Xem tất cả câu hỏi</a>
+            </div>
+
+            <div th:each="q, stat : ${questions}" class="interview-card" th:id="'q-' + ${q.id}">
+                <div class="question-header">
+                    <div>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+                            <span class="question-number-badge" th:text="'Câu ' + (${currentPage * 15} + ${stat.index + 1})">Câu 1</span>
+                            <span class="q-tag q-tag-cat" th:text="${q.category}">Phỏng vấn chung</span>
+                            <span class="q-tag q-tag-level" th:if="${q.targetLevel != null}" th:text="${q.targetLevel}">Mọi cấp bậc</span>
+                        </div>
+                        <a th:href="@{'/interview-questions/' + ${q.id}}" class="question-title-text" th:text="${q.question}">
+                            Hãy giới thiệu ngắn gọn về bản thân bạn?
+                        </a>
+                    </div>
+                </div>
+
+                <!-- PURPOSE BOX -->
+                <div class="section-box purpose" th:if="${q.purpose != null and !#strings.isEmpty(q.purpose)}">
+                    <div class="section-label">
+                        <span>💡</span> Ý đồ của nhà tuyển dụng
+                    </div>
+                    <div th:text="${q.purpose}">Ý đồ nhà tuyển dụng khi hỏi câu này...</div>
+                </div>
+
+                <!-- TIPS BOX -->
+                <div class="section-box tips" th:if="${q.tips != null and !#strings.isEmpty(q.tips)}">
+                    <div class="section-label">
+                        <span>📝</span> Gợi ý & Dàn ý trả lời
+                    </div>
+                    <div th:text="${q.tips}">Dàn ý trả lời chi tiết...</div>
+                </div>
+
+                <!-- SAMPLE ANSWER BOX -->
+                <div class="section-box sample" th:if="${q.sampleAnswer != null and !#strings.isEmpty(q.sampleAnswer)}">
+                    <div class="section-label">
+                        <span>⭐</span> Câu trả lời mẫu ấn tượng
+                    </div>
+                    <div style="white-space:pre-line; font-style: italic;" th:text="${q.sampleAnswer}">
+                        "Em là Nguyễn Văn A, tốt nghiệp chuyên ngành CNTT..."
+                    </div>
+                </div>
+
+                <!-- PITFALLS BOX -->
+                <div class="section-box pitfalls" th:if="${q.pitfalls != null and !#strings.isEmpty(q.pitfalls)}">
+                    <div class="section-label">
+                        <span>⚠️</span> Những điều nên tránh
+                    </div>
+                    <div th:text="${q.pitfalls}">Tránh kể lan man không liên quan...</div>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:10px;">
+                    <a th:href="@{'/interview-questions/' + ${q.id}}" style="font-size:13px; color:#00b14f; font-weight:600; text-decoration:none;">
+                        Xem chi tiết & Chia sẻ →
+                    </a>
+                </div>
+            </div>
+
+            <!-- PAGINATION -->
+            <div th:if="${totalPages > 1}" style="display:flex; justify-content:center; gap:8px; margin-top:30px;">
+                <a th:if="${currentPage > 0}" th:href="@{/interview-questions(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
+                   class="category-pill">‹ Trước</a>
+
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/interview-questions(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
+                       class="category-pill" th:classappend="${i == currentPage} ? 'active' : ''" th:text="${i + 1}">1</a>
+                </span>
+
+                <a th:if="${currentPage < totalPages - 1}" th:href="@{/interview-questions(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
+                   class="category-pill">Sau ›</a>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: SIDEBAR WIDGETS (TOPCV STYLE) -->
+        <div>
+            <!-- Hành trang tìm việc -->
+            <div class="side-widget">
+                <h3 class="widget-title">
+                    <span>🎒</span> Hành trang tìm việc
+                </h3>
+                <ul class="guide-list">
+                    <li class="guide-item">
+                        <span>📄</span>
+                        <a href="javascript:void(0)">Mẫu email xác nhận lịch phỏng vấn chuẩn</a>
+                    </li>
+                    <li class="guide-item">
+                        <span>💌</span>
+                        <a href="javascript:void(0)">Thư cảm ơn sau buổi phỏng vấn gây ấn tượng</a>
+                    </li>
+                    <li class="guide-item">
+                        <span>⭐</span>
+                        <a href="javascript:void(0)">Phương pháp trả lời STAR phỏng vấn hành vi</a>
+                    </li>
+                    <li class="guide-item">
+                        <span>💻</span>
+                        <a href="javascript:void(0)">Kỹ năng phỏng vấn Online qua Google Meet/Zoom</a>
+                    </li>
+                    <li class="guide-item">
+                        <span>🤝</span>
+                        <a href="javascript:void(0)">Bí quyết đàm phán lương khéo léo với HR</a>
+                    </li>
+                    <li class="guide-item">
+                        <span>🎓</span>
+                        <a href="javascript:void(0)">Câu hỏi phỏng vấn thực tập sinh & sinh viên mới ra trường</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Đánh giá năng lực widget -->
+            <div class="side-widget" style="background: linear-gradient(135deg, #00b14f 0%, #00873c 100%); color: #fff;">
+                <h3 style="color:#fff; font-size:17px; font-weight:800; margin-bottom:8px;">
+                    ✍️ Kiểm tra năng lực chuyên môn
+                </h3>
+                <p style="font-size:13.5px; opacity:0.95; line-height:1.5; margin-bottom:16px;">
+                    Thử sức với các bài test kỹ năng công nghệ (Java, JavaScript, Git, MySQL, HTML/CSS, Agile) để đánh giá trình độ và làm đẹp hồ sơ ứng tuyển!
+                </p>
+                <a th:href="@{/skill-tests}" style="display:inline-block; width:100%; text-align:center; background:#fff; color:#00b14f; padding:10px 16px; border-radius:8px; font-weight:700; text-decoration:none;">
+                    Khám phá bài test ngay →
+                </a>
+            </div>
+
+            <!-- Câu hỏi phổ biến -->
+            <div class="side-widget" th:if="${!#lists.isEmpty(popularQuestions)}">
+                <h3 class="widget-title">
+                    <span>🔥</span> Câu hỏi xem nhiều nhất
+                </h3>
+                <ul class="guide-list">
+                    <li th:each="pop : ${popularQuestions}" class="guide-item">
+                        <span>❓</span>
+                        <a th:href="@{'/interview-questions/' + ${pop.id}}" th:text="${pop.question}">Câu hỏi...</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
