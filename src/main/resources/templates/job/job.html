@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -27,21 +28,16 @@
             Khám phá hàng nghìn cơ hội việc làm từ các công ty hàng đầu
         </p>
 
-
         <!-- ================= SEARCH ================= -->
 
         <form class="search-box"
               th:action="@{/jobs}"
               method="get">
 
-
             <!-- TỪ KHÓA -->
-
             <div class="search-item">
 
-                <span class="search-icon">
-                    🔍
-                </span>
+                <span class="search-icon">🔍</span>
 
                 <input
                         type="text"
@@ -51,14 +47,10 @@
 
             </div>
 
-
             <!-- ĐỊA ĐIỂM -->
-
             <div class="search-item">
 
-                <span class="search-icon">
-                    📍
-                </span>
+                <span class="search-icon">📍</span>
 
                 <input
                         type="text"
@@ -68,14 +60,10 @@
 
             </div>
 
-
-            <!-- NGÀNH NGHỀ -->
-
+            <!-- NGÀNH NGHỀ
             <div class="search-item">
 
-                <span class="search-icon">
-                    📁
-                </span>
+                <span class="search-icon">📁</span>
 
                 <select name="categoryIds">
 
@@ -86,21 +74,16 @@
                     <option
                             th:each="category : ${categories}"
                             th:value="${category.id}"
-                            th:text="${category.name}">
-
+                            th:text="${category.name}"
+                            th:selected="${categoryIds != null and categoryIds.contains(category.id)}">
                     </option>
 
                 </select>
 
-            </div>
+            </div>-->
 
-
-            <button
-                    type="submit"
-                    class="search-btn">
-
+            <button type="submit" class="search-btn">
                 Tìm kiếm
-
             </button>
 
         </form>
@@ -110,13 +93,11 @@
 </section>
 
 
-
 <!-- ===================================================== -->
 <!-- ======================== MAIN ======================= -->
 <!-- ===================================================== -->
 
 <main class="container main-content">
-
 
     <!-- ================================================= -->
     <!-- ===================== FILTER ==================== -->
@@ -127,30 +108,29 @@
         <form th:action="@{/jobs}"
               method="get">
 
-
             <!-- GIỮ TỪ KHÓA -->
-
             <input
                     type="hidden"
                     name="keyword"
                     th:value="${keyword}">
 
-
             <!-- GIỮ SEARCH LOCATION -->
-
             <input
                     type="hidden"
                     name="location"
                     th:value="${location}">
 
-
             <!-- GIỮ SORT -->
-
             <input
                     type="hidden"
                     name="sort"
                     th:value="${sort}">
 
+            <!-- GIỮ COMPANY -->
+            <input
+                    type="hidden"
+                    name="companyId"
+                    th:value="${companyId}">
 
             <!-- ================= HEADER ================= -->
 
@@ -163,16 +143,35 @@
                 <a
                         th:href="@{/jobs}"
                         class="clear-filter">
-
                     Xóa tất cả
-
                 </a>
 
             </div>
 
 
+            <!-- ================= FAVORITE JOBS ================= -->
 
-            <!-- ================= LOCATION ================= -->
+            <div class="filter-group">
+
+                <h3>❤️ Việc làm yêu thích</h3>
+
+                <label>
+
+                    <input
+                            type="checkbox"
+                            name="favoritesOnly"
+                            value="true"
+                            th:checked="${favoritesOnly}"
+                            onchange="this.form.submit()">
+
+                    Chỉ hiển thị việc làm đã yêu thích
+
+                </label>
+
+            </div>
+
+
+            <!-- ================= LOCATION =================
 
             <div class="filter-group">
 
@@ -180,9 +179,7 @@
                     Địa điểm
                 </h3>
 
-
-                <label
-                        th:each="item : ${locationsList}">
+                <label th:each="item : ${locationsList}">
 
                     <input
                             type="checkbox"
@@ -191,15 +188,11 @@
                             th:checked="${locations != null and locations.contains(item)}"
                             onchange="this.form.submit()">
 
-
-                    <span
-                            th:text="${item}">
-                    </span>
+                    <span th:text="${item}"></span>
 
                 </label>
 
-            </div>
-
+            </div>-->
 
 
             <!-- ================= EXPERIENCE ================= -->
@@ -209,7 +202,6 @@
                 <h3>
                     Kinh nghiệm
                 </h3>
-
 
                 <label>
 
@@ -224,7 +216,6 @@
 
                 </label>
 
-
                 <label>
 
                     <input
@@ -237,7 +228,6 @@
                     0 - 1 năm
 
                 </label>
-
 
                 <label>
 
@@ -252,7 +242,6 @@
 
                 </label>
 
-
                 <label>
 
                     <input
@@ -265,7 +254,6 @@
                     3 - 5 năm
 
                 </label>
-
 
                 <label>
 
@@ -283,73 +271,28 @@
             </div>
 
 
-
-            <!-- ================= SALARY ================= -->
+            <!-- ================= CATEGORY ================= -->
 
             <div class="filter-group">
 
                 <h3>
-                    Mức lương
+                    Ngành nghề
                 </h3>
 
-
-                <label>
-
-                    <input
-                            type="checkbox"
-                            name="salaryRanges"
-                            value="under-1000"
-                            th:checked="${salaryRanges != null and salaryRanges.contains('under-1000')}"
-                            onchange="this.form.submit()">
-
-                    Dưới 1000
-
-                </label>
-
-
-                <label>
+                <label th:each="category : ${categories}">
 
                     <input
                             type="checkbox"
-                            name="salaryRanges"
-                            value="1000-2000"
-                            th:checked="${salaryRanges != null and salaryRanges.contains('1000-2000')}"
+                            name="categoryIds"
+                            th:value="${category.id}"
+                            th:checked="${categoryIds != null and categoryIds.contains(category.id)}"
                             onchange="this.form.submit()">
 
-                    1000 - 2000
-
-                </label>
-
-
-                <label>
-
-                    <input
-                            type="checkbox"
-                            name="salaryRanges"
-                            value="2000-3000"
-                            th:checked="${salaryRanges != null and salaryRanges.contains('2000-3000')}"
-                            onchange="this.form.submit()">
-
-                    2000 - 3000
-
-                </label>
-
-
-                <label>
-
-                    <input
-                            type="checkbox"
-                            name="salaryRanges"
-                            value="3000+"
-                            th:checked="${salaryRanges != null and salaryRanges.contains('3000+')}"
-                            onchange="this.form.submit()">
-
-                    Trên 3000
+                    <span th:text="${category.name}"></span>
 
                 </label>
 
             </div>
-
 
 
             <!-- ================= LEVEL ================= -->
@@ -359,7 +302,6 @@
                 <h3>
                     Cấp bậc
                 </h3>
-
 
                 <label>
 
@@ -374,7 +316,6 @@
 
                 </label>
 
-
                 <label>
 
                     <input
@@ -388,7 +329,6 @@
 
                 </label>
 
-
                 <label>
 
                     <input
@@ -401,7 +341,6 @@
                     Middle
 
                 </label>
-
 
                 <label>
 
@@ -418,41 +357,9 @@
 
             </div>
 
-
-
-            <!-- ================= CATEGORY ================= -->
-
-            <div class="filter-group">
-
-                <h3>
-                    Ngành nghề
-                </h3>
-
-
-                <label
-                        th:each="category : ${categories}">
-
-                    <input
-                            type="checkbox"
-                            name="categoryIds"
-                            th:value="${category.id}"
-                            th:checked="${categoryIds != null and categoryIds.contains(category.id)}"
-                            onchange="this.form.submit()">
-
-
-                    <span
-                            th:text="${category.name}">
-                    </span>
-
-                </label>
-
-            </div>
-
-
         </form>
 
     </aside>
-
 
 
     <!-- ================================================= -->
@@ -460,7 +367,6 @@
     <!-- ================================================= -->
 
     <section class="job-section">
-
 
         <!-- ================= JOB HEADER ================= -->
 
@@ -474,8 +380,7 @@
 
                 <p>
 
-                    <span
-                            th:text="${#lists.size(jobs)}">
+                    <span th:text="${#lists.size(jobs)}">
                         0
                     </span>
 
@@ -486,25 +391,64 @@
             </div>
 
 
-
             <!-- ================= SORT ================= -->
 
             <form
                     th:action="@{/jobs}"
                     method="get">
 
-
+                <!-- GIỮ TỪ KHÓA -->
                 <input
                         type="hidden"
                         name="keyword"
                         th:value="${keyword}">
 
-
+                <!-- GIỮ ĐỊA ĐIỂM TÌM KIẾM -->
                 <input
                         type="hidden"
                         name="location"
                         th:value="${location}">
 
+                <!-- GIỮ COMPANY -->
+                <input
+                        type="hidden"
+                        name="companyId"
+                        th:value="${companyId}">
+
+                <!-- GIỮ WISHLIST -->
+                <input
+                        type="hidden"
+                        name="favoritesOnly"
+                        th:if="${favoritesOnly}"
+                        value="true">
+
+                <!-- GIỮ ĐỊA ĐIỂM ĐÃ CHỌN -->
+                <input
+                        type="hidden"
+                        name="locations"
+                        th:each="item : ${locations}"
+                        th:value="${item}">
+
+                <!-- GIỮ KINH NGHIỆM -->
+                <input
+                        type="hidden"
+                        name="experiences"
+                        th:each="item : ${experiences}"
+                        th:value="${item}">
+
+                <!-- GIỮ CẤP BẬC -->
+                <input
+                        type="hidden"
+                        name="levels"
+                        th:each="item : ${levels}"
+                        th:value="${item}">
+
+                <!-- GIỮ NGÀNH NGHỀ -->
+                <input
+                        type="hidden"
+                        name="categoryIds"
+                        th:each="item : ${categoryIds}"
+                        th:value="${item}">
 
                 <select
                         class="sort-select"
@@ -514,27 +458,19 @@
                     <option
                             value="newest"
                             th:selected="${sort == 'newest'}">
-
                         Mới nhất
-
                     </option>
-
 
                     <option
                             value="salary-high"
                             th:selected="${sort == 'salary-high'}">
-
                         Lương cao nhất
-
                     </option>
-
 
                     <option
                             value="salary-low"
                             th:selected="${sort == 'salary-low'}">
-
                         Lương thấp nhất
-
                     </option>
 
                 </select>
@@ -544,12 +480,33 @@
         </div>
 
 
-
         <!-- ================= JOB CARD ================= -->
 
         <div
                 class="job-card"
                 th:each="job : ${jobs}">
+
+            <!-- NÚT YÊU THÍCH -->
+
+            <form
+                    th:action="@{/candidate/wishlist/toggle/{jobId}(jobId=${job.id})}"
+                    method="post"
+                    class="wishlist-form">
+
+                <button
+                        type="submit"
+                        class="wishlist-btn"
+                        th:classappend="${favoriteJobIds.contains(job.id)} ? ' active' : ''"
+                        th:title="${favoriteJobIds.contains(job.id)} ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'"
+                        th:attr="aria-pressed=${favoriteJobIds.contains(job.id)}">
+
+                    <span th:text="${favoriteJobIds.contains(job.id)} ? '♥' : '♡'">
+                        ♡
+                    </span>
+
+                </button>
+
+            </form>
 
 
             <!-- LOGO -->
@@ -559,112 +516,57 @@
                 <span
                         th:if="${job.title != null and !job.title.isEmpty()}"
                         th:text="${#strings.substring(job.title, 0, 1)}">
-
                     J
-
                 </span>
 
             </div>
-
 
 
             <!-- JOB INFO -->
 
             <div class="job-info">
 
-
                 <!-- TITLE -->
 
-                <h3
-                        th:text="${job.title}">
-
+                <h3 th:text="${job.title}">
                     Junior Backend Developer
-
                 </h3>
-
 
 
                 <!-- COMPANY -->
 
                 <p class="company-name">
-
                     Công ty tuyển dụng
-
                 </p>
-
 
 
                 <!-- DETAILS -->
 
                 <div class="job-details">
 
-
                     <span>
-
                         📍
-
-                        <span
-                                th:text="${job.location}">
-
-
-                        </span>
-
+                        <span th:text="${job.location}"></span>
                     </span>
 
-
                     <span>
-
                         💰
-
-                        <span
-                                th:text="${job.salaryMin}">
-
-
-
-                        </span>
-
+                        <span th:text="${job.salaryMin}"></span>
                         -
-
-                        <span
-                                th:text="${job.salaryMax}">
-
-
-
-                        </span>
-
+                        <span th:text="${job.salaryMax}"></span>
                     </span>
 
-
                     <span>
-
                         ⏱
-
-                        <span
-                                th:text="${job.experience}">
-
-
-
-                        </span>
-
+                        <span th:text="${job.experience}"></span>
                     </span>
-
 
                     <span>
-
                         👨‍💻
-
-                        <span
-                                th:text="${job.level}">
-
-
-
-                        </span>
-
+                        <span th:text="${job.level}"></span>
                     </span>
-
 
                 </div>
-
 
 
                 <!-- SKILLS -->
@@ -673,22 +575,18 @@
                 </div>
 
 
-
                 <!-- FOOTER -->
 
                 <div class="job-footer">
 
-
                     <span
                             class="posted"
                             th:text="${job.createdAt}">
-
-
                     </span>
 
-
-                    <a th:href="@{/jobs/{id}/apply(id=${job.id})}"
-                       class="detail-btn">
+                    <a
+                            th:href="@{/jobs/{id}/apply(id=${job.id})}"
+                            class="detail-btn">
                         Ứng tuyển
                     </a>
 
@@ -699,11 +597,9 @@
         </div>
 
 
-
         <!-- ================= NO JOB ================= -->
 
-        <div
-                th:if="${#lists.isEmpty(jobs)}">
+        <div th:if="${#lists.isEmpty(jobs)}">
 
             <p>
                 Không tìm thấy việc làm nào.
@@ -711,11 +607,9 @@
 
         </div>
 
-
     </section>
 
 </main>
-
 
 
 <!-- ===================================================== -->
@@ -734,7 +628,5 @@
 
 </footer>
 
-
 </body>
-
 </html>

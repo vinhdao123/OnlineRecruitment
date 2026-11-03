@@ -1,0 +1,149 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Chọn lịch phỏng vấn | Online Recruitment</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/candidate/applications.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/fragments/taskbar.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/candidate/interview-booking.css}">
+</head>
+
+<body>
+
+<div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+
+<main class="interview-wrapper">
+
+    <div class="interview-header">
+        <a th:href="@{/candidate/applications}" class="back-link">
+            ← Quay lại danh sách đơn ứng tuyển
+        </a>
+
+        <h1>Chọn lịch phỏng vấn</h1>
+
+        <p>
+            Vui lòng chọn ngày và khung giờ phù hợp để tham gia phỏng vấn.
+        </p>
+    </div>
+
+    <section class="job-info-card">
+        <h2>Thông tin công việc</h2>
+
+        <div class="job-info-item">
+            <span>Công việc</span>
+            <strong th:text="${application.jobTitle}"></strong>
+        </div>
+
+        <div class="job-info-item">
+            <span>Công ty</span>
+            <strong th:text="${application.companyName}"></strong>
+        </div>
+
+        <div class="job-info-item">
+            <span>Mã đơn ứng tuyển</span>
+            <strong th:text="'#' + ${application.applicationId}"></strong>
+        </div>
+    </section>
+
+    <section class="slots-card">
+
+        <div class="slots-heading">
+            <div>
+                <h2>Khung giờ phỏng vấn còn trống</h2>
+                <p>Chọn một khung giờ để xác nhận lịch phỏng vấn.</p>
+            </div>
+
+            <span class="slot-count"
+                  th:text="${#lists.size(slots)} + ' khung giờ'">
+                0 khung giờ
+            </span>
+        </div>
+
+        <div class="empty-slots"
+             th:if="${#lists.isEmpty(slots)}">
+
+            <div class="empty-icon">▦</div>
+
+            <h3>Hiện chưa có lịch phỏng vấn</h3>
+
+            <p>
+                Nhà tuyển dụng chưa mở khung giờ phù hợp.
+                Vui lòng quay lại sau.
+            </p>
+        </div>
+
+        <div class="slots-list"
+             th:if="${not #lists.isEmpty(slots)}">
+
+            <article class="interview-slot"
+                     th:each="slot : ${slots}">
+
+                <div class="slot-date">
+                    <span class="slot-icon">▣</span>
+
+                    <div>
+                        <small>Ngày phỏng vấn</small>
+                        <strong th:text="${#dates.format(slot.available_date, 'dd/MM/yyyy')}">
+                            05/11/2026
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="slot-time">
+                    <small>Thời gian</small>
+
+                    <strong>
+                        <span th:text="${slot.start_time}">08:00</span>
+                        -
+                        <span th:text="${slot.end_time}">08:30</span>
+                    </strong>
+                </div>
+
+                <form th:action="@{/candidate/interviews/book}"
+                      method="post"
+                      class="booking-form">
+
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+
+                    <input type="hidden"
+                           name="applicationId"
+                           th:value="${applicationId}">
+
+                    <input type="hidden"
+                           name="availabilityId"
+                           th:value="${slot.id}">
+
+                    <button type="submit" class="btn-book">
+                        Chọn lịch này
+                    </button>
+
+                </form>
+
+            </article>
+
+        </div>
+
+    </section>
+
+    <div class="bottom-back">
+        <a th:href="@{/candidate/applications}">
+            ← Quay lại danh sách đơn ứng tuyển
+        </a>
+    </div>
+
+</main>
+
+</body>
+</html>

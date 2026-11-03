@@ -520,6 +520,60 @@ body {
     }
 
 }
+
+/* =====================================
+   WISHLIST - HEART BUTTON
+===================================== */
+
+.job-card {
+    position: relative;
+}
+
+.wishlist-form {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    z-index: 5;
+    margin: 0;
+}
+
+.wishlist-btn {
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: #94a3b8;
+    font-size: 28px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: all 0.2s ease;
+}
+
+.wishlist-btn:hover {
+    background: #fff1f2;
+    color: #ef4444;
+    transform: scale(1.12);
+}
+
+.wishlist-btn.active {
+    color: #ef4444;
+    background: #fff1f2;
+}
+
+.wishlist-btn span {
+    line-height: 1;
+}
+
+.wishlist-btn:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 3px;
+}
+
 /* Ảnh logo nằm đè lên chữ cái dự phòng của mỗi tin tuyển dụng. */
 .company-logo { position: relative; overflow: hidden; }
 .company-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }

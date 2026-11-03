@@ -130,21 +130,43 @@ public class ApplicationSubmitController {
             Long templateVersionId =
                     ((Number) cv.get("templateVersionId")).longValue();
 
-            // 5. Không cho ứng tuyển trùng cùng một công việc
-            Integer existing = jdbcTemplate.queryForObject(
-                    """
-                    SELECT COUNT(*)
-                    FROM dbo.applications
-                    WHERE candidate_id = ? AND job_id = ?
-                    """,
-                    Integer.class, candidateId, jobId
-            );
+            // 5. Kiểm tra đơn ứng tuyển đã tồn tại
+            Long rejectedApplicationId = null;
 
-            if (existing != null && existing > 0) {
-                redirectAttributes.addFlashAttribute(
-                        "errorMessage",
-                        "Bạn đã ứng tuyển công việc này rồi.");
-                return redirectUrl;
+            List<Map<String, Object>> existingApplications =
+                    jdbcTemplate.queryForList(
+                            """
+                            SELECT id, status
+                            FROM dbo.applications
+                            WHERE candidate_id = ?
+                              AND job_id = ?
+                            """,
+                            candidateId, jobId
+                    );
+
+            if (!existingApplications.isEmpty()) {
+
+                Map<String, Object> oldApplication = existingApplications.get(0);
+
+                String oldStatus = (String) oldApplication.get("status");
+
+                Long oldApplicationId =
+                        ((Number) oldApplication.get("id")).longValue();
+
+                if ("SUBMITTED".equals(oldStatus)
+                        || "ACCEPTED".equals(oldStatus)) {
+
+                    redirectAttributes.addFlashAttribute(
+                            "errorMessage",
+                            "Bạn đã có đơn ứng tuyển cho công việc này."
+                    );
+
+                    return redirectUrl;
+                }
+
+                if ("REJECTED".equals(oldStatus)) {
+                    rejectedApplicationId = oldApplicationId;
+                }
             }
 
             // 6. Tạo bản chụp dữ liệu CV tại thời điểm ứng tuyển
@@ -239,34 +261,67 @@ public class ApplicationSubmitController {
                     ? null
                     : (String) attachments.get(0).get("storage_path");
 
-            // 8. Lưu đơn ứng tuyển gắn với đúng job, candidate và CV
-            jdbcTemplate.update(
-                    """
-                    INSERT INTO dbo.applications
-                    (
-                        candidate_id,
-                        job_id,
-                        cv_id,
-                        cv_template_version_id,
-                        cv_snapshot_json,
-                        cv_file_path_snapshot,
-                        status
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, 'SUBMITTED')
-                    """,
-                    candidateId,
-                    jobId,
-                    cvId,
-                    templateVersionId,
-                    snapshotJson,
-                    filePath
-            );
+            // 8. Lưu đơn ứng tuyển
+
+            if (rejectedApplicationId != null) {
+
+                // Đơn cũ bị từ chối: mở lại đơn ứng tuyển
+                // Giữ nguyên toàn bộ dữ liệu CV đã nộp trước đó
+                int updated = jdbcTemplate.update(
+                        """
+                        UPDATE dbo.applications
+                        SET status = 'SUBMITTED',
+                            applied_at = GETDATE()
+                        WHERE id = ?
+                          AND candidate_id = ?
+                          AND job_id = ?
+                          AND status = 'REJECTED'
+                        """,
+                        rejectedApplicationId,
+                        candidateId,
+                        jobId
+                );
+
+                if (updated == 0) {
+                    throw new IllegalStateException(
+                            "Không thể ứng tuyển lại. Vui lòng tải lại trang."
+                    );
+                }
+
+            } else {
+
+                // Chưa từng ứng tuyển: tạo đơn mới
+                jdbcTemplate.update(
+                        """
+                        INSERT INTO dbo.applications
+                        (
+                            candidate_id,
+                            job_id,
+                            cv_id,
+                            cv_template_version_id,
+                            cv_snapshot_json,
+                            cv_file_path_snapshot,
+                            status
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, 'SUBMITTED')
+                        """,
+                        candidateId,
+                        jobId,
+                        cvId,
+                        templateVersionId,
+                        snapshotJson,
+                        filePath
+                );
+            }
+
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Gửi hồ sơ ứng tuyển thành công!");
+                    "Gửi hồ sơ ứng tuyển thành công!"
+            );
 
             return redirectUrl;
+
 
         } catch (JacksonException e) {
             redirectAttributes.addFlashAttribute(

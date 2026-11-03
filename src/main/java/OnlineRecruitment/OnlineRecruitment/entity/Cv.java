@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Cv {
 
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -56,8 +58,14 @@ public class Cv {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @Column(name = "avatar_url", length = 500)
+    @Transient
     private String avatarUrl;
+
+    @Transient
+    private String fileUrl;
+
+    @Transient
+    private Boolean isUploaded = false;
 
     @Column(name = "content", columnDefinition = "NVARCHAR(MAX)")
     private String content;
@@ -65,11 +73,6 @@ public class Cv {
     @Column(name = "template", length = 255)
     private String template;
 
-    @Column(name = "file_url", length = 500)
-    private String fileUrl;
-
-    @Column(name = "is_uploaded")
-    private Boolean isUploaded = false;
 
     @PrePersist
     public void prePersist() {
