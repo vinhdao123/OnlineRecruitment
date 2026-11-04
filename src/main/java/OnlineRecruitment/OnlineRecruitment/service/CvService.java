@@ -3,16 +3,24 @@ package OnlineRecruitment.OnlineRecruitment.service;
 import OnlineRecruitment.OnlineRecruitment.dto.candidate.*;
 import OnlineRecruitment.OnlineRecruitment.entity.*;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.*;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CvService {
 
     private final CvRepository cvRepository;
@@ -23,12 +31,100 @@ public class CvService {
     private final CvProjectRepository projRepo;
     private final CvSkillRepository cvSkillRepo;
     private final SkillRepository skillRepo;
+    private final CvCertificateRepository certRepo;
+    private final CvAwardRepository awardRepo;
+    private final CvActivityRepository activityRepo;
+    private final CvReferenceRepository referenceRepo;
+    private final DataSource dataSource;
+
+    @PostConstruct
+    public void initCvTables() {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // 1. cv_projects
+            stmt.execute("IF OBJECT_ID('dbo.cv_projects', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_projects (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  cv_id BIGINT NOT NULL," +
+                    "  name NVARCHAR(255) NOT NULL," +
+                    "  role NVARCHAR(255) NULL," +
+                    "  start_date DATE NULL," +
+                    "  end_date DATE NULL," +
+                    "  project_url NVARCHAR(1000) NULL," +
+                    "  description NVARCHAR(MAX) NULL," +
+                    "  technologies NVARCHAR(MAX) NULL," +
+                    "  display_order INT NOT NULL DEFAULT 0," +
+                    "  CONSTRAINT FK_cv_projects_cv FOREIGN KEY (cv_id) REFERENCES dbo.cv(id) ON DELETE CASCADE" +
+                    ")");
+
+            // 2. cv_certificates
+            stmt.execute("IF OBJECT_ID('dbo.cv_certificates', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_certificates (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  cv_id BIGINT NOT NULL," +
+                    "  name NVARCHAR(255) NOT NULL," +
+                    "  issuing_org NVARCHAR(255) NULL," +
+                    "  issue_date DATE NULL," +
+                    "  expiry_date DATE NULL," +
+                    "  credential_id NVARCHAR(255) NULL," +
+                    "  credential_url NVARCHAR(1000) NULL," +
+                    "  display_order INT NOT NULL DEFAULT 0," +
+                    "  CONSTRAINT FK_cv_certificates_cv FOREIGN KEY (cv_id) REFERENCES dbo.cv(id) ON DELETE CASCADE" +
+                    ")");
+
+            // 3. cv_awards
+            stmt.execute("IF OBJECT_ID('dbo.cv_awards', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_awards (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  cv_id BIGINT NOT NULL," +
+                    "  name NVARCHAR(255) NOT NULL," +
+                    "  issuer NVARCHAR(255) NULL," +
+                    "  award_date DATE NULL," +
+                    "  description NVARCHAR(MAX) NULL," +
+                    "  display_order INT NOT NULL DEFAULT 0," +
+                    "  CONSTRAINT FK_cv_awards_cv FOREIGN KEY (cv_id) REFERENCES dbo.cv(id) ON DELETE CASCADE" +
+                    ")");
+
+            // 4. cv_activities
+            stmt.execute("IF OBJECT_ID('dbo.cv_activities', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_activities (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  cv_id BIGINT NOT NULL," +
+                    "  organization NVARCHAR(255) NOT NULL," +
+                    "  role NVARCHAR(255) NULL," +
+                    "  start_date DATE NULL," +
+                    "  end_date DATE NULL," +
+                    "  description NVARCHAR(MAX) NULL," +
+                    "  display_order INT NOT NULL DEFAULT 0," +
+                    "  CONSTRAINT FK_cv_activities_cv FOREIGN KEY (cv_id) REFERENCES dbo.cv(id) ON DELETE CASCADE" +
+                    ")");
+
+            // 5. cv_references
+            stmt.execute("IF OBJECT_ID('dbo.cv_references', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_references (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  cv_id BIGINT NOT NULL," +
+                    "  full_name NVARCHAR(255) NOT NULL," +
+                    "  position NVARCHAR(255) NULL," +
+                    "  organization NVARCHAR(255) NULL," +
+                    "  email NVARCHAR(255) NULL," +
+                    "  phone NVARCHAR(30) NULL," +
+                    "  display_order INT NOT NULL DEFAULT 0," +
+                    "  CONSTRAINT FK_cv_references_cv FOREIGN KEY (cv_id) REFERENCES dbo.cv(id) ON DELETE CASCADE" +
+                    ")");
+
+            log.info("Initialized CV extra tables successfully.");
+        } catch (Exception e) {
+            log.warn("Notice while initializing CV tables: {}", e.getMessage());
+        }
+    }
 
     // ==========================================
     // 1. QUẢN LÝ DANH SÁCH & CHI TIẾT CV
     // ==========================================
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<CvSummaryVm> listMyCvs(Long userId) {
         Candidate candidate = getCandidate(userId);
         return cvRepository
@@ -43,12 +139,13 @@ public class CvService {
                         cv.getUpdatedAt(),
                         cv.getTemplateVersion() != null ? cv.getTemplateVersion().getTemplate().getName() : "N/A",
                         cv.getAvatarUrl(),
-                        cv.getIsUploaded() != null ? cv.getIsUploaded() : false
+                        cv.getIsUploaded() != null ? cv.getIsUploaded() : false,
+                        cv.getFileUrl()
                 ))
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<Long, Map<String, Object>> getCvListWithDetails(Long userId) {
         Candidate candidate = getCandidate(userId);
         List<Cv> cvs = cvRepository.findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(candidate.getId(), "ACTIVE");
@@ -66,14 +163,14 @@ public class CvService {
         return cvDataMap;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Cv getCvDetail(Long cvId, Long userId) {
         Candidate candidate = getCandidate(userId);
         return cvRepository.findByIdAndCandidateId(cvId, candidate.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CV hoặc bạn không có quyền truy cập"));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<CvTemplateOptionVm> getAvailableTemplates() {
         return templateVersionRepository.findByIsPublishedTrue().stream()
                 .map(v -> new CvTemplateOptionVm(
@@ -84,15 +181,22 @@ public class CvService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public Map<String, Object> getFullCvForPreview(Long cvId, Long userId) {
         Cv cv = getCvDetail(cvId, userId);
+        Candidate candidate = getCandidate(userId);
         Map<String, Object> model = new java.util.HashMap<>();
         model.put("cv", cv);
+        model.put("candidate", candidate);
+        model.put("candidateUser", candidate != null ? candidate.getUser() : null);
         model.put("works", getWorkExperiences(cvId, userId));
         model.put("educations", getEducations(cvId, userId));
         model.put("skills", getSkills(cvId, userId));
         model.put("projects", getProjects(cvId, userId));
+        model.put("certificates", getCertificates(cvId, userId));
+        model.put("awards", getAwards(cvId, userId));
+        model.put("activities", getActivities(cvId, userId));
+        model.put("references", getReferences(cvId, userId));
         return model;
     }
 
@@ -217,19 +321,68 @@ public class CvService {
     }
 
     @Transactional
-    public void uploadCvFile(String fileUrl, Long userId) {
+    public Long cloneCv(Long cvId, Long userId) {
+        Candidate candidate = getCandidate(userId);
+        Cv source = cvRepository.findByIdAndCandidateId(cvId, candidate.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CV"));
+        if (!"ACTIVE".equals(source.getStatus())) {
+            throw new IllegalArgumentException("Không thể nhân bản CV đã bị vô hiệu hóa");
+        }
+        if (Boolean.TRUE.equals(source.getIsUploaded())) {
+            throw new IllegalArgumentException("Không thể nhân bản CV tải lên từ máy");
+        }
+
+        String newTitle = source.getTitle() + " (Bản sao)";
+        if (newTitle.length() > 255) {
+            newTitle = newTitle.substring(0, 255);
+        }
+
+        Cv copy = new Cv();
+        copy.setCandidateId(candidate.getId());
+        copy.setTemplateVersionId(source.getTemplateVersionId());
+        copy.setTitle(newTitle);
+        copy.setProfessionalTitle(source.getProfessionalTitle());
+        copy.setSummary(source.getSummary());
+        copy.setAccentColor(source.getAccentColor());
+        copy.setStatus("ACTIVE");
+        copy.setIsDefault(false);
+        copy.setAvatarUrl(source.getAvatarUrl());
+        copy.setContent(source.getContent());
+        copy.setTemplate(source.getTemplate());
+        cvRepository.save(copy);
+
+        copyCvData(cvId, copy.getId(), userId);
+        return copy.getId();
+    }
+    @Transactional
+    public void uploadCvFile(String fileUrl, String title, Long userId) {
         Candidate candidate = getCandidate(userId);
         Cv cv = new Cv();
         cv.setCandidateId(candidate.getId());
         cv.setTemplateVersionId(1L); // Mặc định template version 1
-        cv.setTitle("CV Upload từ file"); // Có thể sửa để lấy tên file
-        cv.setProfessionalTitle("");
+        cv.setTitle(title != null && !title.trim().isEmpty() ? title.trim() : "CV Upload từ file");
+        cv.setProfessionalTitle("CV Tải lên");
         cv.setSummary("");
         cv.setAccentColor("#2563EB");
         cv.setStatus("ACTIVE");
         cv.setIsDefault(false);
         cv.setFileUrl(fileUrl);
         cv.setIsUploaded(true);
+        cvRepository.save(cv);
+    }
+
+    @Transactional
+    public void uploadCvFile(String fileUrl, Long userId) {
+        uploadCvFile(fileUrl, "CV Upload từ file", userId);
+    }
+
+    @Transactional
+    public void renameCv(Long cvId, String newTitle, Long userId) {
+        if (newTitle == null || newTitle.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên CV không được để trống!");
+        }
+        Cv cv = getCvDetail(cvId, userId);
+        cv.setTitle(newTitle.trim());
         cvRepository.save(cv);
     }
 
@@ -286,6 +439,55 @@ public class CvService {
             projRepo.save(newProj);
         });
 
+        certRepo.findByCvIdOrderByDisplayOrderAsc(sourceCvId).forEach(c -> {
+            CvCertificate n = new CvCertificate();
+            n.setCvId(targetCvId);
+            n.setName(c.getName());
+            n.setIssuer(c.getIssuer());
+            n.setIssueDate(c.getIssueDate());
+            n.setExpiryDate(c.getExpiryDate());
+            n.setCredentialUrl(c.getCredentialUrl());
+            n.setDescription(c.getDescription());
+            n.setDisplayOrder(c.getDisplayOrder());
+            certRepo.save(n);
+        });
+
+        awardRepo.findByCvIdOrderByDisplayOrderAsc(sourceCvId).forEach(a -> {
+            CvAward n = new CvAward();
+            n.setCvId(targetCvId);
+            n.setTitle(a.getTitle());
+            n.setIssuer(a.getIssuer());
+            n.setAwardDate(a.getAwardDate());
+            n.setDescription(a.getDescription());
+            n.setDisplayOrder(a.getDisplayOrder());
+            awardRepo.save(n);
+        });
+
+        activityRepo.findByCvIdOrderByDisplayOrderAsc(sourceCvId).forEach(a -> {
+            CvActivity n = new CvActivity();
+            n.setCvId(targetCvId);
+            n.setOrganization(a.getOrganization());
+            n.setRole(a.getRole());
+            n.setStartDate(a.getStartDate());
+            n.setEndDate(a.getEndDate());
+            n.setIsCurrent(a.getIsCurrent());
+            n.setDescription(a.getDescription());
+            n.setDisplayOrder(a.getDisplayOrder());
+            activityRepo.save(n);
+        });
+
+        referenceRepo.findByCvIdOrderByDisplayOrderAsc(sourceCvId).forEach(r -> {
+            CvReference n = new CvReference();
+            n.setCvId(targetCvId);
+            n.setFullName(r.getFullName());
+            n.setPosition(r.getPosition());
+            n.setCompany(r.getCompany());
+            n.setEmail(r.getEmail());
+            n.setPhone(r.getPhone());
+            n.setRelationship(r.getRelationship());
+            n.setDisplayOrder(r.getDisplayOrder());
+            referenceRepo.save(n);
+        });
         cvSkillRepo.findByIdCvIdOrderByDisplayOrderAsc(sourceCvId).forEach(skill -> {
             CvSkill newSkill = new CvSkill();
             CvSkillId newId = new CvSkillId(targetCvId, skill.getId().getSkillId());
@@ -300,7 +502,7 @@ public class CvService {
     // 4. CÁC HÀM QUẢN LÝ NỘI DUNG CV (WORK, EDU, SKILL, PROJECT)
     // ==========================================
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<CvWorkExperience> getWorkExperiences(Long cvId, Long userId) {
         getCvDetail(cvId, userId);
         return workRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
@@ -341,7 +543,7 @@ public class CvService {
         workRepo.delete(work);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<CvEducation> getEducations(Long cvId, Long userId) {
         getCvDetail(cvId, userId);
         return eduRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
@@ -392,13 +594,13 @@ public class CvService {
         eduRepo.delete(edu);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<CvSkill> getSkills(Long cvId, Long userId) {
         getCvDetail(cvId, userId);
         return cvSkillRepo.findByIdCvIdOrderByDisplayOrderAsc(cvId);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<Skill> getAllAvailableSkills() {
         return skillRepo.findByStatusOrderByNameAsc("ACTIVE");
     }
@@ -432,10 +634,15 @@ public class CvService {
         cvSkillRepo.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
     public List<CvProject> getProjects(Long cvId, Long userId) {
         getCvDetail(cvId, userId);
-        return projRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
+        try {
+            return projRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
+        } catch (Exception e) {
+            log.warn("Cannot fetch projects for cvId {}: {}", cvId, e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     @Transactional
@@ -473,6 +680,245 @@ public class CvService {
         projRepo.delete(project);
     }
 
+    // ==========================================
+    // 4b. CHỨNG CHỈ, GIẢI THƯỞNG, HOẠT ĐỘNG, NGƯỜI THAM CHIẾU
+    // ==========================================
+
+    private void validateDateRange(java.time.LocalDate start, java.time.LocalDate end, boolean startNotFuture) {
+        if (startNotFuture && start != null && start.isAfter(java.time.LocalDate.now())) {
+            throw new IllegalArgumentException("Ngày bắt đầu không được ở trong tương lai.");
+        }
+        if (start != null && end != null && start.isAfter(end)) {
+            throw new IllegalArgumentException("Ngày kết thúc phải sau hoặc bằng ngày bắt đầu.");
+        }
+    }
+
+    // ---- Chứng chỉ ----
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public List<CvCertificate> getCertificates(Long cvId, Long userId) {
+        getCvDetail(cvId, userId);
+        try {
+            return certRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
+        } catch (Exception e) {
+            log.warn("Cannot fetch certificates for cvId {}: {}", cvId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Transactional
+    public void addCertificate(Long cvId, CertificateRequest req, Long userId) {
+        getCvDetail(cvId, userId);
+        if (req.getIssueDate() != null && req.getExpiryDate() != null && req.getIssueDate().isAfter(req.getExpiryDate())) {
+            throw new IllegalArgumentException("Ngày hết hạn phải sau hoặc bằng ngày cấp.");
+        }
+        CvCertificate c = new CvCertificate();
+        c.setCvId(cvId);
+        c.setName(req.getName());
+        c.setIssuer(req.getIssuer());
+        c.setIssueDate(req.getIssueDate());
+        c.setExpiryDate(req.getExpiryDate());
+        c.setCredentialUrl(req.getCredentialUrl());
+        c.setDescription(req.getDescription());
+        c.setDisplayOrder(certRepo.findMaxDisplayOrderByCvId(cvId) + 1);
+        certRepo.save(c);
+    }
+
+    @Transactional
+    public void deleteCertificate(Long cvId, Long certId, Long userId) {
+        getCvDetail(cvId, userId);
+        CvCertificate c = certRepo.findById(certId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chứng chỉ"));
+        if (!c.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        certRepo.delete(c);
+    }
+
+    // ---- Giải thưởng ----
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public List<CvAward> getAwards(Long cvId, Long userId) {
+        getCvDetail(cvId, userId);
+        try {
+            return awardRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
+        } catch (Exception e) {
+            log.warn("Cannot fetch awards for cvId {}: {}", cvId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Transactional
+    public void addAward(Long cvId, AwardRequest req, Long userId) {
+        getCvDetail(cvId, userId);
+        CvAward a = new CvAward();
+        a.setCvId(cvId);
+        a.setTitle(req.getTitle());
+        a.setIssuer(req.getIssuer());
+        a.setAwardDate(req.getAwardDate());
+        a.setDescription(req.getDescription());
+        a.setDisplayOrder(awardRepo.findMaxDisplayOrderByCvId(cvId) + 1);
+        awardRepo.save(a);
+    }
+
+    @Transactional
+    public void deleteAward(Long cvId, Long awardId, Long userId) {
+        getCvDetail(cvId, userId);
+        CvAward a = awardRepo.findById(awardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giải thưởng"));
+        if (!a.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        awardRepo.delete(a);
+    }
+
+    // ---- Hoạt động ngoại khóa ----
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public List<CvActivity> getActivities(Long cvId, Long userId) {
+        getCvDetail(cvId, userId);
+        try {
+            return activityRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
+        } catch (Exception e) {
+            log.warn("Cannot fetch activities for cvId {}: {}", cvId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Transactional
+    public void addActivity(Long cvId, ActivityRequest req, Long userId) {
+        getCvDetail(cvId, userId);
+        validateDateRange(req.getStartDate(), req.getEndDate(), true);
+        boolean current = Boolean.TRUE.equals(req.getIsCurrent());
+        CvActivity a = new CvActivity();
+        a.setCvId(cvId);
+        a.setOrganization(req.getOrganization());
+        a.setRole(req.getRole());
+        a.setStartDate(req.getStartDate());
+        a.setEndDate(current ? null : req.getEndDate());
+        a.setIsCurrent(current);
+        a.setDescription(req.getDescription());
+        a.setDisplayOrder(activityRepo.findMaxDisplayOrderByCvId(cvId) + 1);
+        activityRepo.save(a);
+    }
+
+    @Transactional
+    public void deleteActivity(Long cvId, Long activityId, Long userId) {
+        getCvDetail(cvId, userId);
+        CvActivity a = activityRepo.findById(activityId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hoạt động"));
+        if (!a.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        activityRepo.delete(a);
+    }
+
+    // ---- Người tham chiếu ----
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public List<CvReference> getReferences(Long cvId, Long userId) {
+        getCvDetail(cvId, userId);
+        try {
+            return referenceRepo.findByCvIdOrderByDisplayOrderAsc(cvId);
+        } catch (Exception e) {
+            log.warn("Cannot fetch references for cvId {}: {}", cvId, e.getMessage());
+            return Collections.emptyList();
+        }
+    }
+
+    @Transactional
+    public void addReference(Long cvId, ReferenceRequest req, Long userId) {
+        getCvDetail(cvId, userId);
+        CvReference r = new CvReference();
+        r.setCvId(cvId);
+        r.setFullName(req.getFullName());
+        r.setPosition(req.getPosition());
+        r.setCompany(req.getCompany());
+        r.setEmail(req.getEmail());
+        r.setPhone(req.getPhone());
+        r.setRelationship(req.getRelationship());
+        r.setDisplayOrder(referenceRepo.findMaxDisplayOrderByCvId(cvId) + 1);
+        referenceRepo.save(r);
+    }
+
+    @Transactional
+    public void deleteReference(Long cvId, Long referenceId, Long userId) {
+        getCvDetail(cvId, userId);
+        CvReference r = referenceRepo.findById(referenceId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người tham chiếu"));
+        if (!r.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        referenceRepo.delete(r);
+    }
+
+    // ==========================================
+    // 4c. BỘ TÙY BIẾN MẪU CV (CUSTOMIZER)
+    // ==========================================
+
+    private static final java.util.Set<String> CUSTOMIZER_TEMPLATE_CODES =
+            java.util.Set.of("STANDARD", "MINIMALIST", "CREATIVE", "MODERN", "ATS_FRIENDLY");
+    private static final java.util.regex.Pattern HEX_COLOR = java.util.regex.Pattern.compile("^#[0-9A-Fa-f]{6}$");
+
+    /**
+     * Dựng dữ liệu xem trước cho bộ tùy biến mẫu CV.
+     *
+     * @param selectedCvId CV cần xem trước; null = CV mặc định (nếu có), 0 = dùng dữ liệu mẫu
+     * @param templateCode mã mẫu (STANDARD, MINIMALIST, CREATIVE, MODERN, ATS_FRIENDLY)
+     * @param fontFamily   font tùy chọn (null = mặc định của mẫu)
+     * @param accentColor  màu chủ đạo dạng #RRGGBB (null = lấy màu của CV hoặc mặc định)
+     * @param avatarUrl    ảnh đại diện tùy chọn (null = dùng ảnh của CV / ảnh mẫu)
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getPreviewModelForCustomizer(Long selectedCvId, String templateCode, String fontFamily,
+                                                            String accentColor, String avatarUrl, Long userId) {
+        Candidate candidate = getCandidate(userId);
+        List<Cv> myCvs = cvRepository
+                .findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(candidate.getId(), "ACTIVE");
+
+        Cv selected = null;
+        if (selectedCvId == null) {
+            selected = myCvs.isEmpty() ? null : myCvs.get(0);
+        } else if (selectedCvId > 0) {
+            selected = myCvs.stream().filter(c -> c.getId().equals(selectedCvId)).findFirst().orElse(null);
+        }
+
+        String code = templateCode != null ? templateCode.trim().toUpperCase() : "";
+        if (!CUSTOMIZER_TEMPLATE_CODES.contains(code)) {
+            code = "STANDARD";
+        }
+
+        String color;
+        if (accentColor != null && HEX_COLOR.matcher(accentColor).matches()) {
+            color = accentColor;
+        } else if (selected != null && selected.getAccentColor() != null && HEX_COLOR.matcher(selected.getAccentColor()).matches()) {
+            color = selected.getAccentColor();
+        } else {
+            color = "#2563EB";
+        }
+
+        Map<String, Object> model = new java.util.HashMap<>();
+        model.put("cvOptions", myCvs);
+        model.put("previewCv", selected);
+        model.put("isSample", selected == null);
+        model.put("selectedCvId", selected != null ? selected.getId() : 0L);
+        model.put("templateCode", code);
+        model.put("accentColor", color);
+        model.put("fontFamily", fontFamily);
+        model.put("avatarUrl", avatarUrl != null && !avatarUrl.isBlank()
+                ? avatarUrl
+                : (selected != null ? selected.getAvatarUrl() : null));
+
+        if (selected != null) {
+            Long id = selected.getId();
+            model.put("works", workRepo.findByCvIdOrderByDisplayOrderAsc(id));
+            model.put("educations", eduRepo.findByCvIdOrderByDisplayOrderAsc(id));
+            model.put("skills", cvSkillRepo.findByIdCvIdOrderByDisplayOrderAsc(id));
+            model.put("projects", projRepo.findByCvIdOrderByDisplayOrderAsc(id));
+        } else {
+            model.put("works", List.of());
+            model.put("educations", List.of());
+            model.put("skills", List.of());
+            model.put("projects", List.of());
+        }
+        return model;
+    }
     // ==========================================
     // 5. HÀM BỔ TRỢ
     // ==========================================

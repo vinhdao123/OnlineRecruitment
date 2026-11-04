@@ -1,0 +1,391 @@
+/* =====================================================================
+   MODULE CV - THƯ VIỆN MẪU CV (gallery.html & customizer.html)
+   ===================================================================== */
+
+/* ================= BREADCRUMB ================= */
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 13.5px;
+    color: #94a3b8;
+}
+.breadcrumb-nav a { color: #64748b; text-decoration: none; font-weight: 500; }
+.breadcrumb-nav a:hover { color: #0284c7; }
+.breadcrumb-active { color: #0c4a6e; font-weight: 600; }
+
+/* ================= BANNER OCEAN BLUE ================= */
+.ocean-hero-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 28px;
+    padding: 30px 36px;
+    margin-bottom: 18px;
+    border-radius: 18px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 55%, #06b6d4 100%);
+    box-shadow: 0 12px 28px rgba(2, 132, 199, 0.22);
+    position: relative;
+    overflow: hidden;
+}
+.ocean-hero-banner::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    top: -80px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+}
+.ocean-hero-content { position: relative; z-index: 1; max-width: 580px; }
+.ocean-hero-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    margin-bottom: 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+.ocean-hero-title { font-size: 27px; font-weight: 800; line-height: 1.25; margin-bottom: 8px; }
+.ocean-hero-desc { font-size: 14.5px; line-height: 1.6; color: rgba(255, 255, 255, 0.9); }
+.ocean-hero-actions { position: relative; z-index: 1; flex-shrink: 0; }
+.btn-ocean-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 22px;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #0c4a6e;
+    font-size: 14.5px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 6px 16px rgba(12, 74, 110, 0.24);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.btn-ocean-cta:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(12, 74, 110, 0.32); }
+
+/* ================= THANH LỌC MẪU CV ================= */
+.filter-nav-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 14px;
+    margin-bottom: 22px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+.filter-pill {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #475569;
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.filter-pill:hover { border-color: #0284c7; color: #0284c7; background: #f0f9ff; }
+.filter-pill.active {
+    background: linear-gradient(135deg, #0c4a6e 0%, #0284c7 100%);
+    color: #ffffff;
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
+}
+
+/* ================= GRID 5 MẪU CV (3 CỘT) ================= */
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+.hidden-card { display: none !important; }
+
+.tpl-card {
+    --tpl-accent: #1e293b;
+    --tpl-soft: #f1f5f9;
+    background: #eef2f6;
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    border: 1px solid #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.tpl-card:hover { transform: translateY(-4px); box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12); }
+
+/* ================= BẢNG MÀU THEO TỪNG MẪU ================= */
+/* STANDARD: #1e293b, #475569, #1e3a8a, #450a0a */
+.tpl-card[data-code="STANDARD"].theme-c1 { --tpl-accent: #1e293b; --tpl-soft: #f1f5f9; }
+.tpl-card[data-code="STANDARD"].theme-c2 { --tpl-accent: #475569; --tpl-soft: #f1f5f9; }
+.tpl-card[data-code="STANDARD"].theme-c3 { --tpl-accent: #1e3a8a; --tpl-soft: #eff6ff; }
+.tpl-card[data-code="STANDARD"].theme-c4 { --tpl-accent: #450a0a; --tpl-soft: #fef2f2; }
+
+/* MINIMALIST: #1e40af, #065f46, #9f1239, #854d0e */
+.tpl-card[data-code="MINIMALIST"].theme-c1 { --tpl-accent: #1e40af; --tpl-soft: #dbeafe; }
+.tpl-card[data-code="MINIMALIST"].theme-c2 { --tpl-accent: #065f46; --tpl-soft: #d1fae5; }
+.tpl-card[data-code="MINIMALIST"].theme-c3 { --tpl-accent: #9f1239; --tpl-soft: #ffe4e6; }
+.tpl-card[data-code="MINIMALIST"].theme-c4 { --tpl-accent: #854d0e; --tpl-soft: #fef3c7; }
+
+/* CREATIVE: #be123c, #4338ca, #15803d, #d97706 */
+.tpl-card[data-code="CREATIVE"].theme-c1 { --tpl-accent: #be123c; --tpl-soft: #fff1f2; }
+.tpl-card[data-code="CREATIVE"].theme-c2 { --tpl-accent: #4338ca; --tpl-soft: #eef2ff; }
+.tpl-card[data-code="CREATIVE"].theme-c3 { --tpl-accent: #15803d; --tpl-soft: #f0fdf4; }
+.tpl-card[data-code="CREATIVE"].theme-c4 { --tpl-accent: #d97706; --tpl-soft: #fffbeb; }
+
+/* MODERN: #0f766e, #0284c7, #2563eb, #4f46e5 */
+.tpl-card[data-code="MODERN"].theme-c1 { --tpl-accent: #0f766e; --tpl-soft: #ccfbf1; }
+.tpl-card[data-code="MODERN"].theme-c2 { --tpl-accent: #0284c7; --tpl-soft: #e0f2fe; }
+.tpl-card[data-code="MODERN"].theme-c3 { --tpl-accent: #2563eb; --tpl-soft: #dbeafe; }
+.tpl-card[data-code="MODERN"].theme-c4 { --tpl-accent: #4f46e5; --tpl-soft: #e0e7ff; }
+
+/* ATS_FRIENDLY: #111827, #1e40af, #065f46, #7c2d12 */
+.tpl-card[data-code="ATS_FRIENDLY"].theme-c1 { --tpl-accent: #111827; --tpl-soft: #f3f4f6; }
+.tpl-card[data-code="ATS_FRIENDLY"].theme-c2 { --tpl-accent: #1e40af; --tpl-soft: #eff6ff; }
+.tpl-card[data-code="ATS_FRIENDLY"].theme-c3 { --tpl-accent: #065f46; --tpl-soft: #ecfdf5; }
+.tpl-card[data-code="ATS_FRIENDLY"].theme-c4 { --tpl-accent: #7c2d12; --tpl-soft: #fff7ed; }
+
+/* Màu cho các chấm tròn swatch */
+.swatch-c-1e293b { background: #1e293b; }
+.swatch-c-475569 { background: #475569; }
+.swatch-c-1e3a8a { background: #1e3a8a; }
+.swatch-c-450a0a { background: #450a0a; }
+.swatch-c-1e40af { background: #1e40af; }
+.swatch-c-065f46 { background: #065f46; }
+.swatch-c-9f1239 { background: #9f1239; }
+.swatch-c-854d0e { background: #854d0e; }
+.swatch-c-be123c { background: #be123c; }
+.swatch-c-4338ca { background: #4338ca; }
+.swatch-c-15803d { background: #15803d; }
+.swatch-c-d97706 { background: #d97706; }
+.swatch-c-0f766e { background: #0f766e; }
+.swatch-c-0284c7 { background: #0284c7; }
+.swatch-c-2563eb { background: #2563eb; }
+.swatch-c-4f46e5 { background: #4f46e5; }
+.swatch-c-111827 { background: #111827; }
+.swatch-c-7c2d12 { background: #7c2d12; }
+
+/* ================= KHUNG TỜ GIẤY A4 & OVERLAY ================= */
+.tpl-a4-stage {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+    background: #ffffff;
+}
+.tpl-a4-paper {
+    aspect-ratio: 210 / 297;
+    width: 100%;
+    background: #ffffff;
+    padding: 14px 14px 12px;
+    font-size: 7.5px;
+    line-height: 1.38;
+    color: #1e293b;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.tpl-sample-avatar { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.tpl-hover-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 74, 110, 0.72);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 18px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+.tpl-a4-stage:hover .tpl-hover-overlay { opacity: 1; pointer-events: auto; }
+
+.btn-overlay-primary,
+.btn-overlay-secondary {
+    width: 86%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.15s ease;
+}
+.btn-overlay-primary { background: #0284c7; color: #ffffff; border: 1.5px solid #38bdf8; box-shadow: 0 6px 14px rgba(2, 132, 199, 0.35); }
+.btn-overlay-secondary { background: #ffffff; color: #0c4a6e; border: 1.5px solid #ffffff; }
+.btn-overlay-primary:hover, .btn-overlay-secondary:hover { transform: scale(1.03); }
+
+/* ================= CHÂN THẺ MẪU CV (SWATCH + TÊN + TAG) ================= */
+.tpl-card-meta { padding-top: 12px; display: flex; flex-direction: column; gap: 8px; }
+.tpl-swatches { display: flex; align-items: center; gap: 7px; }
+.swatch-dot {
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #cbd5e1;
+    cursor: pointer;
+    position: relative;
+    padding: 0;
+    transition: transform 0.15s ease;
+}
+.swatch-dot:hover { transform: scale(1.14); }
+.swatch-dot.active { box-shadow: 0 0 0 2px #0284c7; }
+.swatch-dot.active::after {
+    content: "";
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+    background: #ffffff;
+}
+.tpl-card-name { font-size: 15px; font-weight: 700; color: #0f172a; }
+.tpl-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.tpl-tag { padding: 2px 8px; border-radius: 6px; background: #ffffff; border: 1px solid #cbd5e1; color: #475569; font-size: 11px; font-weight: 600; }
+
+/* =====================================================================
+   BỐ CỤC 5 MẪU CV TRONG TỜ GIẤY A4
+   ===================================================================== */
+
+/* ---------- 1. STANDARD (Tiêu chuẩn) ---------- */
+.std-head { display: flex; gap: 10px; padding-bottom: 8px; border-bottom: 2px solid var(--tpl-accent); margin-bottom: 7px; }
+.std-photo { width: 46px; height: 56px; flex-shrink: 0; border-radius: 4px; overflow: hidden; border: 1.5px solid var(--tpl-accent); }
+.std-head-info { flex: 1; min-width: 0; }
+.std-name { font-size: 11px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; letter-spacing: 0.02em; }
+.std-role { font-size: 8px; font-weight: 600; color: #475569; margin-bottom: 4px; }
+.std-contact { display: grid; grid-template-columns: 1fr 1fr; gap: 1px 6px; font-size: 6.8px; color: #334155; }
+.std-sec { margin-bottom: 6px; }
+.std-sec-title { font-size: 8px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; border-bottom: 1.5px solid var(--tpl-accent); padding-bottom: 2px; margin-bottom: 4px; }
+.std-row { display: grid; grid-template-columns: 54px 1fr; gap: 6px; margin-bottom: 4px; }
+.std-time { font-size: 6.8px; font-weight: 700; color: var(--tpl-accent); }
+.std-org { font-weight: 700; color: #0f172a; }
+.std-sub { font-size: 6.8px; color: #475569; }
+
+/* ---------- 2. MINIMALIST (Tiêu chuẩn - Ít kinh nghiệm) ---------- */
+.min-paper { padding: 0; }
+.min-top-banner { background: var(--tpl-soft); padding: 10px 12px 8px; display: flex; flex-direction: column; align-items: center; text-align: center; border-bottom: 2px solid var(--tpl-accent); }
+.min-avatar-circle { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 2px solid var(--tpl-accent); margin-bottom: 4px; }
+.min-name { font-size: 10.5px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; }
+.min-role { font-size: 7.5px; font-weight: 600; color: #334155; margin-bottom: 5px; }
+.min-contact-3col { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; font-size: 6.4px; color: #334155; border-top: 1px dashed rgba(15, 23, 42, 0.2); padding-top: 4px; }
+.min-body { padding: 8px 12px 10px; }
+.min-sec { margin-bottom: 6px; }
+.min-sec-title { text-align: center; font-size: 7.8px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 0; margin-bottom: 4px; border-top: 1px solid var(--tpl-accent); border-bottom: 1px solid var(--tpl-accent); }
+.min-item { margin-bottom: 4px; }
+.min-item-head { display: flex; justify-content: space-between; font-weight: 700; color: #0f172a; }
+.min-skills-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 10px; font-size: 7px; }
+.min-skill-pill { padding: 2px 5px; border-radius: 4px; background: var(--tpl-soft); color: var(--tpl-accent); font-weight: 700; text-align: center; }
+
+/* ---------- 3. CREATIVE (Thanh lịch) ---------- */
+.cre-top { display: flex; gap: 9px; align-items: stretch; margin-bottom: 7px; }
+.cre-photo { width: 44px; height: 56px; flex-shrink: 0; border-radius: 6px; overflow: hidden; border: 2px solid var(--tpl-accent); }
+.cre-summary-box { flex: 1; padding: 5px 8px; background: var(--tpl-soft); border-left: 3px solid var(--tpl-accent); border-radius: 0 6px 6px 0; }
+.cre-name { font-size: 10.5px; font-weight: 800; color: var(--tpl-accent); }
+.cre-role { font-size: 7.5px; font-weight: 600; color: #475569; margin-bottom: 2px; }
+.cre-summary { font-size: 6.7px; color: #334155; }
+.cre-3col-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 5px 0; margin-bottom: 6px; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; font-size: 6.6px; }
+.cre-col-box { background: #f8fafc; padding: 4px 5px; border-radius: 4px; }
+.cre-col-title { font-size: 7px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; margin-bottom: 2px; }
+.cre-sec-title { font-size: 8px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; margin-bottom: 4px; }
+.cre-timeline { border-left: 1.5px solid var(--tpl-accent); margin-left: 4px; padding-left: 8px; }
+.cre-timeline-item { position: relative; margin-bottom: 5px; }
+.cre-timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -11.5px;
+    top: 2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--tpl-accent);
+}
+.cre-tl-title { font-weight: 700; color: #0f172a; }
+.cre-tl-meta { font-size: 6.6px; color: var(--tpl-accent); font-weight: 600; }
+
+/* ---------- 4. MODERN (Hiện đại 2 cột) ---------- */
+.mod-a4-paper { padding: 0; flex-direction: row; }
+.mod-left-col { width: 36%; background: var(--tpl-soft); padding: 12px 8px; display: flex; flex-direction: column; gap: 7px; border-right: 1.5px solid var(--tpl-accent); }
+.mod-avatar-wrap { width: 46px; height: 46px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 2px solid var(--tpl-accent); }
+.mod-left-name { text-align: center; font-size: 9px; font-weight: 800; color: var(--tpl-accent); line-height: 1.2; }
+.mod-left-role { text-align: center; font-size: 6.8px; color: #334155; font-weight: 600; }
+.mod-side-sec { font-size: 6.6px; color: #1e293b; }
+.mod-side-heading { font-size: 7.2px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; margin-bottom: 3px; border-bottom: 1px solid var(--tpl-accent); padding-bottom: 1px; }
+.mod-skill-row { margin-bottom: 3px; }
+.mod-skill-bar { height: 4px; background: rgba(15, 23, 42, 0.14); border-radius: 999px; overflow: hidden; margin-top: 1px; }
+.mod-skill-bar-fill { height: 100%; background: var(--tpl-accent); border-radius: 999px; }
+.mod-w-90 { width: 90%; }
+.mod-w-85 { width: 85%; }
+.mod-w-80 { width: 80%; }
+
+.mod-right-col { width: 64%; padding: 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+.mod-main-sec { font-size: 7px; }
+.mod-main-heading { font-size: 7.8px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; padding-left: 5px; border-left: 2.5px solid var(--tpl-accent); margin-bottom: 3px; }
+.mod-exp-item { margin-bottom: 4px; }
+.mod-exp-title { font-weight: 700; color: #0f172a; }
+.mod-exp-time { font-size: 6.5px; color: #64748b; }
+
+/* ---------- 5. ATS_FRIENDLY (Chuẩn ATS) ---------- */
+.ats-top-center { text-align: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1.5px solid var(--tpl-accent); display: flex; flex-direction: column; align-items: center; }
+.ats-avatar { width: 34px; height: 34px; border-radius: 50%; overflow: hidden; border: 1.5px solid var(--tpl-accent); margin-bottom: 3px; }
+.ats-name { font-size: 10.5px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; letter-spacing: 0.05em; }
+.ats-role { font-size: 7.5px; font-weight: 600; color: #334155; }
+.ats-contact-line { font-size: 6.4px; color: #475569; margin-top: 2px; }
+.ats-sec { margin-bottom: 5px; }
+.ats-sec-title { font-size: 7.6px; font-weight: 800; color: var(--tpl-accent); text-transform: uppercase; border-bottom: 1px solid var(--tpl-accent); padding-bottom: 1px; margin-bottom: 3px; }
+.ats-split-line { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-weight: 700; color: #0f172a; }
+.ats-split-line span:last-child { font-size: 6.6px; font-weight: 600; color: var(--tpl-accent); white-space: nowrap; }
+.ats-sub { font-size: 6.8px; color: #334155; margin-bottom: 3px; }
+
+/* =====================================================================
+   TRANG BỘ TÙY BIẾN MẪU CV (customizer.html)
+   ===================================================================== */
+.customizer-grid { display: grid; grid-template-columns: 340px 1fr; gap: 22px; align-items: flex-start; }
+.customizer-panel { background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06); }
+.customizer-block-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #0c4a6e; margin-bottom: 8px; }
+.customizer-tpl-list { display: flex; flex-direction: column; gap: 6px; }
+.customizer-tpl-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 12px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+}
+.customizer-tpl-btn.active, .customizer-tpl-btn:hover { border-color: #0284c7; background: #e0f2fe; color: #0c4a6e; }
+.customizer-stage { background: #eef2f6; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; display: flex; justify-content: center; }
+.customizer-stage .tpl-card { width: 100%; max-width: 520px; padding: 0; background: transparent; border: none; box-shadow: none; }
+.customizer-stage .tpl-card:hover { transform: none; }
+.customizer-stage .tpl-a4-paper { font-size: 11px; padding: 24px; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 1080px) {
+    .templates-grid { grid-template-columns: repeat(2, 1fr); }
+    .customizer-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+    .templates-grid { grid-template-columns: 1fr; }
+    .ocean-hero-banner { flex-direction: column; align-items: flex-start; padding: 24px 20px; }
+}
