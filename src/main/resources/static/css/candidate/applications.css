@@ -378,4 +378,110 @@ a {
     .application-count {
         padding: 12px 16px;
     }
-}
+}.apply-again {
+     margin-top: 12px;
+     text-align: right;
+ }
+
+    .btn-apply-again {
+        background: #2563eb;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .btn-apply-again:hover {
+        background: #1d4ed8;
+    }/* LỊCH PHỎNG VẤN */
+    .interview-section {
+        margin-top: 22px;
+        padding-top: 18px;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .interview-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .interview-heading h3 {
+        margin: 0;
+        font-size: 18px;
+        color: #172033;
+    }
+
+    .interview-badge {
+        padding: 6px 13px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .interview-badge.pending {
+        background: #ffeadf;
+        color: #ea580c;
+    }
+
+    .interview-badge.booked {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .btn-choose-interview {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 13px;
+        border-radius: 30px;
+        background: #111;
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        box-sizing: border-box;
+        transition: 0.2s;
+    }
+
+    .btn-choose-interview:hover {
+        background: #2563eb;
+    }
+
+    .interview-description {
+        margin: 12px 0 0;
+        color: #777;
+        font-size: 14px;
+    }
+
+    .booked-interview {
+        padding: 15px 0 0;
+    }
+
+    .booked-interview h3 {
+        font-size: 17px;
+        margin-bottom: 15px;
+    }
+
+    .booked-interview ul {
+        padding-left: 25px;
+        line-height: 2;
+        color: #333;
+    }
+
+    .btn-booked {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 25px;
+        background: #eeeeee;
+        color: #888;
+        font-weight: 600;
+        cursor: not-allowed;
+    }
