@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Skill Matching | Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/recruiter/skill-match-detail.css}">
+</head>
+<body>
+<main class="match-page">
+    <a class="back-link" th:href="@{/recruiter/applications}">← Quay lại danh sách ứng viên</a>
+    <div class="match-card">
+        <p class="eyebrow">ĐÁNH GIÁ MỨC ĐỘ PHÙ HỢP KỸ NĂNG</p>
+        <h1 th:text="${applicationData.jobTitle}">Java Backend Developer</h1>
+        <p class="candidate" th:text="|Ứng viên: ${applicationData.candidateName} · Hồ sơ #${applicationData.applicationId}|">Ứng viên</p>
+        <section th:if="${matchPercentage != null}" class="score-section">
+            <div class="score-header">
+                <strong th:text="|${matchPercentage}%|">80%</strong>
+                <span th:text="|Đáp ứng ${matchedCount}/${requiredCount} kỹ năng bắt buộc|">4/5 kỹ năng</span>
+            </div>
+            <progress max="100" th:value="${matchPercentage}">80</progress>
+        </section>
+        <div th:unless="${matchPercentage != null}" class="empty-state">
+            Job này chưa khai báo kỹ năng bắt buộc, nên chưa thể đánh giá mức độ phù hợp.
+        </div>
+        <section th:if="${requiredCount > 0}" class="skill-columns">
+            <div>
+                <h2>✓ Kỹ năng đáp ứng <span th:text="|(${matchedCount})|">(4)</span></h2>
+                <ul class="skill-list">
+                    <li class="skill matched" th:each="skill : ${requiredSkills}"
+                        th:if="${skill.matched == 1}" th:text="${skill.skillName}">Java</li>
+                </ul>
+                <p class="no-skills" th:if="${matchedCount == 0}">Chưa có kỹ năng trùng khớp.</p>
+            </div>
+            <div>
+                <h2>✕ Kỹ năng còn thiếu <span th:text="|(${requiredCount - matchedCount})|">(1)</span></h2>
+                <ul class="skill-list">
+                    <li class="skill missing" th:each="skill : ${requiredSkills}"
+                        th:if="${skill.matched == 0}" th:text="${skill.skillName}">REST API</li>
+                </ul>
+                <p class="no-skills" th:if="${matchedCount == requiredCount}">Không thiếu kỹ năng nào.</p>
+            </div>
+        </section>
+        <p class="explanation">Điểm được tính bằng số kỹ năng bắt buộc trùng với CV chia cho tổng số kỹ năng bắt buộc của Job. Đây chỉ là chỉ số tham khảo, không tự động quyết định tuyển dụng.</p>
+    </div>
+</main>
+</body>
+</html>

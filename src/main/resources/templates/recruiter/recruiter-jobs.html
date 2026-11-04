@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quản lý tin tuyển dụng - Online Recruitment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/jobs.css}">
+
+    <style>
+        .alert {
+            margin: 16px 0 20px;
+            padding: 14px 18px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .alert-success {
+            color: #166534;
+            background-color: #dcfce7;
+            border: 1px solid #86efac;
+        }
+
+        .alert-error {
+            color: #991b1b;
+            background-color: #fee2e2;
+            border: 1px solid #fca5a5;
+        }
+
+        .row-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .row-actions form {
+            display: inline-flex;
+            margin: 0;
+        }
+
+        /* Nút đóng tin tuyển dụng - viền đỏ */
+        .btn-close-job {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 7px 12px;
+            border: 1px solid #ef4444;
+            border-radius: 8px;
+            background: #ffffff;
+            color: #dc2626;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.4;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background-color 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease,
+            box-shadow 0.2s ease;
+        }
+
+        .btn-close-job:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+            color: #b91c1c;
+            box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12);
+        }
+
+        .btn-close-job:focus-visible {
+            outline: 2px solid #f87171;
+            outline-offset: 2px;
+        }
+
+        .btn-close-job:active {
+            background: #fee2e2;
+        }
+
+        .reject-reason {
+            margin-top: 6px;
+            color: #b91c1c;
+            font-size: 12px;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .empty-state {
+            text-align: center;
+        }
+
+        .pagination a.active {
+            font-weight: 700;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Header -->
+<div th:replace="~{fragments :: header}"></div>
+
+<main class="wrap manage-page">
+
+    <!-- Tiêu đề trang -->
+    <div class="manage-head">
+        <div>
+            <h1>Quản lý tin tuyển dụng</h1>
+            <p>Các tin do bạn đăng, ở mọi trạng thái</p>
+        </div>
+
+        <a th:href="@{/recruiter/jobs/new}"
+           class="btn btn-primary btn-lg">
+            + Đăng tin mới
+        </a>
+    </div>
+
+    <!-- Thông báo thành công -->
+    <div class="alert alert-success"
+         th:if="${success != null}"
+         th:text="${success}"
+         role="status"
+         aria-live="polite">
+    </div>
+
+    <!-- Thông báo lỗi -->
+    <div class="alert alert-error"
+         th:if="${error != null}"
+         th:text="${error}"
+         role="alert">
+    </div>
+
+    <!-- Bộ lọc tin tuyển dụng -->
+    <form class="filter-bar"
+          th:action="@{/recruiter/jobs}"
+          method="get">
+
+        <input type="text"
+               name="keyword"
+               th:value="${keyword}"
+               placeholder="Tìm theo tiêu đề..."
+               aria-label="Tìm theo tiêu đề tin tuyển dụng">
+
+        <select name="status" aria-label="Lọc theo trạng thái">
+            <option value="">Tất cả trạng thái</option>
+
+            <option value="DRAFT"
+                    th:selected="${status == 'DRAFT'}">
+                Nháp
+            </option>
+
+            <option value="PENDING"
+                    th:selected="${status == 'PENDING'}">
+                Chờ duyệt
+            </option>
+
+            <option value="APPROVED"
+                    th:selected="${status == 'APPROVED'}">
+                Đang hiển thị
+            </option>
+
+            <option value="REJECTED"
+                    th:selected="${status == 'REJECTED'}">
+                Bị từ chối
+            </option>
+
+            <option value="CLOSED"
+                    th:selected="${status == 'CLOSED'}">
+                Đã đóng
+            </option>
+        </select>
+
+        <button type="submit" class="btn btn-outline">
+            Lọc
+        </button>
+
+        <a th:href="@{/recruiter/jobs}"
+           class="btn btn-outline">
+            Xóa bộ lọc
+        </a>
+    </form>
+
+    <!-- Bảng tin tuyển dụng -->
+    <div class="table-wrap"
+         th:if="${jobPage != null and !jobPage.empty}">
+
+        <table class="data-table">
+
+            <thead>
+            <tr>
+                <th>Tiêu đề</th>
+                <th>Địa điểm</th>
+                <th>Hạn nộp</th>
+                <th>Trạng thái</th>
+                <th>Ngày đăng</th>
+                <th>Thao tác</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="job : ${jobPage.content}">
+
+                <!-- Tiêu đề và cấp bậc -->
+                <td>
+                    <a class="row-title"
+                       th:href="@{/jobs/{id}(id=${job.id})}"
+                       th:text="${job.title}">
+                        Tiêu đề tin tuyển dụng
+                    </a>
+
+                    <div class="row-sub"
+                         th:text="${job.level}">
+                        Junior
+                    </div>
+                </td>
+
+                <!-- Địa điểm -->
+                <td th:text="${job.location != null and !#strings.isEmpty(job.location)
+                    ? job.location : '—'}">
+                    Hanoi
+                </td>
+
+                <!-- Hạn nộp -->
+                <td th:text="${job.deadline != null
+                    ? #temporals.format(job.deadline, 'dd/MM/yyyy')
+                    : '—'}">
+                    31/12/2026
+                </td>
+
+                <!-- Trạng thái -->
+                <td>
+                    <span class="status"
+                          th:classappend="'status-' + ${job.status}"
+                          th:switch="${job.status}">
+
+                        <span th:case="'DRAFT'">Nháp</span>
+                        <span th:case="'PENDING'">Chờ duyệt</span>
+                        <span th:case="'APPROVED'">Đang hiển thị</span>
+                        <span th:case="'REJECTED'">Bị từ chối</span>
+                        <span th:case="'CLOSED'">Đã đóng</span>
+
+                        <span th:case="*"
+                              th:text="${job.status}">
+                        </span>
+                    </span>
+
+                    <!-- Lý do từ chối -->
+                    <div class="reject-reason"
+                         th:if="${job.status == 'REJECTED'
+                             and job.rejectionReason != null
+                             and !#strings.isEmpty(job.rejectionReason)}"
+                         th:text="'Lý do: ' + ${job.rejectionReason}">
+                    </div>
+                </td>
+
+                <!-- Ngày tạo -->
+                <td th:text="${job.createdAt != null
+                    ? #temporals.format(job.createdAt, 'dd/MM/yyyy')
+                    : '—'}">
+                    01/10/2026
+                </td>
+
+                <!-- Các thao tác -->
+                <td>
+                    <div class="row-actions">
+
+                        <!-- Xem tin -->
+                        <a class="btn btn-outline btn-sm"
+                           th:href="@{/jobs/{id}(id=${job.id})}">
+                            Xem
+                        </a>
+
+                        <!-- Sửa tin: không hiển thị với tin đã đóng -->
+                        <a th:if="${job.status != 'CLOSED'}"
+                           class="btn btn-outline btn-sm"
+                           th:href="@{/recruiter/jobs/{id}/edit(id=${job.id})}">
+                            Sửa
+                        </a>
+
+                        <!-- Đóng tin: không hiển thị với tin đã đóng -->
+                        <form th:if="${job.status != 'CLOSED'}"
+                              th:action="@{/recruiter/jobs/{id}/close(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirm('Bạn có chắc muốn đóng tin này không? Tin sẽ ngừng hiển thị công khai.');">
+
+                            <!-- CSRF token -->
+                            <input type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+
+                            <button type="submit"
+                                    class="btn-close-job">
+                                Đóng tin
+                            </button>
+                        </form>
+
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+    <!-- Không có tin tuyển dụng -->
+    <div class="empty-state"
+         th:if="${jobPage == null or jobPage.empty}">
+
+        <div class="empty-icon">&#128196;</div>
+
+        <h3>Chưa có tin tuyển dụng nào</h3>
+
+        <p>
+            Hãy đăng tin đầu tiên để bắt đầu tiếp cận ứng viên.
+        </p>
+
+        <a th:href="@{/recruiter/jobs/new}"
+           class="btn btn-primary">
+            Đăng tin mới
+        </a>
+    </div>
+
+    <!-- Phân trang -->
+    <nav class="pagination"
+         th:if="${jobPage != null and jobPage.totalPages > 1}"
+         aria-label="Phân trang tin tuyển dụng">
+
+        <!-- Trang trước -->
+        <a th:if="${jobPage.hasPrevious()}"
+           th:href="@{/recruiter/jobs(
+                keyword=${keyword},
+                status=${status},
+                page=${jobPage.number - 1}
+           )}"
+           aria-label="Trang trước">
+            &laquo;
+        </a>
+
+        <!-- Các số trang -->
+        <a th:each="i : ${#numbers.sequence(0, jobPage.totalPages - 1)}"
+           th:href="@{/recruiter/jobs(
+                keyword=${keyword},
+                status=${status},
+                page=${i}
+           )}"
+           th:text="${i + 1}"
+           th:classappend="${i == jobPage.number} ? 'active' : ''"
+           th:attr="aria-current=${i == jobPage.number ? 'page' : null}">
+        </a>
+
+        <!-- Trang sau -->
+        <a th:if="${jobPage.hasNext()}"
+           th:href="@{/recruiter/jobs(
+                keyword=${keyword},
+                status=${status},
+                page=${jobPage.number + 1}
+           )}"
+           aria-label="Trang sau">
+            &raquo;
+        </a>
+
+    </nav>
+
+</main>
+
+<!-- Footer -->
+<div th:replace="~{fragments :: footer}"></div>
+
+</body>
+</html>

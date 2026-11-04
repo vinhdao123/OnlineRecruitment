@@ -1,0 +1,40 @@
+/* Dùng cùng sidebar / topbar Admin cho Job và Job Categories. */
+body.admin { margin: 0 !important; min-height: 100vh; background: #f4f6fb; }
+body.admin .main { margin-left: 240px; width: calc(100% - 240px); min-width: 0; padding: 0 30px 32px; }
+body.admin .sidebar { z-index: 100; }
+body.admin .topbar { position: relative; z-index: 5; }
+.admin-job-main .page-container { width: 100%; max-width: 1250px; margin: 0 auto; }
+.admin-job-main .main-content { padding-top: 6px; }
+.admin-job-main .review-banner { margin-bottom: 20px; }
+.admin-category-main .container { width: 100%; max-width: 1100px; margin: 0 auto; padding: 24px; background: #fff; border-radius: 14px; }
+.admin-category-main .container > h1 { margin-bottom: 20px; }
+.admin-category-main table { width: 100%; border-collapse: collapse; }
+.admin-category-main table th, .admin-category-main table td { padding: 12px; text-align: left; border-bottom: 1px solid #e5eaf2; }
+.admin-category-main .container input, .admin-category-main .container textarea, .admin-category-main .container select { max-width: 100%; }
+.admin-category-main .container .btn { background: #2563eb; color: white; }
+@media (max-width: 900px) { body.admin .main { margin-left: 0; width: 100%; padding: 0 16px 24px; } }
+
+/* Job Admin: sử dụng một cột nội dung duy nhất bên cạnh sidebar. */
+body.admin:has(.admin-job-main), body.admin:has(.admin-category-main) { display: block; }
+body.admin .admin-job-main, body.admin .admin-category-main {
+    display: block; margin-left: 260px; width: calc(100% - 260px);
+    max-width: none; min-width: 0; box-sizing: border-box;
+    padding: 0 28px 32px;
+}
+body.admin .admin-job-main .page-container { width: 100%; max-width: 1250px; }
+body.admin .admin-job-main .site-footer { display: none; }
+/* Trạng thái phải phân biệt được khi xem tất cả / đóng / chờ duyệt. */
+.admin-job-main .status-badge.status-pending { color: #a86500; background: #fff3db; border-color: #f8d79b; }
+.admin-job-main .status-badge.status-active { color: #086d47; background: #e0f7ec; border-color: #a6e5c7; }
+.admin-job-main .status-badge.status-closed { color: #526174; background: #e9eef5; border-color: #d0d9e5; }
+.admin-job-main .status-badge.status-rejected { color: #ba263b; background: #ffebee; border-color: #f8c2ca; }
+.admin-job-main .status-badge.status-draft { color: #4a61a1; background: #e9eeff; border-color: #c4d0fa; }
+.admin-job-main .status-badge.status-expired { color: #8d5313; background: #fff1df; border-color: #eccda4; }
+@media (max-width: 900px) {
+ body.admin .admin-job-main, body.admin .admin-category-main { margin-left: 0; width: 100%; padding: 0 16px 24px; }
+}
+
+/* Thông tin tin bị từ chối (chỉ hiển thị với trạng thái REJECTED). */
+.rejected-job-note { background: #fff7f7; border: 1px solid #f7caca; color: #7f1d1d; border-radius: 12px; padding: 16px; margin: 12px 0; }
+.rejected-job-note p { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rejected-job-note small { color: #6b4650; }

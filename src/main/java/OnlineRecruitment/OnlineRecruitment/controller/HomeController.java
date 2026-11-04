@@ -46,7 +46,7 @@ public class HomeController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    @GetMapping("/candidate/dashboard")
+    @GetMapping("/candidate/dashboard/overview")
     public String candidateDashboard(Model model) {
 
         Authentication authentication =

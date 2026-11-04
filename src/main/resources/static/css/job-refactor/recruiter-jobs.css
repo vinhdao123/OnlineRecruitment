@@ -1,0 +1,22 @@
+/* CSS chuyển từ recruiter/jobs.html (thẻ style) */
+.job-flash {
+            position: fixed;
+            z-index: 9999;
+            top: 88px;
+            right: 24px;
+            width: min(460px, calc(100vw - 32px));
+            padding: 16px 20px;
+            border: 1px solid;
+            border-radius: 12px;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, .14);
+            background: #fff;
+            font-family: Inter, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 600;
+        }
+        .job-flash-success { color: #133668; border-color: #82b1f3; background: #f0fdf4; }
+        .job-flash-error { color: #991b1b; border-color: #fca5a5; background: #fef2f2; }
+        @media (max-width: 600px) {
+            .job-flash { top: 16px; right: 16px; }
+        }

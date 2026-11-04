@@ -13,6 +13,12 @@ public class Skill {
     @Column(name = "name", length = 150, nullable = false)
     private String name;
 
+    // Kỹ năng thuộc ngành nghề nào (bảng job_categories).
+    // nullable=true để giữ tương thích dữ liệu kỹ năng cũ.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private JobCategory category;
+
     @Column(name = "status", length = 20, nullable = false)
     private String status;
 }
