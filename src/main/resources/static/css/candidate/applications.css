@@ -79,11 +79,9 @@ a {
     font-size: 25px;
     color: #2563eb;
 }
-
 /* =========================
    DANH SÁCH ĐƠN
 ========================= */
-
 .applications-list {
     display: flex;
     flex-direction: column;
