@@ -10,8 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.List;
 
 @Component
@@ -19,18 +20,37 @@ import java.util.List;
 @Slf4j
 public class DataInitializerService implements CommandLineRunner {
 
+    private final DataSource dataSource;
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final SkillTestRepository skillTestRepository;
     private final SkillTestQuestionRepository skillTestQuestionRepository;
 
     @Override
-    @Transactional
     public void run(String... args) {
+        migrateSkillTestsTable();
         try {
             seedInterviewQuestions();
+        } catch (Exception e) {
+            log.warn("Auto-seeding interview questions encountered notice: {}", e.getMessage());
+        }
+        try {
             seedSkillTests();
         } catch (Exception e) {
-            log.warn("Auto-seeding skill tests / interview questions encountered notice: {}", e.getMessage());
+            log.warn("Auto-seeding skill tests encountered notice: {}", e.getMessage());
+        }
+    }
+
+    private void migrateSkillTestsTable() {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement()) {
+            // Add updated_at column if missing (schema compatibility fix)
+            stmt.execute(
+                "IF NOT EXISTS (SELECT 1 FROM sys.columns " +
+                "WHERE object_id = OBJECT_ID('dbo.skill_tests') AND name = 'updated_at') " +
+                "ALTER TABLE dbo.skill_tests ADD updated_at DATETIME2 NULL");
+            log.info("skill_tests schema migration checked OK.");
+        } catch (Exception e) {
+            log.warn("skill_tests schema migration warning: {}", e.getMessage());
         }
     }
 
