@@ -84,36 +84,63 @@
                     Xem ứng viên chờ duyệt
                 </a>
             </div>
-
-            <!-- Card 5: Gói dịch vụ & Nâng cấp -->
-            <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fcd34d; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+            <!-- Card 5: Tạo lịch phỏng vấn cho ứng viên đã được duyệt -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #f59e0b; color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 3h12l4 6-10 12L2 9Z"/>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #ede9fe; color: #7c3aed; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+                            <path d="M16 2v4M8 2v4M3 10h18"></path>
+                            <path d="m9 16 2 2 4-4"></path>
                         </svg>
                     </div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #b45309;">Gói dịch vụ của bạn</h3>
 
-                    <!-- Kiểm tra xem có gói chưa (dùng biến currentUserPackage từ GlobalControllerAdvice) -->
-                    <div th:if="${currentUserPackage != null}">
-                        <p style="font-size: 14px; color: #92400e; margin: 0 0 20px 0; line-height: 1.5;">
-                            Bạn đang sử dụng gói <strong th:text="${currentUserPackage.servicePackage.name}"></strong>.<br>
-                            Hạn sử dụng: <strong th:text="${#temporals.format(currentUserPackage.endDate, 'dd/MM/yyyy')}"></strong>
-                        </p>
-                    </div>
-                    <div th:if="${currentUserPackage == null}">
-                        <p style="font-size: 14px; color: #92400e; margin: 0 0 20px 0; line-height: 1.5;">
-                            Bạn chưa có gói dịch vụ nào. Hãy nâng cấp để đăng tin và tiếp cận nhiều ứng viên hơn.
-                        </p>
-                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">
+                        Tạo lịch phỏng vấn
+                    </h3>
+
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">
+                        Thiết lập ngày và khung giờ phỏng vấn để những ứng viên đã được nhà tuyển dụng chấp nhận có thể lựa chọn và đặt lịch phỏng vấn.
+                    </p>
                 </div>
 
-                <a th:href="@{/pricing}" class="btn" style="background: #f59e0b; color: #fff; border: none; justify-content: center; font-weight: 600; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
-                    <i class="fas fa-crown" style="margin-right: 8px;"></i> Nâng cấp / Mua gói
+                <a th:href="@{/recruiter/interviews/availability}"
+                   class="btn btn-outline"
+                   style="justify-content: center;">
+                    Tạo lịch phỏng vấn
                 </a>
             </div>
 
+            <!-- Card 6: Xem lịch phỏng vấn đã đăng ký -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+                            <path d="M16 2v4M8 2v4M3 10h18"></path>
+                            <path d="M8 14h3M8 17h6"></path>
+                        </svg>
+                    </div>
+
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">
+                        Xem lịch phỏng vấn
+                    </h3>
+
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">
+                        Theo dõi danh sách ứng viên đã đăng ký phỏng vấn, xem CV và kiểm tra các khung giờ còn trống theo từng ngày.
+                    </p>
+                </div>
+
+                <a th:href="@{/recruiter/interviews}"
+                   class="btn btn-outline"
+                   style="justify-content: center;">
+                    Xem lịch phỏng vấn
+                </a>
+            </div>
         </div>
     </main>
 

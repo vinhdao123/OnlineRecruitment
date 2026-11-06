@@ -21,5 +21,6 @@ public class CvSummaryVm {
     private String templateName;
     private String avatarUrl;
     private Boolean isUploaded;
+    private String fileUrl;
 
 }

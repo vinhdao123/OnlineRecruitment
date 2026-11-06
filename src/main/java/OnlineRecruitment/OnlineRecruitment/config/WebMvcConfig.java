@@ -11,6 +11,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Cấu hình đường dẫn trỏ tới thư mục chứa ảnh upload trong static
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:src/main/resources/static/uploads/");
+                .addResourceLocations("file:uploads/", "file:src/main/resources/static/uploads/");
     }
 }

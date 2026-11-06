@@ -8,4 +8,7 @@ import java.util.List;
 @Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
     List<Skill> findByStatusOrderByNameAsc(String status);
+    List<Skill> findAllByOrderByNameAsc();
+    boolean existsByNameIgnoreCase(String name);
+    boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
 }

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Ngân hàng câu hỏi — ' + ${test.title})}"></head>
+<body class="admin">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main">
+
+  <div class="topbar">
+    <div>
+      <div class="breadcrumb" style="font-size:13px; color:#8895a8; margin-bottom:4px;">
+        <a th:href="@{/admin/skill-tests}">Đề thi kỹ năng</a>
+        <span>›</span>
+        <b th:text="${test.skillName}">Java</b>
+        <span>›</span>
+        <span>Ngân hàng câu hỏi (Question Pool)</span>
+      </div>
+      <h1 style="font-size:22px; font-weight:800; color:#1a2b4a;" th:text="'Ngân hàng câu hỏi: ' + ${test.title}">
+        Ngân hàng câu hỏi
+      </h1>
+    </div>
+    <div class="topbar-actions">
+      <a th:href="@{/admin/skill-tests}" class="btn btn-secondary">← Quay lại danh sách đề thi</a>
+    </div>
+  </div>
+
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+
+  <!-- STATS BANNER -->
+  <div style="background:#fff; border-radius:12px; border:1px solid #e5eaf2; padding:20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div>
+      <div style="font-size:13px; color:#8895a8;">Cơ chế thi:</div>
+      <div style="font-size:15px; color:#1a2b4a; font-weight:700; margin-top:2px;">
+        Mỗi ứng viên khi vào thi sẽ được hệ thống bốc <span style="color:#00b14f;" th:text="${test.totalQuestionsPerTest}">10</span> câu ngẫu nhiên từ ngân hàng <span style="color:#2563eb;" th:text="${questions.size()}">20</span> câu hỏi bên dưới.
+      </div>
+    </div>
+    <button type="button" class="btn btn-primary" onclick="openAddModal()">
+      + Thêm câu hỏi vào Pool
+    </button>
+  </div>
+
+  <!-- QUESTION LIST -->
+  <div class="table-wrap">
+    <table class="data">
+      <thead>
+      <tr>
+        <th style="width: 50px;">STT</th>
+        <th>Nội dung câu hỏi trắc nghiệm</th>
+        <th>Các phương án (A, B, C, D)</th>
+        <th style="width: 100px;">Đáp án đúng</th>
+        <th style="width: 140px; text-align:right;">Thao tác</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="q, stat : ${questions}">
+        <td th:text="${stat.index + 1}">1</td>
+        <td style="max-width:350px;">
+          <b th:text="${q.questionText}">Nội dung câu hỏi?</b>
+          <div style="font-size:12px; color:#64748b; margin-top:4px;" th:if="${q.explanation != null and !#strings.isEmpty(q.explanation)}">
+            💡 Giải thích: <span th:text="${#strings.abbreviate(q.explanation, 90)}">Giải thích...</span>
+          </div>
+        </td>
+        <td style="font-size:13px;">
+          <div><b th:style="${q.correctOption == 'A' ? 'color:#00b14f;' : ''}">A.</b> <span th:text="${q.optionA}">Option A</span></div>
+          <div><b th:style="${q.correctOption == 'B' ? 'color:#00b14f;' : ''}">B.</b> <span th:text="${q.optionB}">Option B</span></div>
+          <div><b th:style="${q.correctOption == 'C' ? 'color:#00b14f;' : ''}">C.</b> <span th:text="${q.optionC}">Option C</span></div>
+          <div><b th:style="${q.correctOption == 'D' ? 'color:#00b14f;' : ''}">D.</b> <span th:text="${q.optionD}">Option D</span></div>
+        </td>
+        <td>
+          <span class="badge badge-active" style="font-weight:800; font-size:13px;" th:text="'Đáp án ' + ${q.correctOption}">Đáp án A</span>
+        </td>
+        <td style="text-align:right; white-space:nowrap;">
+          <button type="button" class="btn btn-secondary" style="font-size:12px; padding:4px 8px;"
+                  th:data-id="${q.id}"
+                  th:data-text="${q.questionText}"
+                  th:data-a="${q.optionA}"
+                  th:data-b="${q.optionB}"
+                  th:data-c="${q.optionC}"
+                  th:data-d="${q.optionD}"
+                  th:data-correct="${q.correctOption}"
+                  th:data-exp="${q.explanation}"
+                  onclick="openEditModal(this)">
+            Sửa
+          </button>
+          <form th:action="@{'/admin/skill-tests/' + ${test.id} + '/questions/' + ${q.id} + '/delete'}" method="post" style="display:inline;"
+                onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này khỏi ngân hàng?')">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn btn-danger" style="font-size:12px; padding:4px 8px;">
+              Xóa
+            </button>
+          </form>
+        </td>
+      </tr>
+      <tr th:if="${questions.isEmpty()}">
+        <td colspan="5" style="text-align:center; color:#8895a8; padding: 40px;">
+          Ngân hàng đề thi này chưa có câu hỏi nào. Nhấn "+ Thêm câu hỏi vào Pool" để bắt đầu tạo.
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ADD QUESTION MODAL -->
+<div id="addModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px); overflow-y:auto;">
+  <div style="background:#fff; width:620px; max-width:92%; margin:40px auto; padding:28px; border-radius:14px; box-shadow:0 15px 35px rgba(0,0,0,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #e5eaf2;">
+      <h3 style="font-size:18px; font-weight:800; color:#1a2b4a; margin:0;">+ Thêm câu hỏi mới vào Pool</h3>
+      <span onclick="document.getElementById('addModal').style.display='none'" style="cursor:pointer; font-size:24px; color:#94a3b8;">&times;</span>
+    </div>
+
+    <form th:action="@{'/admin/skill-tests/' + ${test.id} + '/questions/create'}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Nội dung câu hỏi <span style="color:#ef4444;">*</span></label>
+        <textarea name="questionText" rows="3" required
+                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;"
+                  placeholder="Nhập nội dung câu hỏi trắc nghiệm..."></textarea>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án A <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="optionA" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án B <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="optionB" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án C <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="optionC" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án D <span style="color:#ef4444;">*</span></label>
+          <input type="text" name="optionD" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Đáp án đúng <span style="color:#ef4444;">*</span></label>
+        <select name="correctOption" style="width:100%; box-sizing:border-box; padding:10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:14px; font-weight:700;">
+          <option value="A">Phương án A</option>
+          <option value="B">Phương án B</option>
+          <option value="C">Phương án C</option>
+          <option value="D">Phương án D</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Giải thích đáp án chi tiết (Hiển thị sau khi ứng viên nộp bài)</label>
+        <textarea name="explanation" rows="2"
+                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:13.5px; font-family:inherit;"
+                  placeholder="Giải thích vì sao đáp án này đúng để giúp ứng viên học hỏi..."></textarea>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addModal').style.display='none'">Hủy bỏ</button>
+        <button type="submit" class="btn btn-primary" style="font-weight:700;">Lưu câu hỏi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- EDIT QUESTION MODAL -->
+<div id="editModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px); overflow-y:auto;">
+  <div style="background:#fff; width:620px; max-width:92%; margin:40px auto; padding:28px; border-radius:14px; box-shadow:0 15px 35px rgba(0,0,0,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #e5eaf2;">
+      <h3 style="font-size:18px; font-weight:800; color:#1a2b4a; margin:0;">Chỉnh sửa câu hỏi</h3>
+      <span onclick="document.getElementById('editModal').style.display='none'" style="cursor:pointer; font-size:24px; color:#94a3b8;">&times;</span>
+    </div>
+
+    <form id="editQuestionForm" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Nội dung câu hỏi <span style="color:#ef4444;">*</span></label>
+        <textarea id="editQuestionText" name="questionText" rows="3" required
+                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;"></textarea>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án A <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="editOptionA" name="optionA" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án B <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="editOptionB" name="optionB" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án C <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="editOptionC" name="optionC" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+        <div>
+          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án D <span style="color:#ef4444;">*</span></label>
+          <input type="text" id="editOptionD" name="optionD" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Đáp án đúng <span style="color:#ef4444;">*</span></label>
+        <select id="editCorrectOption" name="correctOption" style="width:100%; box-sizing:border-box; padding:10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:14px; font-weight:700;">
+          <option value="A">Phương án A</option>
+          <option value="B">Phương án B</option>
+          <option value="C">Phương án C</option>
+          <option value="D">Phương án D</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:18px;">
+        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Giải thích đáp án chi tiết</label>
+        <textarea id="editExplanation" name="explanation" rows="2"
+                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:13.5px; font-family:inherit;"></textarea>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px;">
+        <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Hủy bỏ</button>
+        <button type="submit" class="btn btn-primary" style="font-weight:700;">Cập nhật câu hỏi</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  const testId = /*[[${test.id}]]*/ 0;
+
+  function openAddModal() {
+    document.getElementById('addModal').style.display = 'block';
+  }
+
+  function openEditModal(btn) {
+    const qId = btn.getAttribute('data-id');
+    document.getElementById('editQuestionForm').action = '/admin/skill-tests/' + testId + '/questions/' + qId + '/edit';
+    document.getElementById('editQuestionText').value = btn.getAttribute('data-text');
+    document.getElementById('editOptionA').value = btn.getAttribute('data-a');
+    document.getElementById('editOptionB').value = btn.getAttribute('data-b');
+    document.getElementById('editOptionC').value = btn.getAttribute('data-c');
+    document.getElementById('editOptionD').value = btn.getAttribute('data-d');
+    document.getElementById('editCorrectOption').value = btn.getAttribute('data-correct');
+    document.getElementById('editExplanation').value = btn.getAttribute('data-exp') || '';
+    document.getElementById('editModal').style.display = 'block';
+  }
+</script>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

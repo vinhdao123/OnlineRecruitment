@@ -70,8 +70,8 @@
 
         <!-- Logo công ty, không có logo thì hiện chữ cái đầu của tiêu đề -->
         <div class="job-logo">
-            <img th:if="${job.logoUrl != null or (job.company != null and job.company.logoUrl != null)}"
-                 th:src="${job.logoUrl != null and !#strings.isEmpty(job.logoUrl) ? job.logoUrl : (job.company != null ? job.company.logoUrl : null)}"
+            <img th:if="${job.company != null and job.company.logoUrl != null and !#strings.isEmpty(job.company.logoUrl)}"
+                 th:src="${job.company.logoUrl}"
                  th:alt="${job.title}"
                  onerror="this.style.display='none'">
             <span th:text="${#strings.toUpperCase(#strings.substring(job.title, 0, 1))}">J</span>
@@ -125,6 +125,7 @@
             <span th:case="'ACTIVE'">Đang hiển thị</span>
             <span th:case="'REJECTED'">Bị từ chối</span>
             <span th:case="'CLOSED'">Đã đóng</span>
+                        <span th:case="'EXPIRED'">Quá hạn</span>
             <span th:case="*" th:text="${job.status}"></span>
         </span>
     </section>
@@ -264,7 +265,7 @@
                     <th:block th:if="${isOwner}">
 
                         <!-- Sửa: mọi tin chưa đóng (sửa tin đang chạy sẽ gửi lại Admin duyệt) -->
-                        <a th:if="${job.status.name() != 'CLOSED'}"
+                        <a th:if="${job.status.name() != 'CLOSED' and job.status.name() != 'EXPIRED'}"
                            class="btn btn-outline btn-block"
                            th:href="@{/recruiter/jobs/{id}/edit(id=${job.id})}">
                             Sửa tin
@@ -299,16 +300,16 @@
                         </form>
 
                         <!-- Tin đã đóng: có thể mở lại -->
-                        <form th:if="${job.status.name() == 'CLOSED'}"
+                        <form th:if="${job.status.name() == 'CLOSED' or job.status.name() == 'EXPIRED'}"
                               th:action="@{/recruiter/jobs/{id}/reopen(id=${job.id})}"
                               method="post"
-                              onsubmit="return confirm('Bạn có muốn mở lại tin này không?');">
+                              onsubmit="return confirm('Chuyển tin về nháp để cập nhật hạn và gửi duyệt lại?');">
                             <input type="hidden"
                                    th:if="${_csrf != null}"
                                    th:name="${_csrf.parameterName}"
                                    th:value="${_csrf.token}">
                             <button type="submit" class="btn btn-primary btn-block">
-                                Mở tin
+                                Soạn đăng lại
                             </button>
                         </form>
                     </th:block>

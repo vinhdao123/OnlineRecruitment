@@ -89,7 +89,8 @@ public class ApplicationSubmitController {
                     SELECT j.id, j.company_id, c.recruiter_id
                     FROM dbo.jobs j
                     JOIN dbo.companies c ON c.id = j.company_id
-                    WHERE j.id = ?
+                    WHERE j.id = ? AND j.status = 'ACTIVE' AND c.status = 'ACTIVE'
+                      AND (j.deadline IS NULL OR j.deadline >= CAST(GETDATE() AS date))
                     """,
                     jobId
             );

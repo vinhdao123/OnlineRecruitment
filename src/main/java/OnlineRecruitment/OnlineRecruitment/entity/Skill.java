@@ -13,6 +13,17 @@ public class Skill {
     @Column(name = "name", length = 150, nullable = false)
     private String name;
 
+    // Giữ nullable để các kỹ năng cũ chưa phân loại tiếp tục dùng được trong CV.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private JobCategory category;
+
+    public Skill(Long id, String name, String status) {
+        this.id = id;
+        this.name = name;
+        this.status = status;
+    }
+
     @Column(name = "status", length = 20, nullable = false)
     private String status;
 }

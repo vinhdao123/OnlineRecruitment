@@ -122,6 +122,9 @@
                 <span>Duyệt tin</span>
             </a>
 
+            <a th:if="${activePage == 'admin'}" th:href="@{/admin/categories}">Danh mục</a>
+            <a th:if="${activePage == 'admin'}" th:href="@{/admin/skills}">Kỹ năng</a>
+
         </nav>
     </div>
 </header>

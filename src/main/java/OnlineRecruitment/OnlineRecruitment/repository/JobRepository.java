@@ -17,6 +17,15 @@ import java.util.Optional;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT j FROM Job j WHERE j.id = :id")
+    Optional<Job> findByIdForUpdate(@Param("id") Long id);
+
+    @org.springframework.data.jpa.repository.Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Job j SET j.status = OnlineRecruitment.OnlineRecruitment.entity.JobStatus.EXPIRED, j.updatedAt = CURRENT_TIMESTAMP WHERE j.status = OnlineRecruitment.OnlineRecruitment.entity.JobStatus.ACTIVE AND j.deadline < :today")
+    int expireActiveJobs(@Param("today") LocalDate today);
+
+
     // ================= SẮP XẾP =================
 
     List<Job> findAllByOrderByCreatedAtDesc();

@@ -60,8 +60,7 @@
                     Thay đổi mật khẩu
                 </a>
             </div>
-            ```html
-            <!-- Card 4: Việc làm đã ứng tuyển -->
+                        <!-- Card 4: Việc làm đã ứng tuyển -->
             <div style="background: #ffffff; border: 1px solid #e5e7eb;
             border-radius: 16px; padding: 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -99,7 +98,40 @@
                     Xem đơn ứng tuyển
                 </a>
             </div>
-            ```
+                    
+            <!-- Card 5: Cẩm nang phỏng vấn -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #fdf2f8; color: #db2777; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Cẩm nang phỏng vấn</h3>
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Bộ câu hỏi phỏng vấn chuẩn theo từng ngành nghề, phân tích ý đồ nhà tuyển dụng và gợi ý câu trả lời ghi điểm.</p>
+                </div>
+                <a th:href="@{/interview-questions}" class="btn btn-outline" style="justify-content: center;">
+                    Khám phá câu hỏi phỏng vấn
+                </a>
+            </div>
+
+            <!-- Card 6: Đánh giá kỹ năng chuyên môn -->
+            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #f0fdf4; color: #16a34a; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Đánh giá kỹ năng</h3>
+                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Tham gia các bài test trắc nghiệm chuyên môn ngẫu nhiên từ ngân hàng câu hỏi để khẳng định năng lực và nhận kết quả chi tiết.</p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a th:href="@{/skill-tests}" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                        Làm bài test
+                    </a>
+                    <a th:href="@{/candidate/skill-tests/history}" class="btn btn-outline" style="justify-content: center;" title="Xem lịch sử làm bài">
+                        Lịch sử
+                    </a>
+                </div>
+            </div>
+
         </div>
     </main>
 

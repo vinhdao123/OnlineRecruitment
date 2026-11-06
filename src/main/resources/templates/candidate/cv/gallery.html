@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện mẫu CV — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-gallery.css}">
+</head>
+<body>
+
+<!-- ================= TASKBAR ================= -->
+<div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
+
+<!-- ================= LAYOUT CHÍNH ================= -->
+<div class="cv-dashboard-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="cv-sidebar">
+        <div class="cv-sidebar-menu">
+            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                My CV
+            </a>
+            <a th:href="@{/candidate/cvs/gallery}" class="cv-sidebar-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                Template CV
+            </a>
+        </div>
+    </aside>
+
+    <!-- ================= NỘI DUNG CHÍNH ================= -->
+    <main class="main-content">
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb-nav">
+            <a th:href="@{/}">Trang chủ</a>
+            <span>/</span>
+            <span class="breadcrumb-active">Thư viện mẫu CV</span>
+        </div>
+
+        <!-- Banner Ocean Blue -->
+        <section class="ocean-hero-banner">
+            <div class="ocean-hero-content">
+                <span class="ocean-hero-badge">✨ THƯ VIỆN MẪU CV CHUẨN TUYỂN DỤNG</span>
+                <h1 class="ocean-hero-title">Chọn mẫu CV chuyên nghiệp, gây ấn tượng ngay từ ánh nhìn đầu tiên</h1>
+                <p class="ocean-hero-desc">5 bố cục tối ưu cho từng giai đoạn sự nghiệp — từ sinh viên mới ra trường đến chuyên gia nhiều năm kinh nghiệm, hỗ trợ đổi màu tức thì và tương thích hệ thống lọc hồ sơ ATS.</p>
+            </div>
+            <div class="ocean-hero-actions">
+                <a th:href="@{/candidate/cvs/customizer}" class="btn-ocean-cta">🎨 Mở Bộ Tùy Biến Ngay →</a>
+            </div>
+        </section>
+
+        <!-- Thanh lọc mẫu CV -->
+        <div class="filter-nav-bar">
+            <button type="button" class="filter-pill active" onclick="filterGallery('ALL', this)">Tất cả mẫu CV (5)</button>
+            <button type="button" class="filter-pill" onclick="filterGallery('STANDARD', this)">Tiêu chuẩn</button>
+            <button type="button" class="filter-pill" onclick="filterGallery('MINIMALIST', this)">Tiêu chuẩn (Ít kinh nghiệm)</button>
+            <button type="button" class="filter-pill" onclick="filterGallery('CREATIVE', this)">Thanh lịch</button>
+            <button type="button" class="filter-pill" onclick="filterGallery('MODERN', this)">Hiện đại (2 cột)</button>
+            <button type="button" class="filter-pill" onclick="filterGallery('ATS_FRIENDLY', this)">Chuẩn ATS</button>
+        </div>
+
+        <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
+
+        <!-- ================= GRID 5 MẪU CV ================= -->
+        <div class="templates-grid">
+            <div th:each="tpl : ${templates}" class="tpl-card theme-c1" th:attr="data-code=${tpl.code}">
+
+                <!-- Khung tờ giấy A4 -->
+                <div class="tpl-a4-stage">
+
+                    <!-- ============ MẪU 1: STANDARD (Tiêu chuẩn) ============ -->
+                    <div th:if="${tpl.code == 'STANDARD'}" class="tpl-a4-paper">
+                        <div class="std-head">
+                            <div class="std-photo">
+                                <img th:src="@{/images/cv-sample-avatar.jpg}" src="/images/cv-sample-avatar.jpg" alt="Lê Quang Dũng" class="tpl-sample-avatar">
+                            </div>
+                            <div class="std-head-info">
+                                <div class="std-name">Lê Quang Dũng</div>
+                                <div class="std-role">Business Development Executive</div>
+                                <div class="std-contact">
+                                    <span>📅 08/12/1998</span>
+                                    <span>📞 0123 456 789</span>
+                                    <span>✉️ quangdung@email.vn</span>
+                                    <span>📍 Hoàng Mai, Hà Nội</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="std-sec">
+                            <div class="std-sec-title">Mục tiêu nghề nghiệp</div>
+                            <div>Phát triển sự nghiệp trong lĩnh vực Phát triển Kinh doanh B2B, đóng góp tăng trưởng doanh thu bền vững và mở rộng mạng lưới đối tác chiến lược cho doanh nghiệp.</div>
+                        </div>
+
+                        <div class="std-sec">
+                            <div class="std-sec-title">Học vấn</div>
+                            <div class="std-row">
+                                <div class="std-time">2016 - 2020</div>
+                                <div>
+                                    <div class="std-org">Đại học Ngoại Thương</div>
+                                    <div class="std-sub">Cử nhân Quản trị Kinh doanh — GPA: 3.7/4.0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="std-sec">
+                            <div class="std-sec-title">Kinh nghiệm làm việc</div>
+                            <div class="std-row">
+                                <div class="std-time">2022 - Nay</div>
+                                <div>
+                                    <div class="std-org">Công ty TNHH Giải pháp ABC</div>
+                                    <div class="std-sub">Business Development Executive — Mở rộng 35+ khách hàng doanh nghiệp, đạt 125% KPI doanh số năm.</div>
+                                </div>
+                            </div>
+                            <div class="std-row">
+                                <div class="std-time">2020 - 2022</div>
+                                <div>
+                                    <div class="std-org">Công ty Cổ phần Thương mại XYZ</div>
+                                    <div class="std-sub">Chuyên viên Kinh doanh — Tư vấn giải pháp và chăm sóc khách hàng trọng điểm.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="std-sec">
+                            <div class="std-sec-title">Kỹ năng</div>
+                            <div>Đàm phán B2B • Quản trị CRM • IELTS 7.0</div>
+                        </div>
+                    </div>
+
+                    <!-- ============ MẪU 2: MINIMALIST (Tiêu chuẩn - Ít kinh nghiệm) ============ -->
+                    <div th:if="${tpl.code == 'MINIMALIST'}" class="tpl-a4-paper min-paper">
+                        <div class="min-top-banner">
+                            <div class="min-avatar-circle">
+                                <img th:src="@{/images/cv-sample-avatar.jpg}" src="/images/cv-sample-avatar.jpg" alt="Lê Quang Dũng" class="tpl-sample-avatar">
+                            </div>
+                            <div class="min-name">Lê Quang Dũng</div>
+                            <div class="min-role">Business Development Executive</div>
+                            <div class="min-contact-3col">
+                                <span>📞 0123 456 789</span>
+                                <span>✉️ quangdung@email.vn</span>
+                                <span>📍 Hoàng Mai, Hà Nội</span>
+                            </div>
+                        </div>
+
+                        <div class="min-body">
+                            <div class="min-sec">
+                                <div class="min-sec-title">Học vấn</div>
+                                <div class="min-item">
+                                    <div class="min-item-head">
+                                        <span>Đại học Ngoại Thương</span>
+                                        <span>2016 - 2020</span>
+                                    </div>
+                                    <div>Quản trị Kinh doanh (GPA: 3.7/4.0) — Sinh viên: 08/12/1998</div>
+                                </div>
+                            </div>
+
+                            <div class="min-sec">
+                                <div class="min-sec-title">Kinh nghiệm làm việc</div>
+                                <div class="min-item">
+                                    <div class="min-item-head">
+                                        <span>Công ty TNHH Giải pháp ABC</span>
+                                        <span>2022 - Nay</span>
+                                    </div>
+                                    <div>Business Development Executive — Tìm kiếm, đàm phán và ký kết hợp đồng B2B.</div>
+                                </div>
+                                <div class="min-item">
+                                    <div class="min-item-head">
+                                        <span>Công ty Cổ phần Thương mại XYZ</span>
+                                        <span>2020 - 2022</span>
+                                    </div>
+                                    <div>Chuyên viên Kinh doanh — Phát triển kênh khách hàng doanh nghiệp vừa và nhỏ.</div>
+                                </div>
+                            </div>
+
+                            <div class="min-sec">
+                                <div class="min-sec-title">Kỹ năng</div>
+                                <div class="min-skills-2col">
+                                    <span class="min-skill-pill">Đàm phán B2B</span>
+                                    <span class="min-skill-pill">Quản trị CRM</span>
+                                    <span class="min-skill-pill">IELTS 7.0</span>
+                                    <span class="min-skill-pill">Phân tích thị trường</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ MẪU 3: CREATIVE (Thanh lịch) ============ -->
+                    <div th:if="${tpl.code == 'CREATIVE'}" class="tpl-a4-paper">
+                        <div class="cre-top">
+                            <div class="cre-photo">
+                                <img th:src="@{/images/cv-sample-avatar.jpg}" src="/images/cv-sample-avatar.jpg" alt="Lê Quang Dũng" class="tpl-sample-avatar">
+                            </div>
+                            <div class="cre-summary-box">
+                                <div class="cre-name">Lê Quang Dũng</div>
+                                <div class="cre-role">Business Development Executive</div>
+                                <div class="cre-summary">Chuyên viên Phát triển Kinh doanh định hướng dữ liệu, thế mạnh xây dựng quan hệ đối tác B2B và tối ưu phễu chuyển đổi.</div>
+                            </div>
+                        </div>
+
+                        <div class="cre-3col-row">
+                            <div class="cre-col-box">
+                                <div class="cre-col-title">Cá nhân</div>
+                                <div>08/12/1998</div>
+                                <div>0123 456 789</div>
+                                <div>quangdung@email.vn</div>
+                                <div>Hoàng Mai, Hà Nội</div>
+                            </div>
+                            <div class="cre-col-box">
+                                <div class="cre-col-title">Học vấn</div>
+                                <div><strong>ĐH Ngoại Thương</strong></div>
+                                <div>Quản trị Kinh doanh</div>
+                                <div>GPA: 3.7/4.0</div>
+                            </div>
+                            <div class="cre-col-box">
+                                <div class="cre-col-title">Kỹ năng</div>
+                                <div>• Đàm phán B2B</div>
+                                <div>• Quản trị CRM</div>
+                                <div>• IELTS 7.0</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="cre-sec-title">Kinh nghiệm làm việc</div>
+                            <div class="cre-timeline">
+                                <div class="cre-timeline-item">
+                                    <div class="cre-tl-title">Công ty TNHH Giải pháp ABC — Business Development Executive</div>
+                                    <div class="cre-tl-meta">2022 - Hiện tại</div>
+                                    <div>Chủ trì đàm phán hợp đồng khách hàng doanh nghiệp, tăng trưởng doanh thu vùng 125%.</div>
+                                </div>
+                                <div class="cre-timeline-item">
+                                    <div class="cre-tl-title">Công ty Cổ phần Thương mại XYZ — Chuyên viên Kinh doanh</div>
+                                    <div class="cre-tl-meta">2020 - 2022</div>
+                                    <div>Khai thác khách hàng mới và duy trì tỷ lệ gia hạn hợp đồng trên 90%.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ MẪU 4: MODERN (Hiện đại 2 cột) ============ -->
+                    <div th:if="${tpl.code == 'MODERN'}" class="tpl-a4-paper mod-a4-paper">
+                        <div class="mod-left-col">
+                            <div class="mod-avatar-wrap">
+                                <img th:src="@{/images/cv-sample-avatar.jpg}" src="/images/cv-sample-avatar.jpg" alt="Lê Quang Dũng" class="tpl-sample-avatar">
+                            </div>
+                            <div>
+                                <div class="mod-left-name">Lê Quang Dũng</div>
+                                <div class="mod-left-role">Business Development Executive</div>
+                            </div>
+
+                            <div class="mod-side-sec">
+                                <div class="mod-side-heading">Liên hệ</div>
+                                <div>📅 08/12/1998</div>
+                                <div>📞 0123 456 789</div>
+                                <div>✉️ quangdung@email.vn</div>
+                                <div>📍 Hoàng Mai, Hà Nội</div>
+                            </div>
+
+                            <div class="mod-side-sec">
+                                <div class="mod-side-heading">Kỹ năng</div>
+                                <div class="mod-skill-row">
+                                    <div>Đàm phán B2B</div>
+                                    <div class="mod-skill-bar"><div class="mod-skill-bar-fill mod-w-90"></div></div>
+                                </div>
+                                <div class="mod-skill-row">
+                                    <div>Quản trị CRM</div>
+                                    <div class="mod-skill-bar"><div class="mod-skill-bar-fill mod-w-85"></div></div>
+                                </div>
+                                <div class="mod-skill-row">
+                                    <div>IELTS 7.0</div>
+                                    <div class="mod-skill-bar"><div class="mod-skill-bar-fill mod-w-80"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mod-right-col">
+                            <div class="mod-main-sec">
+                                <div class="mod-main-heading">Học vấn</div>
+                                <div class="mod-exp-title">Đại học Ngoại Thương</div>
+                                <div class="mod-exp-time">2016 - 2020 | GPA: 3.7/4.0</div>
+                                <div>Cử nhân Quản trị Kinh doanh</div>
+                            </div>
+
+                            <div class="mod-main-sec">
+                                <div class="mod-main-heading">Kinh nghiệm làm việc</div>
+                                <div class="mod-exp-item">
+                                    <div class="mod-exp-title">Công ty TNHH Giải pháp ABC</div>
+                                    <div class="mod-exp-time">Business Development Executive • 2022 - Nay</div>
+                                    <div>Phát triển đối tác chiến lược B2B, quản lý pipeline trên CRM.</div>
+                                </div>
+                                <div class="mod-exp-item">
+                                    <div class="mod-exp-title">Công ty Cổ phần Thương mại XYZ</div>
+                                    <div class="mod-exp-time">Chuyên viên Kinh doanh • 2020 - 2022</div>
+                                    <div>Tư vấn giải pháp thương mại và chăm sóc khách hàng doanh nghiệp.</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ============ MẪU 5: ATS_FRIENDLY (Chuẩn ATS) ============ -->
+                    <div th:if="${tpl.code == 'ATS_FRIENDLY'}" class="tpl-a4-paper">
+                        <div class="ats-top-center">
+                            <div class="ats-avatar">
+                                <img th:src="@{/images/cv-sample-avatar.jpg}" src="/images/cv-sample-avatar.jpg" alt="Lê Quang Dũng" class="tpl-sample-avatar">
+                            </div>
+                            <div class="ats-name">LÊ QUANG DŨNG</div>
+                            <div class="ats-role">Business Development Executive</div>
+                            <div class="ats-contact-line">08/12/1998 • 0123 456 789 • quangdung@email.vn • Hoàng Mai, Hà Nội</div>
+                        </div>
+
+                        <div class="ats-sec">
+                            <div class="ats-sec-title">Học vấn</div>
+                            <div class="ats-split-line">
+                                <span>Đại học Ngoại Thương</span>
+                                <span>2016 - 2020</span>
+                            </div>
+                            <div class="ats-sub">Cử nhân Quản trị Kinh doanh — GPA: 3.7/4.0</div>
+                        </div>
+
+                        <div class="ats-sec">
+                            <div class="ats-sec-title">Kinh nghiệm làm việc</div>
+                            <div class="ats-split-line">
+                                <span>Công ty TNHH Giải pháp ABC — Business Development Executive</span>
+                                <span>2022 - Nay</span>
+                            </div>
+                            <div class="ats-sub">Phát triển khách hàng B2B, đàm phán hợp đồng và vượt 25% chỉ tiêu doanh thu năm.</div>
+
+                            <div class="ats-split-line">
+                                <span>Công ty Cổ phần Thương mại XYZ — Chuyên viên Kinh doanh</span>
+                                <span>2020 - 2022</span>
+                            </div>
+                            <div class="ats-sub">Phụ trách tư vấn giải pháp và quản lý danh mục khách hàng doanh nghiệp.</div>
+                        </div>
+
+                        <div class="ats-sec">
+                            <div class="ats-sec-title">Kỹ năng</div>
+                            <div>Đàm phán B2B • Quản trị CRM • IELTS 7.0</div>
+                        </div>
+                    </div>
+
+                    <!-- Overlay khi hover -->
+                    <div class="tpl-hover-overlay">
+                        <a class="btn-overlay-primary js-use-tpl-btn"
+                           th:href="@{/candidate/cvs/customizer(templateCode=${tpl.code})}"
+                           th:attr="data-base-url=@{/candidate/cvs/customizer(templateCode=${tpl.code})}">🎨 Dùng mẫu này ngay</a>
+                        <a class="btn-overlay-secondary"
+                           th:href="@{/candidate/cvs/new(templateId=${tpl.versionId})}">+ Tạo hồ sơ mới</a>
+                    </div>
+                </div>
+
+                <!-- Chân thẻ: chọn màu + tên mẫu + tags -->
+                <div class="tpl-card-meta">
+                    <div class="tpl-swatches">
+                        <button th:each="color, stat : ${tpl.colors}"
+                                type="button"
+                                class="swatch-dot"
+                                th:classappend="${(stat.index == 0 ? 'active ' : '') + 'swatch-c-' + #strings.substring(color, 1)}"
+                                th:attr="data-theme=${'theme-c' + (stat.index + 1)}, data-color=${color}, title=${color}"
+                                onclick="selectTplColor(this, this.getAttribute('data-theme'), this.getAttribute('data-color'))"></button>
+                    </div>
+                    <h3 class="tpl-card-name" th:text="${tpl.name}">Tên mẫu CV</h3>
+                    <div class="tpl-tags">
+                        <span th:each="tag : ${tpl.tags}" class="tpl-tag" th:text="${tag}">ATS</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // Lọc thẻ mẫu CV theo mã mẫu
+    function filterGallery(code, btn) {
+        document.querySelectorAll('.filter-nav-bar .filter-pill').forEach(function (pill) {
+            pill.classList.remove('active');
+        });
+        if (btn) {
+            btn.classList.add('active');
+        }
+        document.querySelectorAll('.templates-grid .tpl-card').forEach(function (card) {
+            var cardCode = card.getAttribute('data-code');
+            var match = (code === 'ALL' || cardCode === code);
+            card.classList.toggle('hidden-card', !match);
+        });
+    }
+
+    // Đổi màu trực tiếp trên tờ A4 và cập nhật đường dẫn sang bộ tùy biến
+    function selectTplColor(dotBtn, themeClass, hexColor) {
+        var card = dotBtn.closest('.tpl-card');
+        if (!card) { return; }
+
+        card.querySelectorAll('.swatch-dot').forEach(function (dot) {
+            dot.classList.remove('active');
+        });
+        dotBtn.classList.add('active');
+
+        card.classList.remove('theme-c1', 'theme-c2', 'theme-c3', 'theme-c4');
+        card.classList.add(themeClass);
+
+        var useBtn = card.querySelector('.js-use-tpl-btn');
+        if (useBtn) {
+            var baseUrl = useBtn.getAttribute('data-base-url') || useBtn.getAttribute('href');
+            var sep = baseUrl.indexOf('?') !== -1 ? '&' : '?';
+            useBtn.setAttribute('href', baseUrl + sep + 'accentColor=' + encodeURIComponent(hexColor));
+        }
+    }
+</script>
+</body>
+</html>
