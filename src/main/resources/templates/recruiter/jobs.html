@@ -71,13 +71,14 @@
 
         <div class="manage-actions">
             <!-- Tài khoản đang đăng nhập -->
-            <div class="recruiter-account" th:if="${currentRecruiter != null}">
+            <a class="recruiter-account" th:if="${currentRecruiter != null}"
+               th:href="@{/recruiter/profile}" title="Xem hồ sơ tài khoản">
                 <i data-lucide="user" class="ui-icon"></i>
                 <span>
                     <strong th:text="${currentRecruiter.fullName != null ? currentRecruiter.fullName : currentRecruiter.email}">Nhà tuyển dụng</strong>
                     <small th:text="${currentRecruiter.email}">email</small>
                 </span>
-            </div>
+            </a>
 
             <a th:href="@{/recruiter/jobs/new}" class="btn btn-primary btn-lg">
                 <i data-lucide="plus" class="ui-icon"></i>
@@ -96,7 +97,25 @@
         </div>
     </div>
 
-    <!-- Thông báo đã được đặt cố định ngay dưới thẻ body để dễ nhìn. -->
+    <section class="recruiter-banner" aria-labelledby="recruiter-banner-title">
+        <div class="recruiter-banner-copy">
+            <h2 id="recruiter-banner-title"
+                th:text="${draftJobs > 0 ? 'Tiếp tục hoàn thiện tin tuyển dụng' : (pendingJobs > 0 ? 'Theo dõi tin đang chờ duyệt' : 'Chuẩn bị cho đợt tuyển dụng tiếp theo')}">
+                Tiếp tục hoàn thiện tin tuyển dụng
+            </h2>
+            <p th:if="${draftJobs > 0}">Bạn có <strong th:text="${draftJobs + ' tin nháp'}">0 tin nháp</strong>. Kiểm tra nội dung và hạn ứng tuyển trước khi gửi duyệt.</p>
+            <p th:if="${draftJobs == 0 and pendingJobs > 0}">Có <strong th:text="${pendingJobs + ' tin'}">0 tin</strong> đang chờ xét duyệt. Tin sẽ hiển thị với ứng viên sau khi được phê duyệt.</p>
+            <p th:if="${draftJobs == 0 and pendingJobs == 0}">Mô tả rõ công việc, yêu cầu và quyền lợi để ứng viên dễ đánh giá mức độ phù hợp.</p>
+        </div>
+        <a class="recruiter-banner-link"
+           th:href="${draftJobs > 0} ? @{/recruiter/jobs/archive(tab='draft')} : (${pendingJobs > 0} ? @{/recruiter/jobs(status='PENDING')} : @{/recruiter/jobs/new})">
+            <span th:text="${draftJobs > 0 ? 'Xem tin nháp' : (pendingJobs > 0 ? 'Xem tin chờ duyệt' : 'Tạo tin mới')}">Xem tin nháp</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+        </a>
+        <img class="recruiter-banner-photo"
+             th:src="@{/images/banners/recruitment-office.png}"
+             alt="" width="1536" height="1024" decoding="async">
+    </section>
 
     <nav class="filter-bar" aria-label="Lọc nhanh trạng thái">
         <a class="btn btn-outline" th:href="@{/recruiter/jobs}" th:text="${'Tất cả (' + totalJobs + ')'}"></a>
