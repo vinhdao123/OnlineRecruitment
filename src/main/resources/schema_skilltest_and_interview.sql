@@ -463,3 +463,34 @@ BEGIN
      N'Thuộc tính alt cung cấp mô tả văn bản thay thế khi hình ảnh không tải được và hỗ trợ tiếp cận (Accessibility) cũng như SEO.', 'ACTIVE');
 END
 GO
+
+
+-- =========================================================================
+-- BƯỚC 4: TẠO BẢNG NGƯỠNG XẾP LOẠI BÀI THI KỸ NĂNG
+-- (skill_test_rating_thresholds) - Lưu dữ liệu trên DB, không hardcode backend
+-- =========================================================================
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[skill_test_rating_thresholds]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [dbo].[skill_test_rating_thresholds] (
+        [id]            BIGINT IDENTITY(1,1) PRIMARY KEY,
+        [min_score]     INT            NOT NULL,  -- Điểm tối thiểu (0-100) để đạt mức xếp loại này
+        [label]         NVARCHAR(100)  NOT NULL,  -- Nhãn xếp loại: "Xuất sắc", "Giỏi", "Khá", "Đạt", "Chưa đạt"
+        [display_order] INT            NOT NULL DEFAULT 0,
+        [created_at]    DATETIME2      NOT NULL DEFAULT SYSDATETIME(),
+        [updated_at]    DATETIME2      NOT NULL DEFAULT SYSDATETIME()
+    );
+END
+GO
+
+-- Seed dữ liệu ngưỡng xếp loại mặc định (nếu bảng chưa có dữ liệu)
+IF NOT EXISTS (SELECT 1 FROM [dbo].[skill_test_rating_thresholds])
+BEGIN
+    INSERT INTO [dbo].[skill_test_rating_thresholds] ([min_score], [label], [display_order])
+    VALUES
+    (90, N'Xuất sắc',  1),
+    (80, N'Giỏi',      2),
+    (65, N'Khá',       3),
+    (50, N'Đạt',       4),
+    (0,  N'Chưa đạt',  5);
+END
+GO

@@ -1,6 +1,8 @@
 package OnlineRecruitment.OnlineRecruitment.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,8 +23,9 @@ public class Company {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruiter_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recruiter_id")
+    @NotFound(action = NotFoundAction.IGNORE)
     private User recruiter;
 
     @Column(name = "company_name", length = 255, nullable = false)

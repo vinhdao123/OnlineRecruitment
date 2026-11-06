@@ -4,9 +4,11 @@ import OnlineRecruitment.OnlineRecruitment.dto.skilltest.QuestionAnswerItem;
 import OnlineRecruitment.OnlineRecruitment.entity.SkillTest;
 import OnlineRecruitment.OnlineRecruitment.entity.SkillTestAttempt;
 import OnlineRecruitment.OnlineRecruitment.entity.SkillTestQuestion;
+import OnlineRecruitment.OnlineRecruitment.entity.SkillTestRatingThreshold;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.SkillTestAttemptRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.SkillTestQuestionRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.SkillTestRatingThresholdRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.SkillTestRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +31,7 @@ public class SkillTestService {
     private final SkillTestRepository skillTestRepository;
     private final SkillTestQuestionRepository skillTestQuestionRepository;
     private final SkillTestAttemptRepository skillTestAttemptRepository;
+    private final SkillTestRatingThresholdRepository ratingThresholdRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional(readOnly = true)
@@ -132,12 +135,8 @@ public class SkillTestService {
         double score = totalQuestions > 0 ? Math.round(((double) correctCount / totalQuestions) * 100.0) : 0.0;
         boolean isPassed = score >= (test.getPassingScore() != null ? test.getPassingScore() : 60);
 
-        String rating;
-        if (score >= 90) rating = "Xuất sắc";
-        else if (score >= 80) rating = "Giỏi";
-        else if (score >= 65) rating = "Khá";
-        else if (score >= 50) rating = "Đạt";
-        else rating = "Chưa đạt";
+        // Tra cứu xếp loại từ bảng ngưỡng trong database (không hardcode)
+        String rating = resolveRatingFromDB(score);
 
         String json = "[]";
         try {
@@ -243,5 +242,49 @@ public class SkillTestService {
     @Transactional(readOnly = true)
     public long countQuestionsInPool(Long testId) {
         return skillTestQuestionRepository.countBySkillTestId(testId);
+    }
+
+    /**
+     * Tra cứu nhãn xếp loại từ bảng ngưỡng trong database.
+     * Lấy dòng đầu tiên có minScore <= score (đã sort giảm dần).
+     * Nếu DB chưa có dữ liệu, fallback về logic mặc định để tránh lỗi runtime.
+     */
+    @Transactional(readOnly = true)
+    public String resolveRatingFromDB(double score) {
+        List<SkillTestRatingThreshold> matches = ratingThresholdRepository.findMatchingThresholds(score);
+        if (!matches.isEmpty()) {
+            return matches.get(0).getLabel();
+        }
+        // Fallback mặc định nếu bảng ngưỡng chưa được seed
+        log.warn("skill_test_rating_thresholds is empty; using built-in fallback for score={}", score);
+        if (score >= 90) return "Xuất sắc";
+        else if (score >= 80) return "Giỏi";
+        else if (score >= 65) return "Khá";
+        else if (score >= 50) return "Đạt";
+        else return "Chưa đạt";
+    }
+
+    /**
+     * Lấy tất cả ngưỡng xếp loại (dùng cho trang Admin quản lý).
+     */
+    @Transactional(readOnly = true)
+    public List<SkillTestRatingThreshold> getAllRatingThresholds() {
+        return ratingThresholdRepository.findAllByOrderByDisplayOrderAsc();
+    }
+
+    /**
+     * Lưu (tạo mới hoặc cập nhật) ngưỡng xếp loại.
+     */
+    @Transactional
+    public SkillTestRatingThreshold saveRatingThreshold(SkillTestRatingThreshold threshold) {
+        return ratingThresholdRepository.save(threshold);
+    }
+
+    /**
+     * Xóa ngưỡng xếp loại theo ID.
+     */
+    @Transactional
+    public void deleteRatingThreshold(Long thresholdId) {
+        ratingThresholdRepository.deleteById(thresholdId);
     }
 }

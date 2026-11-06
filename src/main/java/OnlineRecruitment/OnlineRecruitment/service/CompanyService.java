@@ -71,12 +71,10 @@ public class CompanyService {
         Company c = getById(id);
         User recruiter = c.getRecruiter();
 
+        // Kích hoạt tài khoản recruiter (Admin có toàn quyền duyệt, không phụ thuộc vào OTP)
         if (recruiter != null) {
-            boolean hasVerifiedOtp = otpTokenRepository.existsByEmailAndUsedAtIsNotNull(recruiter.getEmail());
-            if (!hasVerifiedOtp) {
-                throw new IllegalStateException("Không thể duyệt công ty: Người đại diện (Recruiter) chưa xác thực mã OTP!");
-            }
             recruiter.setStatus(UserStatus.ACTIVE);
+            recruiter.setRejectionReason(null);
             userRepository.save(recruiter);
         }
 
@@ -84,11 +82,18 @@ public class CompanyService {
         c.setRejectionReason(null);
         companyRepository.save(c);
 
-        if (recruiter != null) {
-            emailService.sendEmail(recruiter.getEmail(),
-                    "Thông báo: Hồ sơ doanh nghiệp đã được phê duyệt!",
-                    "Xin chào " + recruiter.getFullName() + ",\n\nCông ty " + c.getCompanyName() +
-                    " của bạn đã được Admin phê duyệt thành công. Bạn hiện có thể đăng nhập và đăng tin tuyển dụng.");
+        // Gửi email thông báo phê duyệt cho recruiter
+        if (recruiter != null && recruiter.getEmail() != null) {
+            String emailBody = "Xin chào " + recruiter.getFullName() + ",\n\n"
+                    + "Chúc mừng! Hồ sơ đăng ký doanh nghiệp của công ty \""
+                    + c.getCompanyName() + "\" đã được Admin phê duyệt thành công.\n\n"
+                    + "Bạn hiện có thể đăng nhập vào hệ thống và bắt đầu đăng tin tuyển dụng.\n\n"
+                    + "Trân trọng,\n"
+                    + "Ban quản trị Online Recruitment";
+            emailService.sendEmail(
+                    recruiter.getEmail(),
+                    "Thông báo: Hồ sơ doanh nghiệp đã được phê duyệt - " + c.getCompanyName(),
+                    emailBody);
         }
 
         activityLogService.log(actor, "APPROVE_COMPANY",
