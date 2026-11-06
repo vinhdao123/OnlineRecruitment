@@ -49,6 +49,8 @@ public class RecruiterJobForm {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate deadline;
 
+    private Boolean isPinned = false;
+
     // URL logo công ty (không bắt buộc, lưu vào companies.logo_url)
     private String logoUrl;
 
