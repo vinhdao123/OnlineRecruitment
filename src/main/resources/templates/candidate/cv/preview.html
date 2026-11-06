@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Xem trước: ' + ${cv.title}">Xem trước CV — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+</head>
+<body class="preview-body-bg">
+
+<!-- TOOLBAR (Ẩn khi in ấn) -->
+<div class="preview-toolbar" th:if="${cv.isUploaded}">
+    <a th:href="@{/candidate/cvs}" class="preview-btn preview-btn-secondary">&larr; Quay lại danh sách CV</a>
+    <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="preview-btn preview-btn-primary">⬇ Tải file về máy</a>
+    <a th:if="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf')}"
+       th:href="@{/candidate/cvs/{id}/file(id=${cv.id})}" target="_blank" class="preview-btn preview-btn-secondary">🔗 Mở tab riêng</a>
+</div>
+
+<div class="preview-toolbar" th:unless="${cv.isUploaded}">
+    <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="preview-btn preview-btn-secondary">&larr; Quay lại chỉnh sửa</a>
+    <button type="button" onclick="window.print()" class="preview-btn preview-btn-primary">🖨️ In / Tải file PDF</button>
+    <a th:href="@{/candidate/cvs}" class="preview-btn preview-btn-secondary">📋 Quản lý CV</a>
+</div>
+
+<!-- ==========================================
+     TRƯỜNG HỢP 1: CV TẢI LÊN TỪ MÁY (FILE UPLOAD)
+     ========================================== -->
+<th:block th:if="${cv.isUploaded}">
+    <div class="preview-container preview-uploaded-container">
+        <div class="preview-uploaded-banner">
+            <div class="preview-uploaded-header-info">
+                <span class="preview-uploaded-badge">📎 CV ĐÍNH KÈM TẢI LÊN TỪ MÁY</span>
+                <h1 class="preview-uploaded-title" th:text="${cv.title}">Tên file CV</h1>
+                <p class="preview-uploaded-sub">
+                    Định dạng: <span th:text="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf') ? 'Tài liệu PDF' : 'Tài liệu Word / Office'}"></span>
+                    &bull; Trạng thái: <span>Đã sẵn sàng ứng tuyển</span>
+                </p>
+            </div>
+            <div class="preview-uploaded-actions">
+                <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="preview-btn preview-btn-primary">⬇ Tải file về máy</a>
+            </div>
+        </div>
+
+        <div class="preview-embed-box" th:if="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf')}">
+            <iframe th:src="@{/candidate/cvs/{id}/file(id=${cv.id})}" class="preview-pdf-iframe" title="Nội dung CV PDF"></iframe>
+        </div>
+
+        <div class="preview-doc-box" th:unless="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf')}">
+            <div class="preview-doc-icon">📄</div>
+            <h2 class="preview-doc-heading" th:text="${cv.title}">Tài liệu CV</h2>
+            <p class="preview-doc-text">File định dạng Word (.doc, .docx) không hỗ trợ xem trực tiếp trong khung trình duyệt. Bạn có thể tải file về để xem và chỉnh sửa trên máy tính.</p>
+            <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="preview-btn preview-btn-primary">⬇ Tải file Word về máy</a>
+        </div>
+    </div>
+</th:block>
+
+<!-- ==========================================
+     TRƯỜNG HỢP 2: CV TẠO TRỰC TUYẾN
+     ========================================== -->
+<th:block th:unless="${cv.isUploaded}">
+<div class="preview-container">
+    <!-- HEADER CV -->
+    <header class="preview-header">
+        <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-avatar">
+        <div class="preview-info-col">
+            <h1 class="preview-title" th:text="${candidateUser != null && candidateUser.fullName != null && !candidateUser.fullName.isEmpty() ? candidateUser.fullName : cv.title}">Họ và Tên</h1>
+            <p class="preview-subtitle" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : (candidate != null && candidate.desiredPosition != null ? candidate.desiredPosition : 'Chuyên gia')}">Chức danh nghề nghiệp</p>
+
+            <div class="preview-contact-bar">
+                <span class="preview-contact-item" th:if="${candidateUser != null && candidateUser.email != null}">
+                    <span>✉</span> <span th:text="${candidateUser.email}"></span>
+                </span>
+                <span class="preview-contact-item" th:if="${candidateUser != null && candidateUser.phone != null}">
+                    <span>📞</span> <span th:text="${candidateUser.phone}"></span>
+                </span>
+                <span class="preview-contact-item" th:if="${candidate != null && candidate.address != null && !candidate.address.isEmpty()}">
+                    <span>📍</span> <span th:text="${candidate.address}"></span>
+                </span>
+                <span class="preview-contact-item" th:if="${candidate != null && candidate.linkedinUrl != null && !candidate.linkedinUrl.isEmpty()}">
+                    <span>🔗</span> <a th:href="${candidate.linkedinUrl}" target="_blank" class="preview-item-link" th:text="${candidate.linkedinUrl}"></a>
+                </span>
+                <span class="preview-contact-item" th:if="${candidate != null && candidate.githubUrl != null && !candidate.githubUrl.isEmpty()}">
+                    <span>🐙</span> <a th:href="${candidate.githubUrl}" target="_blank" class="preview-item-link" th:text="${candidate.githubUrl}"></a>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- NỘI DUNG CHI TIẾT -->
+    <main class="preview-body-content">
+
+        <!-- 1. GIỚI THIỆU BẢN THÂN / MỤC TIÊU -->
+        <section class="preview-section" th:if="${cv.summary != null && !cv.summary.isEmpty()}">
+            <h2 class="preview-section-title">Giới thiệu bản thân</h2>
+            <p class="preview-item-desc" th:text="${cv.summary}"></p>
+        </section>
+
+        <!-- 2. KINH NGHIỆM LÀM VIỆC -->
+        <section class="preview-section" th:if="${works != null && !works.isEmpty()}">
+            <h2 class="preview-section-title">Kinh nghiệm làm việc</h2>
+            <div class="preview-item" th:each="work : ${works}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title" th:text="${work.jobTitle}">Chức danh</h3>
+                        <p class="preview-item-subtitle" th:text="${work.companyName}">Tên công ty</p>
+                    </div>
+                    <span class="preview-item-date">
+                        <span th:text="${work.startDate != null ? #temporals.format(work.startDate, 'MM/yyyy') : ''}"></span>
+                        <span> - </span>
+                        <span th:text="${work.isCurrent ? 'Hiện tại' : (work.endDate != null ? #temporals.format(work.endDate, 'MM/yyyy') : '')}"></span>
+                    </span>
+                </div>
+                <p class="preview-item-desc" th:if="${work.description != null && !work.description.isEmpty()}" th:text="${work.description}"></p>
+            </div>
+        </section>
+
+        <!-- 3. TRÌNH ĐỘ HỌC VẤN -->
+        <section class="preview-section" th:if="${educations != null && !educations.isEmpty()}">
+            <h2 class="preview-section-title">Trình độ học vấn</h2>
+            <div class="preview-item" th:each="edu : ${educations}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title" th:text="${edu.institution}">Trường đại học</h3>
+                        <p class="preview-item-subtitle">
+                            <span th:text="${edu.degree}">Bằng cấp</span>
+                            <span th:if="${edu.fieldOfStudy != null && !edu.fieldOfStudy.isEmpty()}" th:text="' - ' + ${edu.fieldOfStudy}"></span>
+                        </p>
+                    </div>
+                    <span class="preview-item-date">
+                        <span th:text="${edu.startDate != null ? #temporals.format(edu.startDate, 'MM/yyyy') : ''}"></span>
+                        <span> - </span>
+                        <span th:text="${edu.endDate != null ? #temporals.format(edu.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
+                    </span>
+                </div>
+                <p class="preview-item-desc" th:if="${edu.grade != null && !edu.grade.isEmpty()}" th:text="'Xếp loại: ' + ${edu.grade}"></p>
+                <p class="preview-item-desc" th:if="${edu.description != null && !edu.description.isEmpty()}" th:text="${edu.description}"></p>
+            </div>
+        </section>
+
+        <!-- 4. KỸ NĂNG CHUYÊN MÔN -->
+        <section class="preview-section" th:if="${skills != null && !skills.isEmpty()}">
+            <h2 class="preview-section-title">Kỹ năng chuyên môn</h2>
+            <div class="preview-skills-list">
+                <div class="preview-skill-tag" th:each="cvSkill : ${skills}">
+                    <span th:text="${cvSkill.skill != null ? cvSkill.skill.name : 'Kỹ năng'}"></span>
+                    <span class="preview-badge-level" th:if="${cvSkill.proficiency != null && !cvSkill.proficiency.isEmpty()}" th:text="'(' + ${cvSkill.proficiency} + ')'"></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. DỰ ÁN TIÊU BIỂU -->
+        <section class="preview-section" th:if="${projects != null && !projects.isEmpty()}">
+            <h2 class="preview-section-title">Dự án tiêu biểu</h2>
+            <div class="preview-item" th:each="proj : ${projects}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title">
+                            <span th:text="${proj.name}">Tên dự án</span>
+                            <a th:if="${proj.projectUrl != null && !proj.projectUrl.isEmpty()}" th:href="${proj.projectUrl}" target="_blank" class="preview-item-link">(Xem chi tiết &rarr;)</a>
+                        </h3>
+                        <p class="preview-item-subtitle" th:if="${proj.role != null && !proj.role.isEmpty()}" th:text="'Vai trò: ' + ${proj.role}"></p>
+                    </div>
+                    <span class="preview-item-date">
+                        <span th:text="${proj.startDate != null ? #temporals.format(proj.startDate, 'MM/yyyy') : ''}"></span>
+                        <span> - </span>
+                        <span th:text="${proj.endDate != null ? #temporals.format(proj.endDate, 'MM/yyyy') : 'Hiện tại'}"></span>
+                    </span>
+                </div>
+                <div th:if="${proj.technologies != null && !proj.technologies.isEmpty()}">
+                    <span class="preview-tech-pill" th:text="${proj.technologies}"></span>
+                </div>
+                <p class="preview-item-desc" th:if="${proj.description != null && !proj.description.isEmpty()}" th:text="${proj.description}"></p>
+            </div>
+        </section>
+
+        <!-- 6. CHỨNG CHỈ -->
+        <section class="preview-section" th:if="${certificates != null && !certificates.isEmpty()}">
+            <h2 class="preview-section-title">Chứng chỉ</h2>
+            <div class="preview-item" th:each="cert : ${certificates}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title">
+                            <span th:text="${cert.name}">Tên chứng chỉ</span>
+                            <a th:if="${cert.credentialUrl != null && !cert.credentialUrl.isEmpty()}" th:href="${cert.credentialUrl}" target="_blank" class="preview-item-link">(Xác thực &rarr;)</a>
+                        </h3>
+                        <p class="preview-item-subtitle" th:if="${cert.issuer != null && !cert.issuer.isEmpty()}" th:text="'Đơn vị cấp: ' + ${cert.issuer}"></p>
+                    </div>
+                    <span class="preview-item-date">
+                        <span th:text="${cert.issueDate != null ? #temporals.format(cert.issueDate, 'MM/yyyy') : ''}"></span>
+                        <span th:if="${cert.expiryDate != null}" th:text="' - ' + ${#temporals.format(cert.expiryDate, 'MM/yyyy')}"></span>
+                    </span>
+                </div>
+                <p class="preview-item-desc" th:if="${cert.description != null && !cert.description.isEmpty()}" th:text="${cert.description}"></p>
+            </div>
+        </section>
+
+        <!-- 7. GIẢI THƯỞNG -->
+        <section class="preview-section" th:if="${awards != null && !awards.isEmpty()}">
+            <h2 class="preview-section-title">Giải thưởng & Thành tích</h2>
+            <div class="preview-item" th:each="award : ${awards}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title" th:text="${award.title}">Tên giải thưởng</h3>
+                        <p class="preview-item-subtitle" th:if="${award.issuer != null && !award.issuer.isEmpty()}" th:text="'Đơn vị trao: ' + ${award.issuer}"></p>
+                    </div>
+                    <span class="preview-item-date" th:if="${award.awardDate != null}" th:text="${#temporals.format(award.awardDate, 'MM/yyyy')}"></span>
+                </div>
+                <p class="preview-item-desc" th:if="${award.description != null && !award.description.isEmpty()}" th:text="${award.description}"></p>
+            </div>
+        </section>
+
+        <!-- 8. HOẠT ĐỘNG NGOẠI KHÓA -->
+        <section class="preview-section" th:if="${activities != null && !activities.isEmpty()}">
+            <h2 class="preview-section-title">Hoạt động ngoại khóa</h2>
+            <div class="preview-item" th:each="act : ${activities}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title" th:text="${act.organization}">Tổ chức / CLB</h3>
+                        <p class="preview-item-subtitle" th:if="${act.role != null && !act.role.isEmpty()}" th:text="'Vai trò: ' + ${act.role}"></p>
+                    </div>
+                    <span class="preview-item-date">
+                        <span th:text="${act.startDate != null ? #temporals.format(act.startDate, 'MM/yyyy') : ''}"></span>
+                        <span> - </span>
+                        <span th:text="${act.isCurrent ? 'Hiện tại' : (act.endDate != null ? #temporals.format(act.endDate, 'MM/yyyy') : '')}"></span>
+                    </span>
+                </div>
+                <p class="preview-item-desc" th:if="${act.description != null && !act.description.isEmpty()}" th:text="${act.description}"></p>
+            </div>
+        </section>
+
+        <!-- 9. NGƯỜI THAM CHIẾU -->
+        <section class="preview-section" th:if="${references != null && !references.isEmpty()}">
+            <h2 class="preview-section-title">Người tham chiếu</h2>
+            <div class="preview-item" th:each="ref : ${references}">
+                <div class="preview-item-header">
+                    <div>
+                        <h3 class="preview-item-title" th:text="${ref.fullName}">Họ tên người tham chiếu</h3>
+                        <p class="preview-item-subtitle">
+                            <span th:text="${ref.position != null ? ref.position : ''}"></span>
+                            <span th:if="${ref.company != null && !ref.company.isEmpty()}" th:text="' - ' + ${ref.company}"></span>
+                        </p>
+                    </div>
+                    <span class="preview-item-date" th:if="${ref.relationship != null && !ref.relationship.isEmpty()}" th:text="'Mối quan hệ: ' + ${ref.relationship}"></span>
+                </div>
+                <p class="preview-item-desc">
+                    <span th:if="${ref.email != null && !ref.email.isEmpty()}" th:text="'Email: ' + ${ref.email}"></span>
+                    <span th:if="${ref.phone != null && !ref.phone.isEmpty()}" th:text="' | SĐT: ' + ${ref.phone}"></span>
+                </p>
+            </div>
+        </section>
+
+    </main>
+</div>
+</th:block>
+
+</body>
+</html>

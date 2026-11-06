@@ -1,0 +1,462 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #1769e8;
+    --primary-dark: #0956ca;
+    --text: #12213a;
+    --muted: #64748b;
+    --border: #e2e8f0;
+    --background: #f8fafc;
+    --white: #ffffff;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: var(--text);
+    background: var(--white);
+    line-height: 1.6;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+/* Thanh điều hướng */
+.header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar {
+    max-width: 1400px;
+    min-height: 72px;
+    margin: 0 auto;
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+}
+
+.logo-brand {
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--primary);
+    white-space: nowrap;
+}
+
+.logo-brand span {
+    color: #111827;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.nav-links a {
+    color: #334155;
+    padding: 10px 0;
+    transition: color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    color: var(--primary);
+}
+
+.nav-links a.active {
+    font-weight: 700;
+}
+
+.nav-actions,
+.guest-menu,
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.user-menu form {
+    margin: 0;
+}
+
+.username {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* Nút */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 9px 18px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--white);
+    color: var(--text);
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-primary {
+    color: var(--white);
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+    color: var(--white);
+}
+
+.btn-outline {
+    color: var(--primary);
+    background: #eff6ff;
+    border-color: #eff6ff;
+}
+
+.btn-outline:hover {
+    background: #dbeafe;
+}
+
+/* Banner */
+.hero {
+    background: linear-gradient(120deg, #eaf4ff, #f8fbff);
+    border-bottom: 1px solid #e5effb;
+}
+
+.hero-content {
+    max-width: 1350px;
+    margin: 0 auto;
+    padding: 48px 28px 38px;
+}
+
+.hero h1 {
+    font-size: clamp(30px, 4vw, 42px);
+    line-height: 1.2;
+    margin-bottom: 12px;
+    color: #0f1f3b;
+}
+
+.hero p {
+    color: #475569;
+    font-size: 17px;
+    margin-bottom: 24px;
+}
+
+.search-form {
+    max-width: 900px;
+    display: flex;
+    gap: 10px;
+    padding: 7px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.search-form input {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: none;
+    outline: none;
+    color: var(--text);
+}
+
+.search-form input::placeholder {
+    color: #94a3b8;
+}
+
+/* Khu vực danh sách */
+.companies-section {
+    max-width: 1400px;
+    min-height: 400px;
+    margin: 0 auto;
+    padding: 34px 28px 55px;
+}
+
+.section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.section-heading h2 {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* Thẻ công ty */
+.company-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.company-card {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: var(--white);
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.025);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.company-card:hover {
+    transform: translateY(-3px);
+    border-color: #bfd7ff;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.07);
+}
+
+.company-card-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 17px;
+}
+
+.company-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: #eff6ff;
+    color: var(--primary);
+    font-size: 30px;
+    font-weight: 800;
+}
+
+.company-main-info {
+    min-width: 0;
+}
+
+.company-main-info h3 {
+    font-size: 18px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    margin-bottom: 5px;
+}
+
+.company-status {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 12px;
+}
+
+.company-description {
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 18px;
+    overflow-wrap: anywhere;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 71px;
+}
+
+.company-details {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 20px;
+}
+
+.detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: #475569;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.detail a {
+    color: var(--primary);
+    overflow-wrap: anywhere;
+}
+
+.detail-icon {
+    width: 19px;
+    flex-shrink: 0;
+    color: var(--primary);
+    text-align: center;
+}
+
+.company-card-footer {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.company-label {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* Trạng thái danh sách trống */
+.empty-state {
+    padding: 60px 20px;
+    text-align: center;
+    border: 1px dashed #cbd5e1;
+    border-radius: 14px;
+    background: var(--background);
+}
+
+.empty-icon {
+    font-size: 40px;
+    color: var(--primary);
+    margin-bottom: 12px;
+}
+
+.empty-state h3 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.empty-state p {
+    color: var(--muted);
+    margin-bottom: 22px;
+}
+
+/* Chân trang */
+.footer {
+    padding: 24px;
+    text-align: center;
+    background: #f8fafc;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 1050px) {
+    .company-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .navbar {
+        gap: 18px;
+    }
+
+    .nav-links {
+        gap: 18px;
+    }
+}
+
+@media (max-width: 720px) {
+    .navbar {
+        padding: 14px 18px;
+        flex-wrap: wrap;
+    }
+
+    .logo-brand {
+        font-size: 22px;
+    }
+
+    .nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .nav-actions {
+        margin-left: auto;
+    }
+
+    .user-menu,
+    .guest-menu {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .username {
+        max-width: 160px;
+        font-size: 13px;
+    }
+
+    .hero-content {
+        padding: 35px 18px;
+    }
+
+    .search-form {
+        flex-direction: column;
+    }
+
+    .search-form .btn {
+        width: 100%;
+    }
+
+    .companies-section {
+        padding: 28px 18px 40px;
+    }
+
+    .company-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 420px) {
+    .company-card {
+        padding: 17px;
+    }
+
+    .company-card-footer {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .company-card-footer .btn {
+        width: 100%;
+    }
+
+    .nav-links {
+        gap: 15px;
+        font-size: 14px;
+    }
+}

@@ -2,8 +2,8 @@ package OnlineRecruitment.OnlineRecruitment.controller.admin;
 
 import OnlineRecruitment.OnlineRecruitment.entity.ActivityLog;
 import OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus;
+import OnlineRecruitment.OnlineRecruitment.entity.JobStatus;
 import OnlineRecruitment.OnlineRecruitment.entity.UserRole;
-import OnlineRecruitment.OnlineRecruitment.entity.UserStatus;
 import OnlineRecruitment.OnlineRecruitment.service.ActivityLogService;
 import OnlineRecruitment.OnlineRecruitment.service.CompanyService;
 import OnlineRecruitment.OnlineRecruitment.service.DashboardService;
@@ -35,10 +35,10 @@ public class AdminDashboardController {
         model.addAttribute("totalJobs",      dashboardService.totalJobs());
 
         long companyPending = companyService.countByStatus(CompanyStatus.PENDING);
-        long userLocked     = userService.countByStatus(UserStatus.LOCKED);
-        long jobPending     = dashboardService.jobsByStatus("PENDING");   // ← đổi ở đây
+        long jobPending     = dashboardService.jobsByStatus(JobStatus.PENDING);
 
-        model.addAttribute("totalPending",   companyPending + userLocked + jobPending);
+        // Pending = công ty chờ duyệt + job chờ duyệt (không cộng user locked)
+        model.addAttribute("totalPending",   companyPending + jobPending);
         model.addAttribute("companyPending", companyPending);
 
         // USER ROLE STATS
@@ -55,6 +55,17 @@ public class AdminDashboardController {
         List<ActivityLog> recent = activityLogService.recent(5);
         model.addAttribute("recentActivities", recent);
 
+        model.addAttribute("activeMenu", "dashboard");
+        return "admin/dashboard";
+    }
+
+    @GetMapping("/activities")
+    public String activities(Model model) {
+        model.addAttribute("totalUsers",     userService.countAll());
+        model.addAttribute("totalCompanies", companyService.countAll());
+        model.addAttribute("totalJobs",      dashboardService.totalJobs());
+        model.addAttribute("totalPending",   companyService.countByStatus(CompanyStatus.PENDING) + dashboardService.jobsByStatus(JobStatus.PENDING));
+        model.addAttribute("recentActivities", activityLogService.recent(50));
         model.addAttribute("activeMenu", "dashboard");
         return "admin/dashboard";
     }

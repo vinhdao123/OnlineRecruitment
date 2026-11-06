@@ -19,6 +19,8 @@ target/
 *.iml
 *.ipr
 
+.PVS-Studio/
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -31,3 +33,17 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local data, credentials and generated review files
+/uploads/
+.env
+.env.*
+!.env.example
+/src/main/resources/application-local.properties
+/src/main/resources/application-local.yml
+/conflict-report.txt
+/main-files*.txt
+/main-missing-files.txt
+/how --stat --oneline 34d0f12
+
+/src/main/resources/static/uploads/

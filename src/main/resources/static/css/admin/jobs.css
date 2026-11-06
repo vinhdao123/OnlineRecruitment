@@ -1,0 +1,550 @@
+
+/* ==================== ADMIN JOB REVIEW ==================== */
+
+.admin-job-page {
+    width: 100%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 24px;
+    box-sizing: border-box;
+    color: #172554;
+    font-family: 'Inter', sans-serif;
+}
+
+.admin-job-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-job-heading h1 {
+    margin: 0;
+    color: #172554;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.admin-job-heading p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.admin-job-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+/* ==================== STATUS SUMMARY ==================== */
+
+.admin-job-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-job-summary-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-width: 0;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+}
+
+.admin-job-summary-label {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-job-summary-value {
+    margin-top: 8px;
+    color: #172554;
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.admin-job-summary-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.admin-job-summary-icon svg {
+    width: 21px;
+    height: 21px;
+}
+
+.admin-job-summary-card.pending .admin-job-summary-icon {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.admin-job-summary-card.approved .admin-job-summary-icon {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-job-summary-card.closed .admin-job-summary-icon {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* ==================== FILTER ==================== */
+
+.admin-job-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 18px;
+    margin-bottom: 24px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
+}
+
+.admin-job-filter input,
+.admin-job-filter select {
+    flex: 1 1 180px;
+    min-width: 0;
+    height: 44px;
+    padding: 0 13px;
+    border: 1px solid #dbe2ea;
+    border-radius: 10px;
+    outline: none;
+    background: #fff;
+    color: #334155;
+    font-family: inherit;
+    font-size: 13px;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.admin-job-filter input:focus,
+.admin-job-filter select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .12);
+}
+
+.admin-job-filter button,
+.admin-job-filter a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 42px;
+    padding: 0 15px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-job-filter .filter-submit {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+}
+
+.admin-job-filter .filter-submit:hover {
+    background: #1d4ed8;
+}
+
+.admin-job-filter .filter-reset {
+    border: 1px solid #dbe2ea;
+    background: #fff;
+    color: #475569;
+}
+
+.admin-job-filter .filter-reset:hover {
+    background: #f8fafc;
+}
+
+/* ==================== JOB GRID ==================== */
+
+.admin-job-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 28px 0 16px;
+}
+
+.admin-job-section-heading h2 {
+    margin: 0;
+    color: #172554;
+    font-size: 21px;
+    font-weight: 800;
+}
+
+.admin-job-section-heading p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.admin-job-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 20px;
+}
+
+.admin-job-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+    padding: 22px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, .04);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.admin-job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, .09);
+}
+
+.admin-job-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.admin-job-id {
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .06em;
+}
+
+.admin-job-title {
+    margin: 8px 0 0;
+    color: #172554;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+}
+
+.admin-job-subtitle {
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+/* ==================== STATUS BADGE ==================== */
+
+.admin-job-status {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: fit-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.admin-job-status.pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.admin-job-status.approved,
+.admin-job-status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-job-status.rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.admin-job-status.draft {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.admin-job-status.closed {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* ==================== JOB META ==================== */
+
+.admin-job-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 13px;
+    padding: 16px 0;
+    border-top: 1px solid #edf0f4;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.admin-job-meta-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.admin-job-meta-item > svg {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    color: #64748b;
+}
+
+.admin-job-meta-label {
+    display: block;
+    margin-bottom: 3px;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+}
+
+.admin-job-meta-value {
+    color: #334155;
+    overflow-wrap: anywhere;
+}
+
+/* ==================== REJECTION REASON ==================== */
+
+.admin-job-rejection {
+    padding: 12px;
+    border: 1px solid #fecdd3;
+    border-radius: 10px;
+    background: #fff1f2;
+    color: #be123c;
+    font-size: 12px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.admin-job-rejection strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* ==================== CARD ACTIONS ==================== */
+
+.admin-job-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+    padding-top: 2px;
+}
+
+.admin-job-actions form {
+    display: inline-flex;
+    margin: 0;
+}
+
+.admin-job-actions .admin-btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 0 11px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+}
+
+.admin-job-actions .admin-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.admin-job-actions .btn-view {
+    border-color: #dbe2ea;
+    background: #fff;
+    color: #475569;
+}
+
+.admin-job-actions .btn-view:hover {
+    background: #f8fafc;
+}
+
+.admin-job-actions .btn-approve {
+    background: #16a34a;
+    color: #fff;
+}
+
+.admin-job-actions .btn-approve:hover {
+    background: #15803d;
+}
+
+.admin-job-actions .btn-reject {
+    background: #fff;
+    border-color: #fecaca;
+    color: #dc2626;
+}
+
+.admin-job-actions .btn-reject:hover {
+    background: #fef2f2;
+}
+
+/* ==================== EMPTY STATE ==================== */
+
+.admin-job-empty {
+    padding: 56px 24px;
+    margin-top: 16px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 16px;
+    background: #fff;
+    text-align: center;
+}
+
+.admin-job-empty > svg {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 14px;
+    color: #94a3b8;
+}
+
+.admin-job-empty h3 {
+    margin: 0;
+    color: #172554;
+    font-size: 18px;
+}
+
+.admin-job-empty p {
+    margin: 8px 0 0;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* ==================== ALERTS ==================== */
+
+.admin-job-alert {
+    padding: 13px 16px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.admin-job-alert.success {
+    border: 1px solid #bbf7d0;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.admin-job-alert.error {
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 1200px) {
+    .admin-job-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-job-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .admin-job-page {
+        padding: 16px;
+    }
+
+    .admin-job-heading h1 {
+        font-size: 23px;
+    }
+
+    .admin-job-grid {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .admin-job-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .admin-job-summary-card {
+        padding: 14px;
+    }
+
+    .admin-job-summary-value {
+        font-size: 22px;
+    }
+
+    .admin-job-filter {
+        padding: 14px;
+    }
+
+    .admin-job-filter input,
+    .admin-job-filter select {
+        flex-basis: 100%;
+        width: 100%;
+    }
+
+    .admin-job-filter button,
+    .admin-job-filter a {
+        flex: 1;
+    }
+
+    .admin-job-card {
+        padding: 17px;
+    }
+
+    .admin-job-card-top {
+        flex-wrap: wrap;
+    }
+}

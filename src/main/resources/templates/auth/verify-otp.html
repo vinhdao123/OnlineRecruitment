@@ -26,7 +26,7 @@
     <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
     <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
 
-    <form th:action="@{/auth/verify-otp}" th:object="${verifyDto}" method="post">
+    <form th:action="@{/verify-otp}" th:object="${verifyDto}" method="post">
         <div class="form-group">
             <label for="email">Email tài khoản</label>
             <input type="email" id="email" th:field="*{email}" class="form-control" readonly style="background-color: #f8f9fa;">
@@ -52,7 +52,7 @@
         <span>Không nhận được mã?</span>
     </div>
 
-    <form th:action="@{/auth/resend-otp}" method="post" style="text-align: center;">
+    <form th:action="@{/resend-otp}" method="post" style="text-align: center;">
         <input type="hidden" name="email" th:value="${verifyDto.email}">
         <button type="submit" class="btn btn-outline" style="font-size: 14px; padding: 8px 16px;">
             🔄 Gửi lại mã OTP

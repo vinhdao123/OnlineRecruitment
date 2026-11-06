@@ -1,0 +1,138 @@
+================================================================================
+          TÀI LIỆU CHI TIẾT VỀ CÁC THAY ĐỔI CƠ SỞ DỮ LIỆU (DATABASE UPDATES)
+          Hệ thống: Tuyển dụng trực tuyến (Online Recruitment)
+          Hệ quản trị CSDL: Microsoft SQL Server
+================================================================================
+
+I. TỔNG QUAN CÁC BẢNG LIÊN QUAN ĐẾN ĐỢT CẬP NHẬT
+--------------------------------------------------------------------------------
+1. BẢNG MỚI: [skill_test_rating_thresholds]
+   - Mục đích: Lưu trữ các mốc điểm và danh hiệu xếp loại năng lực bài thi kỹ năng.
+   - Trước đây: Logic xếp loại bị hardcode if-else trong file Java (SkillTestService).
+   - Hiện tại: Được chuyển hoàn toàn lên Database để có thể cấu hình linh hoạt.
+
+   Cấu trúc bảng:
+   + id (BIGINT, IDENTITY, PRIMARY KEY)
+   + min_score (INT, NOT NULL): Điểm tối thiểu (0-100) để đạt mốc này
+   + label (NVARCHAR(100), NOT NULL): Nhãn xếp loại ("Xuất sắc", "Giỏi", "Khá", "Đạt", "Chưa đạt")
+   + display_order (INT, DEFAULT 0): Thứ tự hiển thị
+   + created_at (DATETIME2, DEFAULT SYSDATETIME())
+   + updated_at (DATETIME2, DEFAULT SYSDATETIME())
+
+   Dữ liệu mẫu khởi tạo:
+   + min_score = 90  -> 'Xuất sắc'  (Thứ tự: 1)
+   + min_score = 80  -> 'Giỏi'      (Thứ tự: 2)
+   + min_score = 65  -> 'Khá'       (Thứ tự: 3)
+   + min_score = 50  -> 'Đạt'       (Thứ tự: 4)
+   + min_score = 0   -> 'Chưa đạt'  (Thứ tự: 5)
+
+
+2. CHUYỂN DỮ LIỆU ĐỀ THI & NGÂN HÀNG CÂU HỎI LÊN DATABASE
+   - Trước đây: Hơn 340 dòng code Java trong DataInitializerService.java hardcode
+     danh sách đề thi và từng câu hỏi A-B-C-D kèm đáp án.
+   - Hiện tại: Đã xóa toàn bộ hardcode trong code backend. Dữ liệu được đưa 100% 
+     vào script SQL [src/main/resources/schema_skilltest_and_interview.sql].
+
+   Các bảng lưu trữ dữ liệu này:
+   a. [skill_tests]: Lưu danh sách đề thi (Java, Javascript, Git, MySQL, Agile, HTML/CSS...)
+      - Bổ sung cột: [updated_at] DATETIME2 NULL (đảm bảo tương thích entity JPA).
+   b. [skill_test_questions]: Ngân hàng câu hỏi trắc nghiệm liên kết theo skill_test_id
+      - Lưu: câu hỏi, 4 phương án (option_a, option_b, option_c, option_d),
+        đáp án đúng (correct_option: 'A'/'B'/'C'/'D'), và lời giải thích (explanation).
+   c. [skill_test_attempts]: Lưu kết quả thi của ứng viên (điểm số, số câu đúng, 
+      thời gian làm bài, xếp loại năng lực và JSON chi tiết từng câu trả lời).
+
+
+3. XỬ LÝ TOÀN VẸN DỮ LIỆU BẢNG [companies] VÀ [users] (LỖI USER ID 38)
+   - Nguyên nhân lỗi: Trước đây trong bảng [companies], có bản ghi lưu recruiter_id = 38,
+     nhưng trong bảng [users], tài khoản id = 38 đã bị xóa từ trước.
+     Khi Admin bấm vào "Tất cả công ty", Hibernate cố gắng truy vấn User 38 không tồn tại,
+     gây lỗi sập trang (Internal Server Error 500).
+   - Khắc phục cấp CSDL:
+     Bổ sung câu lệnh SQL tự động kiểm tra và chèn bản ghi User bù đắp cho các 
+     recruiter_id mồ côi (như ID 38) với quyền RECRUITER và trạng thái ACTIVE, 
+     giúp khóa ngoại liên kết toàn vẹn và không bao giờ bị lỗi thiếu Entity.
+
+
+================================================================================
+II. KỊCH BẢN SQL (SQL SCRIPT) NẾU BẠN MUỐN CHẠY TRỰC TIẾP TRONG SQL SERVER (SSMS)
+================================================================================
+
+USE [OnlineRecruitment];
+GO
+
+-- 1. TẠO BẢNG NGƯỠNG XẾP LOẠI BÀI THI KỸ NĂNG (NẾU CHƯA CÓ)
+IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[skill_test_rating_thresholds]') AND type in (N'U'))
+BEGIN
+    CREATE TABLE [dbo].[skill_test_rating_thresholds] (
+        [id]            BIGINT IDENTITY(1,1) PRIMARY KEY,
+        [min_score]     INT            NOT NULL,
+        [label]         NVARCHAR(100)  NOT NULL,
+        [display_order] INT            NOT NULL DEFAULT 0,
+        [created_at]    DATETIME2      NOT NULL DEFAULT SYSDATETIME(),
+        [updated_at]    DATETIME2      NOT NULL DEFAULT SYSDATETIME()
+    );
+END
+GO
+
+-- 2. NẠP DỮ LIỆU NGƯỠNG XẾP LOẠI MẶC ĐỊNH
+IF NOT EXISTS (SELECT 1 FROM [dbo].[skill_test_rating_thresholds])
+BEGIN
+    INSERT INTO [dbo].[skill_test_rating_thresholds] ([min_score], [label], [display_order])
+    VALUES
+        (90, N'Xuất sắc', 1),
+        (80, N'Giỏi',     2),
+        (65, N'Khá',      3),
+        (50, N'Đạt',      4),
+        (0,  N'Chưa đạt', 5);
+END
+GO
+
+-- 3. BỔ SUNG CỘT UPDATED_AT CHO BẢNG SKILL_TESTS NẾU CÒN THIẾU
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.skill_tests') AND name = 'updated_at')
+BEGIN
+    ALTER TABLE dbo.skill_tests ADD updated_at DATETIME2 NULL;
+END
+GO
+
+-- 4. TỰ ĐỘNG BÙ ĐẮP BẢN GHI CHO CÁC RECRUITER_ID MỒ CÔI TRONG BẢNG COMPANIES (VÍ DỤ ID 38)
+IF EXISTS (SELECT 1 FROM companies WHERE recruiter_id IS NOT NULL AND recruiter_id NOT IN (SELECT id FROM users))
+BEGIN
+    DECLARE @orphan_id BIGINT;
+    DECLARE cur CURSOR FOR 
+        SELECT DISTINCT recruiter_id FROM companies 
+        WHERE recruiter_id IS NOT NULL AND recruiter_id NOT IN (SELECT id FROM users);
+    OPEN cur;
+    FETCH NEXT FROM cur INTO @orphan_id;
+    WHILE @@FETCH_STATUS = 0
+    BEGIN
+        SET IDENTITY_INSERT users ON;
+        INSERT INTO users (id, username, email, password_hash, full_name, role, status, created_at, updated_at)
+        VALUES (
+            @orphan_id, 
+            'recruiter_' + CAST(@orphan_id AS NVARCHAR(20)), 
+            'recruiter_' + CAST(@orphan_id AS NVARCHAR(20)) + '@system.local', 
+            '$2a$10$76gXQeZq4sAcm1z7Jq9kMe6YJq4sAcm1z7Jq9kMe6YJq4sAcm1z7J', 
+            N'Nhà tuyển dụng #' + CAST(@orphan_id AS NVARCHAR(20)), 
+            'RECRUITER', 
+            'ACTIVE', 
+            SYSDATETIME(), 
+            SYSDATETIME()
+        );
+        SET IDENTITY_INSERT users OFF;
+        FETCH NEXT FROM cur INTO @orphan_id;
+    END;
+    CLOSE cur;
+    DEALLOCATE cur;
+END
+GO
+
+================================================================================
+III. GHI CHÚ QUẢN TRỊ VIÊN
+================================================================================
+- File chứa toàn bộ câu lệnh khởi tạo chi tiết cho bài thi và phỏng vấn:
+  Path: src/main/resources/schema_skilltest_and_interview.sql
+- Ứng dụng Spring Boot hiện tại đã được cấu hình tự động thực thi các kiểm tra
+  trên khi khởi động (trong DataInitializerService), nên bạn không bắt buộc phải 
+  chạy thủ công lại nếu đã restart server.
+================================================================================

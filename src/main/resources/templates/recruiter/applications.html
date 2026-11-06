@@ -1,0 +1,276 @@
+```html
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Danh sách ứng viên ứng tuyển | Online Recruitment</title>
+
+    <link rel="stylesheet" th:href="@{/css/recruiter/applications.css}">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="navbar">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-logo">OR</span>
+            <span>Online Recruitment</span>
+        </a>
+
+        <nav class="nav-links">
+            <a th:href="@{/}">Trang chủ</a>
+            <a th:href="@{/jobs}">Kênh tuyển dụng</a>
+            <a th:href="@{/recruiter/company-profile}">Hồ sơ công ty</a>
+        </nav>
+
+        <div class="account">
+            <span class="avatar">N</span>
+            <div class="account-info">
+                <strong>Nguyen Van Recruiter</strong>
+                <span>NHÀ TUYỂN DỤNG</span>
+            </div>
+            <span class="dropdown-icon">▼</span>
+        </div>
+    </div>
+</header>
+
+<main class="page-container">
+
+    <section class="page-heading">
+        <div>
+            <h1>Danh sách ứng viên ứng tuyển</h1>
+            <p>Xem và quản lý hồ sơ ứng tuyển vào các vị trí tuyển dụng của công ty.</p>
+        </div>
+
+        <a class="back-button" th:href="@{/recruiter/dashboard}">
+            ← Quay lại
+        </a>
+    </section>
+
+    <!-- Thông báo kết quả xử lý -->
+    <div th:if="${successMessage != null}"
+         th:text="${successMessage}"
+         style="margin-bottom:16px;padding:12px 16px;border-radius:8px;background:#d1fae5;color:#047857;">
+    </div>
+
+    <div th:if="${errorMessage != null}"
+         th:text="${errorMessage}"
+         style="margin-bottom:16px;padding:12px 16px;border-radius:8px;background:#fee2e2;color:#b91c1c;">
+    </div>
+
+    <!-- Bộ lọc hồ sơ -->
+    <form class="filter-panel"
+          th:action="@{/recruiter/applications}"
+          method="get">
+
+        <div class="search-box">
+            <span class="search-icon">⌕</span>
+            <input type="text"
+                   name="keyword"
+                   placeholder="Tìm theo tên ứng viên, email, vị trí..."
+                   th:value="${keyword}">
+        </div>
+
+        <select name="status" aria-label="Trạng thái hồ sơ">
+            <option value="SUBMITTED"
+                    th:selected="${status == 'SUBMITTED'}">
+                Chờ duyệt
+            </option>
+            <option value="ACCEPTED"
+                    th:selected="${status == 'ACCEPTED'}">
+                Đã duyệt
+            </option>
+            <option value="REJECTED"
+                    th:selected="${status == 'REJECTED'}">
+                Đã từ chối
+            </option>
+            <option value=""
+                    th:selected="${status == null or status == ''}">
+                Tất cả trạng thái
+            </option>
+        </select>
+
+        <select name="jobId" aria-label="Vị trí tuyển dụng">
+            <option value="">Tất cả vị trí</option>
+            <option th:each="job : ${jobs}"
+                    th:value="${job.id}"
+                    th:text="${job.title}"
+                    th:selected="${jobId != null and jobId.equals(job.id)}">
+            </option>
+        </select>
+
+        <select name="sort" aria-label="Sắp xếp theo ngày nộp">
+            <option value="newest"
+                    th:selected="${sort == null or sort == 'newest'}">
+                Ngày nộp: Mới nhất
+            </option>
+            <option value="oldest"
+                    th:selected="${sort == 'oldest'}">
+                Ngày nộp: Cũ nhất
+            </option>
+        </select>
+
+        <button type="submit" class="btn btn-primary">
+            Tìm kiếm
+        </button>
+    </form>
+
+    <!-- Bảng hồ sơ -->
+    <section class="table-card">
+        <div class="table-responsive">
+            <table class="applications-table">
+                <thead>
+                <tr>
+                    <th class="number-column">#</th>
+                    <th>Ứng viên</th>
+                    <th>Vị trí ứng tuyển</th>
+                    <th>Ngày nộp</th>
+                    <th>Hồ sơ</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="app, iterStat : ${applications}">
+                    <td th:text="${iterStat.count}">1</td>
+
+                    <td>
+                        <div class="candidate-cell">
+                            <div class="candidate-avatar"
+                                 th:text="${app.candidateName != null and !app.candidateName.isEmpty()
+                                    ? #strings.substring(app.candidateName, 0, 1)
+                                    : 'U'}">
+                                T
+                            </div>
+
+                            <div class="candidate-info">
+                                <strong th:text="${app.candidateName}">
+                                    Tên ứng viên
+                                </strong>
+                                <span th:text="${app.email}">
+                                    email@example.com
+                                </span>
+                                <span th:if="${app.phone != null}"
+                                      th:text="${app.phone}">
+                                    Số điện thoại
+                                </span>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="job-info">
+                            <strong th:text="${app.jobTitle}">
+                                Vị trí ứng tuyển
+                            </strong>
+                            <span th:text="${app.companyName}">
+                                Công ty
+                            </span>
+                            <span class="job-location"
+                                  th:if="${app.location != null}"
+                                  th:text="${app.location}">
+                                Địa điểm
+                            </span>
+                        </div>
+                    </td>
+
+                    <td class="date-cell"
+                        th:text="${app.appliedAt != null
+                            ? #dates.format(app.appliedAt, 'dd/MM/yyyy')
+                            : ''}">
+                        20/10/2026
+                    </td>
+
+                    <td>
+                        <a class="btn btn-cv"
+                           th:href="@{/recruiter/applications/{id}/cv(id=${app.id})}">
+                            ▤ Xem CV
+                        </a>
+                    </td>
+
+                    <td>
+                        <span class="status-badge status-pending"
+                              th:if="${app.status == 'SUBMITTED'}">
+                            Chờ duyệt
+                        </span>
+
+                        <span class="status-badge status-approved"
+                              th:if="${app.status == 'ACCEPTED'}">
+                            Đã duyệt
+                        </span>
+
+                        <span class="status-badge status-rejected"
+                              th:if="${app.status == 'REJECTED'}">
+                            Đã từ chối
+                        </span>
+
+                        <span class="status-badge"
+                              th:if="${app.status != 'SUBMITTED'
+                                  and app.status != 'ACCEPTED'
+                                  and app.status != 'REJECTED'}"
+                              th:text="${app.status}">
+                            Trạng thái khác
+                        </span>
+                    </td>
+
+                    <td>
+                        <div th:if="${app.status == 'SUBMITTED'}"
+                             class="action-buttons">
+
+                            <form th:action="@{/recruiter/applications/{id}/approve(id=${app.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn duyệt hồ sơ này?');">
+                                <button type="submit" class="btn btn-approve">
+                                    Duyệt
+                                </button>
+                            </form>
+
+                            <form th:action="@{/recruiter/applications/{id}/reject(id=${app.id})}"
+                                  method="post"
+                                  onsubmit="return confirm('Bạn có chắc chắn muốn từ chối hồ sơ này?');">
+                                <button type="submit" class="btn btn-reject">
+                                    Từ chối
+                                </button>
+                            </form>
+                        </div>
+
+                        <span class="completed-text"
+                              th:if="${app.status != 'SUBMITTED'}">
+                            Đã xử lý
+                        </span>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(applications)}">
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <div class="empty-icon">⌕</div>
+                            <strong>Không tìm thấy hồ sơ ứng tuyển</strong>
+                            <p>Hãy thử thay đổi trạng thái, vị trí hoặc từ khóa tìm kiếm.</p>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <span>
+                Tổng số hồ sơ:
+                <strong th:text="${#lists.size(applications)}">0</strong>
+            </span>
+
+            <a class="back-button"
+               th:href="@{/recruiter/dashboard}">
+                Về bảng điều khiển
+            </a>
+        </div>
+    </section>
+
+</main>
+
+</body>
+</html>
+```

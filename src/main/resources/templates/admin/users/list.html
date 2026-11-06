@@ -93,7 +93,8 @@
                 th:classappend="'badge-' + ${#strings.toLowerCase(u.status.name())}">
             <span th:switch="${u.status.name()}">
               <span th:case="'ACTIVE'">● Active</span>
-              <span th:case="'INACTIVE'">○ Inactive</span>
+              <span th:case="'PENDING'">⏳ Pending</span>
+              <span th:case="'REJECTED'">✕ Rejected</span>
               <span th:case="'LOCKED'">⛔ Locked</span>
             </span>
           </span>
@@ -113,6 +114,7 @@
 
               <div class="action-divider"></div>
 
+              <!-- SỬA TẠI ĐÂY: Nếu ACTIVE thì hiện nút Deactivate -->
               <form th:if="${u.status.name() == 'ACTIVE'}"
                     th:action="@{'/admin/users/' + ${u.id} + '/lock'}"
                     method="post" style="margin:0;">
@@ -122,6 +124,7 @@
                 </button>
               </form>
 
+              <!-- SỬA TẠI ĐÂY: Nếu KHÁC ACTIVE (PENDING, REJECTED, LOCKED) thì hiện nút Activate -->
               <form th:if="${u.status.name() != 'ACTIVE'}"
                     th:action="@{'/admin/users/' + ${u.id} + '/unlock'}"
                     method="post" style="margin:0;">

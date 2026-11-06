@@ -3,7 +3,7 @@ package OnlineRecruitment.OnlineRecruitment.service;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.entity.UserRole;
 import OnlineRecruitment.OnlineRecruitment.entity.UserStatus;
-import OnlineRecruitment.OnlineRecruitment.repository.admin.UserRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,6 +84,10 @@ public class UserService {
 
     @Transactional
     public void lock(Long id, User actor) {
+        if (actor != null && actor.getId().equals(id)) {
+            throw new IllegalArgumentException("Bạn không thể tự khóa tài khoản của chính mình!");
+        }
+
         User u = getById(id);
         u.setStatus(UserStatus.LOCKED);
         userRepository.save(u);
@@ -96,6 +100,10 @@ public class UserService {
     @Transactional
     public void unlock(Long id, User actor) {
         User u = getById(id);
+        if (u.getStatus() != UserStatus.LOCKED) {
+            throw new IllegalArgumentException("Chỉ có thể kích hoạt tài khoản đang ở trạng thái bị khóa (LOCKED)!");
+        }
+
         u.setStatus(UserStatus.ACTIVE);
         userRepository.save(u);
 
@@ -116,6 +124,12 @@ public class UserService {
                        UserRole role, UserStatus status,
                        User actor) {
         User u = getById(id);
+
+        if (actor != null && actor.getId().equals(id)) {
+            if (role != u.getRole() || status != u.getStatus()) {
+                throw new IllegalArgumentException("Bạn không thể tự thay đổi vai trò hoặc trạng thái tài khoản của chính mình!");
+            }
+        }
 
         // Nếu đổi email, kiểm tra trùng
         if (!u.getEmail().equalsIgnoreCase(email)) {

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title th:text="${pageTitle}">Kỹ năng</title>
+<link rel="stylesheet" th:href="@{/css/admin.css}"><link rel="stylesheet" th:href="@{/css/admin-job-layout.css}"><link rel="stylesheet" th:href="@{/css/admin-skills.css}"></head>
+<body class="admin"><aside th:replace="~{admin/_layout :: sidebar}"></aside><div class="main skill-main">
+<div th:replace="~{admin/_layout :: topbar('Skills', 'Tạo hoặc chỉnh sửa kỹ năng')}"></div>
+<main class="skill-container skill-form-container"><h1 th:text="${pageTitle}">Tạo kỹ năng</h1>
+<p class="skill-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<form th:object="${skillForm}" th:action="${skillId == null} ? @{/admin/skills} : @{/admin/skills/{id}(id=${skillId})}" method="post">
+<label for="name">Tên kỹ năng *</label><input id="name" th:field="*{name}" maxlength="150" required placeholder="Ví dụ: Java, SQL Server, Figma">
+<p class="skill-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+<label for="categoryId">Danh mục ngành nghề *</label><select id="categoryId" th:field="*{categoryId}" required>
+<option value="">-- Chọn Category --</option><option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name + ' (' + c.status + ')'}" th:disabled="${c.status != 'ACTIVE' and (skillForm.categoryId == null or skillForm.categoryId != c.id)}"></option></select>
+<p class="skill-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
+<div th:if="${skillId != null}"><label for="status">Trạng thái</label><select id="status" th:field="*{status}"><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select></div>
+<p class="category-help">Tên kỹ năng là duy nhất trong hệ thống. Kỹ năng đã dùng trong tin tuyển dụng không thể chuyển danh mục. Kích hoạt lại cần danh mục đang hoạt động.</p>
+<div class="skill-actions"><button class="skill-btn" type="submit">Lưu kỹ năng</button><a class="skill-btn skill-btn-outline" th:href="@{/admin/skills}">Hủy</a></div></form></main></div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block></body></html>

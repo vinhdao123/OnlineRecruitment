@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title th:text="${pageTitle}">Job Category</title>
+<link rel="stylesheet" th:href="@{/css/admin.css}">
+<link rel="stylesheet" th:href="@{/css/admin-job-layout.css}">
+<link rel="stylesheet" th:href="@{/css/admin-categories.css}">
+</head>
+<body class="admin" th:with="activeMenu='categories'">
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+<div class="admin-category-main">
+<div th:replace="~{admin/_layout :: topbar('Job Categories', 'Tạo hoặc chỉnh sửa danh mục')}"></div>
+<main class="category-panel category-form-panel">
+ <div class="category-heading"><div><h1 th:text="${pageTitle}">Job Category</h1><p>Điền thông tin danh mục công việc.</p></div></div>
+ <p class="category-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+ <form th:object="${categoryForm}" th:action="${categoryId == null} ? @{/admin/categories} : @{/admin/categories/{id}(id=${categoryId})}" method="post">
+ <label for="name">Tên danh mục *</label><input id="name" type="text" th:field="*{name}" maxlength="150" placeholder="Ví dụ: IT, Marketing, HR" required>
+ <div class="category-error-text" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+ <label for="description">Mô tả</label><textarea id="description" th:field="*{description}" placeholder="Nhập mô tả danh mục"></textarea>
+ <div th:if="${categoryId != null}"><label for="status">Trạng thái</label><select id="status" th:field="*{status}"><option value="ACTIVE">ACTIVE - Cho phép đăng tin mới</option><option value="INACTIVE">INACTIVE - Không cho đăng tin mới</option></select>
+ <p class="category-help">Tin cũ vẫn giữ danh mục này; Recruiter không được dùng Category INACTIVE cho tin mới.</p></div>
+ <div class="category-actions"><button class="category-btn" type="submit">Lưu danh mục</button><a class="category-btn category-btn-outline" th:href="@{/admin/categories}">Hủy</a></div>
+ </form>
+</main></div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body></html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ cá nhân — Ứng viên</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+    <!-- Taskbar Header -->
+    <div th:replace="~{fragments/taskbar :: taskbar('profile')}"></div>
+
+    <main class="main-wrapper">
+        <!-- Page Title -->
+        <div class="page-title-box">
+            <h1 class="page-title">Hồ sơ ứng viên</h1>
+            <p class="page-subtitle">Quản lý và cập nhật thông tin cá nhân của bạn để nhà tuyển dụng dễ dàng tiếp cận.</p>
+        </div>
+
+        <!-- Notification Alerts -->
+        <div th:if="${successMessage}" class="alert alert-success">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <div class="profile-grid">
+            <!-- Left Column: Profile Overview Card -->
+            <aside class="profile-card">
+                <div class="avatar-container">
+                    <img id="avatarPreview" class="avatar-preview-img"
+                         th:src="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)} ? @{${profileUser.avatarUrl}} : 'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${profileUser.username}"
+                         alt="Avatar">
+                    <label for="avatarInput" class="avatar-upload-btn" title="Tải ảnh đại diện mới từ máy">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    </label>
+                </div>
+
+                <h2 class="profile-card-name" th:text="${profileUser.fullName}">Nguyễn Văn A</h2>
+                <div class="profile-card-role">Ứng viên</div>
+
+                <p style="font-size: 13px; color: #6b7280; margin: 0 0 16px 0;">
+                    Trạng thái: 
+                    <span th:if="${profileUser.status.name() == 'ACTIVE'}" style="color: #10b981; font-weight: 600;">● Đang hoạt động</span>
+                    <span th:if="${profileUser.status.name() == 'PENDING'}" style="color: #f59e0b; font-weight: 600;">● Chờ duyệt</span>
+                    <span th:if="${profileUser.status.name() == 'LOCKED'}" style="color: #ef4444; font-weight: 600;">● Bị khóa</span>
+                </p>
+
+                <div class="profile-card-meta">
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <span th:text="${profileUser.email}">email@example.com</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                        <span th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa có SĐT'}">0912345678</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                        <span th:text="${profileUser.location != null and !#strings.isEmpty(profileUser.location) ? profileUser.location : 'Chưa cập nhật địa chỉ'}">Hà Nội</span>
+                    </div>
+                    <div class="meta-item">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        <span>Tham gia: <th:block th:text="${#temporals.format(profileUser.createdAt, 'dd/MM/yyyy')}">01/01/2026</th:block></span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <a th:href="@{/candidate/change-password}" class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 13px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        Đổi mật khẩu
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Right Column: Profile Content -->
+            <section class="profile-content-card">
+                <div class="content-header">
+                    <h2 class="content-title" th:text="${isEditMode ? 'Chỉnh sửa thông tin hồ sơ' : 'Chi tiết thông tin cá nhân'}">Thông tin cá nhân</h2>
+                    <div>
+                        <a th:if="${!isEditMode}" th:href="@{/candidate/profile(edit=true)}" class="btn btn-primary">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Chỉnh sửa thông tin
+                        </a>
+                        <a th:if="${isEditMode}" th:href="@{/candidate/profile}" class="btn btn-secondary">
+                            ✕ Hủy bỏ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- VIEW MODE -->
+                <div th:if="${!isEditMode}">
+                    <div class="info-section">
+                        <h3 class="info-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            Thông tin cơ bản
+                        </h3>
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <div class="info-label">Họ và tên</div>
+                                <div class="info-value" th:text="${profileUser.fullName}">Nguyễn Văn A</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Tên tài khoản (Username)</div>
+                                <div class="info-value" th:text="${profileUser.username}">nguyenvana</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Email</div>
+                                <div class="info-value" th:text="${profileUser.email}">email@example.com</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Số điện thoại</div>
+                                <div class="info-value" th:classappend="${profileUser.phone == null ? 'empty' : ''}"
+                                     th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật'}">0912345678</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Ngày sinh</div>
+                                <div class="info-value" th:classappend="${candidate.dob == null ? 'empty' : ''}"
+                                     th:text="${candidate.dob != null ? #temporals.format(candidate.dob, 'dd/MM/yyyy') : 'Chưa cập nhật'}">01/01/2000</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">Giới tính</div>
+                                <div class="info-value" th:classappend="${candidate.gender == null ? 'empty' : ''}"
+                                     th:text="${candidate.gender != null and !#strings.isEmpty(candidate.gender) ? candidate.gender : 'Chưa cập nhật'}">Nam</div>
+                            </div>
+                            <div class="info-box" style="grid-column: 1 / -1;">
+                                <div class="info-label">Địa chỉ nơi ở</div>
+                                <div class="info-value" th:classappend="${candidate.address == null and profileUser.location == null ? 'empty' : ''}"
+                                     th:text="${candidate.address != null and !#strings.isEmpty(candidate.address) ? candidate.address : (profileUser.location != null ? profileUser.location : 'Chưa cập nhật')}">Hà Nội</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                            Mục tiêu nghề nghiệp & Giới thiệu
+                        </h3>
+                        <div class="info-grid">
+                            <div class="info-box" style="grid-column: 1 / -1;">
+                                <div class="info-label">Vị trí mong muốn</div>
+                                <div class="info-value" th:classappend="${candidate.desiredPosition == null ? 'empty' : ''}"
+                                     th:text="${candidate.desiredPosition != null and !#strings.isEmpty(candidate.desiredPosition) ? candidate.desiredPosition : 'Chưa cập nhật vị trí mong muốn'}">Software Engineer</div>
+                            </div>
+                            <div class="info-box" style="grid-column: 1 / -1;">
+                                <div class="info-label">Giới thiệu bản thân</div>
+                                <div class="info-value" th:classappend="${candidate.aboutMe == null ? 'empty' : ''}" style="white-space: pre-line;"
+                                     th:text="${candidate.aboutMe != null and !#strings.isEmpty(candidate.aboutMe) ? candidate.aboutMe : 'Chưa có thông tin giới thiệu bản thân.'}">Giới thiệu...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                            Liên kết mạng xã hội & Dự án
+                        </h3>
+                        <div class="info-grid">
+                            <div class="info-box">
+                                <div class="info-label">LinkedIn</div>
+                                <div class="info-value" th:if="${candidate.linkedinUrl != null and !#strings.isEmpty(candidate.linkedinUrl)}">
+                                    <a th:href="${candidate.linkedinUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${candidate.linkedinUrl}"></a>
+                                </div>
+                                <div class="info-value empty" th:if="${candidate.linkedinUrl == null or #strings.isEmpty(candidate.linkedinUrl)}">Chưa cập nhật</div>
+                            </div>
+                            <div class="info-box">
+                                <div class="info-label">GitHub</div>
+                                <div class="info-value" th:if="${candidate.githubUrl != null and !#strings.isEmpty(candidate.githubUrl)}">
+                                    <a th:href="${candidate.githubUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${candidate.githubUrl}"></a>
+                                </div>
+                                <div class="info-value empty" th:if="${candidate.githubUrl == null or #strings.isEmpty(candidate.githubUrl)}">Chưa cập nhật</div>
+                            </div>
+                            <div class="info-box" style="grid-column: 1 / -1;">
+                                <div class="info-label">Portfolio Website</div>
+                                <div class="info-value" th:if="${candidate.portfolioUrl != null and !#strings.isEmpty(candidate.portfolioUrl)}">
+                                    <a th:href="${candidate.portfolioUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${candidate.portfolioUrl}"></a>
+                                </div>
+                                <div class="info-value empty" th:if="${candidate.portfolioUrl == null or #strings.isEmpty(candidate.portfolioUrl)}">Chưa cập nhật</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 30px; text-align: center;">
+                        <a th:href="@{/candidate/profile(edit=true)}" class="btn btn-primary" style="padding: 12px 28px; font-size: 15px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                            Bấm vào đây để chỉnh sửa thông tin hồ sơ
+                        </a>
+                    </div>
+                </div>
+
+                <!-- EDIT MODE -->
+                <form th:if="${isEditMode}" th:action="@{/candidate/profile}" th:object="${candidateDto}" method="post" enctype="multipart/form-data" id="profileForm">
+                    <input type="file" id="avatarInput" name="avatarFile" class="avatar-file-input" accept="image/*" onchange="previewImage(this)">
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">Thông tin cơ bản</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Họ và tên <span class="required">*</span></label>
+                                <input type="text" th:field="*{fullName}" class="form-input" placeholder="Nhập họ và tên đầy đủ" required>
+                                <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Số điện thoại</label>
+                                <input type="text" th:field="*{phone}" class="form-input" placeholder="Ví dụ: 0912345678">
+                                <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Ngày sinh</label>
+                                <input type="date" th:field="*{dob}" class="form-input">
+                                <div th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Giới tính</label>
+                                <select th:field="*{gender}" class="form-select">
+                                    <option value="">-- Chọn giới tính --</option>
+                                    <option value="Nam">Nam</option>
+                                    <option value="Nữ">Nữ</option>
+                                    <option value="Khác">Khác</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Địa chỉ nơi ở</label>
+                                <input type="text" th:field="*{address}" class="form-input" placeholder="Địa chỉ hiện tại của bạn">
+                                <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="field-error"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">Thông tin nghề nghiệp</h3>
+                        <div class="form-grid">
+                            <div class="form-group full-width">
+                                <label class="form-label">Vị trí mong muốn ứng tuyển</label>
+                                <input type="text" th:field="*{desiredPosition}" class="form-input" placeholder="Ví dụ: Senior Java Developer, Frontend React Developer...">
+                                <div th:if="${#fields.hasErrors('desiredPosition')}" th:errors="*{desiredPosition}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Giới thiệu bản thân & Kinh nghiệm tóm tắt</label>
+                                <textarea th:field="*{aboutMe}" class="form-textarea" placeholder="Mô tả kỹ năng, mục tiêu nghề nghiệp, kinh nghiệm nổi bật của bạn..."></textarea>
+                                <div th:if="${#fields.hasErrors('aboutMe')}" th:errors="*{aboutMe}" class="field-error"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-section">
+                        <h3 class="info-section-title">Mạng xã hội & Portfolio</h3>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">Link LinkedIn</label>
+                                <input type="url" th:field="*{linkedinUrl}" class="form-input" placeholder="https://linkedin.com/in/username">
+                                <div th:if="${#fields.hasErrors('linkedinUrl')}" th:errors="*{linkedinUrl}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Link GitHub</label>
+                                <input type="url" th:field="*{githubUrl}" class="form-input" placeholder="https://github.com/username">
+                                <div th:if="${#fields.hasErrors('githubUrl')}" th:errors="*{githubUrl}" class="field-error"></div>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label class="form-label">Link Portfolio / Blog cá nhân</label>
+                                <input type="url" th:field="*{portfolioUrl}" class="form-input" placeholder="https://yourportfolio.com">
+                                <div th:if="${#fields.hasErrors('portfolioUrl')}" th:errors="*{portfolioUrl}" class="field-error"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary" style="padding: 12px 28px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            Lưu thay đổi & Cập nhật
+                        </button>
+                        <a th:href="@{/candidate/profile}" class="btn btn-secondary">Hủy bỏ</a>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
+</html>

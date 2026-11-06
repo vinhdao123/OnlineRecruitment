@@ -1,5 +1,8 @@
 package OnlineRecruitment.OnlineRecruitment.entity;
 
 public enum CompanyStatus {
-    PENDING, APPROVED, REJECTED, INACTIVE
+    PENDING,
+    REJECTED,
+    ACTIVE,
+    LOCKED
 }

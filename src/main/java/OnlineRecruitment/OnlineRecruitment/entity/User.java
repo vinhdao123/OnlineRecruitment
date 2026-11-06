@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
 
     @Id
@@ -27,7 +30,7 @@ public class User {
     @Column(name = "password_hash", length = 255, nullable = false)
     private String passwordHash;
 
-    @Column(name = "full_name", length = 150, nullable = false)
+    @Column(name = "full_name", length = 255, nullable = false)
     private String fullName;
 
     @Column(name = "phone", length = 20)
@@ -35,9 +38,6 @@ public class User {
 
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
-
-    @Column(name = "location", length = 255)
-    private String location;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", length = 20, nullable = false)
@@ -47,18 +47,27 @@ public class User {
     @Column(name = "status", length = 20, nullable = false)
     private UserStatus status;
 
+    @Column(name = "location", length = 255)
+    private String location;
+
+    @Column(name = "rejection_reason", columnDefinition = "NVARCHAR(MAX)")
+    private String rejectionReason;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @OneToOne(mappedBy = "recruiter", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Company company;
+
     @PrePersist
     public void prePersist() {
         LocalDateTime now = LocalDateTime.now();
         if (createdAt == null) createdAt = now;
         if (updatedAt == null) updatedAt = now;
-        if (status == null)    status = UserStatus.ACTIVE;
+        if (status == null)    status = UserStatus.PENDING;
         if (role == null)      role = UserRole.CANDIDATE;
     }
 

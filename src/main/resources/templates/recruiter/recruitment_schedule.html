@@ -1,0 +1,581 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tạo lịch phỏng vấn | OnlineRecruitment</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/recruiter/recruitment_schedule.css}">
+</head>
+
+<body>
+
+<header class="main-header">
+    <div class="header-container">
+
+        <a href="/" class="logo">
+            <span class="logo-icon">OR</span>
+            <span>Online<br>Recruitment</span>
+        </a>
+
+        <nav class="main-nav">
+            <a href="/">Trang chủ</a>
+            <a href="/career-guide">Cẩm nang phỏng vấn</a>
+            <a href="/skill-test">Đánh giá kỹ năng</a>
+            <a href="/recruiter/dashboard" class="active">Kênh tuyển dụng</a>
+            <a href="/recruiter/profile">Hồ sơ công ty</a>
+        </nav>
+
+        <div class="user-profile">
+            <div class="avatar">R</div>
+            <div class="user-info">
+                <strong>Nhà tuyển dụng</strong>
+                <span>NHÀ TUYỂN DỤNG</span>
+            </div>
+            <span class="dropdown-icon">▼</span>
+        </div>
+
+    </div>
+</header>
+
+<main class="page-container">
+
+    <div class="breadcrumb">
+        <a href="/recruiter/dashboard">Kênh tuyển dụng</a>
+        <span>›</span>
+        <a href="/recruiter/interviews/availability">Lịch phỏng vấn</a>
+        <span>›</span>
+        <strong>Tạo lịch phỏng vấn</strong>
+    </div>
+
+    <div class="page-heading">
+        <div>
+            <h1>
+                <span class="heading-icon">▣</span>
+                Tạo lịch phỏng vấn
+            </h1>
+            <p>
+                Chủ động mở ngày và khung giờ để ứng viên được duyệt
+                có thể lựa chọn lịch phỏng vấn.
+            </p>
+        </div>
+    </div>
+
+    <div class="alert alert-success"
+         th:if="${successMessage}"
+         th:text="${successMessage}">
+    </div>
+
+    <div class="alert alert-error"
+         th:if="${errorMessage}"
+         th:text="${errorMessage}">
+    </div>
+
+    <form th:action="@{/recruiter/interviews/availability/save}"
+          method="post"
+          id="availabilityForm">
+
+        <input type="hidden"
+               th:name="${_csrf.parameterName}"
+               th:value="${_csrf.token}">
+
+        <div class="form-layout">
+
+            <!-- CHỌN NGÀY -->
+            <section class="panel calendar-panel">
+
+                <div class="section-heading">
+                    <span class="step-number">1</span>
+                    <div>
+                        <h2>Chọn ngày mở lịch</h2>
+                        <p>Chọn một hoặc nhiều ngày phỏng vấn</p>
+                    </div>
+                </div>
+
+                <div class="calendar">
+
+                    <div class="calendar-header">
+                        <button type="button"
+                                id="prevMonth"
+                                class="month-button">‹</button>
+
+                        <strong id="monthTitle"></strong>
+
+                        <button type="button"
+                                id="nextMonth"
+                                class="month-button">›</button>
+                    </div>
+
+                    <div class="calendar-weekdays">
+                        <span>T2</span>
+                        <span>T3</span>
+                        <span>T4</span>
+                        <span>T5</span>
+                        <span>T6</span>
+                        <span>T7</span>
+                        <span>CN</span>
+                    </div>
+
+                    <div class="calendar-days"
+                         id="calendarDays"
+                         th:attr="data-existing-dates=${existingDateString}">
+                    </div>
+
+                </div>
+
+                <div class="selected-section">
+                    <div class="selected-title">
+                        Ngày đã chọn
+                        <span id="selectedCount">0</span>
+                    </div>
+
+                    <div class="selected-dates" id="selectedDates">
+                        <span class="empty-text">Chưa chọn ngày nào</span>
+                    </div>
+                </div>
+
+                <div id="dateInputs"></div>
+
+                <div class="calendar-hint">
+                    <span>ⓘ</span>
+                    Bạn có thể chọn nhiều ngày khác nhau trong lịch.
+                </div>
+
+            </section>
+
+            <!-- CHỌN GIỜ -->
+            <section class="panel time-panel">
+
+                <div class="duration-select">
+                    <label for="durationMinutes">Thời lượng mỗi buổi:</label>
+
+                    <select id="durationMinutes"
+                            name="durationMinutes"
+                            onchange="generateSlots()">
+                        <option value="15">15 phút</option>
+                        <option value="30" selected>30 phút</option>
+                        <option value="45">45 phút</option>
+                        <option value="60">60 phút</option>
+                        <option value="90">90 phút</option>
+                        <option value="120">120 phút</option>
+                    </select>
+                </div>
+
+                <div class="info-box">
+                    <span class="info-icon">i</span>
+                    Các khung giờ được áp dụng cho tất cả ngày đã chọn.
+                </div>
+
+                <div class="time-input-group">
+                    <div class="form-group">
+                        <label for="startTime">Giờ bắt đầu</label>
+                        <input type="time"
+                               id="startTime"
+                               name="startTime"
+                               value="08:00"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="endTime">Giờ kết thúc</label>
+                        <input type="time"
+                               id="endTime"
+                               name="endTime"
+                               value="17:00"
+                               required>
+                    </div>
+                </div>
+
+                <button type="button"
+                        class="add-time-button"
+                        id="generateSlots">
+                    + Tạo khung giờ
+                </button>
+
+                <div class="slot-divider"></div>
+
+                <div class="slot-heading">
+                    <strong>Danh sách khung giờ</strong>
+                    <span id="durationLabel">Mỗi khung giờ 30 phút</span>
+                </div>Thời lượng mỗi buổi phỏng vấn được thiết lập theo lựa chọn
+                của nhà tuyển dụng. Những khung giờ đã được ứng viên đặt
+                sẽ không thể tiếp tục được sử dụng cho ứng viên khác.
+                Chỉ ứng viên có đơn ứng tuyển được nhà tuyển dụng chấp nhận
+                mới có thể đặt lịch.
+
+                <div class="slot-list" id="slotList">
+                    <span class="empty-text">
+                        Chưa tạo khung giờ
+                    </span>
+                </div>
+
+                <div class="slot-summary" id="slotSummary"></div>
+
+            </section>
+
+        </div>
+
+        <!-- LƯU Ý -->
+        <section class="panel note-panel">
+
+            <h2>
+                <span class="note-icon">ⓘ</span>
+                Lưu ý khi tạo lịch
+            </h2>
+
+            <p>
+                Mỗi khung giờ có thời lượng 30 phút. Những khung giờ
+                đã được ứng viên đặt sẽ không thể tiếp tục được sử dụng
+                cho ứng viên khác. Chỉ ứng viên có đơn ứng tuyển được
+                nhà tuyển dụng chấp nhận mới có thể đặt lịch.
+            </p>
+
+            <div class="form-actions">
+
+                <a href="/recruiter/dashboard" class="cancel-button">
+                    Hủy
+                </a>
+
+                <button type="submit"
+                        class="submit-button"
+                        id="submitButton">
+                    <span>▣</span>
+                    Tạo lịch phỏng vấn
+                </button>
+
+            </div>
+
+        </section>
+
+    </form>
+
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const calendarDays = document.getElementById("calendarDays");
+        const monthTitle = document.getElementById("monthTitle");
+        const selectedDates = document.getElementById("selectedDates");
+        const dateInputs = document.getElementById("dateInputs");
+        const selectedCount = document.getElementById("selectedCount");
+
+        const slotList = document.getElementById("slotList");
+        const slotSummary = document.getElementById("slotSummary");
+
+        const startInput = document.getElementById("startTime");
+        const endInput = document.getElementById("endTime");
+        const durationInput = document.getElementById("durationMinutes");
+        const durationLabel = document.getElementById("durationLabel");
+
+        const form = document.getElementById("availabilityForm");
+
+        let currentMonth = new Date();
+        currentMonth.setDate(1);
+
+        let selected = new Set();
+        let slots = [];
+
+        // Lấy danh sách ngày đã có lịch từ Controller
+        const existingDates = new Set(
+            (calendarDays.dataset.existingDates || "")
+                .split(",")
+                .map(date => date.trim())
+                .filter(date => date !== "")
+        );
+
+        function formatDate(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            const d = String(date.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+
+        function formatDisplay(dateString) {
+            const [y, m, d] = dateString.split("-");
+            return `${d}/${m}/${y}`;
+        }
+
+        function todayString() {
+            return formatDate(new Date());
+        }
+
+        function renderCalendar() {
+
+            calendarDays.innerHTML = "";
+
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+
+            monthTitle.textContent = `Tháng ${month + 1}, ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+
+            let start = firstDay.getDay();
+            start = start === 0 ? 6 : start - 1;
+
+            const totalDays = lastDay.getDate();
+            const previousMonthLastDay =
+                new Date(year, month, 0).getDate();
+
+            const totalCells = Math.ceil((start + totalDays) / 7) * 7;
+
+            for (let i = 0; i < totalCells; i++) {
+
+                let date;
+                let isCurrentMonth = true;
+
+                if (i < start) {
+                    date = new Date(
+                        year, month - 1,
+                        previousMonthLastDay - start + i + 1
+                    );
+                    isCurrentMonth = false;
+
+                } else if (i >= start + totalDays) {
+                    date = new Date(
+                        year, month + 1,
+                        i - start - totalDays + 1
+                    );
+                    isCurrentMonth = false;
+
+                } else {
+                    date = new Date(year, month, i - start + 1);
+                }
+
+                const dateString = formatDate(date);
+
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "calendar-day";
+                button.textContent = date.getDate();
+
+                if (!isCurrentMonth) {
+                    button.classList.add("other-month");
+                }
+
+                if (dateString < todayString()) {
+                    button.classList.add("disabled-day");
+                    button.disabled = true;
+                }
+
+                // Ngày đã tạo lịch trước đó
+                if (existingDates.has(dateString)) {
+                    button.classList.add("booked-day");
+                    button.disabled = true;
+                    button.title = "Ngày này đã được tạo lịch phỏng vấn";
+                }
+
+// Ngày đang được chọn
+                if (selected.has(dateString)) {
+                    button.classList.add("selected-day");
+                }
+
+                if (date.getDay() === 0 && !selected.has(dateString)) {
+                    button.classList.add("sunday");
+                }
+
+                button.addEventListener("click", function () {
+
+                    // Không cho chọn ngày đã tạo lịch
+                    if (existingDates.has(dateString)) {
+                        return;
+                    }
+
+                    if (selected.has(dateString)) {
+                        selected.delete(dateString);
+                    } else {
+                        selected.add(dateString);
+                    }
+
+                    renderCalendar();
+                    renderSelectedDates();
+                });
+
+                calendarDays.appendChild(button);
+            }
+        }
+
+        function renderSelectedDates() {
+
+            selectedDates.innerHTML = "";
+            dateInputs.innerHTML = "";
+
+            const dates = Array.from(selected).sort();
+
+            selectedCount.textContent = dates.length;
+
+            if (dates.length === 0) {
+                selectedDates.innerHTML =
+                    '<span class="empty-text">Chưa chọn ngày nào</span>';
+            }
+
+            dates.forEach(function (date) {
+
+                const chip = document.createElement("span");
+                chip.className = "date-chip";
+
+                const label = document.createElement("span");
+                label.textContent = formatDisplay(date);
+
+                const remove = document.createElement("button");
+                remove.type = "button";
+                remove.textContent = "×";
+                remove.setAttribute("aria-label", "Bỏ chọn ngày");
+
+                remove.addEventListener("click", function () {
+                    selected.delete(date);
+                    renderCalendar();
+                    renderSelectedDates();
+                });
+
+                chip.appendChild(label);
+                chip.appendChild(remove);
+                selectedDates.appendChild(chip);
+
+                const hidden = document.createElement("input");
+                hidden.type = "hidden";
+                hidden.name = "dates";
+                hidden.value = date;
+
+                dateInputs.appendChild(hidden);
+            });
+        }
+
+        function renderSlots() {
+
+            slotList.innerHTML = "";
+
+            if (slots.length === 0) {
+                slotList.innerHTML =
+                    '<span class="empty-text">Chưa có khung giờ</span>';
+                slotSummary.textContent = "";
+                return;
+            }
+
+            slots.forEach(function (slot) {
+
+                const chip = document.createElement("span");
+                chip.className = "time-chip";
+                chip.textContent = `${slot.start} – ${slot.end}`;
+
+                slotList.appendChild(chip);
+            });
+
+            slotSummary.textContent =
+                `Có ${slots.length} khung giờ mỗi ngày. ` +
+                `Tổng ${slots.length * selected.size} lượt phỏng vấn dự kiến.`;
+        }
+
+        function generateSlots() {
+
+            const start = startInput.value;
+            const end = endInput.value;
+
+            const duration = Number(durationInput.value);
+
+            if (!start || !end) {
+                alert("Vui lòng nhập giờ bắt đầu và giờ kết thúc.");
+                return false;
+            }
+
+            if (start >= end) {
+                alert("Giờ kết thúc phải sau giờ bắt đầu.");
+                return false;
+            }
+
+            if (!duration || duration <= 0) {
+                alert("Vui lòng chọn thời lượng phỏng vấn.");
+                return false;
+            }
+
+            const [startHour, startMinute] = start.split(":").map(Number);
+            const [endHour, endMinute] = end.split(":").map(Number);
+
+            let current = startHour * 60 + startMinute;
+            const finish = endHour * 60 + endMinute;
+
+            slots = [];
+
+            function formatTime(minutes) {
+                const h = String(Math.floor(minutes / 60)).padStart(2, "0");
+                const m = String(minutes % 60).padStart(2, "0");
+
+                return `${h}:${m}`;
+            }
+
+            while (current + duration <= finish) {
+
+                const next = current + duration;
+
+                slots.push({
+                    start: formatTime(current),
+                    end: formatTime(next)
+                });
+
+                current = next;
+            }
+
+            if (slots.length === 0) {
+                alert("Khoảng thời gian đã chọn không đủ cho một buổi phỏng vấn.");
+                return false;
+            }
+
+            durationLabel.textContent =
+                `Mỗi khung giờ ${duration} phút`;
+
+            renderSlots();
+
+            return true;
+        }
+
+        document.getElementById("prevMonth")
+            .addEventListener("click", function () {
+                currentMonth.setMonth(currentMonth.getMonth() - 1);
+                renderCalendar();
+            });
+
+        document.getElementById("nextMonth")
+            .addEventListener("click", function () {
+                currentMonth.setMonth(currentMonth.getMonth() + 1);
+                renderCalendar();
+            });
+
+        document.getElementById("generateSlots")
+            .addEventListener("click", generateSlots);
+
+        durationInput.addEventListener("change", generateSlots);
+
+        startInput.addEventListener("change", generateSlots);
+
+        endInput.addEventListener("change", generateSlots);
+
+        form.addEventListener("submit", function (event) {
+
+            if (selected.size === 0) {
+                event.preventDefault();
+                alert("Vui lòng chọn ít nhất một ngày phỏng vấn.");
+                return;
+            }
+
+            if (!generateSlots()) {
+                event.preventDefault();
+                return;
+            }
+
+            document.getElementById("submitButton").disabled = true;
+        });
+
+        renderCalendar();
+        renderSelectedDates();
+        generateSlots();
+
+    });
+</script>
+
+</body>
+</html>

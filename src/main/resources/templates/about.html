@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Về chúng tôi — Online Recruitment</title>
+    <link rel="stylesheet" th:href="@{/css/home.css}">
+</head>
+<body>
+    <header class="header">
+        <div class="container header-container">
+            <a th:href="@{/}" class="logo">Online<span>Recruitment</span></a>
+            <nav class="nav">
+                <a th:href="@{/jobs}">Việc làm</a>
+                <a th:href="@{/companies}">Công ty</a>
+                <a th:href="@{/about}" class="active">Về chúng tôi</a>
+            </nav>
+            <div class="auth-buttons">
+                <a th:href="@{/login}" class="btn-login">Đăng nhập</a>
+                <a th:href="@{/register/candidate}" class="btn-register">Đăng ký</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 60px 20px; max-width: 800px; margin: 0 auto;">
+        <h1>Về Online Recruitment</h1>
+        <p style="font-size: 16px; line-height: 1.8; color: #4b5563; margin-top: 20px;">
+            Online Recruitment là nền tảng kết nối ứng viên và nhà tuyển dụng hàng đầu, mang lại cơ hội việc làm phong phú và môi trường ứng tuyển chuyên nghiệp, bảo mật và hiệu quả.
+        </p>
+    </main>
+</body>
+</html>

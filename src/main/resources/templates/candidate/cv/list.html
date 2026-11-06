@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV của tôi — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
+</head>
+<body>
+
+<!-- ================= TASKBAR ================= -->
+<div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
+
+<!-- ================= LAYOUT CHÍNH ================= -->
+<div class="cv-dashboard-layout">
+
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="cv-sidebar">
+        <div class="cv-sidebar-menu">
+            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                My CV
+            </a>
+            <a th:href="@{/candidate/cvs/gallery}" class="cv-sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                Template CV
+            </a>
+        </div>
+    </aside>
+
+    <!-- ================= NỘI DUNG CHÍNH ================= -->
+    <main class="main-content">
+
+        <div class="cv-breadcrumb">
+            <a th:href="@{/}">Trang chủ</a>
+            <span>/</span>
+            <span class="current">My CV</span>
+        </div>
+
+        <!-- ================= BANNER CHÀO MỪNG ================= -->
+        <section class="cv-welcome-banner">
+            <div class="cv-welcome-content">
+                <span class="cv-welcome-badge">✨ TRUNG TÂM HỒ SƠ ỨNG VIÊN</span>
+                <h1 class="cv-welcome-title">Chào mừng, <span class="cv-welcome-name" th:text="${currentUser != null && currentUser.fullName != null && !currentUser.fullName.isEmpty() ? currentUser.fullName : (profileUser != null && profileUser.fullName != null && !profileUser.fullName.isEmpty() ? profileUser.fullName : #authentication.name)}">Ứng viên</span>! 👋</h1>
+                <p class="cv-welcome-subtitle">Khởi tạo hồ sơ năng lực ấn tượng với bộ mẫu chuẩn quốc tế để chinh phục nhà tuyển dụng và nắm bắt cơ hội nghề nghiệp tốt nhất.</p>
+            </div>
+
+            <div class="cv-welcome-actions">
+                <a th:href="@{/candidate/cvs/new}" class="btn-welcome-create"><span>+</span> Tạo CV ngay</a>
+                <button type="button" class="btn-welcome-upload" onclick="openUploadModal()"><span>📤</span> Tải CV lên</button>
+            </div>
+        </section>
+
+        <!-- ================= THANH TÌM KIẾM ================= -->
+        <div class="cv-search-bar-card">
+            <div class="cv-search-icon-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </div>
+            <input type="text" id="cvSearchInput" class="cv-search-input-clean" placeholder="Tìm kiếm nhanh theo tên CV của bạn..." onkeyup="filterCvs()">
+            <div class="cv-search-count-pill" th:if="${cvs != null}">
+                Tổng cộng: <strong th:text="${#lists.size(cvs)}">0</strong> CV
+            </div>
+        </div>
+
+        <!-- ================= THÔNG BÁO ================= -->
+        <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
+        <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
+
+        <!-- ================= TRẠNG THÁI RỖNG ================= -->
+        <div th:unless="${hasCvs}" class="cv-empty-state">
+            <div class="cv-empty-icon">📄</div>
+            <h3 class="cv-empty-title">Bạn chưa có CV nào</h3>
+            <p class="cv-empty-text">Hãy bấm nút "Tạo CV ngay" hoặc "Tải CV lên" để bắt đầu.</p>
+        </div>
+
+        <!-- ================= GRID DANH SÁCH CV ================= -->
+        <div class="cv-grid" th:if="${hasCvs}">
+            <div th:each="cv : ${cvs}" class="cv-card" th:attr="data-title=${#strings.toLowerCase(cv.title)}"
+                 th:with="detail=${cvDataMap != null ? cvDataMap.get(cv.id) : null},
+                          cvEntity=${detail != null ? detail['cv'] : null},
+                          works=${detail != null ? detail['works'] : null},
+                          educations=${detail != null ? detail['educations'] : null},
+                          displayName=${currentUser != null && currentUser.fullName != null && !currentUser.fullName.isEmpty() ? currentUser.fullName : (profileUser != null && profileUser.fullName != null && !profileUser.fullName.isEmpty() ? profileUser.fullName : #authentication.name)}">
+
+                <!-- ============ TRƯỜNG HỢP 1: CV TẢI LÊN TỪ MÁY ============ -->
+                <th:block th:if="${cv.isUploaded}">
+                    <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="cv-card-link-wrapper">
+                        <div class="cv-preview-card">
+                            <div class="cv-uploaded-preview-box">
+                                <div class="cv-uploaded-icon">📑</div>
+                                <div class="cv-uploaded-name" th:text="${cv.title}">Tên CV</div>
+                                <span class="cv-uploaded-label">Tệp đính kèm</span>
+                            </div>
+                        </div>
+
+                        <div class="cv-card-footer">
+                            <div class="cv-card-title-row">
+                                <h3 class="cv-card-title" th:text="${cv.title}">Tên CV</h3>
+                                <button type="button" class="btn-rename-icon" th:attr="onclick='event.preventDefault(); event.stopPropagation(); openRenameModal(' + ${cv.id} + ', \'' + ${#strings.escapeJavaScript(cv.title)} + '\')'" title="Đổi tên CV">✏</button>
+                                <span th:if="${cv.isDefault}" class="badge-default">Mặc định</span>
+                                <span class="badge-file">📎 File</span>
+                            </div>
+                            <div class="cv-card-date">
+                                Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span>
+                            </div>
+                        </div>
+                    </a>
+
+                    <div class="cv-card-actions">
+                        <div class="cv-btn-row-2">
+                            <a th:href="@{/candidate/cvs/{id}/file(id=${cv.id})}" target="_blank" class="btn-act-dark">Xem trước</a>
+                            <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="btn-act-green">Tải về</a>
+                        </div>
+                        <div class="cv-btn-row-2">
+                            <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/default(id=${cv.id})}" method="post">
+                                <button type="submit" class="btn-act-blue">★ Đặt mặc định</button>
+                            </form>
+                            <span th:if="${cv.isDefault}" class="btn-act-disabled">★ Đã mặc định</span>
+
+                            <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/delete(id=${cv.id})}" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa file CV này?');">
+                                <button type="submit" class="btn-act-danger">Xóa file</button>
+                            </form>
+                            <span th:if="${cv.isDefault}" class="btn-act-disabled">Khóa xóa</span>
+                        </div>
+                    </div>
+                </th:block>
+
+                <!-- ============ TRƯỜNG HỢP 2: CV TẠO TRỰC TUYẾN ============ -->
+                <th:block th:unless="${cv.isUploaded}">
+                    <div class="cv-preview-card">
+                        <div class="cv-preview-header">
+                            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-preview-avatar">
+                            <div class="cv-preview-info">
+                                <h3 class="cv-preview-name" th:text="${displayName}">Nguyễn Văn A</h3>
+                                <p class="cv-preview-title" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : 'Chưa cập nhật chức danh'}">Chức danh</p>
+                            </div>
+                        </div>
+
+                        <div class="cv-preview-body">
+                            <div th:if="${cvEntity != null && cvEntity.summary != null && !cvEntity.summary.isEmpty()}">
+                                <div class="cv-preview-section-title">Mục tiêu nghề nghiệp</div>
+                                <p class="cv-preview-text" th:text="${cvEntity.summary}">Tóm tắt</p>
+                            </div>
+                            <div th:if="${works != null && !#lists.isEmpty(works)}">
+                                <div class="cv-preview-section-title">Kinh nghiệm làm việc</div>
+                                <p class="cv-preview-item-title" th:text="${works[0].jobTitle}">Chức danh</p>
+                                <p class="cv-preview-item-sub" th:text="${works[0].companyName}">Công ty</p>
+                            </div>
+                            <div th:if="${educations != null && !#lists.isEmpty(educations)}">
+                                <div class="cv-preview-section-title">Học vấn</div>
+                                <p class="cv-preview-item-title" th:text="${educations[0].institution}">Trường</p>
+                                <p class="cv-preview-item-sub" th:text="${educations[0].degree}">Bằng cấp</p>
+                            </div>
+                            <p class="cv-preview-empty"
+                               th:if="${(cvEntity == null || cvEntity.summary == null || cvEntity.summary.isEmpty()) && (works == null || #lists.isEmpty(works)) && (educations == null || #lists.isEmpty(educations))}">
+                                CV chưa có nội dung. Bấm "Chỉnh sửa" để bổ sung.
+                            </p>
+                        </div>
+                        <div class="cv-preview-gradient"></div>
+                    </div>
+
+                    <div class="cv-card-footer">
+                        <div class="cv-card-title-row">
+                            <h3 class="cv-card-title" th:text="${cv.title}">Tên CV</h3>
+                            <button type="button" class="btn-rename-icon" th:attr="onclick='openRenameModal(' + ${cv.id} + ', \'' + ${#strings.escapeJavaScript(cv.title)} + '\')'" title="Đổi tên CV">✏</button>
+                            <span th:if="${cv.isDefault}" class="badge-default">Mặc định</span>
+                        </div>
+                        <div class="cv-card-date">
+                            Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span>
+                        </div>
+                    </div>
+
+                    <div class="cv-card-actions">
+                        <div class="cv-btn-row-2">
+                            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-act-blue">Chỉnh sửa</a>
+                            <a th:href="@{/candidate/cvs/{id}/preview(id=${cv.id})}" class="btn-act-dark">Xem trước</a>
+                        </div>
+                        <div class="cv-btn-row-3">
+                            <form th:action="@{/candidate/cvs/{id}/clone(id=${cv.id})}" method="post">
+                                <button type="submit" class="btn-act-amber">Nhân bản</button>
+                            </form>
+
+                            <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/default(id=${cv.id})}" method="post">
+                                <button type="submit" class="btn-act-blue">★ Mặc định</button>
+                            </form>
+                            <span th:if="${cv.isDefault}" class="btn-act-disabled">★ Đã mặc định</span>
+
+                            <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/delete(id=${cv.id})}" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa CV này?');">
+                                <button type="submit" class="btn-act-danger">Xóa</button>
+                            </form>
+                            <span th:if="${cv.isDefault}" class="btn-act-disabled">Khóa xóa</span>
+                        </div>
+                    </div>
+                </th:block>
+
+            </div>
+        </div>
+
+        <div class="cv-no-result" id="cvNoResult">Không tìm thấy CV nào khớp với từ khóa.</div>
+    </main>
+</div>
+
+<!-- ================= MODAL TẢI LÊN & ĐẶT TÊN CHO CV ================= -->
+<div id="uploadCvModal" class="cv-modal">
+    <div class="cv-modal-backdrop" onclick="closeUploadModal()"></div>
+    <div class="cv-modal-dialog">
+        <div class="cv-modal-header">
+            <div class="cv-modal-header-icon">📤</div>
+            <div>
+                <h3 class="cv-modal-title">Tải lên hồ sơ CV</h3>
+                <p class="cv-modal-subtitle">Hỗ trợ tệp định dạng PDF, DOC, DOCX dung lượng tối đa 10MB.</p>
+            </div>
+            <button type="button" class="cv-modal-close" onclick="closeUploadModal()">&times;</button>
+        </div>
+
+        <form th:action="@{/candidate/cvs/upload}" method="post" enctype="multipart/form-data" class="cv-modal-form" id="uploadCvModalForm">
+            <div class="form-group full-width">
+                <label class="form-label">Chọn tệp CV từ máy tính <span class="required-star">*</span></label>
+                <div class="cv-file-dropzone" onclick="document.getElementById('modalFileInput').click()">
+                    <div class="dropzone-icon">📁</div>
+                    <div class="dropzone-text" id="dropzoneFileName">Kéo thả tệp vào đây hoặc <span>Duyệt file từ máy tính</span></div>
+                    <div class="dropzone-hint">Chấp nhận .pdf, .doc, .docx (Tối đa 10MB)</div>
+                </div>
+                <input type="file" name="cvFile" id="modalFileInput" accept=".pdf,.doc,.docx" required onchange="handleModalFileSelect(this)" class="cv-hidden-input">
+            </div>
+
+            <div class="form-group full-width">
+                <label class="form-label" for="modalCvTitleInput">Đặt tên cho CV này <span class="required-star">*</span></label>
+                <input type="text" name="title" id="modalCvTitleInput" class="form-control" placeholder="VD: CV Senior Java Backend - Nguyễn Văn A" required>
+                <span class="form-hint">Đặt tên giúp bạn dễ dàng chọn đúng CV khi nộp hồ sơ vào các vị trí khác nhau.</span>
+            </div>
+
+            <div class="cv-modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeUploadModal()">Hủy bỏ</button>
+                <button type="submit" class="btn-submit">🚀 Tải lên & Lưu hồ sơ</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= MODAL ĐỔI TÊN CV ================= -->
+<div id="renameCvModal" class="cv-modal">
+    <div class="cv-modal-backdrop" onclick="closeRenameModal()"></div>
+    <div class="cv-modal-dialog">
+        <div class="cv-modal-header">
+            <div class="cv-modal-header-icon">✏️</div>
+            <div>
+                <h3 class="cv-modal-title">Đổi tên hồ sơ CV</h3>
+                <p class="cv-modal-subtitle">Cập nhật tên gọi để nhận diện và quản lý thuận tiện hơn.</p>
+            </div>
+            <button type="button" class="cv-modal-close" onclick="closeRenameModal()">&times;</button>
+        </div>
+
+        <form id="renameCvForm" th:action="@{/candidate/cvs/0/rename}" method="post" class="cv-modal-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div class="form-group full-width">
+                <label class="form-label" for="renameCvTitleInput">Tên CV mới <span class="required-star">*</span></label>
+                <input type="text" name="title" id="renameCvTitleInput" class="form-control" placeholder="Nhập tên mới cho CV..." required>
+            </div>
+
+            <div class="cv-modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeRenameModal()">Hủy bỏ</button>
+                <button type="submit" class="btn-submit">Lưu tên mới</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openUploadModal() {
+        var m = document.getElementById('uploadCvModal');
+        if (m) m.classList.add('active');
+    }
+    function closeUploadModal() {
+        var m = document.getElementById('uploadCvModal');
+        if (m) m.classList.remove('active');
+    }
+    function handleModalFileSelect(input) {
+        if (input.files && input.files[0]) {
+            var file = input.files[0];
+            var dropzoneText = document.getElementById('dropzoneFileName');
+            var dropzone = document.querySelector('.cv-file-dropzone');
+            if (dropzoneText) {
+                dropzoneText.innerHTML = 'Đã chọn tệp: <strong>' + file.name + '</strong>';
+            }
+            if (dropzone) {
+                dropzone.classList.add('has-file');
+            }
+            var titleInput = document.getElementById('modalCvTitleInput');
+            if (titleInput && (!titleInput.value || titleInput.value.trim() === '')) {
+                var defaultName = file.name.replace(/\.[^/.]+$/, "");
+                titleInput.value = defaultName;
+            }
+        }
+    }
+    function openRenameModal(cvId, currentTitle) {
+        var form = document.getElementById('renameCvForm');
+        var input = document.getElementById('renameCvTitleInput');
+        if (form && input) {
+            form.action = '/candidate/cvs/' + cvId + '/rename';
+            input.value = currentTitle;
+            var m = document.getElementById('renameCvModal');
+            if (m) m.classList.add('active');
+        }
+    }
+    function closeRenameModal() {
+        var m = document.getElementById('renameCvModal');
+        if (m) m.classList.remove('active');
+    }
+
+    // Lọc nhanh danh sách CV theo tên
+    function filterCvs() {
+        var keyword = document.getElementById('cvSearchInput').value.trim().toLowerCase();
+        var cards = document.querySelectorAll('.cv-grid .cv-card');
+        var visible = 0;
+        cards.forEach(function (card) {
+            var title = card.getAttribute('data-title') || '';
+            var match = keyword === '' || title.indexOf(keyword) !== -1;
+            card.classList.toggle('cv-hidden', !match);
+            if (match) { visible++; }
+        });
+        var noResult = document.getElementById('cvNoResult');
+        if (noResult) {
+            noResult.classList.toggle('show', cards.length > 0 && visible === 0);
+        }
+    }
+</script>
+</body>
+</html>

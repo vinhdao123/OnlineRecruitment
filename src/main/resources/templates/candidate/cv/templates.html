@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thư viện Template CV — Online Recruitment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
+
+<div class="cv-dashboard-layout">
+    <!-- SIDEBAR -->
+    <aside class="cv-sidebar">
+        <div class="cv-sidebar-menu">
+            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                My CV
+            </a>
+            <a th:href="@{/candidate/cvs/gallery}" class="cv-sidebar-item active">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                Template CV
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        <div class="cv-breadcrumb">
+            <a th:href="@{/}">Trang chủ</a>
+            <span>/</span>
+            <span class="current">Thư viện mẫu CV</span>
+        </div>
+
+        <section class="cv-welcome-banner">
+            <div class="cv-welcome-content">
+                <span class="cv-welcome-badge">✨ THƯ VIỆN MẪU CV</span>
+                <h1 class="cv-welcome-title">Khám phá bộ 5 mẫu CV chuyên nghiệp chuẩn tuyển dụng</h1>
+                <p class="cv-welcome-subtitle">Xem trước trên khổ giấy A4, đổi màu tức thì và khởi tạo hồ sơ chỉ với một cú nhấp chuột.</p>
+            </div>
+            <div class="cv-welcome-actions">
+                <a th:href="@{/candidate/cvs/gallery}" class="btn-welcome-create">Mở thư viện mẫu CV &rarr;</a>
+            </div>
+        </section>
+
+        <div class="cv-grid" th:if="${templates != null}">
+            <div th:each="tpl : ${templates}" class="cv-card">
+                <div class="cv-card-footer">
+                    <div class="cv-card-title-row">
+                        <h3 class="cv-card-title" th:text="${tpl.name}">Mẫu CV</h3>
+                        <span th:each="tag : ${tpl.tags}" class="badge-default" th:text="${tag}">ATS</span>
+                    </div>
+                    <p class="cv-card-date" th:text="${'Mã mẫu: ' + tpl.code}"></p>
+                </div>
+                <div class="cv-card-actions">
+                    <div class="cv-btn-row-2">
+                        <a th:href="@{/candidate/cvs/customizer(templateCode=${tpl.code})}" class="btn-act-blue">Tùy biến mẫu</a>
+                        <a th:href="@{/candidate/cvs/new(templateId=${tpl.versionId})}" class="btn-act-dark">+ Tạo CV mới</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

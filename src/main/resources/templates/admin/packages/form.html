@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/_layout :: head('Thêm/Sửa Gói')}"></head>
+<body class="admin">
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+<div class="main">
+    <div th:replace="~{admin/_layout :: topbar('Thông tin Gói dịch vụ', 'Điền thông tin chi tiết')}"></div>
+
+    <div class="section" style="max-width: 600px;">
+        <form th:action="@{/admin/packages/save}" th:object="${pkg}" method="post">
+            <input type="hidden" th:field="*{id}">
+
+            <div style="margin-bottom: 16px;">
+                <label style="font-weight: 600; font-size: 14px;">Tên gói *</label>
+                <input type="text" th:field="*{name}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="font-weight: 600; font-size: 14px;">Mô tả ngắn</label>
+                <textarea th:field="*{description}" rows="3" style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                    <label style="font-weight: 600; font-size: 14px;">Giá tiền (VNĐ) *</label>
+                    <input type="number" th:field="*{price}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+                </div>
+                <div>
+                    <label style="font-weight: 600; font-size: 14px;">Thời hạn (Ngày) *</label>
+                    <input type="number" th:field="*{durationDays}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="font-weight: 600; font-size: 14px;">Dành cho đối tượng *</label>
+                <select th:field="*{targetRole}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+                    <option value="">-- Chọn đối tượng --</option>
+                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" th:field="*{isActive}" id="isActive">
+                <label for="isActive" style="font-weight: 600; font-size: 14px;">Mở bán công khai</label>
+            </div>
+
+            <div style="display: flex; gap: 12px;">
+                <button type="submit" class="btn btn-primary">Lưu Gói</button>
+                <a th:href="@{/admin/packages}" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+</body>
+</html>

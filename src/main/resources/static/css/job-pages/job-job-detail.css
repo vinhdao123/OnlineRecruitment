@@ -1,0 +1,304 @@
+        /* ===== NỀN VÀ KHUNG CHUNG ===== */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            color: #1e293b;
+            background: #f8fafc;
+            line-height: 1.6;
+        }
+
+        a { color: inherit; text-decoration: none; }
+
+        .wrap {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ===== THANH ĐẦU TRANG ===== */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: #fff;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .topbar-inner {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            height: 64px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        .brand-mark {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: #fff;
+            font-size: 14px;
+        }
+
+        .brand-name span { color: #2563eb; }
+
+        .topbar nav {
+            display: flex;
+            gap: 4px;
+            margin-left: auto;
+        }
+
+        .topbar nav a {
+            padding: 8px 14px;
+            border-radius: 8px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .topbar nav a:hover {
+            background: #eff6ff;
+            color: #2563eb;
+        }
+
+        /* ===== NÚT ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 18px;
+            border: 1.5px solid transparent;
+            border-radius: 10px;
+            background: transparent;
+            font: inherit;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+        .btn-outline {
+            background: #fff;
+            border-color: #bfdbfe;
+            color: #2563eb;
+        }
+
+        .btn-outline:hover { background: #2563eb; color: #fff; }
+
+        .btn-danger {
+            background: #fff;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .btn-danger:hover { background: #dc2626; color: #fff; }
+
+        .btn-block { width: 100%; }
+
+        /* ===== THANH QUAY LẠI ===== */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 24px 0 16px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .back-link:hover { color: #2563eb; }
+
+        /* ===== KHỐI TIÊU ĐỀ TIN ===== */
+        .job-hero {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 28px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .job-logo {
+            flex: none;
+            width: 84px;
+            height: 84px;
+            border-radius: 16px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            color: #2563eb;
+            font-size: 34px;
+            font-weight: 800;
+            overflow: hidden;
+        }
+
+        .job-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .job-hero-body { flex: 1; min-width: 0; }
+
+        .job-hero h1 {
+            margin: 0 0 4px;
+            font-size: 28px;
+            font-weight: 800;
+            color: #172554;
+            line-height: 1.3;
+            overflow-wrap: anywhere;
+        }
+
+        .job-company {
+            margin: 0 0 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+
+        .chip {
+            padding: 4px 12px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .chip-salary { background: #dcfce7; color: #166534; }
+
+        /* ===== NHÃN TRẠNG THÁI ===== */
+        .status {
+            display: inline-flex;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-DRAFT    { background: #f1f5f9; color: #475569; }
+        .status-PENDING  { background: #fff7ed; color: #c2410c; }
+        .status-ACTIVE   { background: #dcfce7; color: #166534; }
+        .status-REJECTED { background: #fee2e2; color: #b91c1c; }
+        .status-CLOSED   { background: #e2e8f0; color: #334155; }
+
+        /* ===== BỐ CỤC 2 CỘT ===== */
+        .detail-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 340px;
+            gap: 24px;
+            margin: 24px 0 60px;
+            align-items: start;
+        }
+
+        .panel {
+            margin-bottom: 20px;
+            padding: 24px 28px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+        }
+
+        .panel h2 {
+            margin: 0 0 12px;
+            padding-left: 12px;
+            border-left: 4px solid #2563eb;
+            font-size: 18px;
+            font-weight: 800;
+        }
+
+        /* Giữ xuống dòng người nhập */
+        .prose {
+            margin: 0;
+            white-space: pre-line;
+            color: #334155;
+            overflow-wrap: anywhere;
+        }
+
+        /* ===== CỘT PHẢI ===== */
+        .side { position: sticky; top: 84px; }
+
+        .summary-label { color: #64748b; font-size: 13px; }
+
+        .summary-salary {
+            margin-bottom: 14px;
+            font-size: 26px;
+            font-weight: 800;
+            color: #15803d;
+        }
+
+        .summary-list {
+            list-style: none;
+            margin: 0 0 18px;
+            padding: 0;
+        }
+
+        .summary-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid #edf0f4;
+            font-size: 14px;
+        }
+
+        .summary-list span { color: #64748b; }
+        .summary-list strong { text-align: right; }
+
+        .company-name { margin: 0 0 6px; font-weight: 800; }
+
+        .company-info {
+            margin: 4px 0;
+            color: #475569;
+            font-size: 14px;
+            overflow-wrap: anywhere;
+        }
+
+        .actions { display: flex; flex-direction: column; gap: 10px; }
+        .actions form { margin: 0; }
+
+        /* ===== LÝ DO TỪ CHỐI ===== */
+        .reject-box {
+            margin-bottom: 20px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: #fff1f2;
+            color: #be123c;
+            font-size: 14px;
+        }
+
+        /* ===== MÀN HÌNH NHỎ ===== */
+        @media (max-width: 900px) {
+            .detail-layout { grid-template-columns: minmax(0, 1fr); }
+            .side { position: static; }
+            .job-hero { flex-direction: column; align-items: flex-start; }
+            .job-hero h1 { font-size: 23px; }
+        }
+    

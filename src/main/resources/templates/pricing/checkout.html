@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body style="background: #f4f6fa; margin: 0; padding: 40px 20px;">
+
+<div style="max-width: 800px; margin: 0 auto; display: flex; gap: 24px; align-items: flex-start;">
+
+    <!-- Cột thông tin chuyển khoản -->
+    <div class="section" style="flex: 1; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+        <h2 style="margin-top:0; color: #1a2b4a;">Thông tin chuyển khoản</h2>
+        <p style="color: #8895a8; margin-bottom: 20px;">Vui lòng chuyển khoản đúng số tiền và nội dung để hệ thống kích hoạt gói.</p>
+
+        <div style="background: #f7f9fc; padding: 20px; border-radius: 8px; border: 1px dashed #2a6df4; margin-bottom: 24px;">
+            <p style="margin: 0 0 10px;"><b>Ngân hàng:</b> Vietcombank (VCB)</p>
+            <p style="margin: 0 0 10px;"><b>Số tài khoản:</b> 0123456789</p>
+            <p style="margin: 0 0 10px;"><b>Chủ tài khoản:</b> CONG TY ONLINE RECRUITMENT</p>
+            <p style="margin: 0 0 10px;"><b>Số tiền:</b> <span style="color: #d33; font-weight: bold; font-size: 18px;" th:text="${payment.amount} + ' VNĐ'"></span></p>
+            <p style="margin: 0;"><b>Nội dung:</b> <span style="color: #2a6df4; font-weight: bold;" th:text="'MUA GOI ' + ${payment.id}"></span></p>
+        </div>
+
+        <form th:action="@{'/pricing/confirm/' + ${payment.id}}" method="post">
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px;">
+                ✓ Tôi đã chuyển khoản thành công
+            </button>
+        </form>
+        <a th:href="@{/pricing}" style="display: block; text-align: center; margin-top: 16px; color: #8895a8; text-decoration: none;">Hủy giao dịch</a>
+    </div>
+
+    <!-- Cột Mã QR (Dùng ảnh động từ VietQR) -->
+    <div class="section" style="width: 300px; background: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center;">
+        <h3 style="margin-top:0; color: #1a2b4a;">Quét mã để thanh toán</h3>
+        <img th:src="|https://img.vietqr.io/image/VCB-0123456789-compact2.png?amount=${payment.amount}&addInfo=${payment.user.username} THANH TOAN GOI ${payment.id}&accountName=CONG TY ONLINE RECRUITMENT|"
+             alt="QR Code" style="width: 100%; border-radius: 8px; margin: 15px 0;">
+        <p style="margin: 0;"><b>Nội dung:</b> <span style="color: #2a6df4; font-weight: bold;" th:text="${payment.user.username} + ' THANH TOAN GOI ' + ${payment.id}"></span></p>
+    </div>
+
+</div>
+
+</body>
+</html>

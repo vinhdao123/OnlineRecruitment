@@ -520,3 +520,6 @@ body {
     }
 
 }
+/* Ảnh logo nằm đè lên chữ cái dự phòng của mỗi tin tuyển dụng. */
+.company-logo { position: relative; overflow: hidden; }
+.company-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }

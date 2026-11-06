@@ -1,0 +1,142 @@
+/* =====================================================================
+   MODULE CV - SIDEBAR & KHUNG LAYOUT (My CV / Template CV / Đầu mục CV)
+   ===================================================================== */
+
+/* 1. Khung chứa toàn bộ (Sidebar + Nội dung) */
+.cv-dashboard-layout {
+    display: flex;
+    flex-direction: row;
+    max-width: 1200px;
+    margin: 24px auto 48px;
+    padding: 0 20px;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+/* 2. Cột Sidebar (bên trái) */
+.cv-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 16px;
+}
+
+.cv-sidebar-menu {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    padding: 12px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+}
+
+.cv-sidebar-menu:last-child {
+    margin-bottom: 0;
+}
+
+.cv-sidebar-title {
+    padding: 6px 16px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #94a3b8;
+}
+
+.cv-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    color: #475569;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14.5px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cv-sidebar-item:last-child {
+    margin-bottom: 0;
+}
+
+.cv-sidebar-item:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.cv-sidebar-item.active {
+    background: #e0f2fe;
+    color: #0369a1;
+    font-weight: 600;
+}
+
+.cv-sidebar-item svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.cv-sidebar-emoji {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+/* Khối "Đang chỉnh sửa CV" trên các trang đầu mục */
+.cv-sidebar-current {
+    margin: 0 4px 8px;
+    padding: 10px 12px;
+    background: #f0f9ff;
+    border: 1px dashed #bae6fd;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #0369a1;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.cv-sidebar-current strong {
+    display: block;
+    font-size: 13px;
+    color: #0c4a6e;
+}
+
+/* 3. Cột Nội dung (bên phải) */
+.main-content {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* 4. Responsive */
+@media (max-width: 900px) {
+    .cv-dashboard-layout {
+        flex-direction: column;
+    }
+
+    .cv-sidebar {
+        width: 100%;
+        position: static;
+    }
+
+    .cv-sidebar-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    .cv-sidebar-title {
+        width: 100%;
+    }
+
+    .cv-sidebar-current {
+        width: 100%;
+    }
+
+    .cv-sidebar-item {
+        margin-bottom: 0;
+    }
+}

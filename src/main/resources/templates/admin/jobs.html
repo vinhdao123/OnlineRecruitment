@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quản lý tin tuyển dụng | OnlineRecruitment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" th:href="@{/css/job-refactor/admin-jobs.css}">
+<link rel="stylesheet" th:href="@{/css/admin.css}">
+<link rel="stylesheet" th:href="@{/css/admin-job-layout.css}">
+<style>
+body.admin{background:linear-gradient(140deg,#eaf3ff,#dbeafe,#eff6ff)!important}
+body.admin .site-header,body.admin .search-panel,body.admin .job-card{box-shadow:0 8px 25px rgba(37,99,235,.07)}
+</style>
+</head>
+
+<body class="admin">
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+<div class="main admin-job-main">
+<div th:replace="~{admin/_layout :: topbar('Quản lý tin tuyển dụng', 'Tất cả tin, chờ duyệt và đã đóng')}"></div>
+
+<!-- ================= MAIN ================= -->
+
+<main class="page-container main-content">
+
+    <!-- PAGE HEADING -->
+    <section class="page-heading">
+
+        <div class="heading-left">
+            <div class="heading-icon">
+                <i data-lucide="shield-check"></i>
+            </div>
+
+            <div>
+                <h1 class="page-title" th:switch="${selectedStatus}">
+                    <span th:case="'PENDING'">Tin chờ duyệt</span><span th:case="'CLOSED'">Tin đã đóng</span>
+                    <span th:case="'REJECTED'">Tin đã từ chối</span><span th:case="'ACTIVE'">Tin đang tuyển</span>
+                    <span th:case="'EXPIRED'">Tin quá hạn</span><span th:case="'DRAFT'">Tin nháp</span>
+                    <span th:case="*">Tất cả tin tuyển dụng</span>
+                </h1>
+
+                <p class="page-description">
+                    Xem danh sách tin theo từng trạng thái và xử lý yêu cầu duyệt tin.
+                </p>
+            </div>
+        </div>
+
+        <div class="admin-badge">
+            <i data-lucide="user-check"></i>
+            QUẢN TRỊ VIÊN
+        </div>
+
+    </section>
+
+    <!-- REVIEW BANNER -->
+    <section class="review-banner">
+
+        <div class="banner-icon">
+            <i data-lucide="inbox"></i>
+        </div>
+
+        <div>
+            <h2 class="banner-title">Quản lý tin tuyển dụng</h2>
+
+            <p class="banner-description">
+                Xem tất cả tin tuyển dụng, lọc trạng thái và kiểm duyệt những tin đang chờ.
+            </p>
+        </div>
+
+    </section>
+
+    <!-- SUCCESS MESSAGE -->
+    <div class="alert alert-success"
+         th:if="${successMessage != null and !#strings.isEmpty(successMessage)}">
+
+        <i data-lucide="check-circle"></i>
+
+        <div th:text="${successMessage}">
+            Thao tác đã được thực hiện thành công.
+        </div>
+
+    </div>
+
+    <!-- ERROR MESSAGE -->
+    <div class="alert alert-error"
+         th:if="${errorMessage != null and !#strings.isEmpty(errorMessage)}">
+
+        <i data-lucide="alert-circle"></i>
+
+        <div th:text="${errorMessage}">
+            Đã xảy ra lỗi khi xử lý yêu cầu.
+        </div>
+
+    </div>
+
+    <!-- ================= SEARCH ================= -->
+
+    <section class="search-panel">
+
+        <h2 class="search-heading">
+            <span class="search-heading-icon">
+                <i data-lucide="search"></i>
+            </span>
+
+            Tìm kiếm tin tuyển dụng
+        </h2>
+
+        <form class="search-form"
+              th:action="@{/admin/jobs}"
+              method="get">
+
+            <select name="status" aria-label="Trạng thái tin" class="admin-status-filter">
+                <option value="">Tất cả trạng thái</option>
+                <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Chờ duyệt</option>
+                <option value="ACTIVE" th:selected="${selectedStatus == 'ACTIVE'}">Đang tuyển</option>
+                <option value="REJECTED" th:selected="${selectedStatus == 'REJECTED'}">Bị từ chối</option>
+                <option value="DRAFT" th:selected="${selectedStatus == 'DRAFT'}">Tin nháp</option>
+                <option value="CLOSED" th:selected="${selectedStatus == 'CLOSED'}">Đã đóng</option>
+                <option value="EXPIRED" th:selected="${selectedStatus == 'EXPIRED'}">Quá hạn</option>
+            </select>
+            <div class="search-input-wrap">
+                <i data-lucide="search"></i>
+
+                <input
+                        class="search-input"
+                        type="text"
+                        name="keyword"
+                        placeholder="Tìm theo tên công việc hoặc từ khóa..."
+                        aria-label="Từ khóa tìm kiếm"
+                        th:value="${keyword}">
+            </div>
+
+            <button class="btn btn-search" type="submit">
+                <i data-lucide="search"></i>
+                <span>Tìm kiếm</span>
+            </button>
+
+            <a class="btn btn-reset" th:href="@{/admin/jobs(status=${selectedStatus})}">
+                <i data-lucide="rotate-ccw"></i>
+                <span>Xóa bộ lọc</span>
+            </a>
+
+        </form>
+
+    </section>
+
+    <!-- ================= JOB LIST ================= -->
+
+    <section>
+
+        <div class="list-heading">
+
+            <h2 class="list-title">
+                <i data-lucide="files"></i>
+                Danh sách tin tuyển dụng
+            </h2>
+
+            <p class="list-caption">
+                Kiểm tra kỹ nội dung trước khi phê duyệt.
+            </p>
+
+        </div>
+
+        <div class="job-list"
+             th:if="${jobs != null and !jobs.isEmpty()}">
+
+            <article class="job-card" th:each="job : ${jobs}">
+
+                <!-- JOB HEADER -->
+                <div class="job-card-header">
+
+                    <div class="job-title-area">
+
+                        <div class="job-id">
+                            <i data-lucide="hash"></i>
+                            <span th:text="${job.id}">1</span>
+                        </div>
+
+                        <h3 class="job-title"
+                            th:text="${job.title}">
+                            Java Developer
+                        </h3>
+
+                        <div class="job-company">
+
+                            <i data-lucide="building-2"></i>
+
+                            <span th:if="${job.company != null}"
+                                  th:text="${job.company.companyName}">
+                                Công ty tuyển dụng
+                            </span>
+
+                            <span th:if="${job.company == null}">
+                                Chưa cập nhật công ty
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <span class="status-badge"
+                          th:classappend="${' status-' + #strings.toLowerCase(job.status.name())}">
+                        <span class="status-dot"></span>
+                        <span th:text="${job.status.name() == 'PENDING' ? 'CHỜ DUYỆT' : (job.status.name() == 'CLOSED' ? 'ĐÃ ĐÓNG' : (job.status.name() == 'ACTIVE' ? 'ĐANG TUYỂN' : (job.status.name() == 'DRAFT' ? 'BẢN NHÁP' : (job.status.name() == 'REJECTED' ? 'TỪ CHỐI' : 'HẾT HẠN'))))}">TRẠNG THÁI</span>
+                    </span>
+
+                </div>
+
+                <!-- JOB BODY -->
+                <div class="job-card-body">
+
+                    <div class="info-grid">
+
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i data-lucide="layers"></i>
+                            </div>
+
+                            <div class="info-content">
+                                <span class="info-label">Danh mục</span>
+                                <span class="info-value" th:text="${job.category != null ? job.category.name : 'Chưa chọn'}"></span>
+                                <span class="info-label">Cấp bậc</span>
+
+                                <span class="info-value"
+                                      th:text="${job.level != null ? job.level : 'Chưa cập nhật'}">
+                                    Intern
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i data-lucide="map-pin"></i>
+                            </div>
+
+                            <div class="info-content">
+                                <span class="info-label">Địa điểm</span>
+
+                                <span class="info-value"
+                                      th:text="${job.location != null and !#strings.isEmpty(job.location) ? job.location : 'Chưa cập nhật'}">
+                                    Hà Nội
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i data-lucide="users"></i>
+                            </div>
+
+                            <div class="info-content">
+                                <span class="info-label">Số lượng tuyển</span>
+
+                                <span class="info-value">
+                                    <span th:text="${job.quantity != null ? job.quantity : 0}">
+                                        2
+                                    </span>
+                                    người
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i data-lucide="calendar-clock"></i>
+                            </div>
+
+                            <div class="info-content">
+                                <span class="info-label">Hạn nộp hồ sơ</span>
+
+                                <span class="info-value"
+                                      th:text="${job.deadline != null ? #temporals.format(job.deadline, 'dd/MM/yyyy') : 'Không giới hạn'}">
+                                    31/12/2026
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i data-lucide="calendar-days"></i>
+                            </div>
+
+                            <div class="info-content">
+                                <span class="info-label">Ngày tạo</span>
+
+                                <span class="info-value"
+                                      th:text="${job.createdAt != null ? #temporals.format(job.createdAt, 'dd/MM/yyyy HH:mm') : 'Chưa xác định'}">
+                                    17/10/2026
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <i data-lucide="user-round"></i>
+                            </div>
+
+                            <div class="info-content">
+                                <span class="info-label">Email nhà tuyển dụng</span>
+
+                                <span class="info-value"
+                                      th:if="${job.recruiter != null}"
+                                      th:text="${job.recruiter.email}">
+                                    recruiter@example.com
+                                </span>
+
+                                <span class="info-value"
+                                      th:if="${job.recruiter == null}">
+                                    Chưa xác định
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- DESCRIPTION -->
+                    <div class="detail-section">
+
+                        <h4 class="detail-heading">
+                            <i data-lucide="file-text"></i>
+                            Mô tả công việc
+                        </h4>
+
+                        <p class="detail-text"
+                           th:if="${job.description != null and !#strings.isEmpty(job.description)}"
+                           th:text="${job.description}">
+                            Mô tả công việc tuyển dụng.
+                        </p>
+
+                        <p class="empty-detail"
+                           th:if="${job.description == null or #strings.isEmpty(job.description)}">
+                            Chưa có mô tả công việc.
+                        </p>
+
+                    </div>
+
+                    <!-- REQUIREMENTS -->
+                    <div class="detail-section">
+
+                        <h4 class="detail-heading">
+                            <i data-lucide="list-checks"></i>
+                            Yêu cầu ứng viên
+                        </h4>
+
+                        <p class="detail-text"
+                           th:if="${job.requirements != null and !#strings.isEmpty(job.requirements)}"
+                           th:text="${job.requirements}">
+                            Yêu cầu ứng viên.
+                        </p>
+
+                        <p class="empty-detail"
+                           th:if="${job.requirements == null or #strings.isEmpty(job.requirements)}">
+                            Chưa có yêu cầu ứng viên.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <!-- REVIEW FOOTER -->
+                <div class="job-card-footer">
+
+                    <div class="review-note">
+                        <i data-lucide="info"></i>
+
+                        <p>
+                            <strong>Lưu ý:</strong>
+                            Chỉ phê duyệt khi thông tin công việc,
+                            công ty và yêu cầu tuyển dụng phù hợp.
+                            Nếu tin chưa hợp lệ, hãy nhập lý do từ chối.
+                        </p>
+                    </div>
+
+                    <!-- Hiển thị lý do đã từ chối và hướng dẫn gửi duyệt lại.
+                         Không duyệt trực tiếp REJECTED: Recruiter cần sửa và nộp lại để trở thành PENDING. -->
+                    <div class="rejected-job-note"
+                         th:if="${job.status.name() == 'REJECTED'}">
+                        <strong>Lý do từ chối:</strong>
+                        <p th:text="${job.rejectionReason != null and !#strings.isEmpty(job.rejectionReason) ? job.rejectionReason : 'Chưa có lý do được lưu.'}"></p>
+                        <small>Nhà tuyển dụng chỉnh sửa tin và gửi duyệt lại. Tin sẽ xuất hiện trong mục Chờ duyệt.</small>
+                    </div>
+
+                    <div class="review-actions">
+                        <a class="btn btn-reset" th:href="@{/jobs/{id}(id=${job.id})}">Xem đầy đủ nội dung</a>
+                        <form th:if="${job.status.name() == 'CLOSED' or job.status.name() == 'EXPIRED'}"
+                              th:action="@{/admin/jobs/{id}/reopen(id=${job.id})}" method="post">
+                            <p>Chuyển về nháp để nhà tuyển dụng cập nhật hạn và gửi duyệt lại.</p>
+                            <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button class="btn btn-approve" type="submit">Cho phép soạn đăng lại</button>
+                        </form>
+
+                        <!-- APPROVE -->
+                        <form th:if="${job.status.name() == 'PENDING'}" class="approve-form"
+                              th:action="@{/admin/jobs/{id}/approve(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirmApprove();">
+
+                            <input
+                                    type="hidden"
+                                    th:name="${_csrf.parameterName}"
+                                    th:value="${_csrf.token}">
+
+                            <button class="btn btn-approve" type="submit">
+                                <i data-lucide="check-circle-2"></i>
+                                Phê duyệt tin này
+                            </button>
+
+                        </form>
+
+                        <!-- REJECT -->
+                        <form th:if="${job.status.name() == 'PENDING'}" class="reject-form"
+                              th:action="@{/admin/jobs/{id}/reject(id=${job.id})}"
+                              method="post"
+                              onsubmit="return confirmReject(this);">
+
+                            <input
+                                    type="hidden"
+                                    th:name="${_csrf.parameterName}"
+                                    th:value="${_csrf.token}">
+
+                            <label class="reject-label">
+                                <i data-lucide="message-square-warning"></i>
+                                Lý do từ chối
+                            </label>
+
+                            <textarea
+                                    class="reject-textarea"
+                                    name="reason"
+                                    maxlength="500"
+                                    required
+                                    placeholder="Nhập lý do từ chối tin tuyển dụng..."></textarea>
+
+                            <span class="reject-help">
+                                Tối đa 500 ký tự.
+                            </span>
+
+                            <button class="btn btn-reject" type="submit">
+                                <i data-lucide="x-circle"></i>
+                                Từ chối tin này
+                            </button>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </article>
+
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state"
+             th:if="${jobs == null or jobs.isEmpty()}">
+
+            <div class="empty-icon">
+                <i data-lucide="inbox"></i>
+            </div>
+
+            <h3 class="empty-title">
+                Không có tin tuyển dụng phù hợp
+            </h3>
+
+            <p class="empty-description">
+                Hiện tại không có tin tuyển dụng phù hợp với
+                bộ lọc hoặc từ khóa tìm kiếm.
+                Bạn có thể thử từ khóa khác hoặc quay lại sau.
+            </p>
+
+        </div>
+
+    </section>
+
+</main>
+</div>
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+
+    function confirmApprove() {
+        return window.confirm(
+            "Bạn có chắc chắn muốn phê duyệt tin tuyển dụng này không?"
+        );
+    }
+
+    function confirmReject(form) {
+        const textarea = form.querySelector('textarea[name="reason"]');
+
+        if (!textarea || textarea.value.trim() === "") {
+            window.alert("Vui lòng nhập lý do từ chối.");
+
+            if (textarea) {
+                textarea.focus();
+            }
+
+            return false;
+        }
+
+        if (textarea.value.trim().length > 500) {
+            window.alert(
+                "Lý do từ chối không được vượt quá 500 ký tự."
+            );
+
+            textarea.focus();
+            return false;
+        }
+
+        return window.confirm(
+            "Bạn có chắc chắn muốn từ chối tin tuyển dụng này không?"
+        );
+    }
+</script>
+
+</body>
+</html>
