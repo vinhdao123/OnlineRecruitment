@@ -539,9 +539,9 @@ textarea::placeholder {
 }
 
 .alert-success {
-    border: 1px solid #b9d4f9;
+    border: 1px solid #bbf7d0;
     background: #f0fdf4;
-    color: #133668;
+    color: #166534;
 }
 
 .alert-error {

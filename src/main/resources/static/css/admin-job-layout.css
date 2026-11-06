@@ -1,6 +1,6 @@
 /* Dùng cùng sidebar / topbar Admin cho Job và Job Categories. */
 body.admin { margin: 0 !important; min-height: 100vh; background: #f4f6fb; }
-body.admin .main { margin-left: 240px; width: calc(100% - 240px); min-width: 0; padding: 0 30px 32px; }
+body.admin .main { margin-left: 260px; width: calc(100% - 260px); min-width: 0; padding: 0 30px 32px; }
 body.admin .sidebar { z-index: 100; }
 body.admin .topbar { position: relative; z-index: 5; }
 .admin-job-main .page-container { width: 100%; max-width: 1250px; margin: 0 auto; }
@@ -38,3 +38,10 @@ body.admin .admin-job-main .site-footer { display: none; }
 .rejected-job-note { background: #fff7f7; border: 1px solid #f7caca; color: #7f1d1d; border-radius: 12px; padding: 16px; margin: 12px 0; }
 .rejected-job-note p { margin: 8px 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .rejected-job-note small { color: #6b4650; }
+
+.admin-catalog-filters{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:20px 0}
+.admin-catalog-filters input,.admin-catalog-filters select,.admin-status-filter{padding:11px 12px;border:1px solid #c4d1e3;border-radius:8px;background:#fff;color:#24334a;font:inherit;max-width:100%}
+.admin-catalog-filters input{flex:1;min-width:180px}
+.admin-catalog-filters a{color:#2457a7}
+@media(max-width:600px){.admin-catalog-filters input,.admin-catalog-filters select,.admin-status-filter{width:100%}}
+@media(max-width:900px){body.admin{display:block}body.admin .sidebar{position:relative;width:100%;min-height:auto;max-height:none}body.admin .topbar{flex-wrap:wrap;height:auto;gap:12px;padding:16px 0}body.admin .search-global{display:none}}

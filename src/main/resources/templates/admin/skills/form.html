@@ -13,5 +13,6 @@
 <option value="">-- Chọn Category --</option><option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name + ' (' + c.status + ')'}" th:disabled="${c.status != 'ACTIVE' and (skillForm.categoryId == null or skillForm.categoryId != c.id)}"></option></select>
 <p class="skill-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></p>
 <div th:if="${skillId != null}"><label for="status">Trạng thái</label><select id="status" th:field="*{status}"><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select></div>
+<p class="category-help">Tên kỹ năng là duy nhất trong hệ thống. Kỹ năng đã dùng trong tin tuyển dụng không thể chuyển danh mục. Kích hoạt lại cần danh mục đang hoạt động.</p>
 <div class="skill-actions"><button class="skill-btn" type="submit">Lưu kỹ năng</button><a class="skill-btn skill-btn-outline" th:href="@{/admin/skills}">Hủy</a></div></form></main></div>
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block></body></html>

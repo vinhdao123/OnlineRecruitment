@@ -82,15 +82,25 @@
               <form th:if="${c.status.name() == 'PENDING'}"
                     th:action="@{'/admin/companies/' + ${c.id} + '/approve'}"
                     method="post" style="margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="action-item action-item-success"
                         onclick="return confirm('Duyệt doanh nghiệp này?')">
                   <span>✓</span> Approve
                 </button>
               </form>
 
+              <button th:if="${c.status.name() == 'PENDING'}"
+                      type="button" class="action-item action-item-danger"
+                      th:data-id="${c.id}"
+                      th:data-name="${c.companyName}"
+                      onclick="openRejectModal(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+                <span>✕</span> Reject
+              </button>
+
               <form th:if="${c.status.name() == 'ACTIVE'}"
                     th:action="@{'/admin/companies/' + ${c.id} + '/lock'}"
                     method="post" style="margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="action-item action-item-danger"
                         onclick="return confirm('Khóa doanh nghiệp này?')">
                   <span>🚫</span> Lock Company
@@ -100,6 +110,7 @@
               <form th:if="${c.status.name() == 'LOCKED'}"
                     th:action="@{'/admin/companies/' + ${c.id} + '/unlock'}"
                     method="post" style="margin:0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <button type="submit" class="action-item action-item-success"
                         onclick="return confirm('Mở khóa doanh nghiệp này?')">
                   <span>✓</span> Unlock Company
@@ -137,6 +148,86 @@
   </div>
 
 </div>
+
+<!-- Modal Từ Chối Duyệt Công Ty -->
+<div id="rejectModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
+  <div style="background:#fff; width:520px; max-width:90%; margin:80px auto; padding:24px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #e5e7eb;">
+      <h3 style="margin:0; font-size:18px; color:#111827;">✕ Từ Chối Phê Duyệt Doanh Nghiệp</h3>
+      <span onclick="closeRejectModal()" style="cursor:pointer; font-size:20px; color:#9ca3af; font-weight:700;">&times;</span>
+    </div>
+    
+    <p style="font-size:13px; color:#6b7280; margin-bottom:14px;">
+      Doanh nghiệp: <strong id="modalCompanyName" style="color:#111827;"></strong><br>
+      Hệ thống sẽ gửi email kèm lý do từ chối và <strong>đường dẫn biểu mẫu</strong> để nhà tuyển dụng có thể chỉnh sửa lại thông tin và gửi lại xét duyệt.
+    </p>
+
+    <form id="rejectForm" th:action="@{/admin/companies/0/reject}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+      <input type="hidden" name="redirectUrl" id="modalRedirectUrl" value="">
+      
+      <div style="margin-bottom:12px;">
+        <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">
+          Lý do từ chối (Không bắt buộc)
+        </label>
+        <textarea id="modalReason" name="reason" rows="4" 
+                  style="width:100%; box-sizing:border-box; border:1px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;" 
+                  placeholder="Nhập lý do từ chối cụ thể (nếu có)..."></textarea>
+      </div>
+
+      <!-- Gợi ý lý do nhanh -->
+      <div style="margin-bottom:16px;">
+        <span style="font-size:12px; color:#6b7280; font-weight:600;">Gợi ý lý do nhanh:</span>
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+          <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addQuickReason('Mã số thuế không hợp lệ hoặc không tồn tại trên Cổng thông tin Quốc gia.')">Mã số thuế không hợp lệ</button>
+          <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addQuickReason('Thông tin người đại diện hoặc số điện thoại liên hệ chưa chính xác.')">Sai thông tin liên hệ</button>
+          <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addQuickReason('Tên doanh nghiệp chưa khớp với giấy phép đăng ký kinh doanh.')">Sai tên doanh nghiệp</button>
+          <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addQuickReason('Địa chỉ trụ sở công ty chưa cụ thể hoặc thiếu website chính thức.')">Thiếu địa chỉ/website</button>
+        </div>
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:12px; border-top:1px solid #e5e7eb;">
+        <button type="button" class="btn btn-secondary" onclick="closeRejectModal()">Hủy bỏ</button>
+        <button type="submit" class="btn btn-danger" style="background:#dc2626; color:#fff; font-weight:600;">
+          ✕ Xác Nhận Từ Chối & Gửi Mail
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function openRejectModal(companyId, companyName) {
+    document.getElementById('modalCompanyName').textContent = companyName;
+    const form = document.getElementById('rejectForm');
+    const baseAction = form.getAttribute('data-base-action') || form.action;
+    form.setAttribute('data-base-action', baseAction);
+    form.action = baseAction.replace('/0/reject', '/' + companyId + '/reject');
+    document.getElementById('modalRedirectUrl').value = window.location.pathname + window.location.search;
+    document.getElementById('modalReason').value = '';
+    document.getElementById('rejectModal').style.display = 'block';
+  }
+
+  function closeRejectModal() {
+    document.getElementById('rejectModal').style.display = 'none';
+  }
+
+  function addQuickReason(text) {
+    const area = document.getElementById('modalReason');
+    if (area.value.trim() === '') {
+      area.value = text;
+    } else {
+      area.value += ' ' + text;
+    }
+  }
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('rejectModal');
+    if (event.target === modal) {
+      closeRejectModal();
+    }
+  }
+</script>
 
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
 </body>

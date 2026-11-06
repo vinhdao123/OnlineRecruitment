@@ -66,15 +66,19 @@ public class AdminCompanyController {
 
     @PostMapping("/{id}/reject")
     public String reject(@PathVariable Long id,
-                         @RequestParam String reason,
+                         @RequestParam(name = "reason", required = false) String reason,
+                         @RequestParam(value = "redirectUrl", required = false) String redirectUrl,
                          @AuthenticationPrincipal UserDetails principal,
                          RedirectAttributes ra) {
         try {
             User actor = userService.getByEmail(principal.getUsername());
             companyService.reject(id, reason, actor);
-            ra.addFlashAttribute("success", "Đã từ chối công ty.");
+            ra.addFlashAttribute("success", "Đã từ chối công ty và gửi email kèm liên kết chỉnh sửa hồ sơ cho nhà tuyển dụng.");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
+        }
+        if (redirectUrl != null && !redirectUrl.isBlank()) {
+            return "redirect:" + redirectUrl;
         }
         return "redirect:/admin/companies/" + id;
     }

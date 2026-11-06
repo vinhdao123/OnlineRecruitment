@@ -31,9 +31,15 @@ public class AdminJobController {
     // Liệt kê jobs trong luồng tuyển dụng.
     public String listJobs(
             @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "") String status,
             Model model
     ) {
-        List<Job> jobs = jobService.getPendingJobs();
+        jobService.refreshExpiredJobs();
+        status = status.trim().toUpperCase(Locale.ROOT);
+        if (!java.util.Set.of("", "PENDING", "ACTIVE", "REJECTED", "CLOSED", "EXPIRED", "DRAFT").contains(status)) {
+            status = "";
+        }
+        List<Job> jobs = jobService.findAllJobsForManagement(null, null, status);
 
         if (keyword != null && !keyword.trim().isEmpty()) {
             String normalizedKeyword =
@@ -63,8 +69,23 @@ public class AdminJobController {
         model.addAttribute("jobs", jobs);
         model.addAttribute("keyword", keyword);
         model.addAttribute("isAdmin", true);
+        model.addAttribute("status", status);
+        model.addAttribute("selectedStatus", status);
+        model.addAttribute("activeMenu", status.isEmpty() ? "jobs" : "jobs-" + status.toLowerCase(Locale.ROOT));
 
         return "admin/jobs";
+    }
+
+    @PostMapping("/{id}/reopen")
+    public String reopenJob(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            jobService.reopenAdminJob(id);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Đã chuyển tin về nháp. Nhà tuyển dụng cần cập nhật hạn và gửi duyệt lại.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/jobs?status=DRAFT";
     }
 
     /**

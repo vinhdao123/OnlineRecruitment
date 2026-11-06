@@ -1,6 +1,5 @@
 package OnlineRecruitment.OnlineRecruitment.controller.Recruiter;
 
-import OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -21,20 +20,18 @@ import java.util.Map;
 public class RecruiterApplicationController {
 
     private final JdbcTemplate jdbcTemplate;
-    private final SkillMatchingService skillMatchingService;
 
-    public RecruiterApplicationController(JdbcTemplate jdbcTemplate, SkillMatchingService skillMatchingService) {
+    public RecruiterApplicationController(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.skillMatchingService = skillMatchingService;
     }
 
     // =========================================
     // DANH SÁCH ĐƠN ỨNG TUYỂN
-    // =========================================
+    // =========================================sql.append(" ORDER BY a.applied_at DESC");
     @GetMapping
     public String applications(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false, defaultValue = "") String status,
+            @RequestParam(required = false, defaultValue = "SUBMITTED") String status,
             @RequestParam(required = false) Long jobId,
             @RequestParam(required = false, defaultValue = "newest") String sort,
             Model model) {
@@ -140,68 +137,11 @@ public class RecruiterApplicationController {
         List<Map<String, Object>> applications =
                 jdbcTemplate.queryForList(sql.toString(), params.toArray());
 
-        // Tính độ phù hợp đúng theo job_id và cv_id của từng Application.
-        // Không có kỹ năng yêu cầu thì hiển thị "Chưa đủ dữ liệu".
-        skillMatchingService.attachScores(applications);
-
         model.addAttribute("applications", applications);
         model.addAttribute("jobs", jobs);
         addFilters(model, keyword, status, jobId, sort);
 
         return "recruiter/applications";
-    }
-
-    // =========================================
-    // XEM CHI TIẾT ĐỘ PHÙ HỢP KỸ NĂNG
-    // =========================================
-    @GetMapping("/{applicationId}/skill-match")
-    public String viewSkillMatch(@PathVariable Long applicationId, Model model) {
-        // Lấy tài khoản từ phiên đăng nhập hiện tại, không tin recruiter ID từ URL.
-        String username = getCurrentUsername();
-        if (username == null) return "redirect:/login";
-
-        // Quan trọng: chỉ cho phép xem Application thuộc công ty của Recruiter.
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
-                SELECT a.id AS applicationId, a.job_id AS jobId, a.cv_id AS cvId,
-                       j.title AS jobTitle, u.full_name AS candidateName,
-                       a.status AS applicationStatus
-                FROM dbo.applications a
-                JOIN dbo.jobs j ON j.id = a.job_id
-                JOIN dbo.companies c ON c.id = j.company_id
-                JOIN dbo.candidates ca ON ca.id = a.candidate_id
-                JOIN dbo.users u ON u.id = ca.user_id
-                JOIN dbo.users recruiter ON recruiter.id = c.recruiter_id
-                WHERE a.id = ? AND (recruiter.username = ? OR recruiter.email = ?)
-                """, applicationId, username, username);
-
-        if (rows.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
-                    "Không tìm thấy hồ sơ ứng tuyển hoặc không có quyền xem.");
-        }
-
-        Map<String, Object> application = rows.get(0);
-        // Đọc các Skill bắt buộc, đánh dấu Skill nào có trong CV.
-        List<Map<String, Object>> requiredSkills = jdbcTemplate.queryForList("""
-                SELECT s.id AS skillId, s.name AS skillName,
-                       CASE WHEN cs.skill_id IS NULL THEN 0 ELSE 1 END AS matched
-                FROM dbo.job_skills js
-                JOIN dbo.skills s ON s.id = js.skill_id
-                LEFT JOIN dbo.cv_skills cs
-                  ON cs.skill_id = js.skill_id AND cs.cv_id = ?
-                WHERE js.job_id = ? AND js.is_required = 1
-                ORDER BY s.name
-                """, application.get("cvId"), application.get("jobId"));
-
-        long matched = requiredSkills.stream()
-                .filter(skill -> ((Number) skill.get("matched")).intValue() == 1)
-                .count();
-        int total = requiredSkills.size();
-        model.addAttribute("applicationData", application);
-        model.addAttribute("requiredSkills", requiredSkills);
-        model.addAttribute("requiredCount", total);
-        model.addAttribute("matchedCount", matched);
-        model.addAttribute("matchPercentage", total == 0 ? null : (int) (matched * 100 / total));
-        return "recruiter/skill-match-detail";
     }
 
     // =========================================

@@ -14,7 +14,7 @@
     --border: #e2e8f0;
     --background: #f5f7fb;
     --white: #ffffff;
-    --green: #055c96;
+    --green: #059669;
     --red: #dc2626;
 }
 
@@ -433,8 +433,8 @@ select {
 }
 
 .status-approved {
-    color: #044a78;
-    background: #cfe2fc;
+    color: #047857;
+    background: #d1fae5;
 }
 
 .status-rejected {
@@ -471,7 +471,7 @@ select {
 
 .btn-approve {
     color: var(--green);
-    border-color: #0977c0;
+    border-color: #10b981;
 }
 
 .btn-approve:hover {
@@ -678,16 +678,3 @@ select {
         padding: 15px;
     }
 }
-
-/* Skill Matching: trạng thái tính từ yêu cầu Job và kỹ năng CV */
-.skill-match-cell { min-width: 134px; }
-.skill-match { display: flex; flex-direction: column; gap: 4px; }
-.skill-match strong { color: #1d4ed8; font-size: 15px; }
-.skill-match span, .skill-match-unavailable { color: #64748b; font-size: 12px; }
-.skill-match-progress { display: block; width: 110px; height: 8px; border: 0; border-radius: 10px; overflow: hidden; appearance: none; }
-.skill-match-progress::-webkit-progress-bar { background: #dbeafe; border-radius: 10px; }
-.skill-match-progress::-webkit-progress-value { background: #2563eb; border-radius: 10px; }
-.skill-match-progress::-moz-progress-bar { background: #2563eb; border-radius: 10px; }
-
-.skill-match-detail-link { color:#1d4ed8; font-weight:700; font-size:13px; text-decoration:none; }
-.skill-match-detail-link:hover { text-decoration:underline; }

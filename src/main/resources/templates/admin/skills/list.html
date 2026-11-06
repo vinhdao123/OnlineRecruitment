@@ -7,6 +7,16 @@
 <main class="skill-container"><div class="skill-heading"><div><h1>Danh sách kỹ năng</h1><p>Quản lý kỹ năng dùng cho hồ sơ CV và phân loại yêu cầu tuyển dụng.</p></div>
 <a class="skill-btn" th:href="@{/admin/skills/new}">+ Tạo kỹ năng</a></div>
 <p class="skill-success" th:if="${successMessage}" th:text="${successMessage}"></p><p class="skill-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+<form class="admin-catalog-filters" th:action="@{/admin/skills}" method="get">
+    <input name="keyword" th:value="${keyword}" placeholder="Tìm tên kỹ năng" aria-label="Tên kỹ năng">
+    <select name="categoryId" aria-label="Danh mục"><option value="">Tất cả danh mục</option>
+        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryId == c.id}"></option></select>
+    <select name="status" aria-label="Trạng thái"><option value="">Tất cả trạng thái</option>
+        <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Đang sử dụng</option>
+        <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Ngừng sử dụng</option></select>
+    <button class="skill-btn">Lọc</button><a th:href="@{/admin/skills}">Xóa bộ lọc</a>
+</form>
+<p>Ngừng sử dụng sẽ ẩn kỹ năng khỏi lựa chọn mới. CV cũ giữ nguyên dữ liệu; có thể kích hoạt lại bằng cách sửa.</p>
 <div class="skill-table-scroll"><table class="skill-table"><thead><tr><th>ID</th><th>Tên kỹ năng</th><th>Danh mục ngành nghề</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
 <tbody><tr th:each="skill : ${skills}"><td th:text="${skill.id}"></td><td th:text="${skill.name}"></td>
 <td th:text="${skill.category != null ? skill.category.name : 'Chưa phân loại'}"></td>

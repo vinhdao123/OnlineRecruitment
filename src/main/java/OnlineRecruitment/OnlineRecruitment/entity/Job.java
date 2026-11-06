@@ -68,7 +68,7 @@ public class Job {
     @Column(name = "experience", length = 255)
     private String experience;
 
-    @Column(name = "level", length = 100)
+    @Column(name = "seniority_level", length = 100)
     private String level;
 
     @Enumerated(EnumType.STRING)

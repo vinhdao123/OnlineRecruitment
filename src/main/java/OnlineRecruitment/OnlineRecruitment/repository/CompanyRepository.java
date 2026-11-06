@@ -23,14 +23,14 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("""
         SELECT c FROM Company c
-        LEFT JOIN FETCH c.recruiter
+        LEFT JOIN c.recruiter
         WHERE c.id = :id
     """)
     Optional<Company> findByIdWithRecruiter(@Param("id") Long id);
 
     @Query(value = """
         SELECT c FROM Company c
-        LEFT JOIN FETCH c.recruiter
+        LEFT JOIN c.recruiter
         WHERE (:keyword IS NULL OR
                LOWER(c.companyName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
                LOWER(c.taxCode)     LIKE LOWER(CONCAT('%', :keyword, '%')) OR
@@ -54,7 +54,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
     @Query("""
         SELECT c FROM Company c
-        LEFT JOIN FETCH c.recruiter
+        LEFT JOIN c.recruiter
         ORDER BY c.createdAt DESC
     """)
     List<Company> findRecent(Pageable pageable);

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Quản lý lịch phỏng vấn</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/recruiter/interviews.css}">
+</head>
+
+<body>
+
+<main class="interview-page">
+
+    <!-- TIÊU ĐỀ -->
+    <header class="page-header">
+        <div>
+            <h1>Lịch phỏng vấn</h1>
+            <p>Quản lý lịch phỏng vấn và theo dõi các khung giờ ứng viên đã đăng ký.</p>
+        </div>
+
+        <a th:href="@{/recruiter/interviews/availability}"
+           class="btn-create">
+            <span>+</span> Tạo lịch phỏng vấn
+        </a>
+    </header>
+
+    <!-- BỘ LỌC -->
+    <section class="filter-section">
+        <form th:action="@{/recruiter/interviews}"
+              method="get"
+              class="filter-form">
+
+            <div class="filter-group">
+                <label for="jobId">Công việc</label>
+
+                <select id="jobId" name="jobId">
+                    <option value="">Tất cả công việc</option>
+
+                    <option th:each="job : ${jobs}"
+                            th:value="${job.id}"
+                            th:text="${job.title}"
+                            th:selected="${selectedJobId != null and selectedJobId == job.id}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="date">Ngày phỏng vấn</label>
+
+                <input type="date"
+                       id="date"
+                       name="date"
+                       th:value="${selectedDate}">
+            </div>
+
+            <button type="submit" class="btn-filter">
+                Lọc lịch
+            </button>
+
+            <a th:href="@{/recruiter/interviews}"
+               class="btn-reset">
+                Đặt lại
+            </a>
+        </form>
+    </section>
+
+    <!-- NGÀY ĐANG XEM -->
+    <div class="selected-date-heading">
+        <div>
+            <span class="date-caption">ĐANG XEM LỊCH NGÀY</span>
+            <h2 th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}">
+                02/11/2026
+            </h2>
+        </div>
+    </div>
+
+    <!-- HAI KHU VỰC SONG SONG -->
+    <div class="schedule-layout">
+
+        <!-- CỘT TRÁI: ỨNG VIÊN ĐÃ ĐẶT LỊCH -->
+        <section class="content-section candidate-section">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Ứng viên đã đặt lịch</h2>
+                    <p>Danh sách ứng viên có lịch phỏng vấn trong ngày.</p>
+                </div>
+
+                <span class="count-badge"
+                      th:text="${#lists.size(interviews)} + ' ứng viên'">
+                    0 ứng viên
+                </span>
+            </div>
+
+            <div class="empty-state"
+                 th:if="${#lists.isEmpty(interviews)}">
+                <div class="empty-icon">📅</div>
+                <h3>Chưa có ứng viên đặt lịch</h3>
+                <p>Ngày này chưa có ứng viên đăng ký phỏng vấn.</p>
+            </div>
+
+            <div class="table-wrapper"
+                 th:unless="${#lists.isEmpty(interviews)}">
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Ứng viên</th>
+                        <th>Công việc</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="item : ${interviews}">
+                        <td>
+                            <div class="candidate-info">
+                                <div class="candidate-avatar"
+                                     th:text="${item.candidateName != null and !#strings.isEmpty(item.candidateName)
+                                         ? #strings.substring(item.candidateName, 0, 1).toUpperCase()
+                                         : 'C'}">
+                                    C
+                                </div>
+
+                                <div class="candidate-details">
+                                    <strong th:text="${item.candidateName}">
+                                        Candidate
+                                    </strong>
+
+                                    <small th:text="${item.email}">
+                                        candidate@example.com
+                                    </small>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="job-name"
+                                  th:text="${item.jobTitle}">
+                                Job title
+                            </span>
+                        </td>
+
+                        <td>
+                            <strong class="interview-time"
+                                    th:text="${item.startTime + ' - ' + item.endTime}">
+                                08:30 - 09:00
+                            </strong>
+                        </td>
+
+                        <td>
+                            <span class="status-badge booked">
+                                Đã đặt lịch
+                            </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+        <!-- CỘT PHẢI: TỔNG QUAN KHUNG GIỜ -->
+        <section class="content-section slot-section">
+
+            <div class="section-heading">
+                <div>
+                    <h2>Tổng quan khung giờ</h2>
+                    <p>Các khung giờ trong ngày đã chọn.</p>
+                </div>
+
+                <span class="count-badge"
+                      th:text="${#lists.size(dailySlots)} + ' khung giờ'">
+                    0 khung giờ
+                </span>
+            </div>
+
+            <!-- CHÚ THÍCH TRẠNG THÁI -->
+            <div class="slot-legend">
+                <span>
+                    <i class="legend-dot open-dot"></i>
+                    Còn trống
+                </span>
+
+                <span>
+                    <i class="legend-dot booked-dot"></i>
+                    Đã đặt
+                </span>
+
+                <span>
+                    <i class="legend-dot closed-dot"></i>
+                    Đã đóng
+                </span>
+            </div>
+
+            <!-- NGÀY CHƯA MỞ LỊCH -->
+            <div class="empty-state"
+                 th:if="${#lists.isEmpty(dailySlots)}">
+
+                <div class="empty-icon">🕒</div>
+                <h3>Ngày này chưa mở lịch</h3>
+                <p>Bạn chưa tạo khung giờ phỏng vấn cho ngày này.</p>
+
+                <a th:href="@{/recruiter/interviews/availability}"
+                   class="btn-create empty-create-btn">
+                    + Mở lịch phỏng vấn
+                </a>
+            </div>
+
+            <!-- DANH SÁCH KHUNG GIỜ -->
+            <div class="slot-list"
+                 th:unless="${#lists.isEmpty(dailySlots)}">
+
+                <article th:each="slot : ${dailySlots}"
+                         class="slot-card"
+                         th:classappend="${slot.displayStatus == 'BOOKED'}
+                             ? ' slot-booked'
+                             : (${slot.displayStatus == 'CLOSED'}
+                                 ? ' slot-closed'
+                                 : ' slot-open')">
+
+                    <div class="slot-top">
+                        <strong class="slot-time"
+                                th:text="${slot.startTime + ' - ' + slot.endTime}">
+                            08:00 - 08:30
+                        </strong>
+
+                        <span th:if="${slot.displayStatus == 'BOOKED'}"
+                              class="status-badge booked">
+                            Đã đặt
+                        </span>
+
+                        <span th:if="${slot.displayStatus == 'OPEN'}"
+                              class="status-badge open">
+                            Còn trống
+                        </span>
+
+                        <span th:if="${slot.displayStatus == 'CLOSED'}"
+                              class="status-badge closed">
+                            Đã đóng
+                        </span>
+                    </div>
+
+                    <!-- ĐÃ ĐẶT -->
+                    <div class="slot-information"
+                         th:if="${slot.displayStatus == 'BOOKED'}">
+
+                        <span>Ứng viên:</span>
+
+                        <strong th:text="${slot.candidateName != null
+                            ? slot.candidateName : 'Đã được đặt'}">
+                            Candidate
+                        </strong>
+
+                        <small th:if="${slot.jobTitle != null}"
+                               th:text="${slot.jobTitle}">
+                            Job title
+                        </small>
+                    </div>
+
+                    <!-- CÒN TRỐNG -->
+                    <div class="slot-information"
+                         th:if="${slot.displayStatus == 'OPEN'}">
+                        <span>Khung giờ đang chờ ứng viên đăng ký.</span>
+                    </div>
+
+                    <!-- ĐÃ ĐÓNG -->
+                    <div class="slot-information closed-information"
+                         th:if="${slot.displayStatus == 'CLOSED'}">
+                        <span>Khung giờ đã hết thời gian đăng ký.</span>
+                    </div>
+
+                </article>
+            </div>
+
+        </section>
+
+    </div>
+
+    <!-- DANH SÁCH NGÀY ĐÃ MỞ LỊCH -->
+    <section class="content-section opened-dates-section">
+
+        <div class="section-heading">
+            <div>
+                <h2>Những ngày đã mở lịch</h2>
+                <p>
+                    Chọn nhanh ngày đã có khung giờ phỏng vấn.
+                    Chỉ hiển thị ngày thực sự có lịch trong hệ thống.
+                </p>
+            </div>
+        </div>
+
+        <div class="empty-date-message"
+             th:if="${#lists.isEmpty(availableDates)}">
+            Bạn chưa tạo khung giờ phỏng vấn cho ngày nào.
+        </div>
+
+        <div class="date-chip-list"
+             th:unless="${#lists.isEmpty(availableDates)}">
+
+            <a th:each="openedDate : ${availableDates}"
+               th:href="@{/recruiter/interviews(date=${openedDate}, jobId=${selectedJobId})}"
+               class="date-chip"
+               th:classappend="${openedDate.equals(selectedDate)}
+                   ? ' active-date' : ''">
+
+                <span th:text="${#temporals.format(openedDate, 'dd/MM/yyyy')}">
+                    02/11/2026
+                </span>
+
+                <span th:if="${openedDate.equals(selectedDate)}"
+                      class="current-date-mark">
+                    Đang xem
+                </span>
+            </a>
+        </div>
+
+        <div class="date-picker-note">
+            <span>📌</span>
+            Bạn vẫn có thể chọn ngày chưa mở lịch bằng ô Ngày phỏng vấn phía trên.
+        </div>
+
+    </section>
+
+</main>
+
+</body>
+</html>

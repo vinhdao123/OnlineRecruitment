@@ -2,6 +2,7 @@ package OnlineRecruitment.OnlineRecruitment.service;
 
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.entity.UserStatus;
+import OnlineRecruitment.OnlineRecruitment.exception.AccountRejectedException;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.DisabledException;
@@ -28,7 +29,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new LockedException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin.");
         }
 
-        if (user.getStatus() == UserStatus.PENDING || user.getStatus() == UserStatus.REJECTED) {
+        if (user.getStatus() == UserStatus.REJECTED) {
+            throw new AccountRejectedException("Hồ sơ đăng ký công ty của bạn đã bị từ chối.");
+        }
+
+        if (user.getStatus() == UserStatus.PENDING) {
             throw new DisabledException("Tài khoản chưa được kích hoạt hoặc đang chờ duyệt.");
         }
 

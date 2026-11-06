@@ -175,39 +175,11 @@
                 <input id="location"
                        class="form-control"
                        type="text"
-                       th:field="*{location}"
+                       th:field="*{location}" maxlength="500"
                        placeholder="Ví dụ: Hà Nội hoặc Hybrid"
                        required>
               </div>
 
-              <!-- URL logo công ty: dán link ảnh, để trống = giữ logo hiện tại -->
-              <div class="form-group full">
-                <label for="logoUrl">
-                  Logo công ty (URL ảnh)
-                  <span class="optional">(Không bắt buộc)</span>
-                </label>
-
-                <div class="logo-field">
-                  <!-- Ảnh xem trước: hiện khi có URL hợp lệ -->
-                  <img id="logoPreview"
-                       class="logo-preview"
-                       th:classappend="${jobForm.logoUrl != null and !#strings.isEmpty(jobForm.logoUrl)} ? 'show'"
-                       th:src="${jobForm.logoUrl}"
-                       alt="Xem trước logo">
-
-                  <input id="logoUrl"
-                         class="form-control"
-                         type="url"
-                         th:field="*{logoUrl}"
-                         maxlength="500"
-                         placeholder="https://example.com/logo.png">
-                </div>
-
-                <span class="field-hint">
-                  Dán đường dẫn ảnh logo (bắt đầu bằng <strong>https://</strong>).
-                  Logo thuộc về công ty nên sẽ áp dụng cho tất cả tin của công ty.
-                </span>
-              </div>
             </div>
           </section>
 
@@ -255,7 +227,7 @@
                 </div>
 
                 <span class="field-hint">
-                                    Có thể để trống nếu doanh nghiệp chưa muốn công khai mức lương.
+                                    Có thể để trống cả hai mức nếu lương thỏa thuận.
                                 </span>
               </div>
 
@@ -277,9 +249,9 @@
                 <input id="deadline"
                        class="form-control"
                        type="date"
-                       th:field="*{deadline}">
+                       th:field="*{deadline}" required>
                 <span class="field-hint">
-                                    Chọn ngày kết thúc nhận hồ sơ.
+                                    Bắt buộc khi gửi duyệt. Tin nhận hồ sơ đến hết ngày này.
                                 </span>
               </div>
             </div>
@@ -336,15 +308,15 @@
           <!-- ACTIONS -->
           <div class="form-actions">
             <div class="action-note">
-              Lưu bản nháp để hoàn thiện sau hoặc gửi tin tuyển dụng
-              để xử lý theo quy trình của hệ thống.
+              Bản nháp cần có tiêu đề và danh mục. Gửi duyệt cần hoàn thiện thông tin và hạn ứng tuyển.
+              Sửa tin đang hiển thị sẽ rút tin xuống cho đến khi được duyệt lại.
             </div>
 
             <div class="action-buttons">
               <button class="btn btn-draft"
                       type="submit"
                       name="action"
-                      value="draft">
+                      value="draft" formnovalidate>
                 Lưu bản nháp
               </button>
 
@@ -494,7 +466,6 @@
   </footer>
 </div>
 
-<script th:src="@{/js/job-pages/recruiter-job-form.js}"></script>
 <script th:src="@{/js/ui-polish.js}"></script>
 </body>
 </html>

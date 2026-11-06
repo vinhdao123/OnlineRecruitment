@@ -52,6 +52,50 @@
             <span>Users</span>
         </a>
 
+        <!-- ==================== DOANH NGHIỆP ==================== -->
+        <details class="nav-group"
+                 th:attr="open=${activeMenu == 'companies'
+                                or activeMenu == 'pending'
+                                or activeMenu == 'banned'}
+                                ? 'open' : null">
+
+            <summary class="nav-item nav-parent">
+                <span class="icon">🏢</span>
+                <span>Doanh nghiệp</span>
+                <span class="chevron">›</span>
+            </summary>
+
+            <div class="nav-submenu">
+                <!-- Tất cả công ty -->
+                <a th:href="@{/admin/companies}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'companies'} ? 'active' : ''">
+                    Tất cả công ty
+                </a>
+
+                <!-- Công ty chờ duyệt -->
+                <a th:href="@{/admin/companies(status='PENDING')}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
+                    Chờ duyệt
+                </a>
+
+                <!-- Công ty đã khóa -->
+                <a th:href="@{/admin/companies(status='LOCKED')}"
+                   class="nav-sub-item"
+                   th:classappend="${activeMenu == 'banned'} ? 'active' : ''">
+                    Đã khóa
+                </a>
+            </div>
+        </details>
+
+        <!-- Xem các đường dẫn ảnh hiện có trong database -->
+        <a th:href="@{/admin/images}" class="nav-item"
+           th:classappend="${activeMenu == 'images'} ? 'active' : ''">
+            <span class="icon">🖼️</span>
+            <span>Thư viện ảnh</span>
+        </a>
+
         <!-- Quản lý gói dịch vụ -->
         <a th:href="@{/admin/packages}"
            class="nav-item"
@@ -83,7 +127,11 @@
         <details class="nav-group"
                  th:attr="open=${activeMenu == 'jobs'
                                 or activeMenu == 'jobs-pending'
-                                or activeMenu == 'jobs-closed'}
+                                or activeMenu == 'jobs-closed'
+                                or activeMenu == 'jobs-rejected'
+                                or activeMenu == 'jobs-expired'
+                                or activeMenu == 'jobs-active'
+                                or activeMenu == 'jobs-draft'}
                                 ? 'open' : null">
 
             <summary class="nav-item nav-parent">
@@ -109,6 +157,16 @@
                 </a>
 
                 <!-- Tin tuyển dụng đã đóng -->
+                <a th:href="@{/admin/jobs(status='ACTIVE')}" class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs-active'} ? 'active' : ''">Đang tuyển</a>
+                <a th:href="@{/admin/jobs(status='REJECTED')}" class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs-rejected'} ? 'active' : ''">Tin đã từ chối</a>
+                <a th:href="@{/admin/jobs(status='DRAFT')}" class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs-draft'} ? 'active' : ''">Tin nháp</a>
+                <a th:href="@{/admin/jobs(status='EXPIRED')}" class="nav-sub-item"
+                   th:classappend="${activeMenu == 'jobs-expired'} ? 'active' : ''">Quá hạn</a>
+
+                <!-- Tin tuyển dụng đã đóng -->
                 <a th:href="@{/admin/jobs(status='CLOSED')}"
                    class="nav-sub-item"
                    th:classappend="${activeMenu == 'jobs-closed'} ? 'active' : ''">
@@ -132,8 +190,14 @@
             <span>Duyệt tin</span>
         </a>
 
-        <!-- ==================== SYSTEM ==================== -->
-        <div class="nav-section">SYSTEM</div>
+        <!-- ==================== NÚT DUYỆT CÔNG TY ==================== -->
+        <a th:href="@{/admin/companies(status='PENDING')}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'pending'} ? 'active' : ''">
+
+            <span class="icon">🏢</span>
+            <span>Duyệt công ty</span>
+        </a>
 
         <!-- ==================== JOB CATEGORIES ==================== -->
         <!--
@@ -148,6 +212,29 @@
             <span class="icon">📂</span>
             <span>Job Categories</span>
         </a>
+
+        <a th:href="@{/admin/skills}" class="nav-item"
+           th:classappend="${activeMenu == 'skills'} ? 'active' : ''">
+            <span class="icon">🧩</span><span>Quản lý Skill</span>
+        </a>
+
+        <!-- ==================== TUYỂN DỤNG & ĐÁNH GIÁ ==================== -->
+        <div class="nav-section">TUYỂN DỤNG & ĐÁNH GIÁ</div>
+
+        <a th:href="@{/admin/interview-questions}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'interview-questions'} ? 'active' : ''">
+            <span class="icon">📚</span>
+            <span>Câu hỏi phỏng vấn</span>
+        </a>
+
+        <a th:href="@{/admin/skill-tests}"
+           class="nav-item"
+           th:classappend="${activeMenu == 'skill-tests'} ? 'active' : ''">
+            <span class="icon">🎯</span>
+            <span>Đề thi kỹ năng</span>
+        </a>
+        <div class="nav-section">SYSTEM</div>
 
         <!-- Cài đặt -->
         <a href="#" class="nav-item">

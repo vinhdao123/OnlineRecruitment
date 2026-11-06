@@ -24,18 +24,6 @@ public class JobAutoCloseScheduler {
     @Transactional
     // Đóng expired jobs trong luồng tuyển dụng.
     public void closeExpiredJobs() {
-        // Tin có deadline < hôm nay là đã hết hạn (đúng ngày deadline vẫn còn hiển thị)
-        List<Job> expired = jobRepository
-                .findByStatusAndDeadlineBefore(
-                JobStatus.ACTIVE,
-                LocalDate.now()
-        );
-
-        // Chuyển từng tin sang CLOSED (updated_at tự cập nhật nhờ @PreUpdate)
-        for (Job job : expired) {
-            job.setStatus(JobStatus.CLOSED);
-        }
-
-        jobRepository.saveAll(expired);
+        jobRepository.expireActiveJobs(LocalDate.now());
     }
 }

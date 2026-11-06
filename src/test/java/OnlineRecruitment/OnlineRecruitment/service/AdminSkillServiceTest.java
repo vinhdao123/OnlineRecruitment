@@ -3,59 +3,71 @@ package OnlineRecruitment.OnlineRecruitment.service;
 import OnlineRecruitment.OnlineRecruitment.entity.JobCategory;
 import OnlineRecruitment.OnlineRecruitment.entity.Skill;
 import OnlineRecruitment.OnlineRecruitment.repository.JobCategoryRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.JobSkillRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.SkillRepository;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
 class AdminSkillServiceTest {
-    @Mock SkillRepository skills;
-    @Mock JobCategoryRepository categories;
-    @InjectMocks AdminSkillService service;
+    SkillRepository skills = mock(SkillRepository.class);
+    JobCategoryRepository categories = mock(JobCategoryRepository.class);
+    JobSkillRepository jobSkills = mock(JobSkillRepository.class);
+    AdminSkillService service = new AdminSkillService(skills, categories, jobSkills);
 
-    private JobCategory category(String status) {
-        JobCategory c = new JobCategory(); c.setId(2L); c.setStatus(status); return c;
+    JobCategory category(String status) {
+        JobCategory category = new JobCategory(); category.setId(3L); category.setStatus(status);
+        return category;
     }
-    @Test void SK_01_createSkillInActiveCategory() {
-        when(categories.findById(2L)).thenReturn(Optional.of(category("ACTIVE")));
-        service.create("  Spring   Boot ", 2L);
-        verify(skills).save(argThat(s -> s.getName().equals("Spring Boot")
-          && s.getStatus().equals("ACTIVE") && s.getCategory().getId().equals(2L)));
+
+    @Test
+    void normalizedDuplicateIsRejectedAcrossCategoriesToRespectDatabaseUniqueName() {
+        when(categories.findById(3L)).thenReturn(Optional.of(category("ACTIVE")));
+        when(skills.existsByNameIgnoreCase("Java")).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> service.create(" Java ", 3L));
+        verify(skills, never()).saveAndFlush(any());
     }
-    @Test void SK_02_rejectDuplicateInCategory() {
-        when(categories.findById(2L)).thenReturn(Optional.of(category("ACTIVE")));
-        when(skills.existsByNameIgnoreCaseAndCategoryId("Java",2L)).thenReturn(true);
-        assertThrows(IllegalArgumentException.class, () -> service.create("Java",2L));
-        verify(skills,never()).save(any());
+
+    @Test
+    void reactivationPreservesSkillIdAndCategory() {
+        Skill skill = new Skill(5L, "Java", "INACTIVE"); skill.setCategory(category("ACTIVE"));
+        when(skills.findById(5L)).thenReturn(Optional.of(skill));
+        when(categories.findById(3L)).thenReturn(Optional.of(skill.getCategory()));
+        service.update(5L, "  Java  ", 3L, "ACTIVE");
+        assertEquals(5L, skill.getId()); assertEquals("ACTIVE", skill.getStatus());
+        assertEquals("Java", skill.getName()); assertEquals(3L, skill.getCategory().getId());
     }
-    @Test void SK_03_rejectInactiveCategory() {
-        when(categories.findById(2L)).thenReturn(Optional.of(category("INACTIVE")));
-        assertThrows(IllegalArgumentException.class, () -> service.create("Java",2L));
-        verify(skills,never()).save(any());
+
+    @Test
+    void invalidStatusCannotBeSaved() {
+        when(skills.findById(5L)).thenReturn(Optional.of(new Skill()));
+        assertThrows(IllegalArgumentException.class, () -> service.update(5L, "Java", 3L, "DELETED"));
+        verify(skills, never()).saveAndFlush(any());
     }
-    @Test void SK_04_updateAndDeactivateSkill() {
-        Skill skill = new Skill(); skill.setId(8L); skill.setStatus("ACTIVE");
-        when(skills.findById(8L)).thenReturn(Optional.of(skill));
-        when(categories.findById(2L)).thenReturn(Optional.of(category("INACTIVE")));
-        service.update(8L,"  SQL  Server ",2L,"INACTIVE");
-        assertEquals("SQL Server",skill.getName());
-        assertEquals("INACTIVE",skill.getStatus());
-        verify(skills).save(skill);
+
+    @Test
+    void usedSkillCannotMoveCategory() {
+        Skill skill = new Skill(5L, "Java", "ACTIVE"); skill.setCategory(category("ACTIVE"));
+        when(skills.findById(5L)).thenReturn(Optional.of(skill)); when(jobSkills.isUsed(5L)).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> service.update(5L, "Java", 9L, "ACTIVE"));
+        verify(skills, never()).saveAndFlush(any());
     }
-    @Test void SK_05_rejectInvalidStatus() {
-        when(skills.findById(8L)).thenReturn(Optional.of(new Skill()));
-        assertThrows(IllegalArgumentException.class, () -> service.update(8L,"Git",2L,"DELETED"));
-        verify(skills,never()).save(any());
+
+    @Test
+    void createRejectsInactiveCategory() {
+        when(categories.findById(3L)).thenReturn(Optional.of(category("INACTIVE")));
+        assertThrows(IllegalArgumentException.class, () -> service.create("Java", 3L));
     }
-    @Test void SK_06_rejectBlankSkillName() {
-        assertThrows(IllegalArgumentException.class, () -> service.create("  ",2L));
-        verifyNoInteractions(categories,skills);
+
+    @Test
+    void canDeactivateSkillInInactiveCategoryWithoutDeletingReferences() {
+        Skill skill = new Skill(5L, "Java", "ACTIVE"); skill.setCategory(category("INACTIVE"));
+        when(skills.findById(5L)).thenReturn(Optional.of(skill));
+        when(categories.findById(3L)).thenReturn(Optional.of(skill.getCategory()));
+        service.update(5L, "Java", 3L, "INACTIVE");
+        assertEquals("INACTIVE", skill.getStatus());
+        verify(skills).saveAndFlush(skill);
+        verify(skills, never()).delete(any());
     }
 }

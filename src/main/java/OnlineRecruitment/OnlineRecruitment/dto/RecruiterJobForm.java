@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 // Dữ liệu form tạo/sửa tin tuyển dụng
-// (@Getter/@Setter của Lombok tự sinh getLogoUrl()/setLogoUrl()...)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -47,6 +46,4 @@ public class RecruiterJobForm {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate deadline;
 
-    // URL logo công ty (không bắt buộc, lưu vào companies.logo_url)
-    private String logoUrl;
 }

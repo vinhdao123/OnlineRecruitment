@@ -6,13 +6,13 @@
 
             --green: #15468b;
             --green-dark: #14386b;
-            --green-light: #eaf7ef;
+            --green-light: #eff6ff;
 
             --purple: #7041a6;
             --purple-light: #f4edff;
 
             --teal: #145580;
-            --teal-light: #e7f8f3;
+            --teal-light: #eff6ff;
 
             --orange: #a85d0b;
             --orange-light: #fff5df;
@@ -261,7 +261,7 @@
             margin-bottom: 25px;
             padding: 22px 24px;
 
-            background: linear-gradient(115deg, #e7f8f3, #f8fcfb);
+            background: linear-gradient(115deg, #eff6ff, #f8fcfb);
             border: 1px solid #cfe2ef;
             border-radius: 16px;
         }
@@ -815,7 +815,7 @@
 
         .info-item:nth-child(2) .info-icon {
             color: #106197;
-            background: #e7f8f3;
+            background: #eff6ff;
         }
 
         .info-item:nth-child(3) .info-icon {
@@ -830,7 +830,7 @@
 
         .info-item:nth-child(5) .info-icon {
             color: #2f5489;
-            background: #eaf7ef;
+            background: #eff6ff;
         }
 
         .info-item:nth-child(6) .info-icon {

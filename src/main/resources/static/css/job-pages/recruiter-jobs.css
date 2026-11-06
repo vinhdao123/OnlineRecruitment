@@ -473,4 +473,60 @@
             object-fit: contain;
             background: #fff;
         }
-    
+
+        /* Đổi điểm nhấn xanh lá sang xanh dương riêng trên trang quản lý tin. */
+        body.recruiter-blue {
+            --green: #3b82f6;
+            --green-dark: #2563eb;
+            --green-light: #eff6ff;
+            --border-green: #bfdbfe;
+            --accent: #2563eb;
+            --accent-soft: #eff6ff;
+            --accent-dark: #1d4ed8;
+        }
+
+        .recruiter-blue .site-nav > a.active {
+            color: #1d4ed8;
+            background: #eaf2ff;
+        }
+
+        .recruiter-blue .site-nav > a.nav-post:hover,
+        .recruiter-blue .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+        }
+
+        .recruiter-blue .job-chip-salary,
+        .recruiter-blue .job-card .status-ACTIVE,
+        .recruiter-blue .job-card .status-APPROVED {
+            color: #1e40af;
+            background: #dbeafe;
+        }
+
+        .recruiter-blue .job-card:hover .job-card-title a {
+            color: #2563eb;
+        }
+
+        .recruiter-blue .job-flash-success {
+            color: #1e40af;
+            background: #eff6ff;
+            border-color: #93c5fd;
+        }
+
+        .recruiter-blue .to-top {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        }
+
+        .recruiter-blue .sf-brand span {
+            color: #93c5fd;
+        }
+
+        .recruiter-blue .sf-btn-primary {
+            color: #fff;
+            background: #2563eb;
+            box-shadow: 0 8px 18px rgb(37 99 235 / 25%);
+        }
+
+        .recruiter-blue .sf-btn-primary:hover {
+            background: #1d4ed8;
+        }

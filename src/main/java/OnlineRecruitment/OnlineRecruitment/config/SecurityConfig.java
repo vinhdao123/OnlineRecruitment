@@ -1,5 +1,6 @@
 package OnlineRecruitment.OnlineRecruitment.config;
 
+import OnlineRecruitment.OnlineRecruitment.exception.AccountRejectedException;
 import OnlineRecruitment.OnlineRecruitment.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -36,13 +37,11 @@ public class SecurityConfig {
                 cause = cause.getCause();
             }
 
-            if (cause instanceof LockedException) {
+            if (cause instanceof AccountRejectedException || exception instanceof AccountRejectedException) {
+                error = "rejected";
+            } else if (cause instanceof LockedException || exception instanceof LockedException) {
                 error = "locked";
-            } else if (cause instanceof DisabledException) {
-                error = "inactive";
-            } else if (exception instanceof LockedException) {
-                error = "locked";
-            } else if (exception instanceof DisabledException) {
+            } else if (cause instanceof DisabledException || exception instanceof DisabledException) {
                 error = "inactive";
             }
 
@@ -60,14 +59,19 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/", "/login", "/register", "/register/**",
                                 "/verify-otp", "/resend-otp", "/auth/**",
+                                "/forgot-password", "/forgot-password/**",
                                 "/403", "/error", "/companies", "/about",
                                 "/company-profile",
+                                "/interview-questions", "/interview-questions/**",
+                                "/skill-tests", "/skill-tests/{id:[0-9]+}",
                                 "/css/**", "/js/**", "/images/**", "/static/**",
                                 "/uploads/**",
                                 "/favicon.ico"
                         ).permitAll()
                         .requestMatchers("/jobs/*/apply").hasRole("CANDIDATE")
+                        .requestMatchers("/applications/submit").hasRole("CANDIDATE")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/jobs", "/jobs/**").permitAll()
+                        .requestMatchers("/skill-tests/*/take", "/skill-tests/*/submit", "/skill-tests/result/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/recruiter/**").hasRole("RECRUITER")
                         .requestMatchers("/candidate/**").hasRole("CANDIDATE")

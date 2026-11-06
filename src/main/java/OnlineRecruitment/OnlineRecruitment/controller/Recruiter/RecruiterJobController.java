@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -44,14 +45,15 @@ public class RecruiterJobController {
             Authentication authentication,
             Model model
     ) {
+        jobService.refreshExpiredJobs();
         User recruiter = getLoggedInRecruiter(authentication);
 
         // Lấy tất cả tin khớp bộ lọc (tiêu đề, địa điểm, trạng thái)
-        List<Job> allJobs = jobService.findAllJobsForManagement(
-                keyword,
-                location,
-                status
-        );
+        List<Job> allJobs = jobService.findMyJobs(recruiter.getId(), keyword, status).stream()
+                .filter(job -> location == null || location.isBlank()
+                        || (job.getLocation() != null && job.getLocation().toLowerCase(java.util.Locale.ROOT)
+                        .contains(location.trim().toLowerCase(java.util.Locale.ROOT))))
+                .toList();
 
         // Tính số trang (luôn có ít nhất 1 trang)
         int totalFound = allJobs.size();
@@ -86,27 +88,27 @@ public class RecruiterJobController {
         model.addAttribute("status", status);
         model.addAttribute("currentRecruiter", recruiter);
 
-        // Thống kê trên toàn bộ database.
-        model.addAttribute("totalJobs", jobService.countAllJobs());
+        // Thống kê riêng của nhà tuyển dụng, độc lập với bộ lọc danh sách.
+        model.addAttribute("totalJobs", jobService.countMyJobs(recruiter.getId()));
 
         model.addAttribute(
                 "draftJobs",
-                jobService.countAllJobsByStatus(JobStatus.DRAFT)
+                jobService.countMyJobsByStatus(recruiter.getId(), JobStatus.DRAFT)
         );
 
         model.addAttribute(
                 "pendingJobs",
-                jobService.countAllJobsByStatus(JobStatus.PENDING)
+                jobService.countMyJobsByStatus(recruiter.getId(), JobStatus.PENDING)
         );
 
         model.addAttribute(
                 "activeJobs",
-                jobService.countAllJobsByStatus(JobStatus.ACTIVE)
+                jobService.countMyJobsByStatus(recruiter.getId(), JobStatus.ACTIVE)
         );
 
         model.addAttribute(
                 "rejectedJobs",
-                jobService.countAllJobsByStatus(JobStatus.REJECTED)
+                jobService.countMyJobsByStatus(recruiter.getId(), JobStatus.REJECTED)
         );
 
         return "recruiter/jobs";
@@ -150,7 +152,7 @@ public class RecruiterJobController {
 
             // Tin đã đóng thì phải mở lại trước; các trạng thái khác đều được sửa
             // (sửa tin chờ duyệt/đang hiển thị sẽ được gửi lại cho Admin duyệt)
-            if (job.getStatus() == JobStatus.CLOSED) {
+            if (job.getStatus() == JobStatus.CLOSED || job.getStatus() == JobStatus.EXPIRED) {
 
                 redirectAttributes.addFlashAttribute(
                         "errorMessage",
@@ -163,7 +165,7 @@ public class RecruiterJobController {
             RecruiterJobForm form = new RecruiterJobForm();
 
             form.setJobId(job.getId());
-            form.setCategoryId(job.getCategory().getId());
+            form.setCategoryId(job.getCategory() == null ? null : job.getCategory().getId());
             form.setTitle(job.getTitle());
             form.setDescription(job.getDescription());
             form.setRequirements(job.getRequirements());
@@ -217,6 +219,8 @@ public class RecruiterJobController {
     @PostMapping("/save")
     public String saveJob(
             @ModelAttribute("jobForm") RecruiterJobForm form,
+            BindingResult bindingResult,
+            Model model,
             @RequestParam(defaultValue = "draft") String action,
             Authentication authentication,
             RedirectAttributes redirectAttributes
@@ -224,8 +228,13 @@ public class RecruiterJobController {
         try {
             User recruiter = getLoggedInRecruiter(authentication);
 
-            boolean submitForReview =
-                    "submit".equalsIgnoreCase(action.trim());
+            if (bindingResult.hasErrors()) {
+                throw new IllegalArgumentException("Ngày, số lượng hoặc mức lương không hợp lệ. Vui lòng kiểm tra lại.");
+            }
+            if (!"draft".equals(action) && !"submit".equals(action)) {
+                throw new IllegalArgumentException("Thao tác lưu tin không hợp lệ.");
+            }
+            boolean submitForReview = "submit".equals(action);
 
             jobService.saveRecruiterJob(
                     recruiter,
@@ -246,17 +255,15 @@ public class RecruiterJobController {
                 );
             }
 
-            return "redirect:/recruiter/jobs";
+            return submitForReview ? "redirect:/recruiter/jobs?status=PENDING"
+                    : "redirect:/recruiter/jobs/archive?tab=draft";
 
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Không thể lưu tin tuyển dụng: " + e.getMessage()
-            );
-
-            // Chuyển về danh sách để hiện thông báo lỗi rõ ràng.
-            // Không báo thành công nếu dữ liệu chưa được lưu.
-            return "redirect:/recruiter/jobs";
+            model.addAttribute("errorMessage", e.getMessage());
+            model.addAttribute("categories", jobService.getActiveCategories());
+            model.addAttribute("employmentTypes", EmploymentType.values());
+            model.addAttribute("pageTitle", "Hoàn thiện tin tuyển dụng");
+            return "recruiter/job-form";
         }
     }
 
@@ -313,8 +320,9 @@ public class RecruiterJobController {
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Mở lại tin tuyển dụng thành công!"
+                    "Đã chuyển tin về nháp. Cập nhật hạn ứng tuyển và gửi duyệt để đăng lại."
             );
+            return "redirect:/recruiter/jobs/" + id + "/edit";
         } catch (IllegalArgumentException e) {
             // Có lỗi nghiệp vụ thì báo ra màn hình
             redirectAttributes.addFlashAttribute(

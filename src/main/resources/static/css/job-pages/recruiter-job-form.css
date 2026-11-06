@@ -1,19 +1,19 @@
     :root {
       --navy: #243B53;
       --navy-dark: #192D43;
-      --green: #36765B;
-      --green-dark: #285A44;
-      --teal: #178A8A;
-      --teal-dark: #116B6B;
+      --green: #2563EB;
+      --green-dark: #1D4ED8;
+      --teal: #3B82F6;
+      --teal-dark: #1D4ED8;
       --orange: #C47742;
       --orange-dark: #9A5529;
       --body-text: #455468;
       --muted: #718096;
-      --border: #B2C5B3;
-      --border-strong: #89A98E;
+      --border: #BFDBFE;
+      --border-strong: #93B4E8;
       --white: #FFFFFF;
-      --surface: #F9FCF8;
-      --success: #24734B;
+      --surface: #F8FAFF;
+      --success: #1E40AF;
       --danger: #B42332;
       --shadow: 0 18px 45px rgba(36, 59, 83, 0.10);
     }
@@ -27,15 +27,15 @@
       min-height: 100vh;
       font-family: 'Inter', sans-serif;
       color: var(--body-text);
-      background-color: #DCEBDD;
+      background-color: #EFF6FF;
       background-image:
-              radial-gradient(circle, rgba(49, 86, 65, 0.16) 1.2px, transparent 1.8px),
-              linear-gradient(90deg, transparent 49.5%, rgba(66, 107, 85, 0.055) 50%, transparent 50.5%),
-              linear-gradient(0deg, transparent 49.5%, rgba(66, 107, 85, 0.055) 50%, transparent 50.5%),
-              radial-gradient(circle at 0% 0%, transparent 0 75px, rgba(66, 107, 85, 0.15) 76px 78px, transparent 79px),
-              radial-gradient(circle at 100% 100%, transparent 0 100px, rgba(66, 107, 85, 0.13) 101px 103px, transparent 104px),
-              radial-gradient(ellipse at 100% 0%, rgba(159, 197, 162, 0.38), transparent 42%),
-              linear-gradient(135deg, #DCEBDD 0%, #C8DFCA 45%, #E5EFE3 100%);
+              radial-gradient(circle, rgba(37, 99, 235, 0.16) 1.2px, transparent 1.8px),
+              linear-gradient(90deg, transparent 49.5%, rgba(59, 130, 246, 0.055) 50%, transparent 50.5%),
+              linear-gradient(0deg, transparent 49.5%, rgba(59, 130, 246, 0.055) 50%, transparent 50.5%),
+              radial-gradient(circle at 0% 0%, transparent 0 75px, rgba(59, 130, 246, 0.15) 76px 78px, transparent 79px),
+              radial-gradient(circle at 100% 100%, transparent 0 100px, rgba(59, 130, 246, 0.13) 101px 103px, transparent 104px),
+              radial-gradient(ellipse at 100% 0%, rgba(147, 197, 253, 0.38), transparent 42%),
+              linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 45%, #F1F5FD 100%);
       background-size:
               22px 22px,
               44px 44px,
@@ -83,7 +83,7 @@
       align-items: center;
       gap: 8px;
       padding: 11px 16px;
-      border: 1.5px solid #9EB6A1;
+      border: 1.5px solid #A9C4EB;
       border-radius: 10px;
       color: var(--navy);
       background: rgba(255, 255, 255, .86);
@@ -167,10 +167,10 @@
     .form-card-header {
       position: relative;
       padding: 25px 28px;
-      border-bottom: 1.5px solid #D6E4D6;
+      border-bottom: 1.5px solid #DBE7F8;
       background:
-              radial-gradient(circle at 100% 0%, rgba(23, 138, 138, .09), transparent 35%),
-              linear-gradient(120deg, #FFFFFF, #F3F9F1);
+              radial-gradient(circle at 100% 0%, rgba(59, 130, 246, .09), transparent 35%),
+              linear-gradient(120deg, #FFFFFF, #F1F6FF);
     }
 
     .form-card-header::after {
@@ -219,8 +219,8 @@
 
     .alert-success {
       color: var(--success);
-      background: #ECFDF3;
-      border-color: #A6E2BC;
+      background: #EFF6FF;
+      border-color: #BFDBFE;
     }
 
     .section {
@@ -237,7 +237,7 @@
       gap: 12px;
       padding-bottom: 14px;
       margin-bottom: 20px;
-      border-bottom: 1.5px solid #DDE8DD;
+      border-bottom: 1.5px solid #DFE8F5;
     }
 
     .section-number {
@@ -246,10 +246,10 @@
       width: 34px;
       height: 34px;
       place-items: center;
-      border: 1.5px solid #A8C9B1;
+      border: 1.5px solid #B3CDF1;
       border-radius: 10px;
       color: var(--green-dark);
-      background: #EDF7ED;
+      background: #EFF6FF;
       font-size: 13px;
       font-weight: 800;
     }
@@ -306,24 +306,24 @@
       width: 100%;
       min-height: 45px;
       padding: 11px 13px;
-      border: 1.5px solid #B2C5B3;
+      border: 1.5px solid #BFDBFE;
       border-radius: 9px;
       outline: none;
       color: var(--navy);
-      background: #FCFEFB;
+      background: #FCFDFF;
       font-size: 12px;
       transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
     }
 
     .form-control:hover {
-      border-color: #789C81;
+      border-color: #7FA7DF;
       background: #FFFFFF;
     }
 
     .form-control:focus {
       border-color: var(--teal);
       background: #FFFFFF;
-      box-shadow: 0 0 0 4px rgba(23, 138, 138, .11);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, .11);
     }
 
     select.form-control {
@@ -386,7 +386,7 @@
       gap: 12px;
       padding-top: 24px;
       margin-top: 30px;
-      border-top: 1.5px solid #DDE8DD;
+      border-top: 1.5px solid #DFE8F5;
     }
 
     .action-note {
@@ -434,14 +434,14 @@
 
     .btn-submit {
       color: #FFFFFF;
-      background: linear-gradient(135deg, #36765B, #178A8A);
-      border-color: #36765B;
-      box-shadow: 0 6px 15px rgba(54, 118, 91, .20);
+      background: linear-gradient(135deg, #2563EB, #3B82F6);
+      border-color: #2563EB;
+      box-shadow: 0 6px 15px rgba(37, 99, 235, .20);
     }
 
     .btn-submit:hover {
-      background: linear-gradient(135deg, #285A44, #116B6B);
-      box-shadow: 0 9px 20px rgba(54, 118, 91, .25);
+      background: linear-gradient(135deg, #1D4ED8, #1D4ED8);
+      box-shadow: 0 9px 20px rgba(37, 99, 235, .25);
     }
 
     .sidebar {
@@ -467,10 +467,10 @@
       width: 40px;
       height: 40px;
       place-items: center;
-      border: 1.5px solid #B4D3BD;
+      border: 1.5px solid #BBD2F1;
       border-radius: 12px;
       color: var(--green-dark);
-      background: #EEF7EF;
+      background: #EFF6FF;
     }
 
     .side-icon svg {
@@ -480,8 +480,8 @@
 
     .side-card:nth-child(2) .side-icon {
       color: var(--teal-dark);
-      background: #E7F7F6;
-      border-color: #A9DAD7;
+      background: #EFF6FF;
+      border-color: #BFDBFE;
     }
 
     .side-card:nth-child(3) .side-icon {
@@ -541,7 +541,7 @@
       margin-top: 1px;
       border-radius: 50%;
       color: var(--green-dark);
-      background: #E5F4E8;
+      background: #E4EEFF;
       font-size: 11px;
       font-weight: 800;
     }
@@ -609,7 +609,7 @@
 
     .footer-note {
       padding: 20px 0 0;
-      color: #5D7565;
+      color: #647B9A;
       text-align: center;
       font-size: 10px;
       line-height: 1.7;
@@ -630,7 +630,7 @@
       height: 64px;
       object-fit: contain;
       padding: 4px;
-      border: 1.5px solid #B2C5B3;
+      border: 1.5px solid #BFDBFE;
       border-radius: 12px;
       background: #FFFFFF;
     }
@@ -726,4 +726,4 @@
         width: 100%;
       }
     }
-  
+

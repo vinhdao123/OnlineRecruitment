@@ -16,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -72,9 +73,15 @@ public class AuthService {
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
             throw new IllegalArgumentException("Mật khẩu xác nhận không khớp!");
         }
-        if (userRepository.existsByEmail(dto.getEmail())) {
+        
+        Optional<User> existingUser = userRepository.findByEmail(dto.getEmail());
+        if (existingUser.isPresent()) {
+            if (existingUser.get().getStatus() == UserStatus.REJECTED) {
+                throw new IllegalArgumentException("Hồ sơ đăng ký của email này đã bị từ chối trước đó. Vui lòng kiểm tra email của bạn để sử dụng đường dẫn chỉnh sửa và gửi lại hồ sơ mà không cần đăng ký mới!");
+            }
             throw new IllegalArgumentException("Email tài khoản đã tồn tại!");
         }
+        
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new IllegalArgumentException("Username đã được sử dụng!");
         }
@@ -272,6 +279,131 @@ public class AuthService {
 
         currentUser.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(currentUser);
+    }
+
+    // 7. Gửi OTP quên mật khẩu (dành cho người dùng chưa đăng nhập)
+    @Transactional
+    public void sendForgotPasswordOtp(String email) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập địa chỉ Gmail tài khoản!");
+        }
+
+        User user = userRepository.findByEmail(email.trim())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản nào được đăng ký với email: " + email));
+
+        if (user.getStatus() == UserStatus.LOCKED) {
+            throw new IllegalArgumentException("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để được hỗ trợ.");
+        }
+
+        // Cooldown check
+        otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(user.getEmail()).ifPresent(lastToken -> {
+            if (lastToken.getCreatedAt().isAfter(LocalDateTime.now().minusSeconds(RESEND_COOLDOWN_SECONDS))) {
+                throw new IllegalArgumentException("Vui lòng đợi " + RESEND_COOLDOWN_SECONDS + " giây trước khi yêu cầu mã mới!");
+            }
+        });
+
+        int code = secureRandom.nextInt(900000) + 100000;
+        String otp = String.valueOf(code);
+
+        OtpToken otpToken = new OtpToken();
+        otpToken.setEmail(user.getEmail());
+        otpToken.setUser(user);
+        otpToken.setOtpHash(hashOtp(otp));
+        otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(10));
+        otpToken.setAttemptCount(0);
+        otpTokenRepository.save(otpToken);
+
+        emailService.sendOtpEmail(user.getEmail(),
+                "Mã OTP đặt lại mật khẩu - Online Recruitment",
+                "Xin chào " + user.getFullName() + ",\n\n" +
+                "Bạn hoặc ai đó vừa yêu cầu đặt lại mật khẩu cho tài khoản Online Recruitment.\n" +
+                "Mã xác thực OTP của bạn là: " + otp + "\n" +
+                "Mã này có hiệu lực trong vòng 10 phút. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email và bảo mật tài khoản.");
+    }
+
+    // 8. Đặt lại mật khẩu bằng OTP
+    @Transactional
+    public void resetPasswordWithOtp(String email, String otp, String newPassword, String confirmPassword) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập địa chỉ Gmail tài khoản!");
+        }
+
+        User user = userRepository.findByEmail(email.trim())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email này."));
+
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự!");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Mật khẩu mới và mật khẩu xác nhận không trùng khớp!");
+        }
+        if (otp == null || otp.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập mã OTP!");
+        }
+
+        OtpToken token = otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(user.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Chưa có mã OTP nào được gửi tới email này. Vui lòng nhấn gửi mã OTP trước."));
+
+        if (token.getUsedAt() != null) {
+            throw new IllegalArgumentException("Mã OTP này đã được sử dụng. Vui lòng yêu cầu mã mới.");
+        }
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        if (token.getAttemptCount() >= MAX_ATTEMPTS) {
+            throw new IllegalArgumentException("Bạn đã nhập sai quá " + MAX_ATTEMPTS + " lần. Vui lòng yêu cầu mã OTP mới.");
+        }
+
+        byte[] inputHash = hashOtp(otp);
+        if (!MessageDigest.isEqual(token.getOtpHash(), inputHash)) {
+            token.setAttemptCount(token.getAttemptCount() + 1);
+            otpTokenRepository.save(token);
+            throw new IllegalArgumentException("Mã OTP không chính xác. Số lần thử còn lại: " + (MAX_ATTEMPTS - token.getAttemptCount()));
+        }
+
+        token.setUsedAt(LocalDateTime.now());
+        otpTokenRepository.save(token);
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    // 9. Kiểm tra tính hợp lệ của OTP (không đánh dấu đã dùng để cho phép submit mật khẩu ở bước tiếp theo)
+    @Transactional
+    public void validateOtpOnly(String email, String otp) {
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập địa chỉ Gmail!");
+        }
+        if (otp == null || otp.isBlank()) {
+            throw new IllegalArgumentException("Vui lòng nhập mã OTP!");
+        }
+
+        User user = userRepository.findByEmail(email.trim())
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản với email này."));
+
+        OtpToken token = otpTokenRepository.findTopByEmailOrderByCreatedAtDesc(user.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Chưa có mã OTP nào được gửi tới email này."));
+
+        if (token.getUsedAt() != null) {
+            throw new IllegalArgumentException("Mã OTP này đã được sử dụng. Vui lòng yêu cầu mã mới.");
+        }
+
+        if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới.");
+        }
+
+        if (token.getAttemptCount() >= MAX_ATTEMPTS) {
+            throw new IllegalArgumentException("Bạn đã nhập sai quá " + MAX_ATTEMPTS + " lần. Vui lòng yêu cầu mã OTP mới.");
+        }
+
+        byte[] inputHash = hashOtp(otp);
+        if (!MessageDigest.isEqual(token.getOtpHash(), inputHash)) {
+            token.setAttemptCount(token.getAttemptCount() + 1);
+            otpTokenRepository.save(token);
+            throw new IllegalArgumentException("Mã OTP không chính xác. Số lần thử còn lại: " + (MAX_ATTEMPTS - token.getAttemptCount()));
+        }
     }
 
     private byte[] hashOtp(String otp) {

@@ -9,46 +9,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Danh sách công ty | OnlineRecruitment</title>
     <link rel="stylesheet" th:href="@{/css/company/company-profile.css}">
+    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
 </head>
 
 <body>
 
-<header class="header">
-    <nav class="navbar">
-
-        <a class="logo-brand" th:href="@{/}">
-            Online<span>Recruitment</span>
-        </a>
-
-        <div class="nav-links">
-            <a th:href="@{/jobs}">Việc làm</a>
-            <a th:href="@{/company-profile}" class="active">Công ty</a>
-            <a th:href="@{/}">Trang chủ</a>
-        </div>
-
-        <div class="nav-actions">
-
-            <!-- Chưa đăng nhập -->
-            <div sec:authorize="isAnonymous()" class="guest-menu">
-                <a class="btn" th:href="@{/login}">Đăng nhập</a>
-                <a class="btn btn-primary" th:href="@{/register}">Đăng ký</a>
-            </div>
-
-            <!-- Đã đăng nhập -->
-            <div sec:authorize="isAuthenticated()" class="user-menu">
-                <span class="username" sec:authentication="name">
-                    Tên đăng nhập
-                </span>
-
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn">Đăng xuất</button>
-                </form>
-            </div>
-
-        </div>
-
-    </nav>
-</header>
+<div th:replace="~{fragments/taskbar :: taskbar('companies')}"></div>
 
 <main>
 
