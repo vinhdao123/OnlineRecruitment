@@ -1,22 +1,25 @@
+
 package OnlineRecruitment.OnlineRecruitment.controller;
 
-import OnlineRecruitment.OnlineRecruitment.entity.*;
-import OnlineRecruitment.OnlineRecruitment.repository.CompanyRepository;
+import OnlineRecruitment.OnlineRecruitment.entity.Candidate;
+import OnlineRecruitment.OnlineRecruitment.entity.Cv;
+import OnlineRecruitment.OnlineRecruitment.entity.Job;
+import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.CandidateRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.CvRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.candidate.WishlistRepository;
 import OnlineRecruitment.OnlineRecruitment.service.JobService;
-import OnlineRecruitment.OnlineRecruitment.service.ServicePackageService;
-import OnlineRecruitment.OnlineRecruitment.service.UserService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class JobController {
@@ -25,64 +28,188 @@ public class JobController {
     private final UserRepository userRepository;
     private final CandidateRepository candidateRepository;
     private final CvRepository cvRepository;
-    // Thêm 2 service này
-    private final ServicePackageService servicePackageService;
-    private final UserService userService;
-    private final CompanyRepository companyRepository;
+    private final WishlistRepository wishlistRepository;
 
     public JobController(
             JobService jobService,
             UserRepository userRepository,
             CandidateRepository candidateRepository,
             CvRepository cvRepository,
-            ServicePackageService servicePackageService,
-            UserService userService,
-            CompanyRepository companyRepository) {
+            WishlistRepository wishlistRepository) {
 
         this.jobService = jobService;
         this.userRepository = userRepository;
         this.candidateRepository = candidateRepository;
         this.cvRepository = cvRepository;
-        this.servicePackageService = servicePackageService;
-        this.userService = userService;
-        this.companyRepository = companyRepository;
+        this.wishlistRepository = wishlistRepository;
     }
+
+    // ==========================================
+    // LẤY CANDIDATE ĐANG ĐĂNG NHẬP
+    // ==========================================
+
+    private Optional<Candidate> getCurrentCandidate() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+
+            return Optional.empty();
+        }
+
+        String username = authentication.getName();
+
+        Optional<User> userOptional =
+                userRepository.findByUsername(username);
+
+        if (userOptional.isEmpty()) {
+            userOptional = userRepository.findByEmail(username);
+        }
+
+        if (userOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return candidateRepository.findByUserId(
+                userOptional.get().getId()
+        );
+    }
+
+    // ==========================================
+    // DANH SÁCH CÔNG VIỆC
+    // ==========================================
 
     @GetMapping("/jobs")
     public String jobs(
+
             @RequestParam(required = false) String keyword,
+
             @RequestParam(required = false) String location,
+
             @RequestParam(required = false) List<String> locations,
+
             @RequestParam(required = false) List<String> experiences,
+
             @RequestParam(required = false) List<String> salaryRanges,
+
             @RequestParam(required = false) List<String> levels,
+
             @RequestParam(required = false) List<Long> categoryIds,
+
             @RequestParam(required = false) Long companyId,
+
             @RequestParam(defaultValue = "newest") String sort,
+
+            // Chỉ hiển thị công việc yêu thích
+            @RequestParam(defaultValue = "false") boolean favoritesOnly,
+
             Model model) {
 
+        // ==========================================
+        // 1. LỌC CÔNG VIỆC
+        // ==========================================
+
         List<Job> jobs = jobService.filterJobs(
-                keyword, location, locations, experiences, salaryRanges, levels, categoryIds
+                keyword,
+                location,
+                locations,
+                experiences,
+                salaryRanges,
+                levels,
+                categoryIds
         );
 
+        // ==========================================
+        // 2. LỌC THEO CÔNG TY
+        // ==========================================
+
         if (companyId != null) {
+
             jobs = jobs.stream()
-                    .filter(job -> job.getCompany() != null
-                            && java.util.Objects.equals(job.getCompany().getId(), companyId))
-                    .collect(java.util.stream.Collectors.toList());
+                    .filter(job ->
+                            job.getCompany() != null
+                                    && Objects.equals(
+                                    job.getCompany().getId(),
+                                    companyId
+                            )
+                    )
+                    .collect(Collectors.toList());
         }
+
+        // ==========================================
+        // 3. LẤY DANH SÁCH JOB YÊU THÍCH
+        // CỦA CANDIDATE ĐANG ĐĂNG NHẬP
+        // ==========================================
+
+        Set<Long> favoriteJobIds = new HashSet<>();
+
+        Optional<Candidate> candidateOptional =
+                getCurrentCandidate();
+
+        if (candidateOptional.isPresent()) {
+
+            Long candidateId =
+                    candidateOptional.get().getId();
+
+            favoriteJobIds.addAll(
+                    wishlistRepository.findJobIdsByCandidateId(
+                            candidateId
+                    )
+            );
+        }
+
+        // ==========================================
+        // 4. CHỈ HIỂN THỊ JOB ĐÃ YÊU THÍCH
+        // ==========================================
+
+        if (favoritesOnly) {
+
+            jobs.removeIf(job ->
+                    !favoriteJobIds.contains(job.getId())
+            );
+        }
+
+        // ==========================================
+        // 5. SẮP XẾP CÔNG VIỆC
+        // ==========================================
 
         if ("salary-high".equals(sort)) {
-            jobs.sort(java.util.Comparator.comparing(
-                    Job::getSalaryMax, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())));
+
+            jobs.sort(Comparator.comparing(
+                    Job::getSalaryMax,
+                    Comparator.nullsLast(
+                            Comparator.reverseOrder()
+                    )
+            ));
+
         } else if ("salary-low".equals(sort)) {
-            jobs.sort(java.util.Comparator.comparing(
-                    Job::getSalaryMax, java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())));
+
+            jobs.sort(Comparator.comparing(
+                    Job::getSalaryMax,
+                    Comparator.nullsLast(
+                            Comparator.naturalOrder()
+                    )
+            ));
         }
 
+        // ==========================================
+        // 6. DỮ LIỆU CHO HTML
+        // ==========================================
+
         model.addAttribute("jobs", jobs);
-        model.addAttribute("locationsList", jobService.getAllLocations());
-        model.addAttribute("categories", jobService.getAllCategories());
+
+        model.addAttribute(
+                "locationsList",
+                jobService.getAllLocations()
+        );
+
+        model.addAttribute(
+                "categories",
+                jobService.getActiveCategories()
+        );
 
         model.addAttribute("keyword", keyword);
         model.addAttribute("location", location);
@@ -94,33 +221,85 @@ public class JobController {
         model.addAttribute("sort", sort);
         model.addAttribute("companyId", companyId);
 
+        // Dữ liệu Wishlist
+        model.addAttribute("favoriteJobIds", favoriteJobIds);
+        model.addAttribute("favoritesOnly", favoritesOnly);
+
+        // ==========================================
+        // 7. TRẢ VỀ TRANG JOB
+        // ==========================================
+
         return "job/job";
     }
 
+    // ==========================================
+    // TRANG ỨNG TUYỂN
+    // ==========================================
+
     @GetMapping("/jobs/{id}/apply")
-    public String showApplyPage(@PathVariable Long id, Model model) {
-        Optional<Job> jobOptional = jobService.findJobById(id);
+    public String showApplyPage(
+            @PathVariable Long id,
+            Model model) {
+
+        // 1. Lấy công việc
+
+        Optional<Job> jobOptional =
+                jobService.findJobById(id);
+
         if (jobOptional.isEmpty()) {
             return "redirect:/jobs";
         }
+
         model.addAttribute("job", jobOptional.get());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getName())) {
+        // 2. Kiểm tra tài khoản đăng nhập
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+
             return "redirect:/login";
         }
 
+        // 3. Lấy thông tin User
+
         String username = authentication.getName();
-        Optional<User> userOptional = userRepository.findByUsername(username);
+
+        Optional<User> userOptional =
+                userRepository.findByUsername(username);
+
         if (userOptional.isEmpty()) {
             userOptional = userRepository.findByEmail(username);
         }
-        User user = userOptional.orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản: " + username));
 
-        Candidate candidate = candidateRepository.findByUserId(user.getId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hồ sơ ứng viên"));
+        User user = userOptional.orElseThrow(() ->
+                new RuntimeException(
+                        "Không tìm thấy tài khoản: " + username
+                )
+        );
 
-        List<Cv> cvs = cvRepository.findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(candidate.getId(), "ACTIVE");
+        // 4. Tìm Candidate
+
+        Candidate candidate = candidateRepository
+                .findByUserId(user.getId())
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "Không tìm thấy hồ sơ ứng viên"
+                        )
+                );
+
+        // 5. Lấy danh sách CV
+
+        List<Cv> cvs = cvRepository
+                .findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(
+                        candidate.getId(),
+                        "ACTIVE"
+                );
+
+        // 6. Đưa dữ liệu lên HTML
 
         model.addAttribute("candidate", candidate);
         model.addAttribute("candidateName", user.getFullName());
@@ -128,67 +307,5 @@ public class JobController {
         model.addAttribute("cvs", cvs);
 
         return "job/apply";
-    }
-
-    // ==========================================
-    // HÀM MỚI: XỬ LÝ ĐĂNG BÀI CỦA RECRUITER
-    // ==========================================
-    @PostMapping("/recruiter/jobs/create")
-    public String createJob(
-            @ModelAttribute("job") Job job,
-            Authentication authentication,
-            RedirectAttributes ra) {
-
-        try {
-            String username = authentication.getName();
-            User recruiter = userService.getByEmail(username);
-
-            // 1. Lấy công ty của Recruiter
-            Company company = companyRepository.findByRecruiterId(recruiter.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Tài khoản chưa có thông tin công ty. Vui lòng cập nhật công ty trước."));
-
-            // 2. Kiểm tra gói dịch vụ
-            UserPackage activePkg = servicePackageService.getActivePackage(recruiter);
-            if (activePkg == null) {
-                ra.addFlashAttribute("error", "Bạn chưa có gói dịch vụ đang hoạt động. Vui lòng mua gói để đăng bài!");
-                return "redirect:/pricing";
-            }
-
-            // 3. Đếm số bài đã đăng và kiểm tra giới hạn (FIX LỖI NULL)
-            long currentJobCount = jobService.countMyJobs(recruiter.getId());
-            Integer maxJobsObj = activePkg.getServicePackage().getMaxJobs();
-            int maxJobs = (maxJobsObj != null) ? maxJobsObj : 0; // Nếu null thì coi như 0 (vô hạn)
-
-            if (maxJobs > 0 && currentJobCount >= maxJobs) {
-                ra.addFlashAttribute("error", "Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " +
-                        activePkg.getServicePackage().getName() + ". Vui lòng nâng cấp gói!");
-                return "redirect:/pricing";
-            }
-
-            // 4. KIỂM TRA QUYỀN GHIM TIN (Bảo mật)
-            if (job.getIsPinned() != null && job.getIsPinned()) {
-                if (!"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
-                    ra.addFlashAttribute("error", "Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
-                    return "redirect:/pricing";
-                }
-            }
-
-            // 5. Gán thông tin và lưu
-            job.setRecruiter(recruiter);
-            job.setCompany(company);
-            job.setStatus(JobStatus.PENDING);
-
-            jobService.saveJob(job);
-
-            ra.addFlashAttribute("success", "Đăng tin tuyển dụng thành công!");
-            return "redirect:/recruiter/jobs";
-
-        } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/recruiter/jobs/create";
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Lỗi hệ thống: " + e.getMessage());
-            return "redirect:/recruiter/jobs/create";
-        }
     }
 }

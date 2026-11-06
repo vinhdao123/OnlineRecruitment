@@ -141,6 +141,37 @@
                     Xem lịch phỏng vấn
                 </a>
             </div>
+
+            <!-- Card 7: Gói dịch vụ & Nâng cấp -->
+            <div style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fcd34d; border-radius: 16px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #f59e0b; color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 3h12l4 6-10 12L2 9Z"/>
+                        </svg>
+                    </div>
+                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #b45309;">Gói dịch vụ</h3>
+
+                    <!-- Hiển thị tên gói nếu đã mua -->
+                    <div th:if="${currentUserPackage != null}">
+                        <p style="font-size: 14px; color: #92400e; margin: 0 0 20px 0; line-height: 1.5;">
+                            Bạn đang sử dụng gói <strong th:text="${currentUserPackage.servicePackage.name}"></strong>.<br>
+                            Hạn sử dụng: <strong th:text="${#temporals.format(currentUserPackage.endDate, 'dd/MM/yyyy')}"></strong>
+                        </p>
+                    </div>
+                    <!-- Nếu chưa mua -->
+                    <div th:if="${currentUserPackage == null}">
+                        <p style="font-size: 14px; color: #92400e; margin: 0 0 20px 0; line-height: 1.5;">
+                            Bạn chưa có gói dịch vụ. Hãy nâng cấp để đăng tin không giới hạn và sử dụng đặc quyền Ghim tin lên Top.
+                        </p>
+                    </div>
+                </div>
+
+                <a th:href="@{/pricing}" class="btn" style="background: #f59e0b; color: #fff; border: none; justify-content: center; font-weight: 600; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);">
+                    Nâng cấp Gói
+                </a>
+            </div>
+
         </div>
     </main>
 

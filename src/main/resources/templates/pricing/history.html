@@ -10,7 +10,6 @@
             background-color: #f3f4f6;
             font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
-            /* Thêm padding-top để không bị Taskbar đè lên */
             padding: 100px 20px 40px 20px;
         }
         .container {
@@ -88,23 +87,13 @@
             font-size: 14px;
             vertical-align: middle;
         }
-        .custom-table tbody tr {
-            transition: background-color 0.15s;
-        }
         .custom-table tbody tr:hover {
             background-color: #f9fafb;
         }
 
         /* Style cho các cột */
-        .td-id {
-            font-weight: 600;
-            color: #111827;
-        }
-        .td-amount {
-            font-weight: 700;
-            color: #2563eb;
-            font-size: 15px;
-        }
+        .td-id { font-weight: 600; color: #111827; }
+        .td-amount { font-weight: 700; color: #2563eb; font-size: 15px; }
 
         /* Trạng thái (Badge) */
         .badge {
@@ -121,10 +110,7 @@
         .badge-failed { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
 
         /* Nút thao tác */
-        .action-group {
-            display: flex;
-            gap: 8px;
-        }
+        .action-group { display: flex; gap: 8px; }
         .btn-sm {
             padding: 6px 14px;
             border-radius: 8px;
@@ -143,23 +129,13 @@
 
         /* Thông báo */
         .alert-success {
-            background: #ecfdf5;
-            color: #065f46;
-            padding: 16px 24px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-weight: 500;
-            border: 1px solid #a7f3d0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            background: #ecfdf5; color: #065f46; padding: 16px 24px;
+            border-radius: 12px; margin-bottom: 24px; font-weight: 500;
+            border: 1px solid #a7f3d0; display: flex; align-items: center; gap: 12px;
         }
     </style>
 </head>
 <body>
-
-<!-- Thêm Taskbar -->
-<div th:replace="~{fragments/taskbar :: taskbar('history')}"></div>
 
 <div class="container">
     <!-- Header -->

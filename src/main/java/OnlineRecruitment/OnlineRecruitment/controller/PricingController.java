@@ -1,10 +1,9 @@
 package OnlineRecruitment.OnlineRecruitment.controller;
 
+import OnlineRecruitment.OnlineRecruitment.config.BankPaymentConfig;
 import OnlineRecruitment.OnlineRecruitment.entity.Payment;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
-import OnlineRecruitment.OnlineRecruitment.service.PaymentService;
-import OnlineRecruitment.OnlineRecruitment.service.ServicePackageService;
-import OnlineRecruitment.OnlineRecruitment.service.UserService;
+import OnlineRecruitment.OnlineRecruitment.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,86 +11,87 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
-import java.util.*;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/pricing")
 @RequiredArgsConstructor
 public class PricingController {
-
     private final ServicePackageService packageService;
     private final UserService userService;
     private final PaymentService paymentService;
+    private final BankPaymentConfig bank;
+    private final OnlineRecruitment.OnlineRecruitment.config.SePayGatewayConfig gateway;
+    private final SePayCheckoutService sePayCheckout;
+
+    private User user(UserDetails principal) { return userService.getByEmail(principal.getUsername()); }
 
     @GetMapping
     public String pricingPage(@AuthenticationPrincipal UserDetails principal, Model model) {
-        User user = userService.getByEmail(principal.getUsername());
+        User user = user(principal);
         model.addAttribute("packages", packageService.getPackagesForRole(user.getRole()));
         model.addAttribute("currentUser", user);
+        model.addAttribute("paymentReady", gateway.isReady() || bank.isReady());
+        model.addAttribute("gatewaySandbox", gateway.isReady() && gateway.isSandbox());
         return "pricing/index";
     }
 
     @GetMapping("/checkout/{id}")
-    public String checkout(@PathVariable Long id,
-                           @AuthenticationPrincipal UserDetails principal,
-                           Model model) {
-        User user = userService.getByEmail(principal.getUsername());
-        Payment payment = paymentService.createPendingPayment(user, id);
-        model.addAttribute("payment", payment);
-        return "pricing/checkout";
+    public String legacyCheckout(@PathVariable Long id) { return "redirect:/pricing"; }
+
+    @PostMapping("/checkout/{id}")
+    public String checkout(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal, RedirectAttributes ra) {
+        if (!gateway.isReady() && !bank.isReady()) {
+            ra.addFlashAttribute("error", "Thanh toán đang được thiết lập. Vui lòng quay lại sau.");
+            return "redirect:/pricing";
+        }
+        Payment payment = gateway.isReady()
+                ? paymentService.createGatewayPayment(user(principal), id, gateway.paymentMethod())
+                : paymentService.createPendingPayment(user(principal), id);
+        return "redirect:/pricing/resume/" + payment.getId();
     }
 
-    // Hàm này dùng để User bấm nút xác nhận (nếu bạn vẫn giữ giao diện cũ)
-    @PostMapping("/confirm/{paymentId}")
-    public String confirmPayment(@PathVariable Long paymentId, RedirectAttributes ra) {
-        try {
-            paymentService.confirmPayment(paymentId); // Đã sửa thành confirmPayment để kích hoạt luôn
-            ra.addFlashAttribute("success", "Thanh toán thành công! Gói đã được kích hoạt.");
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
+    @GetMapping("/resume/{id}")
+    public String resumePayment(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal, Model model) {
+        Payment payment = paymentService.getOwnedPayment(id, user(principal).getId());
+        model.addAttribute("payment", payment);
+
+        // LUÔN TRẢ VỀ TRANG MỚI (gateway-checkout.html)
+        model.addAttribute("sandbox", false);
+        boolean canCheckout = gateway.isReady() && "PENDING".equals(payment.getStatus());
+        model.addAttribute("canCheckout", canCheckout);
+        if (canCheckout) {
+            model.addAttribute("gatewayUrl", gateway.checkoutUrl());
+            model.addAttribute("gatewayFields", sePayCheckout.form(payment));
         }
+        return "pricing/gateway-checkout";
+    }
+
+    @GetMapping("/status/{id}")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<Map<String, Object>> status(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal) {
+        Payment payment = paymentService.getOwnedPayment(id, user(principal).getId());
+        return org.springframework.http.ResponseEntity.ok().cacheControl(org.springframework.http.CacheControl.noStore())
+                .body(Map.of("id", payment.getId(), "status", payment.getStatus(), "paid", "SUCCESS".equals(payment.getStatus())));
+    }
+
+    @PostMapping("/confirm/{id}")
+    public String confirmPayment(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal, RedirectAttributes ra) {
+        paymentService.userRequestConfirm(id, user(principal).getId());
+        ra.addFlashAttribute("success", "Đã gửi yêu cầu đối soát. Gói chỉ kích hoạt khi giao dịch được xác nhận.");
+        return "redirect:/pricing/resume/" + id;
+    }
+
+    @PostMapping("/cancel/{id}")
+    public String cancelPayment(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal, RedirectAttributes ra) {
+        paymentService.cancelPayment(id, user(principal).getId());
+        ra.addFlashAttribute("success", "Đã hủy hóa đơn.");
         return "redirect:/pricing/history";
     }
 
     @GetMapping("/history")
     public String history(@AuthenticationPrincipal UserDetails principal, Model model) {
-        User user = userService.getByEmail(principal.getUsername());
-        model.addAttribute("payments", paymentService.getHistoryByUser(user));
+        model.addAttribute("payments", paymentService.getHistoryByUser(user(principal)));
         return "pricing/history";
     }
-
-    @GetMapping("/resume/{paymentId}")
-    public String resumePayment(@PathVariable Long paymentId, Model model) {
-        Payment payment = paymentService.getPaymentById(paymentId);
-        if (!"PENDING".equals(payment.getStatus())) {
-            return "redirect:/pricing/history";
-        }
-        model.addAttribute("payment", payment);
-        return "pricing/checkout";
-    }
-
-    @PostMapping("/cancel/{paymentId}")
-    public String cancelPayment(@PathVariable Long paymentId, RedirectAttributes ra) {
-        paymentService.cancelPayment(paymentId);
-        ra.addFlashAttribute("success", "Đã hủy hóa đơn chờ thanh toán.");
-        return "redirect:/pricing/history";
-    }
-
-    // ==========================================
-    // HÀM API MỚI: DÀNH CHO JAVASCRIPT Ở TRANG CHECKOUT
-    // (Hàm này giúp trình duyệt tự động kiểm tra xem gói đã được kích hoạt chưa)
-    // ==========================================
-    @GetMapping("/api/payment-status/{paymentId}")
-    @ResponseBody
-    public Map<String, String> checkPaymentStatus(@PathVariable Long paymentId) {
-        Payment payment = paymentService.getPaymentById(paymentId);
-        return Map.of("status", payment.getStatus());
-    }
-
-    @GetMapping("/success")
-    public String paymentSuccess() {
-        return "pricing/success"; // Trả về file success.html
-    }
-
 }

@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin/jobs")
@@ -31,61 +30,29 @@ public class AdminJobController {
     // Liệt kê jobs trong luồng tuyển dụng.
     public String listJobs(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "") String status,
+            @RequestParam(required = false) String status,
             Model model
     ) {
-        jobService.refreshExpiredJobs();
-        status = status.trim().toUpperCase(Locale.ROOT);
-        if (!java.util.Set.of("", "PENDING", "ACTIVE", "REJECTED", "CLOSED", "EXPIRED", "DRAFT").contains(status)) {
-            status = "";
+        // The original Admin design supports all statuses and search.
+        // Keep the existing JobService-only constructor for integration tests.
+        String selectedStatus = status == null ? "" : status.trim().toUpperCase(Locale.ROOT);
+        if (!selectedStatus.isEmpty()) {
+            try {
+                OnlineRecruitment.OnlineRecruitment.entity.JobStatus.valueOf(selectedStatus);
+            } catch (IllegalArgumentException ex) {
+                selectedStatus = "";
+            }
         }
-        List<Job> jobs = jobService.findAllJobsForManagement(null, null, status);
-
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            String normalizedKeyword =
-                    keyword.trim().toLowerCase(Locale.ROOT);
-
-            jobs = jobs.stream()
-                    .filter(job ->
-                            (job.getTitle() != null
-                                    && job.getTitle()
-                                    .toLowerCase(Locale.ROOT)
-                                    .contains(normalizedKeyword))
-                                    ||
-                                    (job.getLocation() != null
-                                            && job.getLocation()
-                                            .toLowerCase(Locale.ROOT)
-                                            .contains(normalizedKeyword))
-                                    ||
-                                    (job.getRecruiter() != null
-                                            && job.getRecruiter().getEmail() != null
-                                            && job.getRecruiter().getEmail()
-                                            .toLowerCase(Locale.ROOT)
-                                            .contains(normalizedKeyword))
-                    )
-                    .collect(Collectors.toList());
-        }
-
+        List<Job> jobs = jobService.findAllJobsForManagement(keyword, selectedStatus);
         model.addAttribute("jobs", jobs);
         model.addAttribute("keyword", keyword);
         model.addAttribute("isAdmin", true);
-        model.addAttribute("status", status);
-        model.addAttribute("selectedStatus", status);
-        model.addAttribute("activeMenu", status.isEmpty() ? "jobs" : "jobs-" + status.toLowerCase(Locale.ROOT));
+        model.addAttribute("selectedStatus", selectedStatus);
+        model.addAttribute("activeMenu", "PENDING".equals(selectedStatus) ? "jobs-pending" :
+                "CLOSED".equals(selectedStatus) ? "jobs-closed" :
+                "REJECTED".equals(selectedStatus) ? "jobs-rejected" : "jobs");
 
         return "admin/jobs";
-    }
-
-    @PostMapping("/{id}/reopen")
-    public String reopenJob(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        try {
-            jobService.reopenAdminJob(id);
-            redirectAttributes.addFlashAttribute("successMessage",
-                    "Đã chuyển tin về nháp. Nhà tuyển dụng cần cập nhật hạn và gửi duyệt lại.");
-        } catch (IllegalArgumentException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        }
-        return "redirect:/admin/jobs?status=DRAFT";
     }
 
     /**

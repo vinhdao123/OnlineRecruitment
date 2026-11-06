@@ -23,26 +23,16 @@ public class AdminJobCategoryController {
         this.categoryService = categoryService;
     }
 
-    @ModelAttribute("activeMenu")
-    public String activeMenu() { return "categories"; }
-
     @GetMapping
-    public String list(@RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) String status, Model model) {
-        String query = keyword == null ? "" : keyword.trim().toLowerCase(java.util.Locale.ROOT);
-        model.addAttribute("categories", categoryService.findAll().stream()
-                .filter(category -> query.isEmpty() || category.getName().toLowerCase(java.util.Locale.ROOT).contains(query))
-                .filter(category -> status == null || status.isBlank() || status.equals(category.getStatus()))
-                .sorted(java.util.Comparator.comparing(JobCategory::getName, String.CASE_INSENSITIVE_ORDER)).toList());
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("status", status);
+    public String list(Model model) {
+        model.addAttribute("categories", categoryService.findAll());
         return "admin/categories/list";
     }
 
     @GetMapping("/new")
     public String createForm(Model model) {
         model.addAttribute("categoryForm", new CategoryForm());
-        model.addAttribute("pageTitle", "Thêm danh mục tuyển dụng");
+        model.addAttribute("pageTitle", "Create Job Category");
         return "admin/categories/form";
     }
 
@@ -54,7 +44,7 @@ public class AdminJobCategoryController {
             RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("pageTitle", "Thêm danh mục tuyển dụng");
+            model.addAttribute("pageTitle", "Create Job Category");
             return "admin/categories/form";
         }
 
@@ -68,7 +58,7 @@ public class AdminJobCategoryController {
             return "redirect:/admin/categories";
 
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("pageTitle", "Thêm danh mục tuyển dụng");
+            model.addAttribute("pageTitle", "Create Job Category");
             model.addAttribute("errorMessage", ex.getMessage());
             return "admin/categories/form";
         }
@@ -90,7 +80,7 @@ public class AdminJobCategoryController {
 
             model.addAttribute("categoryForm", form);
             model.addAttribute("categoryId", id);
-            model.addAttribute("pageTitle", "Chỉnh sửa danh mục tuyển dụng");
+            model.addAttribute("pageTitle", "Update Job Category");
 
             return "admin/categories/form";
 
@@ -111,7 +101,7 @@ public class AdminJobCategoryController {
             RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("pageTitle", "Chỉnh sửa danh mục tuyển dụng");
+            model.addAttribute("pageTitle", "Update Job Category");
             model.addAttribute("categoryId", id);
             return "admin/categories/form";
         }
@@ -126,7 +116,7 @@ public class AdminJobCategoryController {
             return "redirect:/admin/categories";
 
         } catch (IllegalArgumentException ex) {
-            model.addAttribute("pageTitle", "Chỉnh sửa danh mục tuyển dụng");
+            model.addAttribute("pageTitle", "Update Job Category");
             model.addAttribute("categoryId", id);
             model.addAttribute("errorMessage", ex.getMessage());
             return "admin/categories/form";

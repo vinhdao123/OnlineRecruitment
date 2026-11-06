@@ -5,11 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
 // Dữ liệu form tạo/sửa tin tuyển dụng
+// (@Getter/@Setter của Lombok tự sinh getLogoUrl()/setLogoUrl()...)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +20,7 @@ public class RecruiterJobForm {
     private Long jobId;
 
     private Long categoryId;
+    private java.util.List<Long> skillIds = new java.util.ArrayList<>();
 
     private String title;
 
@@ -51,8 +54,4 @@ public class RecruiterJobForm {
 
     // Anh rieng cua Job, upload tu may tinh (tuy chon).
     private MultipartFile jobImageFile;
-
-    // ==== THÊM DÒNG NÀY ĐỂ LÀM TÍNH NĂNG GHIM TIN ====
-    private Boolean isPinned = false;
 }
-

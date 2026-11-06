@@ -1,16 +1,15 @@
 package OnlineRecruitment.OnlineRecruitment.controller.candidate;
 
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -89,8 +88,9 @@ public class ApplicationSubmitController {
                     SELECT j.id, j.company_id, c.recruiter_id
                     FROM dbo.jobs j
                     JOIN dbo.companies c ON c.id = j.company_id
-                    WHERE j.id = ? AND j.status = 'ACTIVE' AND c.status = 'ACTIVE'
-                      AND (j.deadline IS NULL OR j.deadline >= CAST(GETDATE() AS date))
+                    WHERE j.id = ?
+                      AND j.status = 'ACTIVE' AND c.status = 'ACTIVE'
+                      AND (j.deadline IS NULL OR j.deadline >= CONVERT(date, GETDATE()))
                     """,
                     jobId
             );
@@ -112,7 +112,8 @@ public class ApplicationSubmitController {
                         summary AS summary,
                         accent_color AS accentColor,
                         is_default AS isDefault,
-                        status AS status
+                        status AS status,
+                        content AS content
                     FROM dbo.cv
                     WHERE id = ?
                       AND candidate_id = ?
@@ -131,21 +132,43 @@ public class ApplicationSubmitController {
             Long templateVersionId =
                     ((Number) cv.get("templateVersionId")).longValue();
 
-            // 5. Không cho ứng tuyển trùng cùng một công việc
-            Integer existing = jdbcTemplate.queryForObject(
-                    """
-                    SELECT COUNT(*)
-                    FROM dbo.applications
-                    WHERE candidate_id = ? AND job_id = ?
-                    """,
-                    Integer.class, candidateId, jobId
-            );
+            // 5. Kiểm tra đơn ứng tuyển đã tồn tại
+            Long rejectedApplicationId = null;
 
-            if (existing != null && existing > 0) {
-                redirectAttributes.addFlashAttribute(
-                        "errorMessage",
-                        "Bạn đã ứng tuyển công việc này rồi.");
-                return redirectUrl;
+            List<Map<String, Object>> existingApplications =
+                    jdbcTemplate.queryForList(
+                            """
+                            SELECT id, status
+                            FROM dbo.applications
+                            WHERE candidate_id = ?
+                              AND job_id = ?
+                            """,
+                            candidateId, jobId
+                    );
+
+            if (!existingApplications.isEmpty()) {
+
+                Map<String, Object> oldApplication = existingApplications.get(0);
+
+                String oldStatus = (String) oldApplication.get("status");
+
+                Long oldApplicationId =
+                        ((Number) oldApplication.get("id")).longValue();
+
+                if ("SUBMITTED".equals(oldStatus)
+                        || "ACCEPTED".equals(oldStatus)) {
+
+                    redirectAttributes.addFlashAttribute(
+                            "errorMessage",
+                            "Bạn đã có đơn ứng tuyển cho công việc này."
+                    );
+
+                    return redirectUrl;
+                }
+
+                if ("REJECTED".equals(oldStatus)) {
+                    rejectedApplicationId = oldApplicationId;
+                }
             }
 
             // 6. Tạo bản chụp dữ liệu CV tại thời điểm ứng tuyển
@@ -239,35 +262,76 @@ public class ApplicationSubmitController {
             String filePath = attachments.isEmpty()
                     ? null
                     : (String) attachments.get(0).get("storage_path");
+            if (filePath == null && cv.get("content") instanceof String metadata && !metadata.isBlank()) {
+                try {
+                    String uploadedPath = objectMapper.readTree(metadata).path("_cvAssets").path("fileUrl").asText("");
+                    if (uploadedPath.matches("storage/cvs/[a-f0-9-]+\\.(pdf|doc|docx)")) filePath = uploadedPath;
+                } catch (JacksonException ignored) {
+                    // Older CVs may store plain text in content rather than asset metadata.
+                }
+            }
 
-            // 8. Lưu đơn ứng tuyển gắn với đúng job, candidate và CV
-            jdbcTemplate.update(
-                    """
-                    INSERT INTO dbo.applications
-                    (
-                        candidate_id,
-                        job_id,
-                        cv_id,
-                        cv_template_version_id,
-                        cv_snapshot_json,
-                        cv_file_path_snapshot,
-                        status
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, 'SUBMITTED')
-                    """,
-                    candidateId,
-                    jobId,
-                    cvId,
-                    templateVersionId,
-                    snapshotJson,
-                    filePath
-            );
+            // 8. Lưu đơn ứng tuyển
+
+            if (rejectedApplicationId != null) {
+
+                // Đơn cũ bị từ chối: mở lại đơn ứng tuyển
+                // Giữ nguyên toàn bộ dữ liệu CV đã nộp trước đó
+                int updated = jdbcTemplate.update(
+                        """
+                        UPDATE dbo.applications
+                        SET status = 'SUBMITTED',
+                            applied_at = GETDATE()
+                        WHERE id = ?
+                          AND candidate_id = ?
+                          AND job_id = ?
+                          AND status = 'REJECTED'
+                        """,
+                        rejectedApplicationId,
+                        candidateId,
+                        jobId
+                );
+
+                if (updated == 0) {
+                    throw new IllegalStateException(
+                            "Không thể ứng tuyển lại. Vui lòng tải lại trang."
+                    );
+                }
+
+            } else {
+
+                // Chưa từng ứng tuyển: tạo đơn mới
+                jdbcTemplate.update(
+                        """
+                        INSERT INTO dbo.applications
+                        (
+                            candidate_id,
+                            job_id,
+                            cv_id,
+                            cv_template_version_id,
+                            cv_snapshot_json,
+                            cv_file_path_snapshot,
+                            status
+                        )
+                        VALUES (?, ?, ?, ?, ?, ?, 'SUBMITTED')
+                        """,
+                        candidateId,
+                        jobId,
+                        cvId,
+                        templateVersionId,
+                        snapshotJson,
+                        filePath
+                );
+            }
+
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Gửi hồ sơ ứng tuyển thành công!");
+                    "Gửi hồ sơ ứng tuyển thành công!"
+            );
 
             return redirectUrl;
+
 
         } catch (JacksonException e) {
             redirectAttributes.addFlashAttribute(

@@ -19,7 +19,6 @@ public class AdminPackageController {
 
     private final ServicePackageService packageService;
 
-    // 1. Giữ nguyên hàm hiển thị danh sách
     @GetMapping
     public String list(Model model) {
         model.addAttribute("packages", packageService.getAllPackages());
@@ -27,29 +26,45 @@ public class AdminPackageController {
         return "admin/packages/list";
     }
 
-    // 2. Giữ nguyên hàm Chỉnh sửa (Sửa giá, sửa mô tả)
+    @GetMapping("/new")
+    public String createForm(Model model) {
+        model.addAttribute("pkg", new ServicePackage());
+
+        // SỬA DÒNG NÀY: Chỉ lấy RECRUITER và CANDIDATE
+        List<UserRole> allowedRoles = Arrays.stream(UserRole.values())
+                .filter(role -> role != UserRole.ADMIN)
+                .toList();
+        model.addAttribute("roles", allowedRoles);
+
+        model.addAttribute("activeMenu", "packages");
+        return "admin/packages/form";
+    }
+
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("pkg", packageService.getById(id));
-        model.addAttribute("roles", UserRole.values());
+
+        // SỬA DÒNG NÀY: Chỉ lấy RECRUITER và CANDIDATE
+        List<UserRole> allowedRoles = Arrays.stream(UserRole.values())
+                .filter(role -> role != UserRole.ADMIN)
+                .toList();
+        model.addAttribute("roles", allowedRoles);
+
         model.addAttribute("activeMenu", "packages");
-        return "admin/packages/form"; // Vẫn dùng form cũ để sửa
+        return "admin/packages/form";
     }
 
-    // 3. Giữ nguyên hàm Lưu (chỉ dùng để cập nhật gói cũ)
     @PostMapping("/save")
     public String save(@ModelAttribute("pkg") ServicePackage pkg, RedirectAttributes ra) {
         packageService.save(pkg);
-        ra.addFlashAttribute("success", "Đã cập nhật gói dịch vụ thành công.");
+        ra.addFlashAttribute("success", "Đã lưu gói dịch vụ thành công.");
         return "redirect:/admin/packages";
     }
 
-    // 4. Giữ nguyên hàm Ẩn/Hiện (Bật/tắt trạng thái bán)
     @PostMapping("/{id}/toggle")
     public String toggle(@PathVariable Long id, RedirectAttributes ra) {
         packageService.toggleStatus(id);
         ra.addFlashAttribute("success", "Đã thay đổi trạng thái gói dịch vụ.");
         return "redirect:/admin/packages";
     }
-
 }

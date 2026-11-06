@@ -31,19 +31,13 @@ public class RecruiterJobArchiveController {
             Authentication authentication,
             Model model
     ) {
-        jobService.refreshExpiredJobs();
         // 1) Người đang đăng nhập
         User recruiter = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tài khoản đang đăng nhập."));
 
         // 2) Chọn trạng thái theo tab (mặc định là tin nháp)
-        String activeTab = java.util.Set.of("draft", "closed", "expired", "rejected").contains(tab) ? tab : "draft";
-        JobStatus status = switch (activeTab) {
-            case "closed" -> JobStatus.CLOSED;
-            case "expired" -> JobStatus.EXPIRED;
-            case "rejected" -> JobStatus.REJECTED;
-            default -> JobStatus.DRAFT;
-        };
+        boolean closedTab = "closed".equalsIgnoreCase(tab);
+        JobStatus status = closedTab ? JobStatus.CLOSED : JobStatus.DRAFT;
 
         // 3) Lấy tin của chính recruiter này theo trạng thái
         List<Job> jobs = jobService.findMyJobs(recruiter.getId(), null, status.name());
@@ -54,12 +48,10 @@ public class RecruiterJobArchiveController {
 
         model.addAttribute("mode", "recruiter");
         model.addAttribute("pageHeading", "Kho tin");
-        model.addAttribute("pageSub", "Quản lý tin nháp, bị từ chối, đã đóng và quá hạn. Tin đăng lại cần được duyệt trước khi hiển thị.");
-        model.addAttribute("activeTab", activeTab);
+        model.addAttribute("pageSub", "Tin nháp và tin đã đóng của bạn. Bấm vào tin để làm tiếp, không cần nhập lại.");
+        model.addAttribute("activeTab", closedTab ? "closed" : "draft");
         model.addAttribute("tabDraftCount", draftCount);
         model.addAttribute("tabClosedCount", closedCount);
-        model.addAttribute("tabExpiredCount", jobService.countMyJobsByStatus(recruiter.getId(), JobStatus.EXPIRED));
-        model.addAttribute("tabRejectedCount", jobService.countMyJobsByStatus(recruiter.getId(), JobStatus.REJECTED));
         model.addAttribute("jobs", jobs);
 
         // File: templates/job/library.html
