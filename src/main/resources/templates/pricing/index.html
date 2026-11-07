@@ -82,6 +82,9 @@
     </div>
 
     <div class="pricing-grid">
+        <p th:if="${gatewaySandbox}" role="status">Đang dùng SePay Sandbox: giao dịch thử nghiệm, không chuyển tiền thật.</p>
+        <p th:if="${error}" th:text="${error}" role="alert"></p>
+        <p th:unless="${paymentReady}" role="status">Thanh toán đang được thiết lập. Bạn có thể tham khảo các gói bên dưới.</p>
         <!-- Vòng lặp hiển thị các gói -->
         <div class="price-card" th:each="p : ${packages}">
             <h3 th:text="${p.name}">Tên gói</h3>
@@ -93,9 +96,10 @@
             <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'"></div>
 
             <!-- Nút mua gói -->
-            <a th:href="@{/pricing/checkout/{id}(id=${p.id})}" class="btn-buy">
-                Mua gói này
-            </a>
+            <form th:action="@{/pricing/checkout/{id}(id=${p.id})}" method="post" style="margin: 0;">
+                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button class="btn-buy" th:disabled="${!paymentReady}">Mua gói này</button>
+            </form>
         </div>
 
         <!-- Nếu không có gói nào -->

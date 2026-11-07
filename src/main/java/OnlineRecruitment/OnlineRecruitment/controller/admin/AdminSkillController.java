@@ -23,19 +23,8 @@ public class AdminSkillController {
     public String activeMenu() { return "skills"; }
 
     @GetMapping
-    public String list(@RequestParam(required = false) String keyword,
-                       @RequestParam(required = false) String status,
-                       @RequestParam(required = false) Long categoryId, Model model) {
-        String query = keyword == null ? "" : keyword.trim().toLowerCase(java.util.Locale.ROOT);
-        model.addAttribute("skills", service.getAll().stream()
-                .filter(skill -> query.isEmpty() || skill.getName().toLowerCase(java.util.Locale.ROOT).contains(query))
-                .filter(skill -> status == null || status.isBlank() || status.equals(skill.getStatus()))
-                .filter(skill -> categoryId == null || (skill.getCategory() != null && categoryId.equals(skill.getCategory().getId())))
-                .toList());
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("status", status);
-        model.addAttribute("categoryId", categoryId);
-        model.addAttribute("categories", service.getCategories());
+    public String list(Model model) {
+        model.addAttribute("skills", service.getAll());
         return "admin/skills/list";
     }
 

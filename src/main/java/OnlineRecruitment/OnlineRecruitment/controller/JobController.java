@@ -1,6 +1,5 @@
+
 package OnlineRecruitment.OnlineRecruitment.controller;
-
-
 
 import OnlineRecruitment.OnlineRecruitment.entity.Candidate;
 import OnlineRecruitment.OnlineRecruitment.entity.Cv;
@@ -9,17 +8,18 @@ import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.CandidateRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.CvRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.candidate.WishlistRepository;
 import OnlineRecruitment.OnlineRecruitment.service.JobService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
-import java.util.Optional;
-import java.math.BigDecimal;
-import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class JobController {
@@ -28,18 +28,59 @@ public class JobController {
     private final UserRepository userRepository;
     private final CandidateRepository candidateRepository;
     private final CvRepository cvRepository;
+    private final WishlistRepository wishlistRepository;
 
     public JobController(
             JobService jobService,
             UserRepository userRepository,
             CandidateRepository candidateRepository,
-            CvRepository cvRepository) {
+            CvRepository cvRepository,
+            WishlistRepository wishlistRepository) {
 
         this.jobService = jobService;
         this.userRepository = userRepository;
         this.candidateRepository = candidateRepository;
         this.cvRepository = cvRepository;
+        this.wishlistRepository = wishlistRepository;
     }
+
+    // ==========================================
+    // LẤY CANDIDATE ĐANG ĐĂNG NHẬP
+    // ==========================================
+
+    private Optional<Candidate> getCurrentCandidate() {
+
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getName())) {
+
+            return Optional.empty();
+        }
+
+        String username = authentication.getName();
+
+        Optional<User> userOptional =
+                userRepository.findByUsername(username);
+
+        if (userOptional.isEmpty()) {
+            userOptional = userRepository.findByEmail(username);
+        }
+
+        if (userOptional.isEmpty()) {
+            return Optional.empty();
+        }
+
+        return candidateRepository.findByUserId(
+                userOptional.get().getId()
+        );
+    }
+
+    // ==========================================
+    // DANH SÁCH CÔNG VIỆC
+    // ==========================================
 
     @GetMapping("/jobs")
     public String jobs(
@@ -58,25 +99,18 @@ public class JobController {
 
             @RequestParam(required = false) List<Long> categoryIds,
 
-// THÊM DÒNG NÀY
             @RequestParam(required = false) Long companyId,
 
             @RequestParam(defaultValue = "newest") String sort,
+
+            // Chỉ hiển thị công việc yêu thích
+            @RequestParam(defaultValue = "false") boolean favoritesOnly,
+
             Model model) {
 
         // ==========================================
-        // LỌC
+        // 1. LỌC CÔNG VIỆC
         // ==========================================
-
-//        List<Job> jobs = jobService.filterJobs(
-//                keyword,
-//                location,
-//                locations,
-//                experiences,
-//                salaryRanges,
-//                levels,
-//                categoryIds
-//        );
 
         List<Job> jobs = jobService.filterJobs(
                 keyword,
@@ -87,40 +121,95 @@ public class JobController {
                 levels,
                 categoryIds
         );
-        // Lọc thêm theo công ty nếu có companyId
+
+        // ==========================================
+        // 2. LỌC THEO CÔNG TY
+        // ==========================================
+
         if (companyId != null) {
+
             jobs = jobs.stream()
-                    .filter(job -> job.getCompany() != null
-                            && java.util.Objects.equals(
-                            job.getCompany().getId(),
-                            companyId
-                    ))
-                    .collect(java.util.stream.Collectors.toList());
+                    .filter(job ->
+                            job.getCompany() != null
+                                    && Objects.equals(
+                                    job.getCompany().getId(),
+                                    companyId
+                            )
+                    )
+                    .collect(Collectors.toList());
         }
 
         // ==========================================
-        // SẮP XẾP
+        // 3. LẤY DANH SÁCH JOB YÊU THÍCH
+        // CỦA CANDIDATE ĐANG ĐĂNG NHẬP
+        // ==========================================
+
+        Set<Long> favoriteJobIds = new HashSet<>();
+
+        Optional<Candidate> candidateOptional =
+                getCurrentCandidate();
+
+        if (candidateOptional.isPresent()) {
+
+            Long candidateId =
+                    candidateOptional.get().getId();
+
+            favoriteJobIds.addAll(
+                    wishlistRepository.findJobIdsByCandidateId(
+                            candidateId
+                    )
+            );
+        }
+
+        // ==========================================
+        // 4. CHỈ HIỂN THỊ JOB ĐÃ YÊU THÍCH
+        // ==========================================
+
+        if (favoritesOnly) {
+
+            jobs.removeIf(job ->
+                    !favoriteJobIds.contains(job.getId())
+            );
+        }
+
+        // ==========================================
+        // 5. SẮP XẾP CÔNG VIỆC
         // ==========================================
 
         if ("salary-high".equals(sort)) {
-            jobs.sort(java.util.Comparator.comparing(
+
+            jobs.sort(Comparator.comparing(
                     Job::getSalaryMax,
-                    java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())
+                    Comparator.nullsLast(
+                            Comparator.reverseOrder()
+                    )
             ));
+
         } else if ("salary-low".equals(sort)) {
-            jobs.sort(java.util.Comparator.comparing(
+
+            jobs.sort(Comparator.comparing(
                     Job::getSalaryMax,
-                    java.util.Comparator.nullsLast(java.util.Comparator.naturalOrder())
+                    Comparator.nullsLast(
+                            Comparator.naturalOrder()
+                    )
             ));
         }
 
         // ==========================================
-        // DỮ LIỆU CHO HTML
+        // 6. DỮ LIỆU CHO HTML
         // ==========================================
 
         model.addAttribute("jobs", jobs);
-        model.addAttribute("locationsList", jobService.getAllLocations());
-        model.addAttribute("categories", jobService.getAllCategories());
+
+        model.addAttribute(
+                "locationsList",
+                jobService.getAllLocations()
+        );
+
+        model.addAttribute(
+                "categories",
+                jobService.getActiveCategories()
+        );
 
         model.addAttribute("keyword", keyword);
         model.addAttribute("location", location);
@@ -132,8 +221,20 @@ public class JobController {
         model.addAttribute("sort", sort);
         model.addAttribute("companyId", companyId);
 
+        // Dữ liệu Wishlist
+        model.addAttribute("favoriteJobIds", favoriteJobIds);
+        model.addAttribute("favoritesOnly", favoritesOnly);
+
+        // ==========================================
+        // 7. TRẢ VỀ TRANG JOB
+        // ==========================================
+
         return "job/job";
     }
+
+    // ==========================================
+    // TRANG ỨNG TUYỂN
+    // ==========================================
 
     @GetMapping("/jobs/{id}/apply")
     public String showApplyPage(
@@ -141,7 +242,9 @@ public class JobController {
             Model model) {
 
         // 1. Lấy công việc
-        Optional<Job> jobOptional = jobService.findJobById(id);
+
+        Optional<Job> jobOptional =
+                jobService.findJobById(id);
 
         if (jobOptional.isEmpty()) {
             return "redirect:/jobs";
@@ -149,19 +252,21 @@ public class JobController {
 
         model.addAttribute("job", jobOptional.get());
 
-        // 2. Lấy tài khoản đang đăng nhập
+        // 2. Kiểm tra tài khoản đăng nhập
+
         Authentication authentication =
                 SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getName())) {
+
             return "redirect:/login";
         }
 
-        String username = authentication.getName();
+        // 3. Lấy thông tin User
 
-        System.out.println("Gia tri dang dang nhap: " + username);
+        String username = authentication.getName();
 
         Optional<User> userOptional =
                 userRepository.findByUsername(username);
@@ -171,15 +276,23 @@ public class JobController {
         }
 
         User user = userOptional.orElseThrow(() ->
-                new RuntimeException("Không tìm thấy tài khoản: " + username));
+                new RuntimeException(
+                        "Không tìm thấy tài khoản: " + username
+                )
+        );
 
-        // 4. Tìm hồ sơ ứng viên
+        // 4. Tìm Candidate
+
         Candidate candidate = candidateRepository
                 .findByUserId(user.getId())
                 .orElseThrow(() ->
-                        new RuntimeException("Không tìm thấy hồ sơ ứng viên"));
+                        new RuntimeException(
+                                "Không tìm thấy hồ sơ ứng viên"
+                        )
+                );
 
-        // 5. Lấy danh sách CV của ứng viên
+        // 5. Lấy danh sách CV
+
         List<Cv> cvs = cvRepository
                 .findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(
                         candidate.getId(),
@@ -187,6 +300,7 @@ public class JobController {
                 );
 
         // 6. Đưa dữ liệu lên HTML
+
         model.addAttribute("candidate", candidate);
         model.addAttribute("candidateName", user.getFullName());
         model.addAttribute("candidateEmail", user.getEmail());
@@ -194,6 +308,4 @@ public class JobController {
 
         return "job/apply";
     }
-
-
 }

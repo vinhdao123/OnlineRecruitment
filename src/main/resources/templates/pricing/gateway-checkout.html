@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Thanh toán SePay</title><link rel="stylesheet" th:href="@{/css/checkout.css}"></head>
+<body><main class="checkout"><a th:href="@{/pricing/history}">← Lịch sử giao dịch</a>
+    <header><span class="eyebrow">ONLINE RECRUITMENT · SEPAY</span><h1>Thanh toán và kích hoạt gói tự động</h1></header>
+    <div th:if="${sandbox}" class="notice" role="status">MÔI TRƯỜNG THỬ NGHIỆM SANDBOX — không chuyển tiền thật. Gói kích hoạt tại đây chỉ phục vụ kiểm thử website.</div>
+    <div class="panel">
+        <h2 th:text="${payment.servicePackage.name}"></h2>
+        <p>Mã hóa đơn: <strong th:text="'ORPAY' + ${payment.id}"></strong></p>
+        <p class="amount" th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+
+        <!-- HIỂN THỊ MÃ QR ĐỘNG CỦA SEPAY -->
+        <div style="text-align: center; margin: 20px 0;">
+            <img th:if="${payment.status == 'PENDING'}"
+                 th:src="|https://qr.sepay.vn/img?acc=109876805496&bank=VietinBank&amount=${payment.amount}&des=SEVQR ORPAY${payment.id}|"
+                 alt="QR Code" style="width: 300px; border-radius: 8px; border: 1px solid #eef1f6;">
+        </div>
+
+        <div id="payment-status" class="notice" th:classappend="${payment.status == 'SUCCESS'} ? 'paid' : ''" role="status" aria-live="polite"
+             th:text="${payment.status == 'SUCCESS' ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.' : (payment.status == 'FAILED' ? 'Hóa đơn đã hủy, vui lòng liên hệ hỗ trợ nếu đã thanh toán.' : 'Đang chờ kết quả thanh toán từ SePay.')}"></div>
+
+        <p>SePay gửi kết quả trực tiếp về website. Bạn không cần bấm xác nhận đã chuyển khoản hoặc chờ Admin duyệt.</p>
+        <p id="connection-status" role="status">Trạng thái tự cập nhật mỗi 5 giây.</p>
+        <a th:href="@{/pricing/history}">Xem lịch sử giao dịch</a>
+    </div></main>
+<script th:inline="javascript">
+    const statusUrl = /*[[@{/pricing/status/{id}(id=${payment.id})}]]*/ '';
+    const paymentId = /*[[${payment.id}]]*/ 0;
+    let terminal = /*[[${payment.status == 'SUCCESS' or payment.status == 'FAILED'}]]*/ false;
+    let attempts = 0;
+
+    async function poll() {
+        if (terminal) return;
+        try {
+            const response = await fetch(statusUrl, {headers: {Accept: 'application/json'}, cache: 'no-store'});
+
+            if (response.redirected || response.status === 401 || response.status === 403) {
+                document.getElementById('connection-status').textContent = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để xem trạng thái.';
+                return;
+            }
+
+            if (!response.ok) throw new Error('status');
+            const result = await response.json();
+
+            if (result.paid || result.status === 'FAILED') {
+                terminal = true;
+                const box = document.getElementById('payment-status');
+                box.textContent = result.paid ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.' : 'Hóa đơn đã hủy.';
+                if (result.paid) {
+                    box.classList.add('paid');
+                    setTimeout(() => {
+                        window.location.href = '/pricing/history?success=true';
+                    }, 1500);
+                }
+                // Ẩn mã QR khi đã thanh toán
+                document.querySelectorAll('img').forEach(el => el.hidden = true);
+            }
+            document.getElementById('connection-status').textContent = 'Đã cập nhật trạng thái từ website.';
+        } catch (e) {
+            document.getElementById('connection-status').textContent = 'Kết nối bị gián đoạn, hệ thống sẽ thử lại.';
+        }
+
+        if (!terminal && ++attempts < 240) {
+            window.setTimeout(poll, 5000);
+        } else if (!terminal) {
+            document.getElementById('connection-status').textContent = 'Vui lòng tải lại trang để kiểm tra tiếp.';
+        }
+    }
+
+    if (!terminal) {
+        window.setTimeout(poll, 3000);
+    }
+</script>
+</body>
+</html>

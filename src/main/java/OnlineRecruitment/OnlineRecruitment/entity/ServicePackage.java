@@ -33,6 +33,9 @@ public class ServicePackage {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "max_jobs")
+    private Integer maxJobs;
+
     // Tự động gán ngày tạo trước khi lưu vào DB
     @PrePersist
     protected void onCreate() {
