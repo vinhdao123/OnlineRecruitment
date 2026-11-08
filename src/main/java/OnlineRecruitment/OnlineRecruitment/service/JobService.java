@@ -68,6 +68,12 @@ public class JobService {
         return jobRepository.findActiveJobs();
     }
 
+    /** Mark expired ACTIVE jobs before listing an archive or management screen. */
+    @Transactional
+    public void refreshExpiredJobs() {
+        jobRepository.expireActiveJobs(LocalDate.now());
+    }
+
     @Transactional(readOnly = true)
     public List<String> getAllLocations() {
         return jobRepository.findDistinctByLocationIsNotNullOrderByLocationAsc()
@@ -287,7 +293,7 @@ public class JobService {
 
         if (form.getJobId() != null) {
             job = getJobForRecruiter(form.getJobId(), recruiter.getId());
-            if (job.getStatus() == JobStatus.CLOSED) throw new IllegalArgumentException("Tin đã đóng. Hãy mở lại tin trước khi sửa.");
+            if (job.getStatus() == JobStatus.CLOSED || job.getStatus() == JobStatus.EXPIRED) throw new IllegalArgumentException("Tin đã đóng hoặc quá hạn. Hãy chuyển về nháp trước khi sửa.");
             wasLiveOrPending = job.getStatus() == JobStatus.ACTIVE || job.getStatus() == JobStatus.PENDING;
         } else {
             job = new Job();
@@ -313,7 +319,7 @@ public class JobService {
         job.setCompany(company);
         job.setCategory(category);
         job.setTitle(form.getTitle().trim());
-        job.setDescription(form.getDescription().trim());
+        job.setDescription(hasText(form.getDescription()) ? form.getDescription().trim() : "");
         job.setRequirements(trimToNull(form.getRequirements()));
         job.setBenefits(trimToNull(form.getBenefits()));
         job.setLocation(trimToNull(form.getLocation()));
@@ -333,18 +339,22 @@ public class JobService {
 
         // 1. Kiểm tra giới hạn đăng bài (Chỉ check khi tạo mới)
         if (form.getJobId() == null) {
-            if (activePkg == null) {
-                throw new IllegalArgumentException("Bạn chưa có gói dịch vụ nào. Vui lòng mua gói để đăng bài!");
-            }
             long currentJobCount = jobRepository.countByRecruiter_Id(recruiter.getId());
-            Integer maxJobsObj = activePkg.getServicePackage().getMaxJobs();
-            int maxJobs = (maxJobsObj != null) ? maxJobsObj : 0;
+            int maxJobs = 1; // Mặc định cho tài khoản chưa mua gói là 1 bài
+
+            // Nếu đã mua gói thì lấy giới hạn của gói đó
+            if (activePkg != null) {
+                Integer maxJobsObj = activePkg.getServicePackage().getMaxJobs();
+                maxJobs = (maxJobsObj != null) ? maxJobsObj : 0;
+            }
+
             if (maxJobs > 0 && currentJobCount >= maxJobs) {
-                throw new IllegalArgumentException("Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " + activePkg.getServicePackage().getName() + ". Vui lòng nâng cấp gói!");
+                String pkgName = (activePkg != null) ? activePkg.getServicePackage().getName() : "Miễn phí";
+                throw new IllegalArgumentException("Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " + pkgName + ". Vui lòng nâng cấp gói!");
             }
         }
 
-        // 2. Kiểm tra quyền ghim tin
+        // 2. Kiểm tra quyền ghim tin (Bắt buộc phải có gói Pro)
         if (form.getIsPinned() != null && form.getIsPinned()) {
             if (activePkg == null || !"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
                 throw new IllegalArgumentException("Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
@@ -353,6 +363,7 @@ public class JobService {
         } else {
             job.setIsPinned(false);
         }
+
         // ==========================================
 
         if (form.getJobImageFile() != null && !form.getJobImageFile().isEmpty()) {
@@ -364,16 +375,22 @@ public class JobService {
             }
         }
 
-        if (submitForReview || wasLiveOrPending) {
+
+        if (submitForReview) {
+            // Recruiter chọn Gửi duyệt
             ensureCompanyCanPublish(company);
+
             job.setStatus(JobStatus.PENDING);
             job.setRejectionReason(null);
             job.setPublishedAt(null);
+
         } else {
+            // Recruiter chọn Lưu bản nháp
             job.setStatus(JobStatus.DRAFT);
             job.setRejectionReason(null);
             job.setPublishedAt(null);
         }
+
 
         Job saved = jobRepository.save(job);
         jobSkillService.replaceRequired(saved.getId(), selectedSkills);
@@ -386,7 +403,7 @@ public class JobService {
         validatePublishCategoryAndSkills(job);
         if (job.getStatus() != JobStatus.DRAFT && job.getStatus() != JobStatus.REJECTED) throw new IllegalArgumentException("Chỉ được gửi duyệt tin DRAFT hoặc REJECTED.");
         if (!hasText(job.getTitle()) || !hasText(job.getDescription()) || job.getCategory() == null) throw new IllegalArgumentException("Tin cần có tiêu đề, mô tả và danh mục trước khi gửi duyệt.");
-        if (job.getDeadline() != null && job.getDeadline().isBefore(LocalDate.now())) throw new IllegalArgumentException("Hạn ứng tuyển đã qua. Hãy cập nhật hạn ứng tuyển trước.");
+        if (job.getDeadline() == null || job.getDeadline().isBefore(LocalDate.now())) throw new IllegalArgumentException("Hãy cập nhật hạn ứng tuyển từ hôm nay trở đi trước khi gửi duyệt.");
         ensureCompanyCanPublish(job.getCompany());
         job.setStatus(JobStatus.PENDING);
         job.setRejectionReason(null);
@@ -406,33 +423,34 @@ public class JobService {
         return reopenRecruiterJob(jobId, recruiter, null);
     }
 
+    /** Reopen CLOSED or EXPIRED into DRAFT, requiring a new review before publication. */
     public Job reopenRecruiterJob(Long jobId, User recruiter, LocalDate newDeadline) {
-        if (recruiter == null || recruiter.getId() == null) throw new IllegalArgumentException("Không xác định được tài khoản Recruiter.");
+        if (recruiter == null || recruiter.getId() == null)
+            throw new IllegalArgumentException("Không xác định được tài khoản Recruiter.");
         Job job = getJobForRecruiter(jobId, recruiter.getId());
-        if (job.getStatus() != JobStatus.CLOSED) throw new IllegalArgumentException("Chỉ có thể mở lại tin đã đóng.");
-        LocalDate today = LocalDate.now();
-        if (newDeadline != null && newDeadline.isBefore(today)) throw new IllegalArgumentException("Hạn ứng tuyển mới không được nằm trong quá khứ.");
-        LocalDate effectiveDeadline = newDeadline != null ? newDeadline : job.getDeadline();
-        if (effectiveDeadline != null && effectiveDeadline.isBefore(today)) throw new IllegalArgumentException("Tin đã quá hạn. Vui lòng chọn hạn nộp mới (từ hôm nay trở đi) rồi mở lại.");
-        ensureCompanyCanPublish(job.getCompany());
+        if (job.getStatus() != JobStatus.CLOSED && job.getStatus() != JobStatus.EXPIRED)
+            throw new IllegalArgumentException("Chỉ có thể mở lại tin đã đóng hoặc quá hạn.");
+        if (newDeadline != null && newDeadline.isBefore(LocalDate.now()))
+            throw new IllegalArgumentException("Hạn ứng tuyển mới không được ở quá khứ.");
         if (newDeadline != null) job.setDeadline(newDeadline);
-        job.setStatus(JobStatus.ACTIVE);
-        job.setPublishedAt(LocalDateTime.now());
+        // Do not bypass the admin approval process or change the original Job id.
+        job.setStatus(JobStatus.DRAFT);
+        job.setPublishedAt(null);
+        job.setRejectionReason(null);
         return jobRepository.save(job);
     }
 
     private void validateJobForm(RecruiterJobForm form, boolean submitForReview) {
         if (!hasText(form.getTitle())) throw new IllegalArgumentException("Vui lòng nhập tiêu đề tin tuyển dụng.");
         if (form.getTitle().trim().length() > 255) throw new IllegalArgumentException("Tiêu đề không được vượt quá 255 ký tự.");
-        if (!hasText(form.getDescription())) throw new IllegalArgumentException("Vui lòng nhập mô tả công việc.");
+        if (submitForReview && !hasText(form.getDescription())) throw new IllegalArgumentException("Cần có mô tả công việc trước khi gửi duyệt.");
         if (form.getCategoryId() == null) throw new IllegalArgumentException("Vui lòng chọn danh mục nghề nghiệp.");
         if (form.getQuantity() == null || form.getQuantity() < 1) throw new IllegalArgumentException("Số lượng tuyển phải từ 1 trở lên.");
         if (form.getSalaryMin() != null && form.getSalaryMin().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Lương tối thiểu không được âm.");
         if (form.getSalaryMax() != null && form.getSalaryMax().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Lương tối đa không được âm.");
         if (form.getSalaryMin() != null && form.getSalaryMax() != null && form.getSalaryMin().compareTo(form.getSalaryMax()) > 0) throw new IllegalArgumentException("Lương tối thiểu không được lớn hơn lương tối đa.");
-        if (form.getDeadline() != null && form.getDeadline().isBefore(LocalDate.now())) throw new IllegalArgumentException("Hạn ứng tuyển không được là ngày trong quá khứ.");
-        if (submitForReview && !hasText(form.getDescription())) throw new IllegalArgumentException("Cần có mô tả công việc trước khi gửi duyệt.");
-    }
+        if (submitForReview && (form.getDeadline() == null || form.getDeadline().isBefore(LocalDate.now()))) throw new IllegalArgumentException("Hạn ứng tuyển phải từ hôm nay trở đi trước khi gửi duyệt.");
+            }
 
     private void ensureCompanyCanPublish(Company company) {
         if (company == null || company.getStatus() != CompanyStatus.ACTIVE) throw new IllegalArgumentException("Công ty chưa được Admin phê duyệt. Bạn chỉ có thể lưu nháp.");
@@ -452,7 +470,7 @@ public class JobService {
         validatePublishCategoryAndSkills(job);
         if (job.getStatus() != JobStatus.PENDING) throw new IllegalArgumentException("Chỉ có thể duyệt tin đang ở trạng thái PENDING.");
         if (job.getCompany().getStatus() != CompanyStatus.ACTIVE) throw new IllegalArgumentException("Không thể duyệt tin vì công ty chưa ở trạng thái ACTIVE.");
-        if (job.getDeadline() != null && job.getDeadline().isBefore(LocalDate.now())) throw new IllegalArgumentException("Không thể duyệt tin vì hạn ứng tuyển đã qua.");
+        if (job.getDeadline() == null || job.getDeadline().isBefore(LocalDate.now())) throw new IllegalArgumentException("Không thể duyệt tin nếu thiếu hạn ứng tuyển hợp lệ.");
         job.setStatus(JobStatus.ACTIVE);
         job.setPublishedAt(LocalDateTime.now());
         job.setRejectionReason(null);
@@ -474,6 +492,18 @@ public class JobService {
         job.setStatus(JobStatus.REJECTED);
         job.setRejectionReason(normalizedReason);
         job.setPublishedAt(null);
+        return jobRepository.save(job);
+    }
+
+    /** Admin may return a closed / expired job to a draft, never straight to ACTIVE. */
+    public Job reopenAdminJob(Long jobId) {
+        Job job = jobRepository.findByIdForUpdate(jobId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tin tuyển dụng."));
+        if (job.getStatus() != JobStatus.CLOSED && job.getStatus() != JobStatus.EXPIRED)
+            throw new IllegalArgumentException("Chỉ mở lại được tin đã đóng hoặc quá hạn.");
+        job.setStatus(JobStatus.DRAFT);
+        job.setPublishedAt(null);
+        job.setRejectionReason(null);
         return jobRepository.save(job);
     }
 

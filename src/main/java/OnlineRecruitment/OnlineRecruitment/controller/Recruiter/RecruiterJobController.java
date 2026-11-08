@@ -242,23 +242,6 @@ public class RecruiterJobController {
         try {
             User recruiter = getLoggedInRecruiter(authentication);
 
-            // Lấy gói đang dùng
-            var activePkg = servicePackageService.getActivePackage(recruiter);
-            if (activePkg == null) {
-                throw new IllegalArgumentException("Bạn chưa có gói dịch vụ đang hoạt động. Vui lòng mua gói để đăng bài!");
-            }
-
-            // Đếm số bài đã đăng
-            long currentJobCount = jobService.countMyJobs(recruiter.getId());
-            Integer maxJobsObj = activePkg.getServicePackage().getMaxJobs();
-            int maxJobs = (maxJobsObj != null) ? maxJobsObj : 0;
-
-            // Chặn nếu tạo bài mới mà vượt quá số lượng
-            if (form.getJobId() == null && maxJobs > 0 && currentJobCount >= maxJobs) {
-                throw new IllegalArgumentException("Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " +
-                        activePkg.getServicePackage().getName() + ". Vui lòng nâng cấp gói!");
-            }
-
             boolean submitForReview =
                     "submit".equalsIgnoreCase(action.trim());
 
@@ -361,7 +344,7 @@ public class RecruiterJobController {
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Mở lại tin tuyển dụng thành công!"
+                    "Đã chuyển tin về nháp. Hãy cập nhật hạn ứng tuyển rồi gửi Admin duyệt lại."
             );
         } catch (IllegalArgumentException e) {
             // Có lỗi nghiệp vụ thì báo ra màn hình
