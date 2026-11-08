@@ -57,12 +57,12 @@
 
         <!-- Thanh lọc mẫu CV -->
         <div class="filter-nav-bar">
-            <button type="button" class="filter-pill active" onclick="filterGallery('ALL', this)">Tất cả mẫu CV (5)</button>
-            <button type="button" class="filter-pill" onclick="filterGallery('STANDARD', this)">Tiêu chuẩn</button>
-            <button type="button" class="filter-pill" onclick="filterGallery('MINIMALIST', this)">Tiêu chuẩn (Ít kinh nghiệm)</button>
-            <button type="button" class="filter-pill" onclick="filterGallery('CREATIVE', this)">Thanh lịch</button>
-            <button type="button" class="filter-pill" onclick="filterGallery('MODERN', this)">Hiện đại (2 cột)</button>
-            <button type="button" class="filter-pill" onclick="filterGallery('ATS_FRIENDLY', this)">Chuẩn ATS</button>
+            <a th:href="@{/candidate/cvs/gallery(category='ALL', page=0)}" class="filter-pill" th:classappend="${selectedCategory == null || selectedCategory == 'ALL'} ? 'active' : ''">Tất cả mẫu CV (<span th:text="${allTemplatesCount != null ? allTemplatesCount : 5}">5</span>)</a>
+            <a th:href="@{/candidate/cvs/gallery(category='STANDARD', page=0)}" class="filter-pill" th:classappend="${selectedCategory == 'STANDARD'} ? 'active' : ''">Tiêu chuẩn</a>
+            <a th:href="@{/candidate/cvs/gallery(category='MINIMALIST', page=0)}" class="filter-pill" th:classappend="${selectedCategory == 'MINIMALIST'} ? 'active' : ''">Tiêu chuẩn (Ít kinh nghiệm)</a>
+            <a th:href="@{/candidate/cvs/gallery(category='CREATIVE', page=0)}" class="filter-pill" th:classappend="${selectedCategory == 'CREATIVE'} ? 'active' : ''">Thanh lịch</a>
+            <a th:href="@{/candidate/cvs/gallery(category='MODERN', page=0)}" class="filter-pill" th:classappend="${selectedCategory == 'MODERN'} ? 'active' : ''">Hiện đại (2 cột)</a>
+            <a th:href="@{/candidate/cvs/gallery(category='ATS_FRIENDLY', page=0)}" class="filter-pill" th:classappend="${selectedCategory == 'ATS_FRIENDLY'} ? 'active' : ''">Chuẩn ATS</a>
         </div>
 
         <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
@@ -368,6 +368,32 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- ================= PHÂN TRANG MẪU CV ================= -->
+        <div th:if="${totalPages > 1}" class="cv-pagination-wrapper">
+            <div class="cv-pagination">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/candidate/cvs/gallery(page=${currentPage - 1}, category=${selectedCategory}, size=${size})}"
+                   class="cv-page-btn" title="Trang trước">‹ Trước</a>
+                <span th:unless="${currentPage > 0}" class="cv-page-btn disabled">‹ Trước</span>
+
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/candidate/cvs/gallery(page=${i}, category=${selectedCategory}, size=${size})}"
+                       class="cv-page-btn"
+                       th:classappend="${i == currentPage} ? 'active' : ''"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/candidate/cvs/gallery(page=${currentPage + 1}, category=${selectedCategory}, size=${size})}"
+                   class="cv-page-btn" title="Trang sau">Sau ›</a>
+                <span th:unless="${currentPage < totalPages - 1}" class="cv-page-btn disabled">Sau ›</span>
+            </div>
+            <div class="cv-pagination-info">
+                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+                (Hiển thị <strong th:text="${#lists.size(templates)}">0</strong> / <strong th:text="${totalItems}">0</strong> mẫu CV)
             </div>
         </div>
     </main>

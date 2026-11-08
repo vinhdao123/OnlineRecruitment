@@ -7,6 +7,8 @@ import OnlineRecruitment.OnlineRecruitment.repository.CompanyRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import OnlineRecruitment.OnlineRecruitment.service.AuthService;
 import OnlineRecruitment.OnlineRecruitment.service.CompanyService;
+import OnlineRecruitment.OnlineRecruitment.service.PaymentService;
+import OnlineRecruitment.OnlineRecruitment.repository.UserPackageRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,6 +28,8 @@ public class RecruiterProfileController {
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
     private final AuthService authService;
+    private final PaymentService paymentService;
+    private final UserPackageRepository userPackageRepository;
 
     private User getAuthenticatedUser(UserDetails userDetails) {
         return userRepository.findByEmail(userDetails.getUsername())
@@ -140,5 +144,15 @@ public class RecruiterProfileController {
             ra.addFlashAttribute("inputOtp", otp);
             return "redirect:/recruiter/change-password";
         }
+    }
+
+    // 3. Xem lịch sử giao dịch mua gói dịch vụ
+    @GetMapping("/packages/history")
+    public String packageHistory(@AuthenticationPrincipal UserDetails userDetails, Model model) {
+        User user = getAuthenticatedUser(userDetails);
+        model.addAttribute("payments", paymentService.getHistoryByUser(user));
+        model.addAttribute("currentUserPackage",
+                userPackageRepository.findFirstByUserAndStatusOrderByEndDateDesc(user, "ACTIVE").orElse(null));
+        return "recruiter/package-history";
     }
 }

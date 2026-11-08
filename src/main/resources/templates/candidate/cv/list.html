@@ -56,18 +56,19 @@
         </section>
 
         <!-- ================= THANH TÌM KIẾM ================= -->
-        <div class="cv-search-bar-card">
+        <form method="get" th:action="@{/candidate/cvs}" class="cv-search-bar-card">
             <div class="cv-search-icon-badge">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
                     <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
             </div>
-            <input type="text" id="cvSearchInput" class="cv-search-input-clean" placeholder="Tìm kiếm nhanh theo tên CV của bạn..." onkeyup="filterCvs()">
-            <div class="cv-search-count-pill" th:if="${cvs != null}">
-                Tổng cộng: <strong th:text="${#lists.size(cvs)}">0</strong> CV
+            <input type="text" name="keyword" th:value="${keyword}" id="cvSearchInput" class="cv-search-input-clean" placeholder="Tìm kiếm theo tên CV của bạn (gõ từ khóa & Enter)..." onkeyup="filterCvs()">
+            <a th:if="${keyword != null && !keyword.isEmpty()}" th:href="@{/candidate/cvs}" class="btn-cancel" style="padding: 6px 12px; font-size: 13px; text-decoration: none; border-radius: 8px;">✕ Đặt lại</a>
+            <div class="cv-search-count-pill" th:if="${totalItems != null}">
+                Tổng cộng: <strong th:text="${totalItems}">0</strong> CV
             </div>
-        </div>
+        </form>
 
         <!-- ================= THÔNG BÁO ================= -->
         <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
@@ -136,7 +137,7 @@
                 <th:block th:unless="${cv.isUploaded}">
                     <div class="cv-preview-card">
                         <div class="cv-preview-header">
-                            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-preview-avatar">
+                            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-preview-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                             <div class="cv-preview-info">
                                 <h3 class="cv-preview-name" th:text="${displayName}">Nguyễn Văn A</h3>
                                 <p class="cv-preview-title" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : 'Chưa cập nhật chức danh'}">Chức danh</p>
@@ -173,7 +174,9 @@
                             <span th:if="${cv.isDefault}" class="badge-default">Mặc định</span>
                         </div>
                         <div class="cv-card-date">
-                            Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span>
+                            <span>Mẫu: <strong th:text="${cvDataMap[cv.id] != null and cvDataMap[cv.id]['templateName'] != null ? cvDataMap[cv.id]['templateName'] : 'Tiêu chuẩn'}">Tiêu chuẩn</strong></span>
+                            <span>&bull;</span>
+                            <span>Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span></span>
                         </div>
                     </div>
 
@@ -200,6 +203,32 @@
                     </div>
                 </th:block>
 
+            </div>
+        </div>
+
+        <!-- ================= PHÂN TRANG ================= -->
+        <div th:if="${totalPages > 1}" class="cv-pagination-wrapper">
+            <div class="cv-pagination">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/candidate/cvs(page=${currentPage - 1}, keyword=${keyword}, size=${size})}"
+                   class="cv-page-btn" title="Trang trước">‹ Trước</a>
+                <span th:unless="${currentPage > 0}" class="cv-page-btn disabled">‹ Trước</span>
+
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/candidate/cvs(page=${i}, keyword=${keyword}, size=${size})}"
+                       class="cv-page-btn"
+                       th:classappend="${i == currentPage} ? 'active' : ''"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/candidate/cvs(page=${currentPage + 1}, keyword=${keyword}, size=${size})}"
+                   class="cv-page-btn" title="Trang sau">Sau ›</a>
+                <span th:unless="${currentPage < totalPages - 1}" class="cv-page-btn disabled">Sau ›</span>
+            </div>
+            <div class="cv-pagination-info">
+                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+                (Tổng cộng <strong th:text="${totalItems}">0</strong> CV)
             </div>
         </div>
 
