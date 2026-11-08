@@ -174,7 +174,9 @@
                             <span th:if="${cv.isDefault}" class="badge-default">Mặc định</span>
                         </div>
                         <div class="cv-card-date">
-                            Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span>
+                            <span>Mẫu: <strong th:text="${cvDataMap[cv.id] != null and cvDataMap[cv.id]['templateName'] != null ? cvDataMap[cv.id]['templateName'] : 'Tiêu chuẩn'}">Tiêu chuẩn</strong></span>
+                            <span>&bull;</span>
+                            <span>Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span></span>
                         </div>
                     </div>
 

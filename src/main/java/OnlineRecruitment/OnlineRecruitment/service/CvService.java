@@ -117,7 +117,44 @@ public class CvService {
                     "  CONSTRAINT FK_cv_references_cv FOREIGN KEY (cv_id) REFERENCES dbo.cv(id) ON DELETE CASCADE" +
                     ")");
 
-            log.info("Initialized CV extra tables successfully.");
+            // 6. cv_templates & cv_template_versions
+            stmt.execute("IF OBJECT_ID('dbo.cv_templates', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_templates (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  category_id BIGINT NOT NULL DEFAULT 1," +
+                    "  name NVARCHAR(150) NOT NULL," +
+                    "  code NVARCHAR(100) NOT NULL UNIQUE," +
+                    "  status NVARCHAR(20) NOT NULL DEFAULT 'ACTIVE'" +
+                    ")");
+
+            stmt.execute("IF OBJECT_ID('dbo.cv_template_versions', 'U') IS NULL " +
+                    "CREATE TABLE dbo.cv_template_versions (" +
+                    "  id BIGINT IDENTITY(1,1) PRIMARY KEY," +
+                    "  template_id BIGINT NOT NULL," +
+                    "  version_number INT NOT NULL DEFAULT 1," +
+                    "  layout_definition NVARCHAR(MAX) NOT NULL DEFAULT ''," +
+                    "  is_published BIT NOT NULL DEFAULT 1," +
+                    "  CONSTRAINT FK_cv_template_versions_template FOREIGN KEY (template_id) REFERENCES dbo.cv_templates(id) ON DELETE CASCADE" +
+                    ")");
+
+            // Seed 5 templates if not exists
+            stmt.execute("IF NOT EXISTS (SELECT 1 FROM dbo.cv_templates WHERE code = 'STANDARD') " +
+                    "INSERT INTO dbo.cv_templates (category_id, name, code, status) VALUES (1, N'Tiêu chuẩn', 'STANDARD', 'ACTIVE')");
+            stmt.execute("IF NOT EXISTS (SELECT 1 FROM dbo.cv_templates WHERE code = 'MINIMALIST') " +
+                    "INSERT INTO dbo.cv_templates (category_id, name, code, status) VALUES (1, N'Tiêu chuẩn (Ít kinh nghiệm)', 'MINIMALIST', 'ACTIVE')");
+            stmt.execute("IF NOT EXISTS (SELECT 1 FROM dbo.cv_templates WHERE code = 'CREATIVE') " +
+                    "INSERT INTO dbo.cv_templates (category_id, name, code, status) VALUES (1, N'Thanh lịch', 'CREATIVE', 'ACTIVE')");
+            stmt.execute("IF NOT EXISTS (SELECT 1 FROM dbo.cv_templates WHERE code = 'MODERN') " +
+                    "INSERT INTO dbo.cv_templates (category_id, name, code, status) VALUES (1, N'Hiện đại (2 cột)', 'MODERN', 'ACTIVE')");
+            stmt.execute("IF NOT EXISTS (SELECT 1 FROM dbo.cv_templates WHERE code = 'ATS_FRIENDLY') " +
+                    "INSERT INTO dbo.cv_templates (category_id, name, code, status) VALUES (1, N'Chuẩn ATS', 'ATS_FRIENDLY', 'ACTIVE')");
+
+            // Seed versions
+            stmt.execute("INSERT INTO dbo.cv_template_versions (template_id, version_number, layout_definition, is_published) " +
+                    "SELECT t.id, 1, t.code, 1 FROM dbo.cv_templates t " +
+                    "WHERE NOT EXISTS (SELECT 1 FROM dbo.cv_template_versions v WHERE v.template_id = t.id AND v.version_number = 1)");
+
+            log.info("Initialized CV extra tables and 5 templates successfully.");
         } catch (Exception e) {
             log.warn("Notice while initializing CV tables: {}", e.getMessage());
         }
@@ -208,6 +245,24 @@ public class CvService {
                 detail.put("educations", getEducations(cv.getId(), userId));
                 detail.put("skills", getSkills(cv.getId(), userId));
                 detail.put("projects", getProjects(cv.getId(), userId));
+
+                String templateCode = "STANDARD";
+                String templateName = "Tiêu chuẩn";
+                if (cv.getTemplateVersion() != null && cv.getTemplateVersion().getTemplate() != null) {
+                    templateCode = cv.getTemplateVersion().getTemplate().getCode();
+                    templateName = cv.getTemplateVersion().getTemplate().getName();
+                } else if (cv.getTemplateVersionId() != null) {
+                    CvTemplateVersion tv = templateVersionRepository.findById(cv.getTemplateVersionId()).orElse(null);
+                    if (tv != null && tv.getTemplate() != null) {
+                        templateCode = tv.getTemplate().getCode();
+                        templateName = tv.getTemplate().getName();
+                    } else if (tv != null && tv.getLayoutDefinition() != null) {
+                        templateCode = tv.getLayoutDefinition();
+                    }
+                }
+                detail.put("templateCode", templateCode != null ? templateCode.toUpperCase() : "STANDARD");
+                detail.put("templateName", templateName);
+
                 map.put(cv.getId(), detail);
             }
         }
@@ -236,8 +291,31 @@ public class CvService {
     public Map<String, Object> getFullCvForPreview(Long cvId, Long userId) {
         Cv cv = getCvDetail(cvId, userId);
         Candidate candidate = getCandidate(userId);
+
+        String templateCode = "STANDARD";
+        String templateName = "Tiêu chuẩn";
+        if (cv.getTemplateVersion() != null && cv.getTemplateVersion().getTemplate() != null) {
+            templateCode = cv.getTemplateVersion().getTemplate().getCode();
+            templateName = cv.getTemplateVersion().getTemplate().getName();
+        } else if (cv.getTemplateVersionId() != null) {
+            CvTemplateVersion tv = templateVersionRepository.findById(cv.getTemplateVersionId()).orElse(null);
+            if (tv != null && tv.getTemplate() != null) {
+                templateCode = tv.getTemplate().getCode();
+                templateName = tv.getTemplate().getName();
+            } else if (tv != null && tv.getLayoutDefinition() != null) {
+                templateCode = tv.getLayoutDefinition();
+            }
+        }
+        if (templateCode == null || templateCode.isBlank()) {
+            templateCode = "STANDARD";
+        }
+        templateCode = templateCode.trim().toUpperCase();
+
         Map<String, Object> model = new java.util.HashMap<>();
         model.put("cv", cv);
+        model.put("templateCode", templateCode);
+        model.put("templateName", templateName);
+        model.put("accentColor", cv.getAccentColor() != null ? cv.getAccentColor() : "#2563EB");
         model.put("candidate", candidate);
         model.put("candidateUser", candidate != null ? candidate.getUser() : null);
         model.put("works", getWorkExperiences(cvId, userId));
@@ -316,6 +394,14 @@ public class CvService {
 
         if (!"ACTIVE".equals(cv.getStatus())) {
             throw new IllegalArgumentException("Không thể sửa CV đã bị vô hiệu hóa");
+        }
+
+        if (req.getTemplateVersionId() != null) {
+            templateVersionRepository.findById(req.getTemplateVersionId())
+                    .ifPresent(v -> {
+                        cv.setTemplateVersionId(v.getId());
+                        cv.setTemplateVersion(v);
+                    });
         }
 
         cv.setTitle(req.getTitle());

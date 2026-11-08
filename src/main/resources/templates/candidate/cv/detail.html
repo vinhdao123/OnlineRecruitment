@@ -172,7 +172,7 @@
                 <div class="cv-text" th:text="${cv.summary != null && !cv.summary.isEmpty() ? cv.summary : 'Chưa có thông tin tóm tắt.'}"></div>
 
                 <div class="cv-meta-row">
-                    <span>Mẫu CV: <strong th:text="${cv.templateVersion?.template?.name != null ? cv.templateVersion.template.name : 'Mặc định'}"></strong></span>
+                    <span>Mẫu CV: <strong th:text="${templateName != null ? templateName : (cv.templateVersion?.template?.name != null ? cv.templateVersion.template.name : 'Mặc định')}"></strong></span>
                     <span>Màu chủ đạo: <strong th:text="${cv.accentColor}">#0284c7</strong></span>
                     <span>Cập nhật lần cuối: <strong th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></strong></span>
                 </div>
@@ -277,6 +277,14 @@
             <!-- CHẾ ĐỘ SỬA -->
             <form th:if="${isEditMode}" th:action="@{/candidate/cvs/{id}/update(id=${cv.id})}" th:object="${cvRequest}" method="post" enctype="multipart/form-data">
                 <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="form-label">Mẫu giao diện CV <span class="required-star">*</span></label>
+                        <select th:field="*{templateVersionId}" class="form-control">
+                            <option th:each="t : ${templates}" th:value="${t.id}"
+                                    th:text="${t.templateName + ' (Phiên bản ' + t.versionNumber + ')'}"></option>
+                        </select>
+                        <span class="form-hint">Chọn mẫu giao diện (Tiêu chuẩn, Hiện đại 2 cột, Thanh lịch, Chuẩn ATS...). Toàn bộ thông tin CV sẽ tự động được hiển thị theo mẫu mới.</span>
+                    </div>
                     <div class="form-group">
                         <label class="form-label">Tiêu đề CV <span class="required-star">*</span></label>
                         <input type="text" th:field="*{title}" class="form-control">
