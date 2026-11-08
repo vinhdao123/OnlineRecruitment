@@ -4,6 +4,7 @@ import OnlineRecruitment.OnlineRecruitment.config.BankPaymentConfig;
 import OnlineRecruitment.OnlineRecruitment.entity.Payment;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.service.*;
+import OnlineRecruitment.OnlineRecruitment.repository.UserPackageRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,6 +24,7 @@ public class PricingController {
     private final BankPaymentConfig bank;
     private final OnlineRecruitment.OnlineRecruitment.config.SePayGatewayConfig gateway;
     private final SePayCheckoutService sePayCheckout;
+    private final UserPackageRepository userPackageRepository;
 
     private User user(UserDetails principal) { return userService.getByEmail(principal.getUsername()); }
 
@@ -91,7 +93,10 @@ public class PricingController {
 
     @GetMapping("/history")
     public String history(@AuthenticationPrincipal UserDetails principal, Model model) {
-        model.addAttribute("payments", paymentService.getHistoryByUser(user(principal)));
+        User u = user(principal);
+        model.addAttribute("payments", paymentService.getHistoryByUser(u));
+        model.addAttribute("currentUserPackage",
+                userPackageRepository.findFirstByUserAndStatusOrderByEndDateDesc(u, "ACTIVE").orElse(null));
         return "pricing/history";
     }
 }

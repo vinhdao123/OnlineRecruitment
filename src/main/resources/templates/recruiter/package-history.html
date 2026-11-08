@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử giao dịch mua gói — Kênh tuyển dụng</title>
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            margin: 0;
+            padding: 0;
+        }
+
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 60px 20px;
+        }
+
+        /* Top Bar with Back Button */
+        .top-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .btn-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            background: #ffffff;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            cursor: pointer;
+        }
+
+        .btn-back-link:hover {
+            background: #f9fafb;
+            color: #111827;
+            border-color: #d1d5db;
+            transform: translateX(-2px);
+        }
+
+        .breadcrumb-text {
+            font-size: 13px;
+            color: #6b7280;
+        }
+        .breadcrumb-text a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        .breadcrumb-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Header Title Box */
+        .page-header {
+            margin-bottom: 28px;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: #4b5563;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Active Package Banner */
+        .active-pkg-banner {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+            border: 1px solid #fcd34d;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 12px -2px rgba(245, 158, 11, 0.12);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .active-pkg-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .active-pkg-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            background: #f59e0b;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
+            flex-shrink: 0;
+        }
+
+        .active-pkg-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #92400e;
+            margin: 0 0 4px 0;
+        }
+
+        .active-pkg-desc {
+            font-size: 13.5px;
+            color: #78350f;
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .active-pkg-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-upgrade {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f59e0b;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            border: none;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            transition: all 0.2s;
+        }
+
+        .btn-upgrade:hover {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+
+        /* Table Card Container */
+        .table-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .table-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #f3f4f6;
+            background: #fafbfc;
+        }
+
+        .table-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-count {
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            border: 1px solid #bfdbfe;
+        }
+
+        /* Custom Data Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .history-table th {
+            background: #f9fafb;
+            color: #4b5563;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        .history-table td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+            color: #374151;
+        }
+
+        .history-table tbody tr {
+            transition: background-color 0.15s ease;
+            cursor: pointer;
+        }
+
+        .history-table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .td-invoice-id {
+            font-weight: 700;
+            color: #111827;
+            white-space: nowrap;
+        }
+
+        .td-package-name {
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .package-icon-small {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .td-amount {
+            font-weight: 800;
+            color: #1d4ed8;
+            font-size: 15px;
+            white-space: nowrap;
+        }
+
+        /* Status Badges */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 12.5px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-pill.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        .status-pill.pending {
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+        .status-pill.waiting {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+        .status-pill.failed {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+        .status-pill.success .status-dot { background: #10b981; }
+        .status-pill.pending .status-dot { background: #f59e0b; }
+        .status-pill.waiting .status-dot { background: #3b82f6; }
+        .status-pill.failed .status-dot { background: #ef4444; }
+
+        /* Action Buttons */
+        .actions-cell {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-action-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            background: #f3f4f6;
+            color: #374151;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-action-view:hover {
+            background: #eff6ff;
+            color: #2563eb;
+            border-color: #bfdbfe;
+        }
+
+        .btn-action-pay {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 8px;
+            background: #eff6ff;
+            color: #2563eb;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #bfdbfe;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+
+        .btn-action-pay:hover {
+            background: #2563eb;
+            color: #ffffff;
+        }
+
+        .btn-action-cancel {
+            padding: 7px 12px;
+            border-radius: 8px;
+            background: #fff;
+            color: #dc2626;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid #fecaca;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-action-cancel:hover {
+            background: #fee2e2;
+        }
+
+        /* Empty State */
+        .empty-history-box {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-history-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            background: #f3f4f6;
+            color: #9ca3af;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        /* Notification Alerts */
+        .alert-box {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .alert-box.success {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* ================= MODAL CHI TIẾT ================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-dialog {
+            background: #ffffff;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 620px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .modal-overlay.active .modal-dialog {
+            transform: scale(1);
+        }
+
+        /* Modal Header */
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            background: #ffffff;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .modal-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-header-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #eff6ff;
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0;
+        }
+
+        .modal-subtitle {
+            font-size: 13px;
+            color: #6b7280;
+            margin: 2px 0 0 0;
+        }
+
+        /* Nút Close chi tiết */
+        .btn-modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #f3f4f6;
+            border: none;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-modal-close:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            transform: rotate(90deg);
+        }
+
+        /* Modal Body */
+        .modal-body {
+            padding: 24px;
+            max-height: calc(85vh - 140px);
+            overflow-y: auto;
+        }
+
+        /* Card tóm tắt trong modal */
+        .modal-hero-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-hero-package {
+            font-size: 18px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 4px 0;
+        }
+
+        .modal-hero-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: #2563eb;
+            margin: 0;
+        }
+
+        /* Grid chi tiết */
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 14.5px;
+            color: #1e293b;
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .modal-desc-box {
+            background: #f9fafb;
+            border: 1px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #374151;
+            margin: 0 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-desc-text {
+            font-size: 13.5px;
+            color: #4b5563;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Modal Footer */
+        .modal-footer {
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: #ffffff;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        .btn-primary-action {
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: #2563eb;
+            color: #ffffff;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s;
+            cursor: pointer;
+        }
+
+        .btn-primary-action:hover {
+            background: #1d4ed8;
+        }
+
+        @media (max-width: 768px) {
+            .active-pkg-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .modal-info-grid {
+                grid-template-columns: 1fr;
+            }
+            .top-action-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Unified Website Taskbar Header -->
+    <div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+
+    <main class="main-wrapper">
+
+        <!-- Top Bar with Back Button -->
+        <div class="top-action-bar">
+            <!-- Nút Back trang -->
+            <a th:href="@{/recruiter/dashboard}" class="btn-back-link" title="Quay lại Bảng điều khiển tuyển dụng">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Quay lại Kênh tuyển dụng</span>
+            </a>
+
+            <!-- Breadcrumb -->
+            <div class="breadcrumb-text">
+                <a th:href="@{/recruiter/dashboard}">Kênh tuyển dụng</a>
+                <span> / </span>
+                <a th:href="@{/pricing}">Gói dịch vụ</a>
+                <span> / </span>
+                <strong>Lịch sử giao dịch</strong>
+            </div>
+        </div>
+
+        <!-- Notification Alerts -->
+        <div th:if="${param.success != null or success != null}" class="alert-box success">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span th:text="${success != null ? success : 'Giao dịch của bạn đã được ghi nhận thành công!'}">Thao tác thành công!</span>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                    <line x1="2" y1="10" x2="22" y2="10"></line>
+                </svg>
+                Lịch sử giao dịch mua gói dịch vụ
+            </h1>
+            <p>Theo dõi toàn bộ các đơn hàng, gói dịch vụ đã kích hoạt, lịch sử thanh toán và chi tiết quyền lợi tuyển dụng của doanh nghiệp.</p>
+        </div>
+
+        <!-- Active Subscription Banner -->
+        <div class="active-pkg-banner">
+            <div class="active-pkg-info">
+                <div class="active-pkg-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 3h12l4 6-10 12L2 9Z"/>
+                    </svg>
+                </div>
+                <div>
+                    <!-- Nếu đang có gói active -->
+                    <div th:if="${currentUserPackage != null}">
+                        <h3 class="active-pkg-title">
+                            Gói hiện tại: <span th:text="${currentUserPackage.servicePackage.name}">Gói Tuyển Dụng</span>
+                            <span style="font-size: 12px; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 999px; margin-left: 8px;">Đang hoạt động</span>
+                        </h3>
+                        <p class="active-pkg-desc">
+                            Hạn sử dụng: <strong th:text="${#temporals.format(currentUserPackage.endDate, 'dd/MM/yyyy')}">31/12/2026</strong>
+                            &bull; Tin đăng tối đa: <strong th:text="${currentUserPackage.servicePackage.maxJobs != null ? currentUserPackage.servicePackage.maxJobs + ' tin' : 'Không giới hạn'}">Không giới hạn</strong>
+                        </p>
+                    </div>
+                    <!-- Nếu chưa có gói active -->
+                    <div th:if="${currentUserPackage == null}">
+                        <h3 class="active-pkg-title">Tài khoản chưa kích hoạt gói dịch vụ</h3>
+                        <p class="active-pkg-desc">Nâng cấp gói ngay để mở khóa quyền đăng tin không giới hạn, đẩy tin lên Top và tiếp cận ứng viên tiềm năng nhanh chóng.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="active-pkg-actions">
+                <a th:href="@{/pricing}" class="btn-upgrade">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    <span th:text="${currentUserPackage != null ? 'Gia hạn / Nâng cấp gói' : 'Xem bảng giá & Nâng cấp'}">Nâng cấp Gói</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Transactions Table Card -->
+        <div class="table-card">
+            <div class="table-card-header">
+                <h3 class="table-card-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="8" y1="6" x2="21" y2="6"></line>
+                        <line x1="8" y1="12" x2="21" y2="12"></line>
+                        <line x1="8" y1="18" x2="21" y2="18"></line>
+                        <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                        <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                        <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                    </svg>
+                    Danh sách hóa đơn giao dịch
+                </h3>
+                <span class="badge-count" th:text="${payments != null ? payments.size() + ' giao dịch' : '0 giao dịch'}">0 giao dịch</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Mã HĐ</th>
+                            <th>Gói dịch vụ</th>
+                            <th>Số tiền</th>
+                            <th>Hình thức</th>
+                            <th>Mã đối soát</th>
+                            <th>Ngày tạo</th>
+                            <th>Trạng thái</th>
+                            <th style="text-align: right;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Loop over payments -->
+                        <tr th:each="p : ${payments}"
+                            th:data-id="${p.id}"
+                            th:data-package-name="${p.servicePackage.name}"
+                            th:data-package-desc="${p.servicePackage.description != null ? p.servicePackage.description : 'Không có mô tả chi tiết.'}"
+                            th:data-duration="${p.servicePackage.durationDays + ' ngày'}"
+                            th:data-max-jobs="${p.servicePackage.maxJobs != null ? p.servicePackage.maxJobs + ' tin tuyển dụng' : 'Không giới hạn'}"
+                            th:data-amount="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                            th:data-method="${p.paymentMethod != null ? p.paymentMethod : 'BANK_TRANSFER'}"
+                            th:data-txcode="${p.transactionCode != null ? p.transactionCode : 'Đang xử lý / Chưa có'}"
+                            th:data-status="${p.status}"
+                            th:data-created="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}"
+                            th:data-resume-url="@{'/pricing/resume/' + ${p.id}}"
+                            onclick="handleRowClick(event, this)">
+                            
+                            <td class="td-invoice-id" th:text="'#' + ${p.id}">#1</td>
+                            <td>
+                                <div class="td-package-name">
+                                    <div class="package-icon-small">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M6 3h12l4 6-10 12L2 9Z"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div th:text="${p.servicePackage.name}">Gói Tiêu Chuẩn</div>
+                                        <small style="color: #6b7280; font-weight: normal;" th:text="${p.servicePackage.durationDays} + ' ngày'">30 ngày</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="td-amount" th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">500.000 đ</td>
+                            <td>
+                                <span style="font-weight: 500; font-size: 13px;" th:switch="${p.paymentMethod}">
+                                    <span th:case="'BANK_TRANSFER'">Chuyển khoản QR</span>
+                                    <span th:case="'SEPAY_SANDBOX'">Cổng SePay (Sandbox)</span>
+                                    <span th:case="'SEPAY_LIVE'">Cổng SePay</span>
+                                    <span th:case="*" th:text="${p.paymentMethod != null ? p.paymentMethod : 'Chuyển khoản'}">Chuyển khoản</span>
+                                </span>
+                            </td>
+                            <td>
+                                <code style="font-size: 12px; background: #f1f5f9; padding: 3px 6px; border-radius: 6px; color: #475569;"
+                                      th:text="${p.transactionCode != null and !#strings.isEmpty(p.transactionCode) ? p.transactionCode : '—'}">—</code>
+                            </td>
+                            <td style="color: #6b7280; white-space: nowrap;" th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026 12:00</td>
+                            
+                            <!-- Status Column -->
+                            <td>
+                                <span class="status-pill success" th:if="${p.status == 'SUCCESS'}">
+                                    <span class="status-dot"></span> Thành công
+                                </span>
+                                <span class="status-pill pending" th:if="${p.status == 'PENDING'}">
+                                    <span class="status-dot"></span> Chờ thanh toán
+                                </span>
+                                <span class="status-pill waiting" th:if="${p.status == 'WAITING_CONFIRM'}">
+                                    <span class="status-dot"></span> Chờ xác nhận
+                                </span>
+                                <span class="status-pill failed" th:if="${p.status == 'FAILED'}">
+                                    <span class="status-dot"></span> Đã hủy
+                                </span>
+                            </td>
+
+                            <!-- Action Column -->
+                            <td>
+                                <div class="actions-cell" style="justify-content: flex-end;">
+                                    <!-- Nút Xem chi tiết -->
+                                    <button type="button" class="btn-action-view" title="Xem chi tiết đơn hàng này"
+                                            onclick="event.stopPropagation(); openDetailFromButton(this)">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                        Chi tiết
+                                    </button>
+
+                                    <!-- Nút Thanh toán tiếp nếu PENDING -->
+                                    <a th:if="${p.status == 'PENDING'}" th:href="@{'/pricing/resume/' + ${p.id}}"
+                                       class="btn-action-pay" title="Tiếp tục thanh toán" onclick="event.stopPropagation();">
+                                        Thanh toán
+                                    </a>
+
+                                    <!-- Nút Hủy nếu PENDING -->
+                                    <form th:if="${p.status == 'PENDING'}" th:action="@{'/pricing/cancel/' + ${p.id}}"
+                                          method="post" style="margin: 0;" onclick="event.stopPropagation();">
+                                        <button type="submit" class="btn-action-cancel" title="Hủy hóa đơn này"
+                                                onclick="return confirm('Bạn có chắc muốn hủy hóa đơn này không?')">
+                                            Hủy
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Empty State -->
+                        <tr th:if="${payments == null or payments.isEmpty()}">
+                            <td colspan="8">
+                                <div class="empty-history-box">
+                                    <div class="empty-history-icon">
+                                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        </svg>
+                                    </div>
+                                    <h4 style="font-size: 16px; font-weight: 700; color: #374151; margin: 0 0 6px 0;">Chưa có giao dịch mua gói nào</h4>
+                                    <p style="font-size: 14px; color: #6b7280; margin: 0 0 20px 0;">Toàn bộ hóa đơn mua gói đăng tin và dịch vụ tuyển dụng sẽ hiển thị tại đây.</p>
+                                    <a th:href="@{/pricing}" class="btn-upgrade" style="display: inline-flex;">
+                                        Xem danh sách gói dịch vụ
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ================= MODAL XEM CHI TIẾT GIAO DỊCH ================= -->
+    <div id="detailModalOverlay" class="modal-overlay" onclick="handleBackdropClick(event)">
+        <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="modal-header-left">
+                    <div class="modal-header-icon">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="modal-title" id="modalTitle">Chi tiết hóa đơn giao dịch</h3>
+                        <p class="modal-subtitle" id="modalSubtitle">Thông tin đơn hàng #1</p>
+                    </div>
+                </div>
+
+                <!-- Nút Close chi tiết -->
+                <button type="button" class="btn-modal-close" onclick="closeDetailModal()" title="Đóng cửa sổ chi tiết (Esc)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Hero Card: Tên gói & Giá tiền & Trạng thái -->
+                <div class="modal-hero-card">
+                    <div>
+                        <div class="modal-hero-package" id="modalPackageName">Gói Tuyển Dụng VIP</div>
+                        <div id="modalStatusBadge">
+                            <span class="status-pill success"><span class="status-dot"></span> Thành công</span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase;">Tổng thanh toán</div>
+                        <div class="modal-hero-amount" id="modalAmount">1.500.000 đ</div>
+                    </div>
+                </div>
+
+                <!-- Chi tiết thông số trong lưới -->
+                <div class="modal-info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Mã hóa đơn / GD</div>
+                        <div class="info-value" id="modalInvoiceId">#12</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Thời gian tạo</div>
+                        <div class="info-value" id="modalCreatedDate">01/01/2026 10:30</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Phương thức thanh toán</div>
+                        <div class="info-value" id="modalPaymentMethod">Chuyển khoản QR</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Mã tham chiếu ngân hàng</div>
+                        <div class="info-value" id="modalTxCode">—</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Thời hạn sử dụng</div>
+                        <div class="info-value" id="modalDuration">30 ngày</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Quyền lợi đăng tin</div>
+                        <div class="info-value" id="modalMaxJobs">Tối đa 10 tin</div>
+                    </div>
+                </div>
+
+                <!-- Mô tả chi tiết quyền lợi gói -->
+                <div class="modal-desc-box">
+                    <div class="modal-desc-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                        Mô tả & Đặc quyền của gói
+                    </div>
+                    <p class="modal-desc-text" id="modalPackageDesc">Đăng tin tuyển dụng không giới hạn trong 30 ngày, ưu tiên hiển thị đầu danh sách tìm kiếm và lọc ứng viên phù hợp tự động.</p>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <!-- Nút Close chi tiết ở footer -->
+                <button type="button" class="btn-secondary" onclick="closeDetailModal()">
+                    Đóng
+                </button>
+
+                <!-- Nút Thanh toán ngay nếu trạng thái là PENDING -->
+                <a id="modalPayBtn" href="#" class="btn-primary-action" style="display: none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    <span>Thanh toán ngay</span>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript xử lý Modal Chi tiết -->
+    <script>
+        function openDetailModalFromData(data) {
+            document.getElementById('modalTitle').textContent = 'Chi tiết hóa đơn #' + data.id;
+            document.getElementById('modalSubtitle').textContent = 'Mã đơn hàng: #' + data.id + ' • ' + data.created;
+            document.getElementById('modalPackageName').textContent = data.packageName || 'Gói Dịch Vụ';
+            document.getElementById('modalAmount').textContent = data.amount || '0 đ';
+            document.getElementById('modalInvoiceId').textContent = '#' + data.id;
+            document.getElementById('modalCreatedDate').textContent = data.created || '—';
+            
+            // Format Payment Method
+            let methodText = data.method;
+            if (data.method === 'BANK_TRANSFER') methodText = 'Chuyển khoản QR ngân hàng';
+            else if (data.method === 'SEPAY_SANDBOX') methodText = 'Cổng SePay (Sandbox)';
+            else if (data.method === 'SEPAY_LIVE') methodText = 'Cổng SePay';
+            document.getElementById('modalPaymentMethod').textContent = methodText;
+
+            document.getElementById('modalTxCode').textContent = data.txcode && data.txcode !== 'null' ? data.txcode : '—';
+            document.getElementById('modalDuration').textContent = data.duration || '—';
+            document.getElementById('modalMaxJobs').textContent = data.maxJobs || 'Không giới hạn';
+            document.getElementById('modalPackageDesc').textContent = data.packageDesc || 'Không có mô tả chi tiết.';
+
+            // Status Badge
+            const badgeContainer = document.getElementById('modalStatusBadge');
+            badgeContainer.innerHTML = '';
+            const status = (data.status || '').toUpperCase();
+            if (status === 'SUCCESS') {
+                badgeContainer.innerHTML = '<span class="status-pill success"><span class="status-dot"></span> Đã thanh toán & Kích hoạt</span>';
+            } else if (status === 'PENDING') {
+                badgeContainer.innerHTML = '<span class="status-pill pending"><span class="status-dot"></span> Đang chờ thanh toán</span>';
+            } else if (status === 'WAITING_CONFIRM') {
+                badgeContainer.innerHTML = '<span class="status-pill waiting"><span class="status-dot"></span> Đang chờ đối soát ngân hàng</span>';
+            } else {
+                badgeContainer.innerHTML = '<span class="status-pill failed"><span class="status-dot"></span> Đã hủy / Thất bại</span>';
+            }
+
+            // Pay Button in Modal
+            const payBtn = document.getElementById('modalPayBtn');
+            if (status === 'PENDING' && data.resumeUrl) {
+                payBtn.href = data.resumeUrl;
+                payBtn.style.display = 'inline-flex';
+            } else {
+                payBtn.style.display = 'none';
+            }
+
+            // Show Modal
+            const modal = document.getElementById('detailModalOverlay');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function handleRowClick(event, row) {
+            // Không kích hoạt modal nếu click trúng nút hoặc form
+            if (event.target.closest('button') || event.target.closest('a') || event.target.closest('form')) {
+                return;
+            }
+            const data = {
+                id: row.getAttribute('data-id'),
+                packageName: row.getAttribute('data-package-name'),
+                packageDesc: row.getAttribute('data-package-desc'),
+                duration: row.getAttribute('data-duration'),
+                maxJobs: row.getAttribute('data-max-jobs'),
+                amount: row.getAttribute('data-amount'),
+                method: row.getAttribute('data-method'),
+                txcode: row.getAttribute('data-txcode'),
+                status: row.getAttribute('data-status'),
+                created: row.getAttribute('data-created'),
+                resumeUrl: row.getAttribute('data-resume-url')
+            };
+            openDetailModalFromData(data);
+        }
+
+        function openDetailFromButton(btn) {
+            const row = btn.closest('tr');
+            if (row) {
+                const data = {
+                    id: row.getAttribute('data-id'),
+                    packageName: row.getAttribute('data-package-name'),
+                    packageDesc: row.getAttribute('data-package-desc'),
+                    duration: row.getAttribute('data-duration'),
+                    maxJobs: row.getAttribute('data-max-jobs'),
+                    amount: row.getAttribute('data-amount'),
+                    method: row.getAttribute('data-method'),
+                    txcode: row.getAttribute('data-txcode'),
+                    status: row.getAttribute('data-status'),
+                    created: row.getAttribute('data-created'),
+                    resumeUrl: row.getAttribute('data-resume-url')
+                };
+                openDetailModalFromData(data);
+            }
+        }
+
+        // Close Detail Modal
+        function closeDetailModal() {
+            const modal = document.getElementById('detailModalOverlay');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close when clicking backdrop outside dialog
+        function handleBackdropClick(event) {
+            if (event.target === document.getElementById('detailModalOverlay')) {
+                closeDetailModal();
+            }
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' || event.key === 'Esc') {
+                closeDetailModal();
+            }
+        });
+    </script>
+</body>
+</html>

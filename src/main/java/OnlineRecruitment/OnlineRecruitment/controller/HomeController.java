@@ -6,6 +6,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.UserPackageRepository;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Controller
 public class HomeController {
@@ -41,9 +45,13 @@ public class HomeController {
 //    }
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserRepository userRepository;
+    private final UserPackageRepository userPackageRepository;
 
-    public HomeController(JdbcTemplate jdbcTemplate) {
+    public HomeController(JdbcTemplate jdbcTemplate, UserRepository userRepository, UserPackageRepository userPackageRepository) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userRepository = userRepository;
+        this.userPackageRepository = userPackageRepository;
     }
 
     @GetMapping("/candidate/dashboard/overview")
@@ -95,7 +103,13 @@ public class HomeController {
     }
 
     @GetMapping("/recruiter/dashboard")
-    public String recruiterDashboard() {
+    public String recruiterDashboard(@AuthenticationPrincipal UserDetails principal, Model model) {
+        if (principal != null) {
+            userRepository.findByEmail(principal.getUsername()).ifPresent(user -> {
+                model.addAttribute("currentUserPackage",
+                        userPackageRepository.findFirstByUserAndStatusOrderByEndDateDesc(user, "ACTIVE").orElse(null));
+            });
+        }
         return "recruiter/dashboard";
     }
 

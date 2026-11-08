@@ -295,12 +295,15 @@ public class SkillTestService {
      */
     @Transactional(readOnly = true)
     public String resolveRatingFromDB(double score) {
-        List<SkillTestRatingThreshold> matches = ratingThresholdRepository.findMatchingThresholds(score);
-        if (!matches.isEmpty()) {
-            return matches.get(0).getLabel();
+        try {
+            List<SkillTestRatingThreshold> matches = ratingThresholdRepository.findMatchingThresholds(score);
+            if (matches != null && !matches.isEmpty()) {
+                return matches.get(0).getLabel();
+            }
+        } catch (Exception e) {
+            log.warn("Could not query rating thresholds from DB: {}. Using fallback grading.", e.getMessage());
         }
-        // Fallback mặc định nếu bảng ngưỡng chưa được seed
-        log.warn("skill_test_rating_thresholds is empty; using built-in fallback for score={}", score);
+        // Fallback mặc định nếu bảng ngưỡng chưa được seed hoặc bảng chưa sẵn sàng
         if (score >= 90) return "Xuất sắc";
         else if (score >= 80) return "Giỏi";
         else if (score >= 65) return "Khá";
@@ -313,7 +316,12 @@ public class SkillTestService {
      */
     @Transactional(readOnly = true)
     public List<SkillTestRatingThreshold> getAllRatingThresholds() {
-        return ratingThresholdRepository.findAllByOrderByDisplayOrderAsc();
+        try {
+            return ratingThresholdRepository.findAllByOrderByDisplayOrderAsc();
+        } catch (Exception e) {
+            log.warn("Could not query all rating thresholds: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     /**
