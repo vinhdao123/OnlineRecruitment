@@ -3,6 +3,9 @@ package OnlineRecruitment.OnlineRecruitment.service;
 import OnlineRecruitment.OnlineRecruitment.dto.candidate.*;
 import OnlineRecruitment.OnlineRecruitment.entity.*;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -161,6 +164,54 @@ public class CvService {
             cvDataMap.put(cv.getId(), detail);
         }
         return cvDataMap;
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public Page<CvSummaryVm> listMyCvsPaged(Long userId, String keyword, int page, int size) {
+        Candidate candidate = getCandidate(userId);
+        Pageable pageable = PageRequest.of(Math.max(0, page), size > 0 ? size : 6);
+        Page<Cv> cvPage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            cvPage = cvRepository.findByCandidateIdAndStatusAndTitleContainingIgnoreCaseOrderByIsDefaultDescUpdatedAtDesc(
+                    candidate.getId(), "ACTIVE", keyword.trim(), pageable);
+        } else {
+            cvPage = cvRepository.findByCandidateIdAndStatusOrderByIsDefaultDescUpdatedAtDesc(
+                    candidate.getId(), "ACTIVE", pageable);
+        }
+        return cvPage.map(cv -> new CvSummaryVm(
+                cv.getId(),
+                cv.getTitle(),
+                cv.getProfessionalTitle(),
+                cv.getStatus(),
+                cv.getIsDefault(),
+                cv.getUpdatedAt(),
+                cv.getTemplateVersion() != null && cv.getTemplateVersion().getTemplate() != null
+                        ? cv.getTemplateVersion().getTemplate().getName() : "N/A",
+                cv.getAvatarUrl(),
+                cv.getIsUploaded() != null ? cv.getIsUploaded() : false,
+                cv.getFileUrl()
+        ));
+    }
+
+    @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+    public Map<Long, Map<String, Object>> getCvListWithDetailsForCvs(List<CvSummaryVm> cvList, Long userId) {
+        Map<Long, Map<String, Object>> map = new java.util.HashMap<>();
+        if (cvList == null || cvList.isEmpty()) {
+            return map;
+        }
+        for (CvSummaryVm cvSummary : cvList) {
+            Cv cv = cvRepository.findById(cvSummary.getId()).orElse(null);
+            if (cv != null) {
+                Map<String, Object> detail = new java.util.HashMap<>();
+                detail.put("cv", cv);
+                detail.put("works", getWorkExperiences(cv.getId(), userId));
+                detail.put("educations", getEducations(cv.getId(), userId));
+                detail.put("skills", getSkills(cv.getId(), userId));
+                detail.put("projects", getProjects(cv.getId(), userId));
+                map.put(cv.getId(), detail);
+            }
+        }
+        return map;
     }
 
     @Transactional(propagation = Propagation.SUPPORTS, readOnly = true)

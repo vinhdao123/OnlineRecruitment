@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -66,22 +67,33 @@ public class CvController {
     }
 
     @GetMapping
-    public String list(Authentication auth, Model model) {
+    public String list(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "6") int size,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            Authentication auth, Model model) {
         try {
             User user = userRepository.findByEmail(auth.getName())
                     .or(() -> userRepository.findByUsername(auth.getName()))
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy user"));
 
-            var cvs = cvService.listMyCvs(user.getId());
-            var cvDataMap = cvService.getCvListWithDetails(user.getId());
-            String defaultCvTitle = cvs.stream()
+            Page<CvSummaryVm> cvPage = cvService.listMyCvsPaged(user.getId(), keyword, page, size);
+            List<CvSummaryVm> cvs = cvPage.getContent();
+            Map<Long, Map<String, Object>> cvDataMap = cvService.getCvListWithDetailsForCvs(cvs, user.getId());
+            String defaultCvTitle = cvService.listMyCvs(user.getId()).stream()
                     .filter(c -> Boolean.TRUE.equals(c.getIsDefault()))
                     .map(CvSummaryVm::getTitle)
                     .findFirst()
                     .orElse(null);
 
             model.addAttribute("cvs", cvs);
-            model.addAttribute("hasCvs", !cvs.isEmpty());
+            model.addAttribute("cvPage", cvPage);
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", cvPage.getTotalPages());
+            model.addAttribute("totalItems", cvPage.getTotalElements());
+            model.addAttribute("size", size);
+            model.addAttribute("keyword", keyword != null ? keyword.trim() : "");
+            model.addAttribute("hasCvs", cvPage.getTotalElements() > 0);
             model.addAttribute("profileUser", user);
             model.addAttribute("currentUser", user);
             model.addAttribute("cvDataMap", cvDataMap);
@@ -91,6 +103,10 @@ public class CvController {
             model.addAttribute("hasCvs", false);
             model.addAttribute("cvs", new ArrayList<CvSummaryVm>());
             model.addAttribute("cvDataMap", new HashMap<Long, Map<String, Object>>());
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("totalItems", 0);
+            model.addAttribute("keyword", "");
         }
         return "candidate/cv/list";
     }
@@ -100,8 +116,40 @@ public class CvController {
     // ==========================================
 
     @GetMapping("/gallery")
-    public String gallery(Model model) {
-        model.addAttribute("templates", buildGalleryTemplates());
+    public String gallery(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "4") int size,
+            @RequestParam(value = "category", required = false) String category,
+            Model model) {
+        List<CvGalleryTemplateVm> allTemplates = buildGalleryTemplates();
+
+        List<CvGalleryTemplateVm> filtered = allTemplates;
+        if (category != null && !category.trim().isEmpty() && !"ALL".equalsIgnoreCase(category.trim())) {
+            String cat = category.trim();
+            filtered = allTemplates.stream()
+                    .filter(t -> t.getCode().equalsIgnoreCase(cat)
+                            || (t.getTags() != null && t.getTags().stream().anyMatch(tag -> tag.equalsIgnoreCase(cat)))
+                            || (t.getFilterLabel() != null && t.getFilterLabel().equalsIgnoreCase(cat)))
+                    .toList();
+        }
+
+        int totalItems = filtered.size();
+        int totalPages = totalItems == 0 ? 0 : (int) Math.ceil((double) totalItems / size);
+        int validPage = totalPages <= 1 ? 0 : Math.max(0, Math.min(page, totalPages - 1));
+        int fromIndex = validPage * size;
+        int toIndex = Math.min(fromIndex + size, totalItems);
+
+        List<CvGalleryTemplateVm> pagedTemplates = (fromIndex < totalItems)
+                ? filtered.subList(fromIndex, toIndex)
+                : Collections.emptyList();
+
+        model.addAttribute("templates", pagedTemplates);
+        model.addAttribute("allTemplatesCount", allTemplates.size());
+        model.addAttribute("currentPage", validPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalItems", totalItems);
+        model.addAttribute("size", size);
+        model.addAttribute("selectedCategory", category != null && !category.trim().isEmpty() ? category.trim() : "ALL");
         return "candidate/cv/gallery";
     }
 
@@ -889,8 +937,40 @@ public class CvController {
     }
 
     @GetMapping("/templates")
-    public String listTemplates(Model model) {
-        model.addAttribute("templates", buildGalleryTemplates());
+    public String listTemplates(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "6") int size,
+            @RequestParam(value = "category", required = false) String category,
+            Model model) {
+        List<CvGalleryTemplateVm> allTemplates = buildGalleryTemplates();
+
+        List<CvGalleryTemplateVm> filtered = allTemplates;
+        if (category != null && !category.trim().isEmpty() && !"ALL".equalsIgnoreCase(category.trim())) {
+            String cat = category.trim();
+            filtered = allTemplates.stream()
+                    .filter(t -> t.getCode().equalsIgnoreCase(cat)
+                            || (t.getTags() != null && t.getTags().stream().anyMatch(tag -> tag.equalsIgnoreCase(cat)))
+                            || (t.getFilterLabel() != null && t.getFilterLabel().equalsIgnoreCase(cat)))
+                    .toList();
+        }
+
+        int totalItems = filtered.size();
+        int totalPages = totalItems == 0 ? 0 : (int) Math.ceil((double) totalItems / size);
+        int validPage = totalPages <= 1 ? 0 : Math.max(0, Math.min(page, totalPages - 1));
+        int fromIndex = validPage * size;
+        int toIndex = Math.min(fromIndex + size, totalItems);
+
+        List<CvGalleryTemplateVm> pagedTemplates = (fromIndex < totalItems)
+                ? filtered.subList(fromIndex, toIndex)
+                : Collections.emptyList();
+
+        model.addAttribute("templates", pagedTemplates);
+        model.addAttribute("allTemplatesCount", allTemplates.size());
+        model.addAttribute("currentPage", validPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalItems", totalItems);
+        model.addAttribute("size", size);
+        model.addAttribute("selectedCategory", category != null && !category.trim().isEmpty() ? category.trim() : "ALL");
         return "candidate/cv/templates";
     }
 
@@ -936,6 +1016,11 @@ public class CvController {
             ra.addFlashAttribute("errorMessage", "Lỗi tải file: " + e.getMessage());
         }
         return "redirect:/candidate/cvs";
+    }
+
+    @GetMapping("/{id}/rename")
+    public String renameCvGet(@PathVariable Long id) {
+        return "redirect:/candidate/cvs/" + id;
     }
 
     @PostMapping("/{id}/rename")

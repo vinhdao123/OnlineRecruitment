@@ -953,3 +953,76 @@ body.preview-body-bg { background-color: #f1f5f9 !important; background-image: r
     border-color: #7dd3fc;
     color: #0284c7;
 }
+
+/* ================= PHÂN TRANG (PAGINATION) ================= */
+.cv-pagination-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 36px;
+    margin-bottom: 24px;
+}
+
+.cv-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.cv-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    background: #ffffff;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.cv-page-btn:hover:not(.disabled):not(.active) {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+    color: #0284c7;
+    transform: translateY(-1px);
+}
+
+.cv-page-btn.active {
+    background: #0284c7;
+    border-color: #0284c7;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.28);
+    cursor: default;
+}
+
+.cv-page-btn.disabled {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.cv-pagination-info {
+    font-size: 13.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.cv-pagination-info strong {
+    color: #0f172a;
+    font-weight: 700;
+}
