@@ -27,6 +27,7 @@ public class JobDetailController {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final SavedJobRepository savedJobRepository;
+    private final OnlineRecruitment.OnlineRecruitment.service.JobSkillService jobSkills;
 
     @GetMapping("/jobs/{id}")
     // Xử lý dữ liệu Job trong luồng tuyển dụng.
@@ -65,11 +66,7 @@ public class JobDetailController {
 
         // 6) Tin chưa được duyệt (nháp, chờ duyệt, bị từ chối, đã đóng)
         //    chỉ chủ tin hoặc admin được xem, người khác coi như không tồn tại
-        if ((job.getStatus() != JobStatus.ACTIVE
-                || (job.getDeadline() != null && job.getDeadline().isBefore(java.time.LocalDate.now()))
-                || job.getCompany() == null
-                || job.getCompany().getStatus() != OnlineRecruitment.OnlineRecruitment.entity.CompanyStatus.ACTIVE)
-                && !isOwner && !isAdmin) {
+        if (job.getStatus() != JobStatus.ACTIVE && !isOwner && !isAdmin) {
     // Xử lý status exception trong luồng tuyển dụng.
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
@@ -79,13 +76,12 @@ public class JobDetailController {
 
         // 7) Gửi dữ liệu sang trang HTML
         model.addAttribute("job", job);
+        model.addAttribute("requiredSkillNames", jobSkills.requiredNames(id));
         model.addAttribute("isOwner", isOwner);
         model.addAttribute("isAdmin", isAdmin);
 
         // 8) Ứng viên này đã lưu tin chưa (để nút hiện "Lưu tin" hay "Bỏ lưu")
-        boolean isCandidate = loggedIn && authentication.getAuthorities().stream()
-                .anyMatch(a -> "ROLE_CANDIDATE".equals(a.getAuthority()));
-        model.addAttribute("saved", isCandidate && currentUser != null
+        model.addAttribute("saved", currentUser != null
                 && savedJobRepository.existsByUser_IdAndJob_Id(currentUser.getId(), job.getId()));
 
         // File: templates/job/job-detail.html

@@ -47,13 +47,13 @@ class JobPagesTest {
         engine.addDialect(new org.thymeleaf.extras.springsecurity6.dialect.SpringSecurityDialect());
         ThymeleafViewResolver views = new ThymeleafViewResolver();
         views.setTemplateEngine(engine); views.setCharacterEncoding("UTF-8");
-        mvc = MockMvcBuilders.standaloneSetup(new RecruiterJobController(jobs, users),
+        mvc = MockMvcBuilders.standaloneSetup(  new RecruiterJobController(jobs, users),
                 new RecruiterJobArchiveController(jobs, users), new AdminJobController(jobs),
                 new AdminSkillController(skills), new AdminJobCategoryController(categories))
                 .setViewResolvers(views).build();
         recruiter = new User(); recruiter.setId(1L); recruiter.setEmail("recruiter@example.com");
         auth = new UsernamePasswordAuthenticationToken(recruiter.getEmail(), "unused",
-                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN")));
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN")))
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
         when(users.findByEmail(recruiter.getEmail())).thenReturn(Optional.of(recruiter));
         Company company = new Company(); company.setCompanyName("Example");

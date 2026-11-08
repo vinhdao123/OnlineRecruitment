@@ -20,9 +20,11 @@ import java.util.Map;
 public class RecruiterApplicationController {
 
     private final JdbcTemplate jdbcTemplate;
+    private final OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService;
 
-    public RecruiterApplicationController(JdbcTemplate jdbcTemplate) {
+    public RecruiterApplicationController(JdbcTemplate jdbcTemplate, OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.skillMatchingService = skillMatchingService;
     }
 
     // =========================================
@@ -78,6 +80,7 @@ public class RecruiterApplicationController {
                     a.job_id AS jobId,
                     a.cv_id AS cvId,
                     a.cv_snapshot_json AS cvSnapshotJson,
+                    a.cv_file_path_snapshot AS cvFilePathSnapshot,
                     u.full_name AS candidateName,
                     u.email AS email,
                     u.phone AS phone,
@@ -136,6 +139,7 @@ public class RecruiterApplicationController {
 
         List<Map<String, Object>> applications =
                 jdbcTemplate.queryForList(sql.toString(), params.toArray());
+        skillMatchingService.attachScores(applications);
 
         model.addAttribute("applications", applications);
         model.addAttribute("jobs", jobs);
@@ -186,6 +190,7 @@ public class RecruiterApplicationController {
                     a.cv_id AS cvId,
                     a.cv_snapshot_json AS cvSnapshotJson,
                     u.full_name AS candidateName,
+                    a.cv_file_path_snapshot AS cvFilePathSnapshot,
                     u.email AS email,
                     u.phone AS phone,
                     j.title AS jobTitle,
