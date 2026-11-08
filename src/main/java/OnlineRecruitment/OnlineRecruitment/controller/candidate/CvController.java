@@ -295,8 +295,19 @@ public class CvController {
             model.addAttribute("cv", cv);
             model.addAttribute("isEditMode", isEdit);
 
+            String templateName = "Tiêu chuẩn";
+            if (cv.getTemplateVersion() != null && cv.getTemplateVersion().getTemplate() != null) {
+                templateName = cv.getTemplateVersion().getTemplate().getName();
+            } else if (cv.getTemplateVersionId() != null) {
+                templateName = templateVersionRepository.findById(cv.getTemplateVersionId())
+                        .map(tv -> tv.getTemplate() != null ? tv.getTemplate().getName() : "Tiêu chuẩn")
+                        .orElse("Tiêu chuẩn");
+            }
+            model.addAttribute("templateName", templateName);
+            model.addAttribute("templates", cvService.getAvailableTemplates());
+
             if (isEdit) {
-                UpdateCvRequest req = new UpdateCvRequest(cv.getTitle(), cv.getProfessionalTitle(), cv.getSummary(), cv.getAccentColor(), cv.getAvatarUrl());
+                UpdateCvRequest req = new UpdateCvRequest(cv.getTemplateVersionId(), cv.getTitle(), cv.getProfessionalTitle(), cv.getSummary(), cv.getAccentColor(), cv.getAvatarUrl());
                 model.addAttribute("cvRequest", req);
             }
             return "candidate/cv/detail";
@@ -321,6 +332,7 @@ public class CvController {
             model.addAttribute("cvId", id);
             model.addAttribute("isEditMode", true);
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
+            model.addAttribute("templates", cvService.getAvailableTemplates());
             return "candidate/cv/detail";
         }
         try {
@@ -356,6 +368,7 @@ public class CvController {
             model.addAttribute("cvId", id);
             model.addAttribute("isEditMode", true);
             model.addAttribute("cv", cvService.getCvDetail(id, getUserId(auth)));
+            model.addAttribute("templates", cvService.getAvailableTemplates());
             return "candidate/cv/detail";
         }
     }
