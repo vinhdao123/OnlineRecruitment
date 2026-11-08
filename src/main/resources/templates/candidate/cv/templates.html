@@ -65,6 +65,32 @@
                 </div>
             </div>
         </div>
+
+        <!-- ================= PHÂN TRANG MẪU CV ================= -->
+        <div th:if="${totalPages > 1}" class="cv-pagination-wrapper">
+            <div class="cv-pagination">
+                <a th:if="${currentPage > 0}"
+                   th:href="@{/candidate/cvs/templates(page=${currentPage - 1}, category=${selectedCategory}, size=${size})}"
+                   class="cv-page-btn" title="Trang trước">‹ Trước</a>
+                <span th:unless="${currentPage > 0}" class="cv-page-btn disabled">‹ Trước</span>
+
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/candidate/cvs/templates(page=${i}, category=${selectedCategory}, size=${size})}"
+                       class="cv-page-btn"
+                       th:classappend="${i == currentPage} ? 'active' : ''"
+                       th:text="${i + 1}">1</a>
+                </th:block>
+
+                <a th:if="${currentPage < totalPages - 1}"
+                   th:href="@{/candidate/cvs/templates(page=${currentPage + 1}, category=${selectedCategory}, size=${size})}"
+                   class="cv-page-btn" title="Trang sau">Sau ›</a>
+                <span th:unless="${currentPage < totalPages - 1}" class="cv-page-btn disabled">Sau ›</span>
+            </div>
+            <div class="cv-pagination-info">
+                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
+                (Tổng cộng <strong th:text="${totalItems}">0</strong> mẫu CV)
+            </div>
+        </div>
     </main>
 </div>
 </body>

@@ -161,7 +161,7 @@
             <!-- CHẾ ĐỘ XEM -->
             <div th:if="${!isEditMode}">
                 <div class="cv-detail-head">
-                    <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-avatar-lg">
+                    <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-avatar-lg" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                     <div>
                         <h1 class="cv-header-title" th:text="${cv.title}">Tên CV</h1>
                         <p class="cv-subtitle" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : 'Chưa cập nhật chức danh'}"></p>

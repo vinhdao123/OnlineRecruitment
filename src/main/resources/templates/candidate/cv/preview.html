@@ -62,7 +62,7 @@
 <div class="preview-container">
     <!-- HEADER CV -->
     <header class="preview-header">
-        <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-avatar">
+        <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
         <div class="preview-info-col">
             <h1 class="preview-title" th:text="${candidateUser != null && candidateUser.fullName != null && !candidateUser.fullName.isEmpty() ? candidateUser.fullName : cv.title}">Họ và Tên</h1>
             <p class="preview-subtitle" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : (candidate != null && candidate.desiredPosition != null ? candidate.desiredPosition : 'Chuyên gia')}">Chức danh nghề nghiệp</p>
