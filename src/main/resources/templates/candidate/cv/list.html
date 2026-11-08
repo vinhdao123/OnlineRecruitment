@@ -137,7 +137,7 @@
                 <th:block th:unless="${cv.isUploaded}">
                     <div class="cv-preview-card">
                         <div class="cv-preview-header">
-                            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-preview-avatar">
+                            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-preview-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                             <div class="cv-preview-info">
                                 <h3 class="cv-preview-name" th:text="${displayName}">Nguyễn Văn A</h3>
                                 <p class="cv-preview-title" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : 'Chưa cập nhật chức danh'}">Chức danh</p>

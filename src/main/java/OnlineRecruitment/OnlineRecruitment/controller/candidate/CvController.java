@@ -5,6 +5,7 @@ import OnlineRecruitment.OnlineRecruitment.entity.Cv;
 import OnlineRecruitment.OnlineRecruitment.entity.CvTemplateVersion;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.candidate.CvRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.candidate.CvTemplateVersionRepository;
 import OnlineRecruitment.OnlineRecruitment.service.CvService;
 import jakarta.validation.Valid;
@@ -45,6 +46,7 @@ import java.util.Map;
 public class CvController {
 
     private final CvService cvService;
+    private final CvRepository cvRepository;
     private final UserRepository userRepository;
     private final CvTemplateVersionRepository templateVersionRepository;
 
@@ -445,18 +447,10 @@ public class CvController {
     }
 
     @GetMapping("/{id}/avatar")
-    public ResponseEntity<Resource> getCvAvatar(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<Resource> getCvAvatar(@PathVariable Long id) {
         try {
-            Long userId = getUserId(auth);
-            Cv cv = cvService.getCvDetail(id, userId);
-            User user = userRepository.findById(userId).orElse(null);
-
-            String avatarUrl = cv.getAvatarUrl();
-            if (avatarUrl == null || avatarUrl.trim().isEmpty()) {
-                if (user != null && user.getAvatarUrl() != null && !user.getAvatarUrl().trim().isEmpty()) {
-                    avatarUrl = user.getAvatarUrl();
-                }
-            }
+            Cv cv = cvRepository.findById(id).orElse(null);
+            String avatarUrl = (cv != null) ? cv.getAvatarUrl() : null;
 
             File file = resolveAvatarFile(avatarUrl);
             if (file != null && file.exists()) {
@@ -466,17 +460,22 @@ public class CvController {
                         .contentType(mediaType)
                         .body(new FileSystemResource(file));
             }
-
-            // Fallback: avatar mặc định
-            Resource defaultAvatar = new ClassPathResource("static/images/cv-sample-avatar.jpg");
-            if (defaultAvatar.exists()) {
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(defaultAvatar);
-            }
         } catch (Exception e) {
             log.warn("Không thể tải avatar CV {}: {}", id, e.getMessage());
         }
+
+        // Luôn trả về ảnh avatar mặc định, không bao giờ để lỗi vỡ ảnh
+        try {
+            File defFile = new File(System.getProperty("user.dir") + "/src/main/resources/static/images/cv-sample-avatar.jpg");
+            if (defFile.exists()) {
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(new FileSystemResource(defFile));
+            }
+            Resource defaultAvatar = new ClassPathResource("static/images/cv-sample-avatar.jpg");
+            if (defaultAvatar.exists()) {
+                return ResponseEntity.ok().contentType(MediaType.IMAGE_JPEG).body(defaultAvatar);
+            }
+        } catch (Exception ignored) {}
+
         return ResponseEntity.notFound().build();
     }
 

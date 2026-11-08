@@ -115,7 +115,7 @@
                         <div th:if="${templateCode == 'STANDARD'}" class="tpl-a4-paper">
                             <div class="std-head">
                                 <div class="std-photo">
-                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar">
+                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                                 </div>
                                 <div class="std-head-info">
                                     <div class="std-name" th:text="${pName}">Lê Quang Dũng</div>
@@ -188,7 +188,7 @@
                         <div th:if="${templateCode == 'MINIMALIST'}" class="tpl-a4-paper min-paper">
                             <div class="min-top-banner">
                                 <div class="min-avatar-circle">
-                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar">
+                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                                 </div>
                                 <div class="min-name" th:text="${pName}">Lê Quang Dũng</div>
                                 <div class="min-role" th:text="${pRole}">Business Development Executive</div>
@@ -237,7 +237,7 @@
                         <div th:if="${templateCode == 'CREATIVE'}" class="tpl-a4-paper">
                             <div class="cre-top">
                                 <div class="cre-photo">
-                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar">
+                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                                 </div>
                                 <div class="cre-summary-box">
                                     <div class="cre-name" th:text="${pName}">Lê Quang Dũng</div>
@@ -287,7 +287,7 @@
                         <div th:if="${templateCode == 'MODERN'}" class="tpl-a4-paper mod-a4-paper">
                             <div class="mod-left-col">
                                 <div class="mod-avatar-wrap">
-                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar">
+                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                                 </div>
                                 <div>
                                     <div class="mod-left-name" th:text="${pName}">Lê Quang Dũng</div>
@@ -338,7 +338,7 @@
                         <div th:if="${templateCode == 'ATS_FRIENDLY'}" class="tpl-a4-paper">
                             <div class="ats-top-center">
                                 <div class="ats-avatar">
-                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar">
+                                    <img th:src="@{${pAvatar}}" alt="Avatar" class="tpl-sample-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
                                 </div>
                                 <div class="ats-name" th:text="${pName}">LÊ QUANG DŨNG</div>
                                 <div class="ats-role" th:text="${pRole}">Business Development Executive</div>
