@@ -23,9 +23,20 @@ public class AdminJobCategoryController {
         this.categoryService = categoryService;
     }
 
+    @ModelAttribute("activeMenu")
+    public String activeMenu() { return "categories"; }
+
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("categories", categoryService.findAll());
+    public String list(@RequestParam(required = false) String keyword,
+                       @RequestParam(required = false) String status, Model model) {
+        String query = keyword == null ? "" : keyword.trim().toLowerCase(java.util.Locale.ROOT);
+        model.addAttribute("categories", categoryService.findAll().stream()
+                .filter(c -> query.isEmpty() || (c.getName() != null && c.getName().toLowerCase(java.util.Locale.ROOT).contains(query)))
+                .filter(c -> status == null || status.isBlank() || status.equalsIgnoreCase(c.getStatus()))
+                .sorted(java.util.Comparator.comparing(JobCategory::getName,
+                        java.util.Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))).toList());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("status", status);
         return "admin/categories/list";
     }
 

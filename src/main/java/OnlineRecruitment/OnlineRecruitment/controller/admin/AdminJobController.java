@@ -43,6 +43,7 @@ public class AdminJobController {
                 selectedStatus = "";
             }
         }
+        jobService.refreshExpiredJobs();
         List<Job> jobs = jobService.findAllJobsForManagement(keyword, selectedStatus);
         model.addAttribute("jobs", jobs);
         model.addAttribute("keyword", keyword);
@@ -53,6 +54,17 @@ public class AdminJobController {
                 "REJECTED".equals(selectedStatus) ? "jobs-rejected" : "jobs");
 
         return "admin/jobs";
+    }
+
+    @PostMapping("/{id}/reopen")
+    public String reopenJob(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            jobService.reopenAdminJob(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã chuyển tin về nháp để soạn và duyệt lại.");
+        } catch (IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/admin/jobs";
     }
 
     /**
