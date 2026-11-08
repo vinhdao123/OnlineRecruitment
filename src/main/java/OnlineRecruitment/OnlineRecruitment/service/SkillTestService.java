@@ -86,33 +86,78 @@ public class SkillTestService {
     }
 
     /**
-     * Nộp bài thi, chấm điểm tự động và lưu lịch sử
+     * Nộp bài thi, chấm điểm tự động và lưu lịch sử.
+     * Chấm TẤT CẢ các câu hỏi của đề thi (bao gồm cả các câu thí sinh chưa chọn hoặc bỏ trống).
      */
     @Transactional
     public SkillTestAttempt submitTest(Long testId, User user, Map<String, String> submittedAnswers, int timeSpentSeconds) {
         SkillTest test = getById(testId);
 
-        // Lấy danh sách câu hỏi đã nộp
+        // 1. Thu thập danh sách TOÀN BỘ ID câu hỏi của bài thi
         List<Long> questionIds = new ArrayList<>();
-        for (String key : submittedAnswers.keySet()) {
-            if (key.startsWith("q_")) {
+
+        // Ưu tiên 1: Đọc từ assignedQuestionIds (toàn bộ câu hỏi được giao cho bài thi)
+        String assignedStr = submittedAnswers.get("assignedQuestionIds");
+        if (assignedStr != null && !assignedStr.trim().isEmpty()) {
+            for (String part : assignedStr.split(",")) {
                 try {
-                    questionIds.add(Long.parseLong(key.substring(2)));
+                    String trimmed = part.trim();
+                    if (!trimmed.isEmpty()) {
+                        long qId = Long.parseLong(trimmed);
+                        if (!questionIds.contains(qId)) {
+                            questionIds.add(qId);
+                        }
+                    }
                 } catch (NumberFormatException ignored) {}
             }
         }
 
-        if (questionIds.isEmpty()) {
-            throw new IllegalArgumentException("Không tìm thấy câu hỏi nào trong bài nộp!");
+        // Ưu tiên 2: Quét tất cả các key q_ trong request
+        for (String key : submittedAnswers.keySet()) {
+            if (key.startsWith("q_")) {
+                try {
+                    long qId = Long.parseLong(key.substring(2));
+                    if (!questionIds.contains(qId)) {
+                        questionIds.add(qId);
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
         }
 
-        List<SkillTestQuestion> questions = skillTestQuestionRepository.findAllById(questionIds);
+        // Ưu tiên 3: Nếu vẫn rỗng (trường hợp nộp trắng không có hidden input), lấy pool của bài thi
+        if (questionIds.isEmpty()) {
+            List<SkillTestQuestion> fallbackPool = getRandomQuestionsForTest(testId);
+            for (SkillTestQuestion q : fallbackPool) {
+                questionIds.add(q.getId());
+            }
+        }
+
+        List<SkillTestQuestion> rawQuestions = skillTestQuestionRepository.findAllById(questionIds);
+        Map<Long, SkillTestQuestion> questionMap = new HashMap<>();
+        for (SkillTestQuestion q : rawQuestions) {
+            questionMap.put(q.getId(), q);
+        }
+
+        // Giữ đúng thứ tự câu hỏi như trong đề thi được phát
+        List<SkillTestQuestion> orderedQuestions = new ArrayList<>();
+        for (Long id : questionIds) {
+            SkillTestQuestion q = questionMap.get(id);
+            if (q != null) {
+                orderedQuestions.add(q);
+            }
+        }
+        if (orderedQuestions.isEmpty()) {
+            orderedQuestions = rawQuestions;
+        }
+
         int correctCount = 0;
         List<QuestionAnswerItem> reviewItems = new ArrayList<>();
 
-        for (SkillTestQuestion q : questions) {
+        for (SkillTestQuestion q : orderedQuestions) {
             String selected = submittedAnswers.get("q_" + q.getId());
-            boolean isCorrect = selected != null && selected.trim().equalsIgnoreCase(q.getCorrectOption().trim());
+            String cleanSelected = (selected != null && !selected.trim().isEmpty()) ? selected.trim().toUpperCase() : null;
+            boolean isCorrect = cleanSelected != null && cleanSelected.equalsIgnoreCase(q.getCorrectOption().trim());
+
             if (isCorrect) {
                 correctCount++;
             }
@@ -124,14 +169,14 @@ public class SkillTestService {
                     .optionB(q.getOptionB())
                     .optionC(q.getOptionC())
                     .optionD(q.getOptionD())
-                    .selectedOption(selected != null ? selected.trim().toUpperCase() : null)
+                    .selectedOption(cleanSelected)
                     .correctOption(q.getCorrectOption().trim().toUpperCase())
                     .isCorrect(isCorrect)
                     .explanation(q.getExplanation())
                     .build());
         }
 
-        int totalQuestions = questions.size();
+        int totalQuestions = orderedQuestions.size();
         double score = totalQuestions > 0 ? Math.round(((double) correctCount / totalQuestions) * 100.0) : 0.0;
         boolean isPassed = score >= (test.getPassingScore() != null ? test.getPassingScore() : 60);
 
@@ -166,7 +211,6 @@ public class SkillTestService {
         return saved;
     }
 
-    @Transactional(readOnly = true)
     public SkillTestAttempt getAttemptById(Long attemptId) {
         return skillTestAttemptRepository.findById(attemptId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kết quả bài thi ID: " + attemptId));

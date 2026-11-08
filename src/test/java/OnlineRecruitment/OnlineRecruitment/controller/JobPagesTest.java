@@ -53,7 +53,7 @@ class JobPagesTest {
                 .setViewResolvers(views).build();
         recruiter = new User(); recruiter.setId(1L); recruiter.setEmail("recruiter@example.com");
         auth = new UsernamePasswordAuthenticationToken(recruiter.getEmail(), "unused",
-                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN")))
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN")));
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(auth);
         when(users.findByEmail(recruiter.getEmail())).thenReturn(Optional.of(recruiter));
         Company company = new Company(); company.setCompanyName("Example");
