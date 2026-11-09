@@ -39,10 +39,29 @@ public class PricingController {
     }
 
     @GetMapping("/checkout/{id}")
-    public String legacyCheckout(@PathVariable Long id) { return "redirect:/pricing"; }
+    public String legacyCheckout(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal, RedirectAttributes ra) {
+        User currentUser = user(principal);
+        var pkg = packageService.getById(id);
+
+        // Chặn mua chéo gói ở GET
+        if (pkg.getTargetRole() != currentUser.getRole()) {
+            ra.addFlashAttribute("error", "Bạn không thể mua gói dịch vụ dành cho vai trò khác!");
+            return "redirect:/pricing";
+        }
+        return "redirect:/pricing";
+    }
 
     @PostMapping("/checkout/{id}")
     public String checkout(@PathVariable Long id, @AuthenticationPrincipal UserDetails principal, RedirectAttributes ra) {
+        User currentUser = user(principal);
+        var pkg = packageService.getById(id);
+
+        // Chặn mua chéo gói ở POST
+        if (pkg.getTargetRole() != currentUser.getRole()) {
+            ra.addFlashAttribute("error", "Bạn không thể mua gói dịch vụ dành cho vai trò khác!");
+            return "redirect:/pricing";
+        }
+
         if (!gateway.isReady() && !bank.isReady()) {
             ra.addFlashAttribute("error", "Thanh toán đang được thiết lập. Vui lòng quay lại sau.");
             return "redirect:/pricing";
