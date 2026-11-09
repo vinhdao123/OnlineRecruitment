@@ -42,7 +42,16 @@ public class ServicePackageService {
     }
 
     public UserPackage getActivePackage(User user) {
-        return userPackageRepository.findFirstByUserAndStatusOrderByEndDateDesc(user, "ACTIVE")
+        return userPackageRepository
+                .findFirstByUserAndStatusOrderByEndDateDesc(user, "ACTIVE")
+                .map(pkg -> {
+                    if (pkg.getEndDate().isBefore(java.time.LocalDateTime.now())) {
+                        pkg.setStatus("EXPIRED");
+                        userPackageRepository.save(pkg);
+                        return null;   // Coi như chưa có gói
+                    }
+                    return pkg;
+                })
                 .orElse(null);
     }
 }
