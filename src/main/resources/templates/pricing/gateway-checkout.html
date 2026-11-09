@@ -46,15 +46,35 @@
             if (result.paid || result.status === 'FAILED') {
                 terminal = true;
                 const box = document.getElementById('payment-status');
-                box.textContent = result.paid ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.' : 'Hóa đơn đã hủy.';
+                box.textContent = result.paid
+                    ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.'
+                    : 'Hóa đơn đã hủy.';
+
                 if (result.paid) {
                     box.classList.add('paid');
+
+                    // Ẩn mã QR khi đã thanh toán
+                    document.querySelectorAll('img').forEach(el => el.hidden = true);
+
+                    // Đếm ngược trên dòng connection-status
+                    const connEl = document.getElementById('connection-status');
+                    let sec = 6;
+                    connEl.textContent = `Thanh toán thành công! Tự động chuyển trang sau ${sec} giây...`;
+
+                    const countdown = setInterval(() => {
+                        sec--;
+                        if (sec > 0) {
+                            connEl.textContent = `Thanh toán thành công! Tự động chuyển trang sau ${sec} giây...`;
+                        } else {
+                            clearInterval(countdown);
+                        }
+                    }, 1000);
+
+                    // Chuyển trang sau 6 giây
                     setTimeout(() => {
                         window.location.href = '/pricing/history?success=true';
                     }, 6000);
                 }
-                // Ẩn mã QR khi đã thanh toán
-                document.querySelectorAll('img').forEach(el => el.hidden = true);
             }
             document.getElementById('connection-status').textContent = 'Đã cập nhật trạng thái từ website.';
         } catch (e) {
