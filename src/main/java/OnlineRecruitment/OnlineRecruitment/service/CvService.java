@@ -246,23 +246,6 @@ public class CvService {
                 detail.put("skills", getSkills(cv.getId(), userId));
                 detail.put("projects", getProjects(cv.getId(), userId));
 
-                String templateCode = "STANDARD";
-                String templateName = "Tiêu chuẩn";
-                if (cv.getTemplateVersion() != null && cv.getTemplateVersion().getTemplate() != null) {
-                    templateCode = cv.getTemplateVersion().getTemplate().getCode();
-                    templateName = cv.getTemplateVersion().getTemplate().getName();
-                } else if (cv.getTemplateVersionId() != null) {
-                    CvTemplateVersion tv = templateVersionRepository.findById(cv.getTemplateVersionId()).orElse(null);
-                    if (tv != null && tv.getTemplate() != null) {
-                        templateCode = tv.getTemplate().getCode();
-                        templateName = tv.getTemplate().getName();
-                    } else if (tv != null && tv.getLayoutDefinition() != null) {
-                        templateCode = tv.getLayoutDefinition();
-                    }
-                }
-                detail.put("templateCode", templateCode != null ? templateCode.toUpperCase() : "STANDARD");
-                detail.put("templateName", templateName);
-
                 map.put(cv.getId(), detail);
             }
         }
