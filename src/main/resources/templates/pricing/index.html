@@ -67,6 +67,19 @@
             font-size: 14px;
             margin-top: 10px;
         }
+
+        /* CSS cho thông báo lỗi */
+        .alert-error {
+            text-align: center;
+            color: #b91c1c;
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin: 0 auto 24px auto;
+            max-width: 600px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body style="background: #f4f6fa; margin: 0;">
@@ -81,10 +94,16 @@
         </div>
     </div>
 
+    <!-- THÔNG BÁO LỖI NẰM Ở ĐÂY (NGOÀI GRID) -->
+    <div th:if="${error}" class="alert-error" role="alert">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- Thông báo sandbox & payment ready -->
+    <p th:if="${gatewaySandbox}" role="status" style="text-align: center; color: #d97706;">Đang dùng SePay Sandbox: giao dịch thử nghiệm, không chuyển tiền thật.</p>
+    <p th:unless="${paymentReady}" role="status" style="text-align: center; color: #d97706;">Thanh toán đang được thiết lập. Bạn có thể tham khảo các gói bên dưới.</p>
+
     <div class="pricing-grid">
-        <p th:if="${gatewaySandbox}" role="status">Đang dùng SePay Sandbox: giao dịch thử nghiệm, không chuyển tiền thật.</p>
-        <p th:if="${error}" th:text="${error}" role="alert"></p>
-        <p th:unless="${paymentReady}" role="status">Thanh toán đang được thiết lập. Bạn có thể tham khảo các gói bên dưới.</p>
         <!-- Vòng lặp hiển thị các gói -->
         <div class="price-card" th:each="p : ${packages}">
             <h3 th:text="${p.name}">Tên gói</h3>
