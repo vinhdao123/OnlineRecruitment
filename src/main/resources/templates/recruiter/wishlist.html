@@ -1,0 +1,519 @@
+
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Ứng viên quan tâm</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/recruiter/interviews.css}">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        .wishlist-page {
+            padding: 30px 2%;
+        }
+
+        .wishlist-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .wishlist-table th,
+        .wishlist-table td {
+            padding: 16px 14px;
+            text-align: left;
+            border-bottom: 1px solid #e8edf5;
+            vertical-align: middle;
+        }
+
+        .wishlist-table th {
+            background: #f7f9fc;
+            color: #536780;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .candidate-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 180px;
+        }
+
+        .candidate-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: #2563eb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .candidate-details {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .candidate-details strong {
+            color: #172b4d;
+        }
+
+        .candidate-details small {
+            color: #8492a6;
+            overflow-wrap: anywhere;
+        }
+
+        .job-name {
+            font-weight: 500;
+            color: #263b59;
+        }
+
+        .saved-date {
+            color: #64748b;
+            white-space: nowrap;
+        }
+
+        .wishlist-actions {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .btn-view-cv {
+            border: 1px solid #bcd5ff;
+            background: #eff6ff;
+            color: #2563eb;
+            padding: 10px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-view-cv:hover {
+            background: #dbeafe;
+        }
+
+        .btn-remove-wishlist {
+            border: none;
+            background: #fff0f2;
+            color: #e11d48;
+            padding: 10px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .btn-remove-wishlist:hover {
+            background: #ffe0e6;
+        }
+
+        .wishlist-alert {
+            padding: 13px 18px;
+            border-radius: 9px;
+            margin-bottom: 18px;
+        }
+
+        .wishlist-alert.success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .wishlist-alert.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .wishlist-empty {
+            text-align: center;
+            padding: 55px 20px;
+        }
+
+        .wishlist-empty-icon {
+            font-size: 48px;
+            color: #e11d48;
+            margin-bottom: 15px;
+        }
+
+        /* POPUP CV */
+        .cv-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(15, 23, 42, 0.7);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .cv-modal.show {
+            display: flex;
+        }
+
+        .cv-modal-content {
+            width: 90%;
+            max-width: 1100px;
+            height: 90vh;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cv-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 22px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cv-modal-header h3 {
+            margin: 0;
+        }
+
+        .cv-modal-header p {
+            margin: 5px 0 0;
+            color: #8492a6;
+        }
+
+        .cv-close-btn {
+            border: none;
+            background: transparent;
+            font-size: 30px;
+            cursor: pointer;
+            color: #64748b;
+        }
+
+        #cvFrame {
+            width: 100%;
+            flex: 1;
+            border: none;
+        }
+
+        @media (max-width: 900px) {
+            .table-wrapper {
+                overflow-x: auto;
+            }
+
+            .wishlist-table {
+                min-width: 850px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<main class="interview-page wishlist-page">
+
+    <!-- TIÊU ĐỀ -->
+    <header class="page-header">
+
+        <div>
+            <h1>
+                <i class="bi bi-heart-fill" style="color:#e11d48"></i>
+                Ứng viên quan tâm
+            </h1>
+
+            <p>
+                Danh sách tất cả ứng viên bạn đã lưu ở các vị trí tuyển dụng.
+            </p>
+        </div>
+
+        <a th:href="@{/recruiter/interviews}"
+           class="btn-create">
+            <i class="bi bi-arrow-left"></i>
+            Quay lại lịch phỏng vấn
+        </a>
+
+    </header>
+
+    <!-- THÔNG BÁO -->
+    <div th:if="${successMessage}"
+         class="wishlist-alert success"
+         th:text="${successMessage}">
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="wishlist-alert error"
+         th:text="${errorMessage}">
+    </div>
+
+    <!-- DANH SÁCH WISHLIST -->
+    <section class="content-section">
+
+        <div class="section-heading">
+
+            <div>
+                <h2>Danh sách đã lưu</h2>
+
+                <p>
+                    Ứng viên được phân loại theo từng công việc.
+                </p>
+            </div>
+
+            <span class="count-badge"
+                  th:text="${#lists.size(wishlist)} + ' mục đã lưu'">
+                0 mục đã lưu
+            </span>
+
+        </div>
+
+        <!-- DANH SÁCH TRỐNG -->
+        <div class="wishlist-empty"
+             th:if="${#lists.isEmpty(wishlist)}">
+
+            <div class="wishlist-empty-icon">
+                <i class="bi bi-heart"></i>
+            </div>
+
+            <h3>Bạn chưa quan tâm ứng viên nào</h3>
+
+            <p>
+                Hãy quay lại lịch phỏng vấn và nhấn Quan tâm
+                để lưu ứng viên.
+            </p>
+
+            <a th:href="@{/recruiter/interviews}"
+               class="btn-create">
+                Xem lịch phỏng vấn
+            </a>
+
+        </div>
+
+        <!-- BẢNG DANH SÁCH -->
+        <div class="table-wrapper"
+             th:unless="${#lists.isEmpty(wishlist)}">
+
+            <table class="wishlist-table">
+
+                <thead>
+                <tr>
+                    <th>Ứng viên</th>
+                    <th>Công việc</th>
+                    <th>Ngày lưu</th>
+                    <th>CV ứng viên</th>
+                    <th>Thao tác</th>
+                </tr>
+                </thead>
+
+                <tbody>
+
+                <tr th:each="item : ${wishlist}">
+
+                    <!-- THÔNG TIN ỨNG VIÊN -->
+                    <td>
+
+                        <div class="candidate-info">
+
+                            <div class="candidate-avatar"
+                                 th:text="${item.candidateName != null and !#strings.isEmpty(item.candidateName)
+                                    ? #strings.substring(item.candidateName, 0, 1).toUpperCase()
+                                    : 'C'}">
+                                C
+                            </div>
+
+                            <div class="candidate-details">
+
+                                <strong th:text="${item.candidateName}">
+                                    Candidate
+                                </strong>
+
+                                <small th:text="${item.email}">
+                                    candidate@example.com
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </td>
+
+                    <!-- CÔNG VIỆC -->
+                    <td>
+                        <span class="job-name"
+                              th:text="${item.jobTitle}">
+                            Job title
+                        </span>
+                    </td>
+
+                    <!-- NGÀY LƯU -->
+                    <td>
+                        <span class="saved-date"
+                              th:text="${item.createdAt}">
+                            2026-11-10
+                        </span>
+                    </td>
+
+                    <!-- XEM CV -->
+                    <td>
+
+                        <button type="button"
+                                class="btn-view-cv"
+                                th:if="${item.applicationId != null}"
+                                th:attr="data-cv-url=@{/recruiter/applications/{applicationId}/cv(applicationId=${item.applicationId})}">
+
+                            <i class="bi bi-file-earmark-pdf"></i>
+                            Xem CV
+
+                        </button>
+
+                        <span th:unless="${item.applicationId != null}">
+                            Chưa có CV
+                        </span>
+
+                    </td>
+
+                    <!-- BỎ QUAN TÂM -->
+                    <td>
+
+                        <form th:action="@{/recruiter/wishlist/toggle}"
+                              method="post">
+
+                            <input type="hidden"
+                                   name="candidateId"
+                                   th:value="${item.candidateId}">
+
+                            <input type="hidden"
+                                   name="jobId"
+                                   th:value="${item.jobId}">
+
+                            <input type="hidden"
+                                   name="returnToWishlist"
+                                   value="true">
+
+                            <button type="submit"
+                                    class="btn-remove-wishlist">
+
+                                <i class="bi bi-heartbreak"></i>
+                                Bỏ quan tâm
+
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<!-- POPUP XEM CV -->
+<div id="cvModal" class="cv-modal">
+
+    <div class="cv-modal-content">
+
+        <div class="cv-modal-header">
+
+            <div>
+                <h3>CV ứng viên</h3>
+                <p>Xem hồ sơ ứng tuyển</p>
+            </div>
+
+            <button type="button"
+                    id="closeCvModal"
+                    class="cv-close-btn"
+                    aria-label="Đóng popup">
+                &times;
+            </button>
+
+        </div>
+
+        <iframe id="cvFrame"
+                src=""
+                title="CV ứng viên">
+        </iframe>
+
+    </div>
+
+</div>
+
+
+<!-- JAVASCRIPT -->
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const modal = document.getElementById("cvModal");
+        const frame = document.getElementById("cvFrame");
+        const closeBtn = document.getElementById("closeCvModal");
+
+        // MỞ POPUP CV
+        document.querySelectorAll(".btn-view-cv").forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const cvUrl = this.getAttribute("data-cv-url");
+
+                if (!cvUrl) {
+                    return;
+                }
+
+                frame.src = cvUrl;
+                modal.classList.add("show");
+                document.body.style.overflow = "hidden";
+
+            });
+
+        });
+
+        // ĐÓNG POPUP
+        function closeModal() {
+
+            modal.classList.remove("show");
+            frame.src = "";
+            document.body.style.overflow = "";
+
+        }
+
+        closeBtn.addEventListener("click", closeModal);
+
+        modal.addEventListener("click", function (event) {
+
+            if (event.target === modal) {
+                closeModal();
+            }
+
+        });
+
+        document.addEventListener("keydown", function (event) {
+
+            if (event.key === "Escape" &&
+                modal.classList.contains("show")) {
+
+                closeModal();
+
+            }
+
+        });
+
+    });
+
+</script>
+
+</body>
+</html>
