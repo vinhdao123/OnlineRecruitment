@@ -2,7 +2,9 @@
 package OnlineRecruitment.OnlineRecruitment.controller.Recruiter;
 
 import OnlineRecruitment.OnlineRecruitment.repository.Recruiter.InterviewRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.Recruiter.RecruiterWishlistRepository;
 import OnlineRecruitment.OnlineRecruitment.service.InterviewService;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -16,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -24,20 +28,22 @@ public class RecruiterInterviewController {
 
     private final InterviewRepository interviewRepository;
     private final InterviewService interviewService;
+    private final RecruiterWishlistRepository wishlistRepository;
 
     public RecruiterInterviewController(
             InterviewRepository interviewRepository,
-            InterviewService interviewService
+            InterviewService interviewService,
+            RecruiterWishlistRepository wishlistRepository
     ) {
         this.interviewRepository = interviewRepository;
         this.interviewService = interviewService;
+        this.wishlistRepository = wishlistRepository;
     }
 
     // Lấy ID nhà tuyển dụng đang đăng nhập
     private Long getRecruiterId(Authentication authentication) {
 
-        if (authentication == null
-                || !authentication.isAuthenticated()) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new IllegalArgumentException("Vui lòng đăng nhập.");
         }
 
@@ -68,7 +74,7 @@ public class RecruiterInterviewController {
         return companyId;
     }
 
-    // Hiển thị trang tạo lịch
+    // Hiển thị trang tạo lịch phỏng vấn
     @GetMapping("/availability")
     public String showAvailabilityPage(
             Authentication authentication,
@@ -93,7 +99,7 @@ public class RecruiterInterviewController {
                         companyId
                 );
 
-        // Chuyển thành chuỗi yyyy-MM-dd
+        // Chuyển danh sách ngày thành chuỗi yyyy-MM-dd
         String existingDateString = existingDates.stream()
                 .map(LocalDate::toString)
                 .collect(Collectors.joining(","));
@@ -167,11 +173,15 @@ public class RecruiterInterviewController {
     public String showInterviewSchedule(
             Authentication authentication,
             Model model,
-            @RequestParam(required = false) Long jobId,
+
+            @RequestParam(required = false)
+            Long jobId,
+
             @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
             LocalDate date
     ) {
+
         Long recruiterId = getRecruiterId(authentication);
         Long companyId = getCompanyId(recruiterId);
 
@@ -179,28 +189,45 @@ public class RecruiterInterviewController {
         LocalDate selectedDate = (date != null)
                 ? date
                 : LocalDate.now();
+
         // Danh sách ngày đã được tạo khung giờ
         model.addAttribute(
                 "availableDates",
-                interviewRepository.findExistingDates(recruiterId, companyId)
+                interviewRepository.findExistingDates(
+                        recruiterId,
+                        companyId
+                )
         );
 
-
-        // Danh sách công việc
+        // Danh sách công việc của recruiter
         model.addAttribute(
                 "jobs",
-                interviewRepository.findRecruiterJobs(recruiterId, companyId)
+                interviewRepository.findRecruiterJobs(
+                        recruiterId,
+                        companyId
+                )
         );
 
         // Danh sách ứng viên đã đặt lịch
-        model.addAttribute(
-                "interviews",
+        List<Map<String, Object>> interviews =
                 interviewRepository.findBookedInterviews(
                         recruiterId,
                         companyId,
                         jobId,
                         selectedDate
-                )
+                );
+
+        model.addAttribute("interviews", interviews);
+
+        // Danh sách ứng viên đã lưu Wishlist theo từng vị trí
+        Set<String> wishlistedCandidateJobs =
+                wishlistRepository.findWishlistedCandidateJobs(
+                        recruiterId
+                );
+
+        model.addAttribute(
+                "wishlistedCandidateJobs",
+                wishlistedCandidateJobs
         );
 
         // Tất cả khung giờ trong ngày
@@ -213,6 +240,7 @@ public class RecruiterInterviewController {
                 )
         );
 
+        // Giữ lại bộ lọc đang chọn
         model.addAttribute("selectedJobId", jobId);
         model.addAttribute("selectedDate", selectedDate);
 

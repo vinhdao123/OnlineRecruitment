@@ -2,10 +2,10 @@
 package OnlineRecruitment.OnlineRecruitment.controller.candidate;
 
 import OnlineRecruitment.OnlineRecruitment.repository.Recruiter.InterviewRepository;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,7 +31,7 @@ public class CandidateInterviewController {
     }
 
     // =====================================================
-    // 1. HIỂN THỊ CÁC KHUNG GIỜ PHỎNG VẤN
+    // 1. HIỂN THỊ KHUNG GIỜ PHỎNG VẤN
     // =====================================================
 
     @GetMapping("/candidate/interviews/{applicationId}")
@@ -41,6 +41,7 @@ public class CandidateInterviewController {
             Model model
     ) {
 
+        // Kiểm tra đăng nhập
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getName())) {
@@ -49,7 +50,10 @@ public class CandidateInterviewController {
 
         String loginName = authentication.getName();
 
-        // Lấy thông tin đơn ứng tuyển và kiểm tra quyền sở hữu
+        // =================================================
+        // LẤY THÔNG TIN ĐƠN ỨNG TUYỂN
+        // =================================================
+
         String applicationSql = """
             SELECT
                 a.id AS applicationId,
@@ -81,6 +85,7 @@ public class CandidateInterviewController {
                         loginName
                 );
 
+        // Không tìm thấy đơn hoặc không thuộc ứng viên
         if (applications.isEmpty()) {
             return "redirect:/candidate/applications";
         }
@@ -96,18 +101,29 @@ public class CandidateInterviewController {
         Long candidateId = ((Number)
                 application.get("candidateId")).longValue();
 
-        // Kiểm tra đơn này đã có lịch phỏng vấn chưa
+        Long companyId = ((Number)
+                application.get("companyId")).longValue();
+
+        Long recruiterId = ((Number)
+                application.get("recruiterId")).longValue();
+
+        // =================================================
+        // KIỂM TRA ĐƠN NÀY ĐÃ CÓ LỊCH CHƯA
+        // =================================================
+
         String bookedSql = """
             SELECT COUNT(*)
             FROM dbo.interview_schedules
             WHERE application_id = ?
+              AND candidate_id = ?
               AND status = 'SCHEDULED'
             """;
 
         Integer booked = jdbcTemplate.queryForObject(
                 bookedSql,
                 Integer.class,
-                applicationId
+                applicationId,
+                candidateId
         );
 
         if (booked != null && booked > 0) {
@@ -115,42 +131,94 @@ public class CandidateInterviewController {
         }
 
         // =================================================
-        // LỌC LỊCH TRÙNG Ở TẤT CẢ CÁC CÔNG TY
+        // LỌC KHUNG GIỜ
         // =================================================
 
         String slotsSql = """
             SELECT
-                ia.id,
-                ia.available_date,
-                ia.start_time,
-                ia.end_time,
-                ia.status
+                ia.id AS id,
+                ia.available_date AS available_date,
+                ia.start_time AS start_time,
+                ia.end_time AS end_time,
+                ia.status AS status
+
             FROM dbo.interview_availability ia
+
             WHERE ia.company_id = ?
               AND ia.recruiter_id = ?
-              AND ia.status = 'OPEN'
 
-              -- Chỉ lấy lịch trong tương lai
+              -- Chỉ lấy khung giờ trong tương lai
               AND (
-                  ia.available_date > CAST(GETDATE() AS date)
-                  OR (
-                      ia.available_date = CAST(GETDATE() AS date)
-                      AND ia.start_time > CAST(GETDATE() AS time)
-                  )
+                    ia.available_date > CAST(GETDATE() AS date)
+                    OR (
+                        ia.available_date = CAST(GETDATE() AS date)
+                        AND ia.start_time > CAST(GETDATE() AS time)
+                    )
               )
 
-              -- Không hiển thị lịch bị trùng với lịch
-              -- Candidate đã đặt ở bất kỳ công ty nào
+              -- Chỉ hiển thị:
+              -- 1. Slot OPEN
+              -- 2. Slot BOOKED do chính candidate này đặt
+              AND (
+                    ia.status = 'OPEN'
+                    OR (
+                        ia.status = 'BOOKED'
+                        AND EXISTS (
+                            SELECT 1
+                            FROM dbo.interview_schedules own
+                            WHERE own.availability_id = ia.id
+                              AND own.candidate_id = ?
+                              AND own.company_id = ia.company_id
+                              AND own.status = 'SCHEDULED'
+                        )
+                    )
+              )
+
+              -- Loại các khung giờ bị xung đột
               AND NOT EXISTS (
-                  SELECT 1
-                  FROM dbo.interview_schedules s
-                  INNER JOIN dbo.interview_availability booked
-                      ON booked.id = s.availability_id
-                  WHERE s.candidate_id = ?
-                    AND s.status = 'SCHEDULED'
-                    AND booked.available_date = ia.available_date
-                    AND booked.start_time < ia.end_time
-                    AND booked.end_time > ia.start_time
+                    SELECT 1
+                    FROM dbo.interview_schedules s
+                    INNER JOIN dbo.interview_availability booked
+                        ON booked.id = s.availability_id
+
+                    WHERE s.status = 'SCHEDULED'
+                      AND booked.available_date = ia.available_date
+
+                      AND (
+                            -- Cùng công ty, ứng viên khác:
+                            -- không được trùng thời gian
+                            (
+                                s.candidate_id <> ?
+                                AND booked.company_id = ia.company_id
+                                AND booked.start_time < ia.end_time
+                                AND booked.end_time > ia.start_time
+                            )
+
+                            OR
+
+                            -- Khác công ty, cùng ứng viên:
+                            -- không được trùng thời gian
+                            (
+                                s.candidate_id = ?
+                                AND booked.company_id <> ia.company_id
+                                AND booked.start_time < ia.end_time
+                                AND booked.end_time > ia.start_time
+                            )
+
+                            OR
+
+                            -- Cùng công ty, cùng ứng viên,
+                            -- cùng ngày nhưng khác khung giờ:
+                            -- không được chọn
+                            (
+                                s.candidate_id = ?
+                                AND booked.company_id = ia.company_id
+                                AND (
+                                    booked.start_time <> ia.start_time
+                                    OR booked.end_time <> ia.end_time
+                                )
+                            )
+                      )
               )
 
             ORDER BY ia.available_date, ia.start_time
@@ -159,10 +227,17 @@ public class CandidateInterviewController {
         List<Map<String, Object>> slots =
                 jdbcTemplate.queryForList(
                         slotsSql,
-                        application.get("companyId"),
-                        application.get("recruiterId"),
+                        companyId,
+                        recruiterId,
+                        candidateId,
+                        candidateId,
+                        candidateId,
                         candidateId
                 );
+
+        // =================================================
+        // GỬI DỮ LIỆU SANG THYMELEAF
+        // =================================================
 
         model.addAttribute("application", application);
         model.addAttribute("applicationId", applicationId);
@@ -176,7 +251,6 @@ public class CandidateInterviewController {
     // =====================================================
 
     @PostMapping("/candidate/interviews/book")
-    @Transactional
     public String bookInterview(
             @RequestParam Long applicationId,
             @RequestParam Long availabilityId,
@@ -184,6 +258,7 @@ public class CandidateInterviewController {
             RedirectAttributes redirectAttributes
     ) {
 
+        // Kiểm tra đăng nhập
         if (authentication == null
                 || !authentication.isAuthenticated()
                 || "anonymousUser".equals(authentication.getName())) {
@@ -192,13 +267,17 @@ public class CandidateInterviewController {
 
         String loginName = authentication.getName();
 
-        // Lấy Candidate ID
+        // =================================================
+        // LẤY CANDIDATE ID
+        // =================================================
+
         String candidateSql = """
             SELECT ca.id
             FROM dbo.candidates ca
             INNER JOIN dbo.users u
                 ON u.id = ca.user_id
-            WHERE u.username = ? OR u.email = ?
+            WHERE u.username = ?
+               OR u.email = ?
             """;
 
         List<Long> candidateIds = jdbcTemplate.query(
@@ -219,7 +298,10 @@ public class CandidateInterviewController {
 
         Long candidateId = candidateIds.get(0);
 
-        // Lấy Recruiter và Company từ đúng đơn ứng tuyển
+        // =================================================
+        // LẤY RECRUITER VÀ COMPANY TỪ ĐƠN
+        // =================================================
+
         String applicationSql = """
             SELECT
                 j.recruiter_id,
@@ -256,7 +338,42 @@ public class CandidateInterviewController {
         Long companyId = ((Number)
                 application.get("company_id")).longValue();
 
-        // Thực hiện đặt lịch thông qua Repository
+        // =================================================
+        // KIỂM TRA KHUNG GIỜ THUỘC ĐÚNG CÔNG TY
+        // VÀ RECRUITER
+        // =================================================
+
+        String availabilitySql = """
+            SELECT COUNT(*)
+            FROM dbo.interview_availability
+            WHERE id = ?
+              AND company_id = ?
+              AND recruiter_id = ?
+            """;
+
+        Integer availabilityCount = jdbcTemplate.queryForObject(
+                availabilitySql,
+                Integer.class,
+                availabilityId,
+                companyId,
+                recruiterId
+        );
+
+        if (availabilityCount == null || availabilityCount == 0) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Khung giờ phỏng vấn không hợp lệ."
+            );
+
+            return "redirect:/candidate/applications";
+        }
+
+        // =================================================
+        // THỰC HIỆN ĐẶT LỊCH
+        // Repository sẽ kiểm tra lại toàn bộ quy tắc
+        // trong transaction trước khi INSERT.
+        // =================================================
+
         try {
 
             int result = interviewRepository.bookInterview(
@@ -275,7 +392,7 @@ public class CandidateInterviewController {
             } else {
                 redirectAttributes.addFlashAttribute(
                         "errorMessage",
-                        "Không thể đặt lịch. Vui lòng chọn khung giờ khác."
+                        "Không thể đặt lịch. Vui lòng thử lại."
                 );
             }
 
