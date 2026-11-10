@@ -1,5 +1,7 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +10,9 @@
 
     <link rel="stylesheet"
           th:href="@{/css/recruiter/interviews.css}">
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 
 <body>
@@ -25,10 +30,27 @@
            class="btn-create">
             <span>+</span> Tạo lịch phỏng vấn
         </a>
+        <a th:href="@{/recruiter/wishlist}"
+           class="btn-create">
+            <i class="bi bi-heart-fill"></i>
+            Ứng viên quan tâm
+        </a>
     </header>
+
+    <!-- THÔNG BÁO -->
+    <div th:if="${successMessage}"
+         class="alert alert-success"
+         th:text="${successMessage}">
+    </div>
+
+    <div th:if="${errorMessage}"
+         class="alert alert-danger"
+         th:text="${errorMessage}">
+    </div>
 
     <!-- BỘ LỌC -->
     <section class="filter-section">
+
         <form th:action="@{/recruiter/interviews}"
               method="get"
               class="filter-form">
@@ -64,15 +86,18 @@
                class="btn-reset">
                 Đặt lại
             </a>
+
         </form>
+
     </section>
 
     <!-- NGÀY ĐANG XEM -->
     <div class="selected-date-heading">
         <div>
             <span class="date-caption">ĐANG XEM LỊCH NGÀY</span>
+
             <h2 th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}">
-                02/11/2026
+                12/11/2026
             </h2>
         </div>
     </div>
@@ -84,6 +109,7 @@
         <section class="content-section candidate-section">
 
             <div class="section-heading">
+
                 <div>
                     <h2>Ứng viên đã đặt lịch</h2>
                     <p>Danh sách ứng viên có lịch phỏng vấn trong ngày.</p>
@@ -93,32 +119,46 @@
                       th:text="${#lists.size(interviews)} + ' ứng viên'">
                     0 ứng viên
                 </span>
+
             </div>
 
+            <!-- CHƯA CÓ ỨNG VIÊN -->
             <div class="empty-state"
                  th:if="${#lists.isEmpty(interviews)}">
+
                 <div class="empty-icon">📅</div>
+
                 <h3>Chưa có ứng viên đặt lịch</h3>
+
                 <p>Ngày này chưa có ứng viên đăng ký phỏng vấn.</p>
+
             </div>
 
+            <!-- DANH SÁCH ỨNG VIÊN -->
             <div class="table-wrapper"
                  th:unless="${#lists.isEmpty(interviews)}">
 
                 <table>
+
                     <thead>
                     <tr>
                         <th>Ứng viên</th>
                         <th>Công việc</th>
                         <th>Thời gian</th>
                         <th>Trạng thái</th>
+                        <th>CV ứng viên</th>
+                        <th>Quan tâm</th>
                     </tr>
                     </thead>
 
                     <tbody>
+
                     <tr th:each="item : ${interviews}">
+
+                        <!-- THÔNG TIN ỨNG VIÊN -->
                         <td>
                             <div class="candidate-info">
+
                                 <div class="candidate-avatar"
                                      th:text="${item.candidateName != null and !#strings.isEmpty(item.candidateName)
                                          ? #strings.substring(item.candidateName, 0, 1).toUpperCase()
@@ -127,6 +167,7 @@
                                 </div>
 
                                 <div class="candidate-details">
+
                                     <strong th:text="${item.candidateName}">
                                         Candidate
                                     </strong>
@@ -134,10 +175,13 @@
                                     <small th:text="${item.email}">
                                         candidate@example.com
                                     </small>
+
                                 </div>
+
                             </div>
                         </td>
 
+                        <!-- CÔNG VIỆC -->
                         <td>
                             <span class="job-name"
                                   th:text="${item.jobTitle}">
@@ -145,6 +189,7 @@
                             </span>
                         </td>
 
+                        <!-- THỜI GIAN -->
                         <td>
                             <strong class="interview-time"
                                     th:text="${item.startTime + ' - ' + item.endTime}">
@@ -152,14 +197,76 @@
                             </strong>
                         </td>
 
+                        <!-- TRẠNG THÁI -->
                         <td>
                             <span class="status-badge booked">
                                 Đã đặt lịch
                             </span>
                         </td>
+
+                        <!-- XEM CV -->
+                        <td>
+
+                            <button type="button"
+                                    class="btn-view-cv"
+                                    th:attr="data-cv-url=@{/recruiter/applications/{applicationId}/cv(applicationId=${item.applicationId})}"
+                                    th:disabled="${item.applicationId == null}"
+                                    title="Xem CV ứng viên">
+
+                                <i class="bi bi-file-earmark-pdf"></i>
+                                Xem CV
+
+                            </button>
+
+                        </td>
+
+                        <!-- WISHLIST -->
+
+                        <!-- WISHLIST -->
+                        <td>
+                            <form th:action="@{/recruiter/wishlist/toggle}"
+                                  method="post"
+                                  class="wishlist-form">
+
+                                <input type="hidden"
+                                       name="candidateId"
+                                       th:value="${item.candidateId}">
+
+                                <input type="hidden"
+                                       name="jobId"
+                                       th:value="${item.jobId}">
+
+                                <input type="hidden"
+                                       name="date"
+                                       th:value="${selectedDate}">
+
+                                <button type="submit"
+                                        class="btn-wishlist"
+                                        th:with="wishlistKey=${item.candidateId + '_' + item.jobId}"
+                                        th:classappend="${wishlistedCandidateJobs != null and wishlistedCandidateJobs.contains(wishlistKey)}
+                    ? ' wishlisted' : ''">
+
+            <span th:if="${wishlistedCandidateJobs != null and wishlistedCandidateJobs.contains(wishlistKey)}">
+                <i class="bi bi-heart-fill"></i>
+                Đã lưu
+            </span>
+
+                                    <span th:unless="${wishlistedCandidateJobs != null and wishlistedCandidateJobs.contains(wishlistKey)}">
+                <i class="bi bi-heart"></i>
+                Quan tâm
+            </span>
+
+                                </button>
+                            </form>
+                        </td>
+
+
                     </tr>
+
                     </tbody>
+
                 </table>
+
             </div>
 
         </section>
@@ -168,6 +275,7 @@
         <section class="content-section slot-section">
 
             <div class="section-heading">
+
                 <div>
                     <h2>Tổng quan khung giờ</h2>
                     <p>Các khung giờ trong ngày đã chọn.</p>
@@ -177,10 +285,12 @@
                       th:text="${#lists.size(dailySlots)} + ' khung giờ'">
                     0 khung giờ
                 </span>
+
             </div>
 
-            <!-- CHÚ THÍCH TRẠNG THÁI -->
+            <!-- CHÚ THÍCH -->
             <div class="slot-legend">
+
                 <span>
                     <i class="legend-dot open-dot"></i>
                     Còn trống
@@ -195,6 +305,7 @@
                     <i class="legend-dot closed-dot"></i>
                     Đã đóng
                 </span>
+
             </div>
 
             <!-- NGÀY CHƯA MỞ LỊCH -->
@@ -202,13 +313,16 @@
                  th:if="${#lists.isEmpty(dailySlots)}">
 
                 <div class="empty-icon">🕒</div>
+
                 <h3>Ngày này chưa mở lịch</h3>
+
                 <p>Bạn chưa tạo khung giờ phỏng vấn cho ngày này.</p>
 
                 <a th:href="@{/recruiter/interviews/availability}"
                    class="btn-create empty-create-btn">
                     + Mở lịch phỏng vấn
                 </a>
+
             </div>
 
             <!-- DANH SÁCH KHUNG GIỜ -->
@@ -224,6 +338,7 @@
                                  : ' slot-open')">
 
                     <div class="slot-top">
+
                         <strong class="slot-time"
                                 th:text="${slot.startTime + ' - ' + slot.endTime}">
                             08:00 - 08:30
@@ -243,6 +358,7 @@
                               class="status-badge closed">
                             Đã đóng
                         </span>
+
                     </div>
 
                     <!-- ĐÃ ĐẶT -->
@@ -260,21 +376,27 @@
                                th:text="${slot.jobTitle}">
                             Job title
                         </small>
+
                     </div>
 
                     <!-- CÒN TRỐNG -->
                     <div class="slot-information"
                          th:if="${slot.displayStatus == 'OPEN'}">
+
                         <span>Khung giờ đang chờ ứng viên đăng ký.</span>
+
                     </div>
 
                     <!-- ĐÃ ĐÓNG -->
                     <div class="slot-information closed-information"
                          th:if="${slot.displayStatus == 'CLOSED'}">
+
                         <span>Khung giờ đã hết thời gian đăng ký.</span>
+
                     </div>
 
                 </article>
+
             </div>
 
         </section>
@@ -285,18 +407,23 @@
     <section class="content-section opened-dates-section">
 
         <div class="section-heading">
+
             <div>
                 <h2>Những ngày đã mở lịch</h2>
+
                 <p>
                     Chọn nhanh ngày đã có khung giờ phỏng vấn.
                     Chỉ hiển thị ngày thực sự có lịch trong hệ thống.
                 </p>
             </div>
+
         </div>
 
         <div class="empty-date-message"
              th:if="${#lists.isEmpty(availableDates)}">
+
             Bạn chưa tạo khung giờ phỏng vấn cho ngày nào.
+
         </div>
 
         <div class="date-chip-list"
@@ -316,17 +443,131 @@
                       class="current-date-mark">
                     Đang xem
                 </span>
+
             </a>
+
         </div>
 
         <div class="date-picker-note">
+
             <span>📌</span>
+
             Bạn vẫn có thể chọn ngày chưa mở lịch bằng ô Ngày phỏng vấn phía trên.
+
         </div>
 
     </section>
 
 </main>
+
+
+<!-- ==============================
+     POPUP XEM CV
+============================== -->
+
+<div id="cvModal" class="cv-modal">
+
+    <div class="cv-modal-content">
+
+        <div class="cv-modal-header">
+
+            <div>
+                <h3>CV ứng viên</h3>
+                <p>Xem hồ sơ ứng tuyển</p>
+            </div>
+
+            <button type="button"
+                    id="closeCvModal"
+                    class="cv-close-btn"
+                    aria-label="Đóng popup">
+
+                &times;
+
+            </button>
+
+        </div>
+
+        <iframe id="cvFrame"
+                src=""
+                title="CV ứng viên">
+        </iframe>
+
+    </div>
+
+</div>
+
+
+<!-- ==============================
+     JAVASCRIPT
+============================== -->
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const modal = document.getElementById("cvModal");
+        const frame = document.getElementById("cvFrame");
+        const closeBtn = document.getElementById("closeCvModal");
+
+        // MỞ POPUP CV
+        document.querySelectorAll(".btn-view-cv").forEach(button => {
+
+            button.addEventListener("click", function () {
+
+                const cvUrl = this.getAttribute("data-cv-url");
+
+                if (!cvUrl) {
+                    return;
+                }
+
+                frame.src = cvUrl;
+
+                modal.classList.add("show");
+
+                document.body.style.overflow = "hidden";
+
+            });
+
+        });
+
+        // ĐÓNG POPUP
+        function closeModal() {
+
+            modal.classList.remove("show");
+
+            frame.src = "";
+
+            document.body.style.overflow = "";
+
+        }
+
+        // NÚT X
+        closeBtn.addEventListener("click", closeModal);
+
+        // CLICK BÊN NGOÀI POPUP
+        modal.addEventListener("click", function (event) {
+
+            if (event.target === modal) {
+                closeModal();
+            }
+
+        });
+
+        // PHÍM ESC
+        document.addEventListener("keydown", function (event) {
+
+            if (event.key === "Escape" &&
+                modal.classList.contains("show")) {
+
+                closeModal();
+
+            }
+
+        });
+
+    });
+
+</script>
 
 </body>
 </html>

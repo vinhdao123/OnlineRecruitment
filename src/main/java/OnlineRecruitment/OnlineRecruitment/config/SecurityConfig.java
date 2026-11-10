@@ -104,6 +104,11 @@ public class SecurityConfig {
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
                 )
+                .headers(headers ->
+                        headers.frameOptions(frame ->
+                                frame.sameOrigin()
+                        )
+                )
 
                 .exceptionHandling(ex -> ex.accessDeniedPage("/403"));
 
