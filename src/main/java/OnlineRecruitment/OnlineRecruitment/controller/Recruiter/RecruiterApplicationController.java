@@ -1,5 +1,7 @@
 package OnlineRecruitment.OnlineRecruitment.controller.Recruiter;
 
+import OnlineRecruitment.OnlineRecruitment.service.CvApplicationPreviewService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -9,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,10 +25,21 @@ public class RecruiterApplicationController {
 
     private final JdbcTemplate jdbcTemplate;
     private final OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService;
+    private final CvApplicationPreviewService cvApplicationPreviewService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public RecruiterApplicationController(JdbcTemplate jdbcTemplate, OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService) {
+        this(jdbcTemplate, skillMatchingService, null);
+    }
+
+    @Autowired
+    public RecruiterApplicationController(
+            JdbcTemplate jdbcTemplate,
+            OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService,
+            CvApplicationPreviewService cvApplicationPreviewService) {
         this.jdbcTemplate = jdbcTemplate;
         this.skillMatchingService = skillMatchingService;
+        this.cvApplicationPreviewService = cvApplicationPreviewService;
     }
 
     // =========================================
@@ -79,6 +94,7 @@ public class RecruiterApplicationController {
                     a.candidate_id AS candidateId,
                     a.job_id AS jobId,
                     a.cv_id AS cvId,
+                    a.cv_template_version_id AS cvTemplateVersionId,
                     a.cv_snapshot_json AS cvSnapshotJson,
                     a.cv_file_path_snapshot AS cvFilePathSnapshot,
                     u.full_name AS candidateName,
@@ -188,6 +204,7 @@ public class RecruiterApplicationController {
                     a.candidate_id AS candidateId,
                     a.job_id AS jobId,
                     a.cv_id AS cvId,
+                    a.cv_template_version_id AS cvTemplateVersionId,
                     a.cv_snapshot_json AS cvSnapshotJson,
                     u.full_name AS candidateName,
                     a.cv_file_path_snapshot AS cvFilePathSnapshot,
@@ -219,31 +236,41 @@ public class RecruiterApplicationController {
         Map<String, Object> applicationData =
                 new HashMap<>(rows.get(0));
 
+        // Giải mã snapshot CV tại thời điểm ứng tuyển để hiển thị chính xác ngay cả khi ứng viên sửa CV sau đó
+        Map<String, Object> snapshotMap = Map.of();
+        Object rawSnapshot = applicationData.get("cvSnapshotJson");
+        if (rawSnapshot instanceof String json && !json.isBlank()) {
+            try {
+                snapshotMap = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+                if (snapshotMap.get("cv") instanceof Map<?, ?> snapCv) {
+                    if (snapCv.get("title") != null) applicationData.put("cvTitle", snapCv.get("title"));
+                    if (snapCv.get("professionalTitle") != null) applicationData.put("professionalTitle", snapCv.get("professionalTitle"));
+                    if (snapCv.get("summary") != null) applicationData.put("summary", snapCv.get("summary"));
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        model.addAttribute("snapshotData", snapshotMap);
+
+        if (cvApplicationPreviewService != null) {
+            Long candId = applicationData.get("candidateId") instanceof Number n ? n.longValue() : null;
+            Long cvId = applicationData.get("cvId") instanceof Number n ? n.longValue() : null;
+            Long tvId = applicationData.get("cvTemplateVersionId") instanceof Number n ? n.longValue() : null;
+            String filePathSnap = applicationData.get("cvFilePathSnapshot") instanceof String s ? s : null;
+            String fbTitle = applicationData.get("cvTitle") instanceof String s ? s : null;
+            String fbProf = applicationData.get("professionalTitle") instanceof String s ? s : null;
+            String fbSum = applicationData.get("summary") instanceof String s ? s : null;
+
+            model.addAllAttributes(cvApplicationPreviewService.buildPreviewModel(
+                    candId, cvId, tvId, filePathSnap, snapshotMap, fbTitle, fbProf, fbSum));
+            model.addAttribute("avatarEndpoint", "/recruiter/applications/" + applicationId + "/cv-avatar");
+            model.addAttribute("fileDownloadUrl", "/recruiter/applications/" + applicationId + "/cv-file");
+            model.addAttribute("fileViewUrl", "/recruiter/applications/" + applicationId + "/cv-file?inline=true");
+        }
+
         // Dùng tên applicationData để tránh nhầm với các biến
         // ngầm định của môi trường Thymeleaf.
         model.addAttribute("applicationData", applicationData);
-
-        // Debug để kiểm tra dữ liệu được chuyển sang giao diện.
-        System.out.println("========== DEBUG CV ==========");
-        System.out.println("Application ID: "
-                + applicationData.get("applicationId"));
-        System.out.println("Candidate ID: "
-                + applicationData.get("candidateId"));
-        System.out.println("Candidate: "
-                + applicationData.get("candidateName"));
-        System.out.println("Email: "
-                + applicationData.get("email"));
-        System.out.println("Phone: "
-                + applicationData.get("phone"));
-        System.out.println("Job: "
-                + applicationData.get("jobTitle"));
-        System.out.println("Company: "
-                + applicationData.get("companyName"));
-        System.out.println("CV ID: "
-                + applicationData.get("cvId"));
-        System.out.println("CV title: "
-                + applicationData.get("cvTitle"));
-        System.out.println("==============================");
 
         return "recruiter/cv-preview";
     }

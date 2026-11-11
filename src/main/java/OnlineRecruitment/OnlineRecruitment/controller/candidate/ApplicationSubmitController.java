@@ -113,7 +113,10 @@ public class ApplicationSubmitController {
                         accent_color AS accentColor,
                         is_default AS isDefault,
                         status AS status,
-                        content AS content
+                        content AS content,
+                        avatar_url AS avatarUrl,
+                        file_url AS fileUrl,
+                        is_uploaded AS isUploaded
                     FROM dbo.cv
                     WHERE id = ?
                       AND candidate_id = ?
@@ -214,7 +217,7 @@ public class ApplicationSubmitController {
             snapshot.put("certificates", jdbcTemplate.queryForList(
                     """
                     SELECT name, issuing_org, issue_date, expiry_date,
-                           credential_id, credential_url
+                           credential_id, credential_url, description
                     FROM dbo.cv_certificates
                     WHERE cv_id = ?
                     ORDER BY display_order
@@ -238,7 +241,7 @@ public class ApplicationSubmitController {
 
             snapshot.put("references", jdbcTemplate.queryForList(
                     """
-                    SELECT full_name, position, organization, email, phone
+                    SELECT full_name, position, organization, email, phone, relationship
                     FROM dbo.cv_references
                     WHERE cv_id = ?
                     ORDER BY display_order
@@ -262,6 +265,12 @@ public class ApplicationSubmitController {
             String filePath = attachments.isEmpty()
                     ? null
                     : (String) attachments.get(0).get("storage_path");
+            if (filePath == null && cv.get("fileUrl") instanceof String cvFileUrl && !cvFileUrl.isBlank()) {
+                String cleanFileUrl = cvFileUrl.trim().replace("\\", "/");
+                if (cleanFileUrl.matches("(?i)(storage/cvs/[a-f0-9-]+|/?uploads/cv/[^/\\\\]+)\\.(pdf|doc|docx)")) {
+                    filePath = cleanFileUrl;
+                }
+            }
             if (filePath == null && cv.get("content") instanceof String metadata && !metadata.isBlank()) {
                 try {
                     String uploadedPath = objectMapper.readTree(metadata).path("_cvAssets").path("fileUrl").asText("");
