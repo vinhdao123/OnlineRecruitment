@@ -5,11 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.Collection;
 import java.util.List;
 
 @Repository
 public interface CvEducationRepository extends JpaRepository<CvEducation, Long> {
     List<CvEducation> findByCvIdOrderByDisplayOrderAsc(Long cvId);
+
+    List<CvEducation> findByCvIdInOrderByDisplayOrderAsc(Collection<Long> cvIds);
 
     @Query("SELECT COALESCE(MAX(e.displayOrder), 0) FROM CvEducation e WHERE e.cvId = :cvId")
     Integer findMaxDisplayOrderByCvId(@Param("cvId") Long cvId);

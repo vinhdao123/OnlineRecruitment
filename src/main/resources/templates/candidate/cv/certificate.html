@@ -93,7 +93,11 @@
                         <label class="form-label">Ngày hết hạn</label>
                         <input type="date" th:field="*{expiryDate}" class="form-control">
                     </div>
-                    <div class="form-group full-width">
+                    <div class="form-group">
+                        <label class="form-label">Mã số chứng chỉ (Credential ID)</label>
+                        <input type="text" th:field="*{credentialId}" class="form-control" placeholder="VD: CERT-2026-12345">
+                    </div>
+                    <div class="form-group">
                         <label class="form-label">Đường dẫn xác thực chứng chỉ (URL)</label>
                         <input type="url" th:field="*{credentialUrl}" class="form-control" placeholder="https://...">
                     </div>
@@ -120,6 +124,7 @@
                     <span>Ngày cấp: </span>
                     <span th:text="${cert.issueDate != null ? #temporals.format(cert.issueDate, 'MM/yyyy') : '—'}"></span>
                     <span th:if="${cert.expiryDate != null}" th:text="' | Hết hạn: ' + ${#temporals.format(cert.expiryDate, 'MM/yyyy')}"></span>
+                    <span th:if="${cert.credentialId != null && !cert.credentialId.isEmpty()}" th:text="' | Mã: ' + ${cert.credentialId}"></span>
                 </p>
                 <p class="item-desc" th:if="${cert.description != null && !cert.description.isEmpty()}" th:text="${cert.description}"></p>
             </div>

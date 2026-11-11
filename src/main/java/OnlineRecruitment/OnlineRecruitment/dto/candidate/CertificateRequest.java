@@ -21,6 +21,9 @@ public class CertificateRequest {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate expiryDate;
 
+    @Size(max = 255, message = "Mã số chứng chỉ không quá 255 ký tự")
+    private String credentialId;
+
     @Size(max = 1000, message = "Đường dẫn không quá 1000 ký tự")
     private String credentialUrl;
 
