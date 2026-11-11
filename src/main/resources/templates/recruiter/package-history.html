@@ -737,7 +737,14 @@
                         </h3>
                         <p class="active-pkg-desc">
                             Hạn sử dụng: <strong th:text="${#temporals.format(currentUserPackage.endDate, 'dd/MM/yyyy')}">31/12/2026</strong>
-                            &bull; Tin đăng tối đa: <strong th:text="${currentUserPackage.servicePackage.maxJobs != null ? currentUserPackage.servicePackage.maxJobs + ' tin' : 'Không giới hạn'}">Không giới hạn</strong>
+
+                            <!-- CẬP NHẬT LOGIC HIỂN THỊ SỐ TIN -->
+                            &bull; Quota:
+                            <strong th:if="${currentUserPackage.snapshotMaxJobs == null}" style="color: #059669;">Không giới hạn</strong>
+                            <strong th:if="${currentUserPackage.snapshotMaxJobs != null}">
+                                Đã dùng <span th:text="${currentUserPackage.usedJobs != null ? currentUserPackage.usedJobs : 0}"></span> /
+                                <span th:text="${currentUserPackage.snapshotMaxJobs}"></span> tin
+                            </strong>
                         </p>
                     </div>
                     <!-- Nếu chưa có gói active -->
@@ -753,7 +760,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                     </svg>
-                    <span th:text="${currentUserPackage != null ? 'Gia hạn / Nâng cấp gói' : 'Xem bảng giá & Nâng cấp'}">Nâng cấp Gói</span>
+                    <span th:text="${currentUserPackage != null ? 'Gia hạn / Mua thêm tin' : 'Xem bảng giá & Nâng cấp'}">Nâng cấp Gói</span>
                 </a>
             </div>
         </div>

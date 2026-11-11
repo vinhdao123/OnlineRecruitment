@@ -1,85 +1,89 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head('Sửa Gói')}"></head>
+<head th:replace="~{admin/_layout :: head('Thêm/Sửa Gói')}"></head>
 <body class="admin">
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
 <div class="main">
-    <div th:replace="~{admin/_layout :: topbar('Thông tin Gói dịch vụ', 'Chỉ được sửa giá, thời hạn và trạng thái mở bán')}"></div>
+    <div th:replace="~{admin/_layout :: topbar(
+        ${isNew ? 'Thêm Gói mới' : 'Sửa Gói'},
+        ${isNew ? 'Tạo gói dịch vụ mới' : 'Cấu hình gói dịch vụ'})}"></div>
 
-    <div class="section" style="max-width: 600px;">
+    <div class="section" style="max-width: 650px;">
 
-        <!-- Thông báo lỗi nếu có -->
         <div th:if="${error}" role="alert"
              style="padding:12px 16px; background:#fef2f2; border:1px solid #fecaca;
                     color:#b91c1c; border-radius:8px; margin-bottom:16px;"
              th:text="${error}"></div>
 
         <form th:action="@{/admin/packages/save}" th:object="${pkg}" method="post">
-            <!-- ID bắt buộc phải có — nếu null thì Controller sẽ chặn -->
             <input type="hidden" th:field="*{id}">
 
-            <!-- ========== TÊN GÓI: CHỈ ĐỌC ========== -->
+            <!-- Loại gói -->
             <div style="margin-bottom: 16px;">
-                <label style="font-weight: 600; font-size: 14px;">Tên gói</label>
-                <input type="text" th:field="*{name}" readonly
-                       style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8;
-                              border-radius:8px; background:#f3f4f6; color:#6b7280;
-                              cursor:not-allowed;">
-                <small style="color:#6b7280; font-size:12px;">
-                    Tên gói không thể sửa sau khi tạo.
-                </small>
+                <label style="font-weight: 600; font-size: 14px;">Loại gói *</label>
+                <!-- Chỉ giữ lại 1 thẻ select duy nhất, bỏ thẻ hidden bị trùng -->
+                <select th:field="*{packageType}" required
+                        style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+                    <option value="MAIN">Gói chính (có thời hạn)</option>
+                    <option value="TOPUP">Mua thêm tin (Top-up)</option>
+                </select>
+                <small style="color:#6b7280;">Gói chính quyết định thời hạn + quyền ghim. Top-up chỉ cộng thêm số tin.</small>
             </div>
 
-            <!-- ========== MÔ TẢ: CHỈ ĐỌC ========== -->
+            <!-- Tên gói: readonly khi sửa -->
+            <div style="margin-bottom: 16px;">
+                <label style="font-weight: 600; font-size: 14px;">Tên gói *</label>
+                <input type="text" th:field="*{name}" th:readonly="${!isNew}" required
+                       style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;"
+                       th:styleappend="${!isNew} ? 'background:#f3f4f6; color:#6b7280; cursor:not-allowed;' : ''">
+            </div>
+
+            <!-- Mô tả: readonly khi sửa -->
             <div style="margin-bottom: 16px;">
                 <label style="font-weight: 600; font-size: 14px;">Mô tả ngắn</label>
-                <textarea th:field="*{description}" rows="3" readonly
-                          style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8;
-                                 border-radius:8px; background:#f3f4f6; color:#6b7280;
-                                 cursor:not-allowed; resize:none;"></textarea>
+                <textarea th:field="*{description}" rows="3" th:readonly="${!isNew}"
+                          style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px; resize:none;"
+                          th:styleappend="${!isNew} ? 'background:#f3f4f6; color:#6b7280; cursor:not-allowed;' : ''"></textarea>
             </div>
 
-            <!-- ========== GIÁ + THỜI HẠN: CHO SỬA ✅ ========== -->
+            <!-- Giá + Thời hạn -->
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                 <div>
                     <label style="font-weight: 600; font-size: 14px;">Giá tiền (VNĐ) *</label>
                     <input type="number" th:field="*{price}" required min="1" step="1"
-                           style="width:100%; padding:10px; margin-top:6px;
-                                  border:1px solid #d5dde8; border-radius:8px;">
+                           style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
                 </div>
                 <div>
                     <label style="font-weight: 600; font-size: 14px;">Thời hạn (Ngày) *</label>
-                    <input type="number" th:field="*{durationDays}" required min="1"
-                           style="width:100%; padding:10px; margin-top:6px;
-                                  border:1px solid #d5dde8; border-radius:8px;">
+                    <input type="number" th:field="*{durationDays}" min="1" placeholder="Chỉ áp dụng cho gói chính"
+                           style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
                 </div>
             </div>
 
-            <!-- ========== ĐỐI TƯỢNG: CHỈ ĐỌC ========== -->
+            <!-- Số bài đăng -->
             <div style="margin-bottom: 16px;">
-                <label style="font-weight: 600; font-size: 14px;">Dành cho đối tượng</label>
-                <!-- disabled → không submit được, nên cần hidden bù giá trị -->
-                <select disabled
-                        style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8;
-                               border-radius:8px; background:#f3f4f6; color:#6b7280;
-                               cursor:not-allowed;">
-                    <option th:each="r : ${roles}" th:value="${r}"
-                            th:text="${r}" th:selected="${r == pkg.targetRole}"></option>
-                </select>
-                <!-- Hidden để gửi targetRole khi select bị disabled -->
-                <input type="hidden" th:field="*{targetRole}">
+                <label style="font-weight: 600; font-size: 14px;">Số bài đăng tối đa (Số tin) *</label>
+                <input type="number" th:field="*{maxJobs}" min="1" placeholder="Để trống = không giới hạn"
+                       style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
             </div>
 
-            <!-- ========== TRẠNG THÁI: CHO SỬA ✅ ========== -->
+            <!-- Đối tượng -->
+            <input type="hidden" th:field="*{targetRole}" value="RECRUITER">
+
+            <!-- Ghim tin -->
+            <div style="margin-bottom: 16px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" th:field="*{allowPinJob}" id="allowPinJob">
+                <label for="allowPinJob" style="font-weight:600; font-size:14px;">Cho phép ghim tin (chỉ gói chính)</label>
+            </div>
+
+            <!-- Trạng thái -->
             <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" th:field="*{isActive}" id="isActive">
-                <label for="isActive" style="font-weight: 600; font-size: 14px;">
-                    Mở bán công khai
-                </label>
+                <label for="isActive" style="font-weight: 600; font-size: 14px;">Mở bán công khai</label>
             </div>
 
             <div style="display: flex; gap: 12px;">
-                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <button type="submit" class="btn btn-primary" th:text="${isNew ? 'Tạo Gói' : 'Lưu thay đổi'}"></button>
                 <a th:href="@{/admin/packages}" class="btn btn-secondary">Hủy</a>
             </div>
         </form>

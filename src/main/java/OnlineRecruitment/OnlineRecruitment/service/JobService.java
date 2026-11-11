@@ -5,6 +5,7 @@ import OnlineRecruitment.OnlineRecruitment.entity.*;
 import OnlineRecruitment.OnlineRecruitment.repository.CompanyRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.JobCategoryRepository;
 import OnlineRecruitment.OnlineRecruitment.repository.JobRepository;
+import OnlineRecruitment.OnlineRecruitment.repository.UserPackageRepository; // Thêm import này
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -40,16 +41,18 @@ public class JobService {
     private final CompanyRepository companyRepository;
     private final FileStorageService fileStorageService;
     private final JobSkillService jobSkillService;
-    private final ServicePackageService servicePackageService; // Thêm service này
+    private final ServicePackageService servicePackageService;
+    private final UserPackageRepository userPackageRepository; // Thêm repo này để cập nhật usedJobs
 
-    // Xử lý service trong luồng tuyển dụng.
+    // Cập nhật Constructor inject thêm UserPackageRepository
     public JobService(
             JobRepository jobRepository,
             JobCategoryRepository jobCategoryRepository,
             CompanyRepository companyRepository,
             FileStorageService fileStorageService,
             JobSkillService jobSkillService,
-            ServicePackageService servicePackageService
+            ServicePackageService servicePackageService,
+            UserPackageRepository userPackageRepository
     ) {
         this.jobRepository = jobRepository;
         this.jobCategoryRepository = jobCategoryRepository;
@@ -57,6 +60,7 @@ public class JobService {
         this.fileStorageService = fileStorageService;
         this.jobSkillService = jobSkillService;
         this.servicePackageService = servicePackageService;
+        this.userPackageRepository = userPackageRepository;
     }
 
     // =====================================================
@@ -68,7 +72,6 @@ public class JobService {
         return jobRepository.findActiveJobs();
     }
 
-    /** Mark expired ACTIVE jobs before listing an archive or management screen. */
     @Transactional
     public void refreshExpiredJobs() {
         jobRepository.expireActiveJobs(LocalDate.now());
@@ -289,12 +292,9 @@ public class JobService {
                 .orElseThrow(() -> new IllegalArgumentException("Tài khoản chưa có thông tin công ty."));
 
         Job job;
-        boolean wasLiveOrPending = false;
-
         if (form.getJobId() != null) {
             job = getJobForRecruiter(form.getJobId(), recruiter.getId());
             if (job.getStatus() == JobStatus.CLOSED || job.getStatus() == JobStatus.EXPIRED) throw new IllegalArgumentException("Tin đã đóng hoặc quá hạn. Hãy chuyển về nháp trước khi sửa.");
-            wasLiveOrPending = job.getStatus() == JobStatus.ACTIVE || job.getStatus() == JobStatus.PENDING;
         } else {
             job = new Job();
             job.setRecruiter(recruiter);
@@ -333,37 +333,44 @@ public class JobService {
         job.setDeadline(form.getDeadline());
 
         // ==========================================
-        // XỬ LÝ GHIM TIN VÀ GIỚI HẠN ĐĂNG BÀI
+        // XỬ LÝ GHIM TIN VÀ GIỚI HẠN ĐĂNG BÀI (CHUẨN)
         // ==========================================
         UserPackage activePkg = servicePackageService.getActivePackage(recruiter);
 
-        // 1. Kiểm tra giới hạn đăng bài (Chỉ check khi tạo mới)
-        if (form.getJobId() == null) {
-            long currentJobCount = jobRepository.countByRecruiter_Id(recruiter.getId());
-            int maxJobs = 1; // Mặc định cho tài khoản chưa mua gói là 1 bài
-
-            // Nếu đã mua gói thì lấy giới hạn của gói đó
-            if (activePkg != null) {
-                Integer maxJobsObj = activePkg.getServicePackage().getMaxJobs();
-                maxJobs = (maxJobsObj != null) ? maxJobsObj : 0;
-            }
-
-            if (maxJobs > 0 && currentJobCount >= maxJobs) {
-                String pkgName = (activePkg != null) ? activePkg.getServicePackage().getName() : "Miễn phí";
-                throw new IllegalArgumentException("Bạn đã đạt giới hạn " + maxJobs + " tin tuyển dụng của gói " + pkgName + ". Vui lòng nâng cấp gói!");
-            }
-        }
-
-        // 2. Kiểm tra quyền ghim tin (Bắt buộc phải có gói Pro)
+        // 1. Kiểm tra quyền ghim tin
         if (form.getIsPinned() != null && form.getIsPinned()) {
-            if (activePkg == null || !"Recruiter Pro".equals(activePkg.getServicePackage().getName())) {
-                throw new IllegalArgumentException("Chỉ gói Recruiter Pro mới được phép ghim tin lên Top!");
+            boolean canPin = activePkg != null && Boolean.TRUE.equals(activePkg.getAllowPinJob());
+            if (!canPin) {
+                throw new IllegalArgumentException("Gói hiện tại không hỗ trợ ghim tin. Vui lòng nâng cấp gói Pro.");
             }
             job.setIsPinned(true);
         } else {
             job.setIsPinned(false);
         }
 
+        // 2. Kiểm tra giới hạn đăng bài (Chỉ check và trừ quota khi TẠO MỚI)
+        if (form.getJobId() == null) {
+            if (activePkg == null) {
+                // Chưa có gói -> 1 bài free
+                long currentCount = jobRepository.countByRecruiter_Id(recruiter.getId());
+                if (currentCount >= 1) {
+                    throw new IllegalArgumentException("Bạn đã dùng hết 1 bài đăng miễn phí. Vui lòng mua gói.");
+                }
+            } else {
+                // Đã có gói -> check snapshot quota
+                Integer maxJobs = activePkg.getSnapshotMaxJobs();
+                if (maxJobs != null) {
+                    int used = activePkg.getUsedJobs() == null ? 0 : activePkg.getUsedJobs();
+                    if (used >= maxJobs) {
+                        throw new IllegalArgumentException("Bạn đã đăng " + used + "/" + maxJobs + " bài của gói. Vui lòng mua thêm tin.");
+                    }
+                    // Trừ 1 lượt và lưu lại
+                    activePkg.setUsedJobs(used + 1);
+                    userPackageRepository.save(activePkg);
+                }
+                // Nếu maxJobs == null (vô hạn) thì không cần trừ
+            }
+        }
         // ==========================================
 
         if (form.getJobImageFile() != null && !form.getJobImageFile().isEmpty()) {
@@ -375,22 +382,16 @@ public class JobService {
             }
         }
 
-
         if (submitForReview) {
-            // Recruiter chọn Gửi duyệt
             ensureCompanyCanPublish(company);
-
             job.setStatus(JobStatus.PENDING);
             job.setRejectionReason(null);
             job.setPublishedAt(null);
-
         } else {
-            // Recruiter chọn Lưu bản nháp
             job.setStatus(JobStatus.DRAFT);
             job.setRejectionReason(null);
             job.setPublishedAt(null);
         }
-
 
         Job saved = jobRepository.save(job);
         jobSkillService.replaceRequired(saved.getId(), selectedSkills);
@@ -423,7 +424,6 @@ public class JobService {
         return reopenRecruiterJob(jobId, recruiter, null);
     }
 
-    /** Reopen CLOSED or EXPIRED into DRAFT, requiring a new review before publication. */
     public Job reopenRecruiterJob(Long jobId, User recruiter, LocalDate newDeadline) {
         if (recruiter == null || recruiter.getId() == null)
             throw new IllegalArgumentException("Không xác định được tài khoản Recruiter.");
@@ -433,7 +433,6 @@ public class JobService {
         if (newDeadline != null && newDeadline.isBefore(LocalDate.now()))
             throw new IllegalArgumentException("Hạn ứng tuyển mới không được ở quá khứ.");
         if (newDeadline != null) job.setDeadline(newDeadline);
-        // Do not bypass the admin approval process or change the original Job id.
         job.setStatus(JobStatus.DRAFT);
         job.setPublishedAt(null);
         job.setRejectionReason(null);
@@ -450,7 +449,7 @@ public class JobService {
         if (form.getSalaryMax() != null && form.getSalaryMax().compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("Lương tối đa không được âm.");
         if (form.getSalaryMin() != null && form.getSalaryMax() != null && form.getSalaryMin().compareTo(form.getSalaryMax()) > 0) throw new IllegalArgumentException("Lương tối thiểu không được lớn hơn lương tối đa.");
         if (submitForReview && (form.getDeadline() == null || form.getDeadline().isBefore(LocalDate.now()))) throw new IllegalArgumentException("Hạn ứng tuyển phải từ hôm nay trở đi trước khi gửi duyệt.");
-            }
+    }
 
     private void ensureCompanyCanPublish(Company company) {
         if (company == null || company.getStatus() != CompanyStatus.ACTIVE) throw new IllegalArgumentException("Công ty chưa được Admin phê duyệt. Bạn chỉ có thể lưu nháp.");
@@ -495,7 +494,6 @@ public class JobService {
         return jobRepository.save(job);
     }
 
-    /** Admin may return a closed / expired job to a draft, never straight to ACTIVE. */
     public Job reopenAdminJob(Long jobId) {
         Job job = jobRepository.findByIdForUpdate(jobId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tin tuyển dụng."));

@@ -27,73 +27,90 @@ public class AdminPackageController {
     }
 
     // ============================================
-    // CHẶN CREATE: redirect về list kèm thông báo
+    // MỞ KHÓA TẠO GÓI MỚI
     // ============================================
     @GetMapping("/new")
-    public String createForm(RedirectAttributes ra) {
-        ra.addFlashAttribute("error",
-                "Chức năng tạo gói mới đã bị vô hiệu hóa. Admin chỉ được sửa giá, thời hạn và trạng thái.");
-        return "redirect:/admin/packages";
+    public String createForm(Model model) {
+        model.addAttribute("pkg", new ServicePackage());
+        model.addAttribute("roles", allowedRoles());
+        model.addAttribute("isNew", true); // Cờ đánh dấu để HTML biết là Tạo mới
+        model.addAttribute("activeMenu", "packages");
+        return "admin/packages/form";
     }
 
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         model.addAttribute("pkg", packageService.getById(id));
-
-        // Chỉ lấy RECRUITER và CANDIDATE
-        List<UserRole> allowedRoles = Arrays.stream(UserRole.values())
-                .filter(role -> role != UserRole.ADMIN)
-                .toList();
-        model.addAttribute("roles", allowedRoles);
-
+        model.addAttribute("roles", allowedRoles());
+        model.addAttribute("isNew", false); // Cờ đánh dấu để HTML biết là Chỉnh sửa
         model.addAttribute("activeMenu", "packages");
         return "admin/packages/form";
     }
 
-    // ============================================
-    // CHỈ CHO UPDATE 3 FIELD: price, durationDays, isActive
-    // ============================================
     @PostMapping("/save")
     public String save(@ModelAttribute("pkg") ServicePackage form,
                        RedirectAttributes ra) {
 
-        // 1. CHẶN CREATE — chỉ cho Update
-        if (form.getId() == null) {
-            ra.addFlashAttribute("error", "Chức năng tạo gói mới đã bị vô hiệu hóa.");
-            return "redirect:/admin/packages";
+        // Lấy type chuẩn xác, nếu null thì mặc định là MAIN
+        String type = form.getPackageType();
+        if (type == null || type.trim().isEmpty()) {
+            type = "MAIN";
         }
 
-        // 2. Tìm entity gốc trong DB
-        ServicePackage existing;
-        try {
-            existing = packageService.getById(form.getId());
-        } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("error", "Không tìm thấy gói cần sửa.");
-            return "redirect:/admin/packages";
-        }
-
-        // 3. Validate 3 field được phép sửa
+        // 1. Validate chung
         if (form.getPrice() == null || form.getPrice() <= 0) {
             ra.addFlashAttribute("error", "Giá gói phải lớn hơn 0.");
-            return "redirect:/admin/packages/" + form.getId() + "/edit";   // ✅ SỬA
+            return redirectBack(form);
         }
         if (form.getPrice() % 1 != 0) {
             ra.addFlashAttribute("error", "Giá gói phải là số nguyên (VNĐ).");
-            return "redirect:/admin/packages/" + form.getId() + "/edit";   // ✅ SỬA
-        }
-        if (form.getDurationDays() == null || form.getDurationDays() < 1) {
-            ra.addFlashAttribute("error", "Thời hạn phải ít nhất 1 ngày.");
-            return "redirect:/admin/packages/" + form.getId() + "/edit";   // ✅ SỬA
+            return redirectBack(form);
         }
 
-        // 4. CHỈ COPY 3 FIELD ĐƯỢC PHÉP
+        // 2. Validate theo loại gói
+        if ("TOPUP".equals(type)) {
+            // Nếu là TOPUP thì chỉ cần check số tin
+            if (form.getMaxJobs() == null || form.getMaxJobs() < 1) {
+                ra.addFlashAttribute("error", "Gói mua thêm tin phải có số tin > 0.");
+                return redirectBack(form);
+            }
+            form.setDurationDays(null); // Topup không có hạn
+            form.setAllowPinJob(false); // Topup không được ghim
+        } else {
+            // Nếu là MAIN thì bắt buộc check thời hạn
+            if (form.getDurationDays() == null || form.getDurationDays() < 1) {
+                ra.addFlashAttribute("error", "Gói chính phải có thời hạn >= 1 ngày.");
+                return redirectBack(form);
+            }
+        }
+
+        // 3. Xử lý TẠO MỚI
+        if (form.getId() == null) {
+            if (form.getName() == null || form.getName().isBlank()) {
+                ra.addFlashAttribute("error", "Tên gói không được để trống.");
+                return "redirect:/admin/packages/new";
+            }
+
+            form.setTargetRole(UserRole.RECRUITER); // Tự động gán Recruiter
+            if (form.getIsActive() == null) form.setIsActive(true);
+
+            packageService.save(form);
+            ra.addFlashAttribute("success", "Đã tạo gói " + form.getName() + " thành công.");
+            return "redirect:/admin/packages";
+        }
+
+        // 4. Xử lý CẬP NHẬT
+        ServicePackage existing = packageService.getById(form.getId());
         existing.setPrice(form.getPrice());
-        existing.setDurationDays(form.getDurationDays());
-        existing.setIsActive(form.getIsActive() != null && form.getIsActive());
+        existing.setMaxJobs(form.getMaxJobs());
+        existing.setAllowPinJob(Boolean.TRUE.equals(form.getAllowPinJob()));
+        existing.setIsActive(Boolean.TRUE.equals(form.getIsActive()));
 
-        // 5. Lưu — name/description/targetRole giữ nguyên từ DB
+        if ("MAIN".equals(type)) {
+            existing.setDurationDays(form.getDurationDays());
+        }
+
         packageService.save(existing);
-
         ra.addFlashAttribute("success", "Đã cập nhật gói " + existing.getName() + " thành công.");
         return "redirect:/admin/packages";
     }
@@ -103,5 +120,15 @@ public class AdminPackageController {
         packageService.toggleStatus(id);
         ra.addFlashAttribute("success", "Đã thay đổi trạng thái gói dịch vụ.");
         return "redirect:/admin/packages";
+    }
+
+    private List<UserRole> allowedRoles() {
+        return List.of(UserRole.RECRUITER);
+    }
+
+    private String redirectBack(ServicePackage form) {
+        return form.getId() == null
+                ? "redirect:/admin/packages/new"
+                : "redirect:/admin/packages/" + form.getId() + "/edit";
     }
 }

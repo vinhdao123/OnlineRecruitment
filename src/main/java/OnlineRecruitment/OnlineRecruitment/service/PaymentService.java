@@ -27,9 +27,20 @@ public class PaymentService {
         ServicePackage pkg = packageService.getById(packageId);
         if (!Boolean.TRUE.equals(pkg.getIsActive()) || pkg.getTargetRole() != user.getRole())
             throw new IllegalArgumentException("Gói dịch vụ không dành cho tài khoản này hoặc đã ngừng bán.");
-        if (pkg.getPrice() == null || !Double.isFinite(pkg.getPrice()) || pkg.getPrice() <= 0
-                || pkg.getPrice() % 1 != 0 || pkg.getDurationDays() == null || pkg.getDurationDays() < 1)
-            throw new IllegalArgumentException("Giá hoặc thời hạn gói chưa hợp lệ.");
+
+        // 1. Validate Giá tiền (Áp dụng cho cả MAIN và TOPUP)
+        if (pkg.getPrice() == null || !Double.isFinite(pkg.getPrice()) || pkg.getPrice() <= 0 || pkg.getPrice() % 1 != 0) {
+            throw new IllegalArgumentException("Giá gói chưa hợp lệ.");
+        }
+
+        // 2. Validate Thời hạn (CHỈ áp dụng cho gói MAIN)
+        String type = pkg.getPackageType() == null ? "MAIN" : pkg.getPackageType();
+        if ("MAIN".equals(type)) {
+            if (pkg.getDurationDays() == null || pkg.getDurationDays() < 1) {
+                throw new IllegalArgumentException("Thời hạn gói chưa hợp lệ.");
+            }
+        }
+
         Payment payment = new Payment();
         payment.setUser(user);
         payment.setServicePackage(pkg);
@@ -166,44 +177,85 @@ public class PaymentService {
      */
     private void activate(Payment payment, String transactionCode) {
         ServicePackage newPkg = payment.getServicePackage();
-        Integer days = newPkg.getDurationDays();
-        if (days == null || days < 1)
-            throw new IllegalArgumentException("Thời hạn gói không hợp lệ.");
+        String type = newPkg.getPackageType() == null ? "MAIN" : newPkg.getPackageType();
+        Integer newMaxJobs = newPkg.getMaxJobs();
 
         // 1. Chốt hóa đơn
         payment.setStatus("SUCCESS");
         payment.setTransactionCode(transactionCode);
         paymentRepository.save(payment);
 
-        // 2. Tìm gói ACTIVE hiện tại của user
+        // 2. Tìm gói ACTIVE hiện tại
         UserPackage activePkg = userPackageRepository
                 .findFirstByUserAndStatusOrderByEndDateDesc(payment.getUser(), "ACTIVE")
                 .orElse(null);
 
-        // 3. Trùng gói → gia hạn (cộng dồn ngày)
-        if (activePkg != null && activePkg.getServicePackage().getId().equals(newPkg.getId())) {
+        // ============================================================
+        // TRƯỜNG HỢP 1: TOP-UP — chỉ cộng tin, KHÔNG đổi hạn/ghim
+        // ============================================================
+        if ("TOPUP".equals(type)) {
+            if (activePkg == null) {
+                throw new IllegalStateException("Bạn cần mua gói chính (Basic/Pro) trước khi mua thêm tin.");
+            }
+            if (newMaxJobs != null) {
+                int oldMax = activePkg.getSnapshotMaxJobs() == null ? 0 : activePkg.getSnapshotMaxJobs();
+                activePkg.setSnapshotMaxJobs(oldMax + newMaxJobs);
+                userPackageRepository.save(activePkg);
+            } else {
+                activePkg.setSnapshotMaxJobs(null); // null = vô hạn
+                userPackageRepository.save(activePkg);
+            }
+            return;
+        }
+
+        // ============================================================
+        // TRƯỜNG HỢP 2: MUA GÓI CHÍNH (MAIN)
+        // ============================================================
+        Integer days = newPkg.getDurationDays();
+        if (days == null || days < 1) throw new IllegalArgumentException("Thời hạn gói chính không hợp lệ.");
+
+        Boolean newAllowPin = Boolean.TRUE.equals(newPkg.getAllowPinJob());
+
+        if (activePkg != null) {
+            boolean samePackage = activePkg.getServicePackage().getId().equals(newPkg.getId());
+
+            if (!samePackage) {
+                // 2a. Mua gói chính KHÁC -> CHẶN (không cho đổi gói khi chưa hết hạn)
+                throw new IllegalStateException(
+                        "Bạn đang dùng gói \"" + activePkg.getServicePackage().getName()
+                                + "\". Không thể đổi sang gói khác khi gói hiện tại chưa hết hạn.");
+            }
+
+            // 2b. Mua lại ĐÚNG gói -> cộng dồn ngày + cộng dồn số tin
             LocalDateTime base = activePkg.getEndDate().isAfter(LocalDateTime.now())
-                    ? activePkg.getEndDate()
-                    : LocalDateTime.now();
+                    ? activePkg.getEndDate() : LocalDateTime.now();
             activePkg.setEndDate(base.plusDays(days));
+
+            if (newMaxJobs != null) {
+                int oldMax = activePkg.getSnapshotMaxJobs() == null ? 0 : activePkg.getSnapshotMaxJobs();
+                activePkg.setSnapshotMaxJobs(oldMax + newMaxJobs);
+            } else {
+                activePkg.setSnapshotMaxJobs(null); // Gói vô hạn
+            }
+            if (newAllowPin) activePkg.setAllowPinJob(true);
+
             userPackageRepository.save(activePkg);
             return;
         }
 
-        // 4. Khác gói → hủy gói cũ (nâng cấp)
-        if (activePkg != null) {
-            activePkg.setStatus("CANCELLED");
-            userPackageRepository.save(activePkg);
-        }
-
-        // 5. Tạo gói mới
-        UserPackage subscription = new UserPackage();
-        subscription.setUser(payment.getUser());
-        subscription.setServicePackage(newPkg);
-        subscription.setStartDate(LocalDateTime.now());
-        subscription.setEndDate(subscription.getStartDate().plusDays(days));
-        subscription.setStatus("ACTIVE");
-        userPackageRepository.save(subscription);
+        // ============================================================
+        // TRƯỜNG HỢP 3: MUA LẦN ĐẦU
+        // ============================================================
+        UserPackage newUserPkg = new UserPackage();
+        newUserPkg.setUser(payment.getUser());
+        newUserPkg.setServicePackage(newPkg);
+        newUserPkg.setStartDate(LocalDateTime.now());
+        newUserPkg.setEndDate(LocalDateTime.now().plusDays(days));
+        newUserPkg.setStatus("ACTIVE");
+        newUserPkg.setUsedJobs(0);
+        newUserPkg.setSnapshotMaxJobs(newMaxJobs);
+        newUserPkg.setAllowPinJob(newAllowPin);
+        userPackageRepository.save(newUserPkg);
     }
 
     // ==========================================
