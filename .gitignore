@@ -36,6 +36,7 @@ build/
 
 # Local data, credentials and generated review files
 /uploads/
+/storage/
 .env
 .env.*
 !.env.example

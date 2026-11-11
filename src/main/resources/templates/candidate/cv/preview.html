@@ -24,6 +24,10 @@
 </div>
 
 <!-- ==========================================
+     FRAGMENT DÙNG CHUNG CHO CANDIDATE & RECRUITER
+     ========================================== -->
+<th:block th:fragment="cvDocument">
+<!-- ==========================================
      TRƯỜNG HỢP 1: CV TẢI LÊN TỪ MÁY (FILE UPLOAD)
      ========================================== -->
 <th:block th:if="${cv.isUploaded}">
@@ -38,19 +42,19 @@
                 </p>
             </div>
             <div class="preview-uploaded-actions">
-                <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="preview-btn preview-btn-primary">⬇ Tải file về máy</a>
+                <a th:href="${fileDownloadUrl != null ? fileDownloadUrl : '/candidate/cvs/' + cv.id + '/download'}" class="preview-btn preview-btn-primary">⬇ Tải file về máy</a>
             </div>
         </div>
 
         <div class="preview-embed-box" th:if="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf')}">
-            <iframe th:src="@{/candidate/cvs/{id}/file(id=${cv.id})}" class="preview-pdf-iframe" title="Nội dung CV PDF"></iframe>
+            <iframe th:src="${fileViewUrl != null ? fileViewUrl : '/candidate/cvs/' + cv.id + '/file'}" class="preview-pdf-iframe" title="Nội dung CV PDF"></iframe>
         </div>
 
         <div class="preview-doc-box" th:unless="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf')}">
             <div class="preview-doc-icon">📄</div>
             <h2 class="preview-doc-heading" th:text="${cv.title}">Tài liệu CV</h2>
             <p class="preview-doc-text">File định dạng Word (.doc, .docx) không hỗ trợ xem trực tiếp trong khung trình duyệt. Bạn có thể tải file về để xem và chỉnh sửa trên máy tính.</p>
-            <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="preview-btn preview-btn-primary">⬇ Tải file Word về máy</a>
+            <a th:href="${fileDownloadUrl != null ? fileDownloadUrl : '/candidate/cvs/' + cv.id + '/download'}" class="preview-btn preview-btn-primary">⬇ Tải file Word về máy</a>
         </div>
     </div>
 </th:block>
@@ -65,7 +69,7 @@
     <div class="preview-container preview-layout-standard"
          th:if="${templateCode == 'STANDARD' or (templateCode != 'MINIMALIST' and templateCode != 'CREATIVE' and templateCode != 'MODERN' and templateCode != 'ATS_FRIENDLY')}">
         <header class="preview-header">
-            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
+            <img th:src="${avatarEndpoint != null ? avatarEndpoint : '/candidate/cvs/' + cv.id + '/avatar'}" alt="Avatar" class="preview-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
             <div class="preview-info-col">
                 <h1 class="preview-title" th:text="${candidateUser != null && candidateUser.fullName != null && !candidateUser.fullName.isEmpty() ? candidateUser.fullName : cv.title}">Họ và Tên</h1>
                 <p class="preview-subtitle" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : (candidate != null && candidate.desiredPosition != null ? candidate.desiredPosition : 'Chuyên gia')}">Chức danh nghề nghiệp</p>
@@ -249,7 +253,7 @@
     <!-- ============================================================== -->
     <div class="preview-container preview-layout-minimalist" th:if="${templateCode == 'MINIMALIST'}">
         <div class="preview-min-banner">
-            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-min-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
+            <img th:src="${avatarEndpoint != null ? avatarEndpoint : '/candidate/cvs/' + cv.id + '/avatar'}" alt="Avatar" class="preview-min-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
             <h1 class="preview-min-name" th:text="${candidateUser != null && candidateUser.fullName != null && !candidateUser.fullName.isEmpty() ? candidateUser.fullName : cv.title}">Họ và Tên</h1>
             <p class="preview-min-role" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : (candidate != null && candidate.desiredPosition != null ? candidate.desiredPosition : 'Ứng viên tiềm năng')}">Chức danh nghề nghiệp</p>
 
@@ -425,7 +429,7 @@
     <!-- ============================================================== -->
     <div class="preview-container preview-layout-creative" th:if="${templateCode == 'CREATIVE'}">
         <header class="preview-cre-banner">
-            <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-cre-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
+            <img th:src="${avatarEndpoint != null ? avatarEndpoint : '/candidate/cvs/' + cv.id + '/avatar'}" alt="Avatar" class="preview-cre-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
             <div>
                 <h1 class="preview-cre-name" th:text="${candidateUser != null && candidateUser.fullName != null && !candidateUser.fullName.isEmpty() ? candidateUser.fullName : cv.title}">Họ và Tên</h1>
                 <p class="preview-cre-role" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : (candidate != null && candidate.desiredPosition != null ? candidate.desiredPosition : 'Chuyên gia cao cấp')}">Chức danh nghề nghiệp</p>
@@ -599,7 +603,7 @@
         <!-- CỘT TRÁI (SIDEBAR) -->
         <aside class="preview-mod-sidebar">
             <div class="preview-mod-avatar-box">
-                <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="preview-mod-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
+                <img th:src="${avatarEndpoint != null ? avatarEndpoint : '/candidate/cvs/' + cv.id + '/avatar'}" alt="Avatar" class="preview-mod-avatar" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
             </div>
 
             <!-- THÔNG TIN LIÊN HỆ -->
@@ -894,6 +898,7 @@
     }
     /*]]>*/
 </script>
+</th:block>
 
 </body>
 </html>

@@ -59,6 +59,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/sepay/webhook").permitAll()
                         .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/sepay/ipn").permitAll()
+                        .requestMatchers("/uploads/cv/**").denyAll()
                         .requestMatchers(
                                 "/", "/login", "/register", "/register/**",
                                 "/verify-otp", "/resend-otp", "/auth/**",
