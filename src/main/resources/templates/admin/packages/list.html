@@ -6,7 +6,16 @@
 <div class="main">
     <div th:replace="~{admin/_layout :: topbar('Quản lý Gói dịch vụ', 'Danh sách các gói dành cho Recruiter và Candidate')}"></div>
 
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <!-- Thông báo -->
+    <div th:if="${success}" class="alert alert-success" th:text="${success}" style="margin-bottom: 16px;"></div>
+    <div th:if="${error}" class="alert alert-error" th:text="${error}" style="margin-bottom: 16px; color: red;"></div>
+
+    <!-- Thanh công cụ -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+        <a th:href="@{/admin/packages/new}" class="btn btn-primary" style="background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+            + Thêm gói mới
+        </a>
+    </div>
 
     <div class="table-wrap" style="overflow: visible;">
         <table class="data">
@@ -17,6 +26,8 @@
                 <th>Dành Cho</th>
                 <th>Giá (VNĐ)</th>
                 <th>Thời Hạn</th>
+                <th>Số Tin</th>
+                <th>Ghim</th>
                 <th>Trạng thái</th>
                 <th>Hành động</th>
             </tr>
@@ -34,7 +45,12 @@
                     <span class="badge" style="background:#eee;" th:if="${p.targetRole.name() == 'ADMIN'}">Tất cả</span>
                 </td>
                 <td th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                <td th:text="${p.durationDays} + ' ngày'"></td>
+                <td th:text="${p.durationDays != null ? p.durationDays + ' ngày' : '---'}"></td>
+                <td th:text="${p.maxJobs != null ? p.maxJobs : 'Vô hạn'}"></td>
+                <td>
+                    <span th:if="${p.allowPinJob}" style="color: green; font-weight: bold;">Có</span>
+                    <span th:if="${!p.allowPinJob}" style="color: gray;">Không</span>
+                </td>
                 <td>
                     <span class="badge badge-active" th:if="${p.isActive}">Đang bán</span>
                     <span class="badge badge-locked" th:if="${!p.isActive}">Tạm ẩn</span>

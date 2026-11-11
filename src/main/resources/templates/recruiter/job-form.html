@@ -55,6 +55,14 @@
 
       <div class="form-body">
 
+        <div style="padding:14px 18px; border-radius:10px; margin-bottom:20px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong style="font-size:15px;">📊 Hạn mức đăng bài:</strong>
+            <span th:text="${quotaLabel}" style="font-size:15px; font-weight:600;">Còn 5/10 tin</span>
+          </div>
+          <a th:href="@{/pricing}" style="color:#1e40af; font-weight:700; text-decoration:underline; font-size:14px;">Mua thêm tin →</a>
+        </div>
+
         <div class="alert alert-error"
              th:if="${errorMessage != null}"
              th:text="${errorMessage}">
@@ -258,7 +266,7 @@
           </section>
 
           <!-- TÍNH NĂNG GHIM TIN (DÀNH RIÊNG CHO GÓI PRO) -->
-          <div class="form-group full" style="margin-top: 20px; margin-bottom: 30px;">
+          <div class="form-group full" style="margin-top: 20px; margin-bottom: 30px;" th:if="${canPin}">
             <div style="background: #fffbeb; border: 2px dashed #f59e0b; border-radius: 12px; padding: 24px; display: flex; align-items: flex-start; gap: 16px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.1);" id="pinFeatureBox">
               <div style="margin-top: 3px;">
                 <input type="checkbox" th:field="*{isPinned}" id="isPinned" style="width: 24px; height: 24px; cursor: pointer; accent-color: #f59e0b;">

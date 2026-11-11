@@ -125,13 +125,19 @@ public class RecruiterJobController {
     // =====================================================
 
     @GetMapping("/new")
-    // Tạo form trong luồng tuyển dụng.
-    public String createForm(Model model) {
+    public String createForm(Model model, Authentication authentication) {
+        User recruiter = getLoggedInRecruiter(authentication); // Lấy user đang đăng nhập
+
         model.addAttribute("jobForm", new RecruiterJobForm());
         model.addAttribute("skillOptions", jobSkillService.options(List.of()));
         model.addAttribute("categories", jobService.getActiveCategories());
         model.addAttribute("employmentTypes", EmploymentType.values());
         model.addAttribute("pageTitle", "Tạo tin tuyển dụng");
+
+        // ===== THÊM 2 DÒNG NÀY =====
+        model.addAttribute("quotaLabel", servicePackageService.getQuotaLabel(recruiter));
+        model.addAttribute("canPin", servicePackageService.canPinJob(recruiter));
+        // ============================
 
         return "recruiter/job-form";
     }
@@ -141,7 +147,6 @@ public class RecruiterJobController {
     // =====================================================
 
     @GetMapping("/{id}/edit")
-    // Xử lý form trong luồng tuyển dụng.
     public String editForm(
             @PathVariable Long id,
             Authentication authentication,
@@ -151,21 +156,10 @@ public class RecruiterJobController {
         try {
             User recruiter = getLoggedInRecruiter(authentication);
 
-            // Chỉ chủ sở hữu của tin mới được sửa.
-            Job job = jobService.getJobForRecruiter(
-                    id,
-                    recruiter.getId()
-            );
+            Job job = jobService.getJobForRecruiter(id, recruiter.getId());
 
-            // Tin đã đóng thì phải mở lại trước; các trạng thái khác đều được sửa
-            // (sửa tin chờ duyệt/đang hiển thị sẽ được gửi lại cho Admin duyệt)
             if (job.getStatus() == JobStatus.CLOSED) {
-
-                redirectAttributes.addFlashAttribute(
-                        "errorMessage",
-                        "Tin đã đóng. Hãy mở lại tin trước khi sửa."
-                );
-
+                redirectAttributes.addFlashAttribute("errorMessage", "Tin đã đóng. Hãy mở lại tin trước khi sửa.");
                 return "redirect:/recruiter/jobs";
             }
 
@@ -187,31 +181,24 @@ public class RecruiterJobController {
             form.setEmploymentType(job.getEmploymentType());
             form.setQuantity(job.getQuantity());
             form.setDeadline(job.getDeadline());
+            form.setIsPinned(job.getIsPinned()); // Load lại trạng thái ghim cũ (nếu có)
 
             model.addAttribute("jobForm", form);
             model.addAttribute("skillOptions", jobSkillService.options(form.getSkillIds()));
             model.addAttribute("currentJobImageUrl", job.getLogoUrl());
-            model.addAttribute(
-                    "categories",
-                    jobService.getActiveCategories()
-            );
-            model.addAttribute(
-                    "employmentTypes",
-                    EmploymentType.values()
-            );
-            model.addAttribute(
-                    "pageTitle",
-                    "Chỉnh sửa tin tuyển dụng"
-            );
+            model.addAttribute("categories", jobService.getActiveCategories());
+            model.addAttribute("employmentTypes", EmploymentType.values());
+            model.addAttribute("pageTitle", "Chỉnh sửa tin tuyển dụng");
+
+            // ===== THÊM 2 DÒNG NÀY =====
+            model.addAttribute("quotaLabel", servicePackageService.getQuotaLabel(recruiter));
+            model.addAttribute("canPin", servicePackageService.canPinJob(recruiter));
+            // ============================
 
             return "recruiter/job-form";
 
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage()
-            );
-
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/recruiter/jobs";
         }
     }

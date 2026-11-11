@@ -35,6 +35,8 @@ public class PricingController {
         model.addAttribute("currentUser", user);
         model.addAttribute("paymentReady", gateway.isReady() || bank.isReady());
         model.addAttribute("gatewaySandbox", gateway.isReady() && gateway.isSandbox());
+        model.addAttribute("activePackage", packageService.getActivePackage(user));
+
         return "pricing/index";
     }
 
@@ -59,6 +61,13 @@ public class PricingController {
         // Chặn mua chéo gói ở POST
         if (pkg.getTargetRole() != currentUser.getRole()) {
             ra.addFlashAttribute("error", "Bạn không thể mua gói dịch vụ dành cho vai trò khác!");
+            return "redirect:/pricing";
+        }
+
+        // THÊM ĐOẠN NÀY: Chặn mua 2 gói chính cùng lúc
+        var activePkg = packageService.getActivePackage(currentUser);
+        if ("MAIN".equals(pkg.getPackageType()) && activePkg != null && !activePkg.getServicePackage().getId().equals(pkg.getId())) {
+            ra.addFlashAttribute("error", "Bạn đang dùng gói " + activePkg.getServicePackage().getName() + ". Không thể đổi gói khi chưa hết hạn.");
             return "redirect:/pricing";
         }
 

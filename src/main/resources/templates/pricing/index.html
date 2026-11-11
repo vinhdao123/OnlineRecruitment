@@ -112,13 +112,45 @@
             <div class="price">
                 <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">0</span> đ
             </div>
-            <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'"></div>
+            <!-- Hiển thị số tin (Max Jobs) cho cả 2 loại gói -->
+            <div class="duration" th:if="${p.maxJobs != null}" style="color: #2a6df4; font-weight: 600; margin-bottom: 5px;">
+                <span th:text="'Đăng tối đa: ' + ${p.maxJobs} + ' tin'"></span>
+            </div>
+            <div class="duration" th:if="${p.maxJobs == null}" style="color: #2a6df4; font-weight: 600; margin-bottom: 5px;">
+                Không giới hạn số tin
+            </div>
+
+            <!-- Hiển thị thời hạn (chỉ dành cho gói MAIN, gói TOPUP sẽ hiện chữ khác) -->
+            <div class="duration" th:if="${p.durationDays != null}" style="margin-bottom: 30px;">
+                <span th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'"></span>
+            </div>
+            <div class="duration" th:if="${p.durationDays == null}" style="margin-bottom: 30px; color: #64748b;">
+                Cộng dồn vào gói hiện tại
+            </div>
 
             <!-- Nút mua gói -->
-            <form th:action="@{/pricing/checkout/{id}(id=${p.id})}" method="post" style="margin: 0;">
-                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button class="btn-buy" th:disabled="${!paymentReady}">Mua gói này</button>
-            </form>
+            <div th:with="isMain=${p.packageType == 'MAIN'},
+                          isCurrent=${activePackage != null and activePackage.servicePackage.id == p.id},
+                          hasOtherMain=${activePackage != null and activePackage.servicePackage.id != p.id}">
+
+                <!-- Trường hợp 1: Đây là gói đang dùng -->
+                <button th:if="${isCurrent}" class="btn-buy" disabled
+                        style="background: #ecfdf5; color: #047857; cursor: default; border: 1px solid #a7f3d0; font-weight: 700;">
+                    Gói hiện tại của bạn
+                </button>
+
+                <!-- Trường hợp 2: Đang dùng gói Main khác, định mua gói Main mới -->
+                <button th:if="${!isCurrent and isMain and hasOtherMain}" class="btn-buy" disabled
+                        style="background: #e2e8f0; color: #64748b; cursor: not-allowed; border: 1px solid #cbd5e1;">
+                    Không thể đổi gói khi chưa hết hạn
+                </button>
+
+                <!-- Trường hợp 3: Được phép mua (Gói Top-up, hoặc chưa có gói Main nào) -->
+                <form th:if="${!isCurrent and !(isMain and hasOtherMain)}" th:action="@{/pricing/checkout/{id}(id=${p.id})}" method="post" style="margin: 0;">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <button class="btn-buy" th:disabled="${!paymentReady}">Mua gói này</button>
+                </form>
+            </div>
         </div>
 
         <!-- Nếu không có gói nào -->
