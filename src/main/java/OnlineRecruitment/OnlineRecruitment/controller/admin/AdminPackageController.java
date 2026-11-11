@@ -57,10 +57,9 @@ public class AdminPackageController {
     public String save(@ModelAttribute("pkg") ServicePackage form,
                        RedirectAttributes ra) {
 
-        // 1. CHẶN CREATE — nếu form gửi id null thì không cho tạo
+        // 1. CHẶN CREATE — chỉ cho Update
         if (form.getId() == null) {
-            ra.addFlashAttribute("error",
-                    "Chức năng tạo gói mới đã bị vô hiệu hóa.");
+            ra.addFlashAttribute("error", "Chức năng tạo gói mới đã bị vô hiệu hóa.");
             return "redirect:/admin/packages";
         }
 
@@ -76,28 +75,26 @@ public class AdminPackageController {
         // 3. Validate 3 field được phép sửa
         if (form.getPrice() == null || form.getPrice() <= 0) {
             ra.addFlashAttribute("error", "Giá gói phải lớn hơn 0.");
-            return "redirect:/admin/packages/" + form.getId() + "/edit";
+            return "redirect:/admin/packages/" + form.getId() + "/edit";   // ✅ SỬA
         }
         if (form.getPrice() % 1 != 0) {
             ra.addFlashAttribute("error", "Giá gói phải là số nguyên (VNĐ).");
-            return "redirect:/admin/packages/" + form.getId() + "/edit";
+            return "redirect:/admin/packages/" + form.getId() + "/edit";   // ✅ SỬA
         }
         if (form.getDurationDays() == null || form.getDurationDays() < 1) {
             ra.addFlashAttribute("error", "Thời hạn phải ít nhất 1 ngày.");
-            return "redirect:/admin/packages/" + form.getId() + "/edit";
+            return "redirect:/admin/packages/" + form.getId() + "/edit";   // ✅ SỬA
         }
 
         // 4. CHỈ COPY 3 FIELD ĐƯỢC PHÉP
-        //    name, description, targetRole GIỮ NGUYÊN từ DB
         existing.setPrice(form.getPrice());
         existing.setDurationDays(form.getDurationDays());
         existing.setIsActive(form.getIsActive() != null && form.getIsActive());
 
-        // 5. Lưu
+        // 5. Lưu — name/description/targetRole giữ nguyên từ DB
         packageService.save(existing);
 
-        ra.addFlashAttribute("success",
-                "Đã cập nhật gói " + existing.getName() + " thành công.");
+        ra.addFlashAttribute("success", "Đã cập nhật gói " + existing.getName() + " thành công.");
         return "redirect:/admin/packages";
     }
 
