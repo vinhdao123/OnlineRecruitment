@@ -1,73 +1,146 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head('Quản lý Gói dịch vụ')}"></head>
-<body class="admin">
+<head th:replace="~{admin/_layout :: head('Quản lý Gói dịch vụ tuyển dụng')}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
+
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
-<div class="main">
-    <div th:replace="~{admin/_layout :: topbar('Quản lý Gói dịch vụ', 'Danh sách các gói dành cho Recruiter và Candidate')}"></div>
 
-    <!-- Thông báo -->
-    <div th:if="${success}" class="alert alert-success" th:text="${success}" style="margin-bottom: 16px;"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}" style="margin-bottom: 16px; color: red;"></div>
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-    <!-- Thanh công cụ -->
-    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
-        <a th:href="@{/admin/packages/new}" class="btn btn-primary" style="background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; text-decoration: none; font-weight: 600;">
-            + Thêm gói mới
-        </a>
-    </div>
+    <div th:replace="~{admin/_layout :: topbar('Gói dịch vụ', 'Cấu hình bảng giá và quyền lợi tin đăng dành cho nhà tuyển dụng')}"></div>
 
-    <div class="table-wrap" style="overflow: visible;">
-        <table class="data">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Tên Gói</th>
-                <th>Dành Cho</th>
-                <th>Giá (VNĐ)</th>
-                <th>Thời Hạn</th>
-                <th>Số Tin</th>
-                <th>Ghim</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="p : ${packages}">
-                <td th:text="${p.id}"></td>
-                <td>
-                    <strong th:text="${p.name}"></strong><br>
-                    <small style="color: #8895a8;" th:text="${p.description}"></small>
-                </td>
-                <td>
-                    <span class="badge badge-candidate" th:if="${p.targetRole.name() == 'CANDIDATE'}">Candidate</span>
-                    <span class="badge badge-recruiter" th:if="${p.targetRole.name() == 'RECRUITER'}">Recruiter</span>
-                    <span class="badge" style="background:#eee;" th:if="${p.targetRole.name() == 'ADMIN'}">Tất cả</span>
-                </td>
-                <td th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                <td th:text="${p.durationDays != null ? p.durationDays + ' ngày' : '---'}"></td>
-                <td th:text="${p.maxJobs != null ? p.maxJobs : 'Vô hạn'}"></td>
-                <td>
-                    <span th:if="${p.allowPinJob}" style="color: green; font-weight: bold;">Có</span>
-                    <span th:if="${!p.allowPinJob}" style="color: gray;">Không</span>
-                </td>
-                <td>
-                    <span class="badge badge-active" th:if="${p.isActive}">Đang bán</span>
-                    <span class="badge badge-locked" th:if="${!p.isActive}">Tạm ẩn</span>
-                </td>
-                <td>
-                    <a th:href="@{/admin/packages/{id}/edit(id=${p.id})}" class="btn btn-secondary" style="padding: 4px 8px; font-size:12px;">Sửa</a>
-                    <form th:action="@{/admin/packages/{id}/toggle(id=${p.id})}" method="post" style="display:inline;">
-                        <button type="submit" class="btn" th:classappend="${p.isActive} ? 'btn-danger' : 'btn-success'" style="padding: 4px 8px; font-size:12px;">
-                            <span th:text="${p.isActive} ? 'Ẩn' : 'Bán'"></span>
-                        </button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md">
+                    <i data-lucide="package" class="w-3.5 h-3.5"></i>
+                    BẢNG GIÁ &amp; QUYỀN LỢI
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold font-display">Danh sách gói dịch vụ tuyển dụng</h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-xl">
+                    Quản lý các gói đăng tin chính (Basic, Pro, Enterprise) và các gói Top-up nạp thêm tin đăng với mức giá linh hoạt.
+                </p>
+            </div>
+
+            <div class="flex-shrink-0">
+                <a th:href="@{/admin/packages/new}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Thêm gói dịch vụ mới
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${success}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                <span>Hiện có <strong class="text-slate-900 font-bold" th:text="${packages != null ? packages.size() : 0}">0</strong> gói dịch vụ trong hệ thống</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                    <tr class="border-b border-slate-200/80 bg-slate-50/70 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-6">ID</th>
+                        <th class="py-3.5 px-4">Tên gói &amp; Quyền lợi</th>
+                        <th class="py-3.5 px-4">Đối tượng</th>
+                        <th class="py-3.5 px-4">Đơn giá (VNĐ)</th>
+                        <th class="py-3.5 px-4">Thời hạn</th>
+                        <th class="py-3.5 px-4">Số tin đăng</th>
+                        <th class="py-3.5 px-4">Ghim Top</th>
+                        <th class="py-3.5 px-4">Trạng thái</th>
+                        <th class="py-3.5 px-6 text-right">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                    <tr th:each="p : ${packages}" class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-4 px-6 font-mono font-bold text-slate-500" th:text="'#' + ${p.id}">#1</td>
+                        <td class="py-4 px-4 max-w-xs">
+                            <span class="font-extrabold text-slate-900 text-sm block" th:text="${p.name}">Tên gói</span>
+                            <span class="text-[11px] text-slate-400 mt-0.5 line-clamp-2 block leading-relaxed" th:text="${p.description != null ? p.description : ''}">Mô tả ngắn...</span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold"
+                                  th:classappend="${p.targetRole != null and p.targetRole.name() == 'RECRUITER' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800'}">
+                                <span th:if="${p.targetRole != null and p.targetRole.name() == 'CANDIDATE'}">Ứng viên</span>
+                                <span th:if="${p.targetRole != null and p.targetRole.name() == 'RECRUITER'}">Doanh nghiệp</span>
+                                <span th:if="${p.targetRole != null and p.targetRole.name() == 'ADMIN'}">Quản trị</span>
+                                <span th:if="${p.targetRole == null}">Tất cả</span>
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 font-mono font-extrabold text-primary-700 text-sm"
+                            th:text="${p.price != null ? #numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">
+                            0 đ
+                        </td>
+                        <td class="py-4 px-4 font-semibold text-slate-700" th:text="${p.durationDays != null ? p.durationDays + ' ngày' : 'Vĩnh viễn'}">30 ngày</td>
+                        <td class="py-4 px-4 font-bold text-slate-800" th:text="${p.maxJobs != null ? p.maxJobs + ' tin' : 'Không giới hạn'}">10 tin</td>
+                        <td class="py-4 px-4">
+                            <span th:if="${p.allowPinJob == true}" class="inline-flex items-center gap-1 font-bold text-emerald-600">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i> Có
+                            </span>
+                            <span th:if="${p.allowPinJob != true}" class="text-slate-400">Không</span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                                  th:classappend="${p.isActive == true ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
+                                <span th:if="${p.isActive == true}">✓ Đang mở bán</span>
+                                <span th:if="${p.isActive != true}">● Tạm ẩn</span>
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-1.5">
+                                <a th:href="@{/admin/packages/{id}/edit(id=${p.id})}"
+                                   class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary-600 transition-colors" title="Chỉnh sửa">
+                                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                                </a>
+                                <form th:action="@{/admin/packages/{id}/toggle(id=${p.id})}" method="post" class="inline">
+                                    <button type="submit"
+                                            class="p-2 rounded-xl transition-colors"
+                                            th:classappend="${p.isActive == true ? 'text-rose-600 hover:bg-rose-50' : 'text-emerald-600 hover:bg-emerald-50'}"
+                                            th:title="${p.isActive == true ? 'Tạm ẩn gói' : 'Mở bán lại'}">
+                                        <i th:if="${p.isActive == true}" data-lucide="eye-off" class="w-4 h-4"></i>
+                                        <i th:if="${p.isActive != true}" data-lucide="eye" class="w-4 h-4"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${packages == null or #lists.isEmpty(packages)}">
+                        <td colspan="9" class="py-12 text-center text-slate-400">
+                            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+                            Chưa có gói dịch vụ nào trong hệ thống.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
+
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
 </body>
 </html>

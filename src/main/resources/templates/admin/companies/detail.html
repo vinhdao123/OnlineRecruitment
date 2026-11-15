@@ -1,212 +1,291 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head(${company.companyName} + ' — Detail')}"></head>
-<body class="admin">
+<head th:replace="~{admin/_layout :: head(${company.companyName} + ' — Chi tiết doanh nghiệp')}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
 
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
 
-<div class="main">
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-    <div class="topbar">
-        <div>
-            <div class="breadcrumb">
-                <a th:href="@{/admin/companies}">Companies</a>
-                <span>›</span>
-                <b th:text="${company.companyName}">Company Detail</b>
+    <div th:replace="~{admin/_layout :: topbar('Chi tiết doanh nghiệp', 'Xem xét hồ sơ pháp lý, người đại diện và quản lý xét duyệt')}"></div>
+
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+
+        <!-- Breadcrumb -->
+        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <div class="flex items-center gap-2">
+                <a th:href="@{/admin/companies}" class="hover:text-primary-600">Danh sách doanh nghiệp</a>
+                <span>/</span>
+                <span class="text-primary-600 font-semibold" th:text="${company.companyName}">Chi tiết</span>
             </div>
+            <a th:href="@{/admin/companies}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-600">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                Quay lại danh sách
+            </a>
         </div>
-        <div class="topbar-actions">
-            <div class="topbar-user">
-                <div class="avatar-circle">
-                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+
+        <!-- Alert Messages -->
+        <div th:if="${success}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Company Header Profile Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary-600 text-white font-extrabold text-2xl sm:text-3xl flex items-center justify-center font-display shadow-sm flex-shrink-0">
+                    <span th:text="${company.companyName != null ? company.companyName.substring(0,1).toUpperCase() : 'C'}">C</span>
                 </div>
-                <span th:text="${#authentication.name}">admin</span>
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-display" th:text="${company.companyName}">Tên doanh nghiệp</h1>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+                              th:classappend="${company.status.name() == 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : (company.status.name() == 'PENDING' ? 'bg-amber-100 text-amber-800' : (company.status.name() == 'LOCKED' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'))}">
+                            <span th:switch="${company.status.name()}">
+                                <span th:case="'ACTIVE'">✓ Đang hoạt động</span>
+                                <span th:case="'PENDING'">⏳ Chờ phê duyệt</span>
+                                <span th:case="'REJECTED'">✕ Đã từ chối</span>
+                                <span th:case="'LOCKED'">⛔ Đã khóa</span>
+                                <span th:case="*">● Khác</span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                        <span th:if="${company.taxCode != null}">MST: <strong class="font-mono text-slate-800" th:text="${company.taxCode}"></strong></span>
+                        <span th:if="${company.website != null}">&bull; <a th:href="${company.website}" target="_blank" class="text-primary-600 hover:underline" th:text="${company.website}"></a></span>
+                        <span>&bull; Đăng ký ngày: <strong class="text-slate-700" th:text="${#temporals.format(company.createdAt, 'dd/MM/yyyy HH:mm')}"></strong></span>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+            <!-- Actions buttons -->
+            <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+                <!-- PENDING Actions -->
+                <form th:if="${company.status.name() == 'PENDING'}"
+                      th:action="@{'/admin/companies/' + ${company.id} + '/approve'}" method="post"
+                      onsubmit="return confirm('Bạn chắc chắn muốn PHÊ DUYỆT hồ sơ doanh nghiệp này?');">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        Phê duyệt doanh nghiệp
+                    </button>
+                </form>
 
-    <div class="user-header">
-        <div class="user-avatar-wrap">
-            <div class="user-avatar" style="background:#2563eb; color:#fff; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; width:64px; height:64px; border-radius:12px;">
-                <span th:text="${company.companyName.substring(0,1).toUpperCase()}">C</span>
-            </div>
-        </div>
-        <div class="user-title-wrap">
-            <div class="user-name-row">
-                <h1 class="user-name" th:text="${company.companyName}">Company Name</h1>
-                <span class="badge" th:classappend="'badge-' + ${#strings.toLowerCase(company.status.name())}">
-                    <span th:switch="${company.status.name()}">
-                        <span th:case="'ACTIVE'">● Active</span>
-                        <span th:case="'PENDING'">⏳ Pending</span>
-                        <span th:case="'REJECTED'">✕ Rejected</span>
-                        <span th:case="'LOCKED'">⛔ Locked</span>
-                    </span>
-                </span>
-            </div>
-            <div class="user-meta">
-                <span th:if="${company.taxCode != null}">MST: <b th:text="${company.taxCode}"></b> · </span>
-                <span th:if="${company.website != null}">
-                    <a th:href="${company.website}" target="_blank" th:text="${company.website}"></a> ·
-                </span>
-                <span th:text="${#temporals.format(company.createdAt, 'dd/MM/yyyy HH:mm')}">Date</span>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <!-- PENDING -> APPROVE or REJECT -->
-            <form th:if="${company.status.name() == 'PENDING'}"
-                  th:action="@{'/admin/companies/' + ${company.id} + '/approve'}"
-                  method="post" style="display:inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit" class="btn btn-primary" onclick="return confirm('Duyệt hồ sơ doanh nghiệp này?')">
-                    ✓ Phê Duyệt
+                <button th:if="${company.status.name() == 'PENDING'}"
+                        type="button" onclick="openRejectModal()"
+                        class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition-all">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                    Từ chối hồ sơ
                 </button>
-            </form>
 
-            <button th:if="${company.status.name() == 'PENDING'}"
-                    type="button" class="btn btn-danger"
-                    onclick="document.getElementById('rejectModal').style.display='block'">
-                ✕ Từ Chối
-            </button>
+                <!-- ACTIVE Actions -->
+                <form th:if="${company.status.name() == 'ACTIVE'}"
+                      th:action="@{'/admin/companies/' + ${company.id} + '/lock'}" method="post"
+                      onsubmit="return confirm('Bạn chắc chắn muốn KHÓA doanh nghiệp này? Nhà tuyển dụng sẽ không thể đăng tin mới.');">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition-all">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                        Khóa tài khoản DN
+                    </button>
+                </form>
 
-            <!-- ACTIVE -> LOCK -->
-            <form th:if="${company.status.name() == 'ACTIVE'}"
-                  th:action="@{'/admin/companies/' + ${company.id} + '/lock'}"
-                  method="post" style="display:inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit" class="btn btn-danger" onclick="return confirm('Khóa doanh nghiệp này?')">
-                    🚫 Khóa Doanh Nghiệp
-                </button>
-            </form>
-
-            <!-- LOCKED -> UNLOCK -->
-            <form th:if="${company.status.name() == 'LOCKED'}"
-                  th:action="@{'/admin/companies/' + ${company.id} + '/unlock'}"
-                  method="post" style="display:inline">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <button type="submit" class="btn btn-success" onclick="return confirm('Mở khóa doanh nghiệp này?')">
-                    ✓ Mở Khóa
-                </button>
-            </form>
+                <!-- LOCKED Actions -->
+                <form th:if="${company.status.name() == 'LOCKED'}"
+                      th:action="@{'/admin/companies/' + ${company.id} + '/unlock'}" method="post"
+                      onsubmit="return confirm('Mở khóa cho doanh nghiệp này hoạt động trở lại?');">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all">
+                        <i data-lucide="unlock" class="w-4 h-4"></i>
+                        Mở khóa doanh nghiệp
+                    </button>
+                </form>
+            </div>
         </div>
+
+        <!-- 2 Columns Information Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Card 1: Thông tin pháp lý & Liên hệ DN -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <h3 class="text-sm font-extrabold text-slate-900 font-display flex items-center gap-2 pb-3 border-b border-slate-100 uppercase tracking-wider">
+                    <i data-lucide="building" class="w-4 h-4 text-primary-600"></i>
+                    Hồ sơ pháp lý doanh nghiệp
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Tên công ty đầy đủ</span>
+                        <span class="font-bold text-slate-900 text-right" th:text="${company.companyName}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Mã số thuế (MST)</span>
+                        <span class="font-mono font-bold text-slate-900 text-right" th:text="${company.taxCode != null ? company.taxCode : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Email chính thức</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${company.email != null ? company.email : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Số điện thoại tổng đài</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${company.phone != null ? company.phone : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Quy mô nhân sự</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${company.companySize != null ? company.companySize : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-start justify-between py-1.5 border-b border-slate-50 gap-4">
+                        <span class="text-slate-400 font-medium flex-shrink-0">Địa chỉ trụ sở</span>
+                        <span class="font-semibold text-slate-900 text-right leading-relaxed" th:text="${company.address != null ? company.address : '—'}">—</span>
+                    </div>
+
+                    <div th:if="${company.rejectionReason != null}" class="p-3 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-1">
+                        <span class="font-bold flex items-center gap-1 text-rose-700">
+                            <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Lý do từ chối:
+                        </span>
+                        <p th:text="${company.rejectionReason}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Người đại diện tài khoản Recruiter -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <h3 class="text-sm font-extrabold text-slate-900 font-display flex items-center gap-2 pb-3 border-b border-slate-100 uppercase tracking-wider">
+                    <i data-lucide="user-check" class="w-4 h-4 text-primary-600"></i>
+                    Tài khoản đại diện (Recruiter)
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Họ và tên người đại diện</span>
+                        <span class="font-bold text-slate-900 text-right" th:text="${company.recruiter != null ? company.recruiter.fullName : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Tên đăng nhập (Username)</span>
+                        <span class="font-mono font-semibold text-slate-900 text-right" th:text="${company.recruiter != null ? company.recruiter.username : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Email liên hệ cá nhân</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${company.recruiter != null ? company.recruiter.email : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Số điện thoại liên hệ</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${company.recruiter != null && company.recruiter.phone != null ? company.recruiter.phone : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Trạng thái tài khoản người dùng</span>
+                        <span class="font-bold text-slate-900 text-right">
+                            <span th:if="${company.recruiter != null}" th:text="${company.recruiter.status}" class="px-2 py-0.5 rounded-full text-[10px] bg-slate-100 text-slate-700"></span>
+                            <span th:unless="${company.recruiter != null}">—</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Description Box -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-3">
+            <h3 class="text-sm font-extrabold text-slate-900 font-display flex items-center gap-2 uppercase tracking-wider">
+                <i data-lucide="file-text" class="w-4 h-4 text-primary-600"></i>
+                Giới thiệu &amp; Mô tả doanh nghiệp
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line"
+               th:text="${company.description != null ? company.description : 'Doanh nghiệp chưa cập nhật phần mô tả tổng quan.'}">
+            </p>
+        </div>
+
     </div>
-
-    <!-- Thông tin chi tiết -->
-    <div class="info-grid">
-        <div class="info-box">
-            <h3>🏢 Thông Tin Doanh Nghiệp</h3>
-            <div class="info-row">
-                <span class="label">Tên công ty</span>
-                <span class="value" th:text="${company.companyName}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Mã số thuế</span>
-                <span class="value" th:text="${company.taxCode != null ? company.taxCode : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Email công ty</span>
-                <span class="value" th:text="${company.email != null ? company.email : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Số điện thoại</span>
-                <span class="value" th:text="${company.phone != null ? company.phone : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Quy mô</span>
-                <span class="value" th:text="${company.companySize != null ? company.companySize : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Địa chỉ</span>
-                <span class="value" th:text="${company.address != null ? company.address : '—'}">—</span>
-            </div>
-            <div class="info-row" th:if="${company.rejectionReason != null}">
-                <span class="label" style="color: #dc2626;">Lý do từ chối</span>
-                <span class="value" style="color: #dc2626;" th:text="${company.rejectionReason}">—</span>
-            </div>
-        </div>
-
-        <div class="info-box">
-            <h3>👤 Người Đại Diện (Recruiter)</h3>
-            <div class="info-row">
-                <span class="label">Họ và tên</span>
-                <span class="value" th:text="${company.recruiter != null ? company.recruiter.fullName : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Username</span>
-                <span class="value" th:text="${company.recruiter != null ? company.recruiter.username : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Email liên hệ</span>
-                <span class="value" th:text="${company.recruiter != null ? company.recruiter.email : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Số điện thoại</span>
-                <span class="value" th:text="${company.recruiter != null && company.recruiter.phone != null ? company.recruiter.phone : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Trạng thái tài khoản</span>
-                <span class="value">
-                    <span th:if="${company.recruiter != null}" th:text="${company.recruiter.status}"></span>
-                </span>
-            </div>
-        </div>
-    </div>
-
-    <div class="section" style="margin-top: 24px;">
-        <div class="section-title">📄 Mô tả doanh nghiệp</div>
-        <div style="font-size: 14px; color: #374151; line-height: 1.6; white-space: pre-line; padding: 12px 0;"
-             th:text="${company.description != null ? company.description : 'Chưa có thông tin mô tả.'}">
-        </div>
-    </div>
-
 </div>
 
-<!-- Modal từ chối -->
-<div id="rejectModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);">
-    <div style="background:#fff; width:520px; max-width:90%; margin:80px auto; padding:24px; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #e5e7eb;">
-            <h3 style="margin:0; font-size:18px; color:#111827;">✕ Từ Chối Phê Duyệt Doanh Nghiệp</h3>
-            <span onclick="document.getElementById('rejectModal').style.display='none'" style="cursor:pointer; font-size:20px; color:#9ca3af; font-weight:700;">&times;</span>
+<!-- Modal Từ Chối -->
+<div id="rejectModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-xl space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+            <h3 class="text-base font-extrabold text-slate-900 font-display flex items-center gap-2">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-rose-500"></i>
+                Từ chối phê duyệt doanh nghiệp
+            </h3>
+            <button type="button" onclick="closeRejectModal()" class="text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
 
-        <p style="font-size:13px; color:#6b7280; margin-bottom:14px;">
+        <p class="text-xs text-slate-500 leading-relaxed">
             Hệ thống sẽ gửi email kèm lý do từ chối và <strong>đường dẫn biểu mẫu</strong> để nhà tuyển dụng có thể chỉnh sửa lại thông tin và gửi lại xét duyệt mà không phải đăng ký mới từ đầu.
         </p>
 
-        <form th:action="@{'/admin/companies/' + ${company.id} + '/reject'}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <div style="margin-bottom: 12px;">
-                <label style="display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px;">Lý do từ chối (Không bắt buộc)</label>
-                <textarea id="detailModalReason" name="reason" rows="4" 
-                          style="width:100%; box-sizing:border-box; border:1px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;" 
-                          placeholder="Nhập lý do từ chối hồ sơ (nếu có)..."></textarea>
+        <form th:action="@{'/admin/companies/' + ${company.id} + '/reject'}" method="post" class="space-y-4">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="space-y-1.5">
+                <label class="text-xs font-bold text-slate-700">Lý do từ chối (Không bắt buộc)</label>
+                <textarea id="detailModalReason" name="reason" rows="3" placeholder="Nhập lý do chi tiết..."
+                          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500"></textarea>
             </div>
 
-            <!-- Gợi ý lý do nhanh -->
-            <div style="margin-bottom:16px;">
-                <span style="font-size:12px; color:#6b7280; font-weight:600;">Gợi ý lý do nhanh:</span>
-                <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
-                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Mã số thuế không hợp lệ hoặc không tồn tại trên Cổng thông tin Quốc gia.')">Mã số thuế không hợp lệ</button>
-                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Thông tin người đại diện hoặc số điện thoại liên hệ chưa chính xác.')">Sai thông tin liên hệ</button>
-                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Tên doanh nghiệp chưa khớp với giấy phép đăng ký kinh doanh.')">Sai tên doanh nghiệp</button>
-                    <button type="button" class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="addDetailQuickReason('Địa chỉ trụ sở công ty chưa cụ thể hoặc thiếu website chính thức.')">Thiếu địa chỉ/website</button>
+            <!-- Gợi ý nhanh -->
+            <div class="space-y-1.5">
+                <span class="text-[11px] font-bold text-slate-500">Gợi ý lý do nhanh:</span>
+                <div class="flex flex-wrap gap-1.5">
+                    <button type="button" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 font-medium transition-colors"
+                            onclick="addDetailQuickReason('Mã số thuế không hợp lệ hoặc không tồn tại trên Cổng thông tin Quốc gia.')">MST không hợp lệ</button>
+                    <button type="button" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 font-medium transition-colors"
+                            onclick="addDetailQuickReason('Thông tin người đại diện hoặc số điện thoại liên hệ chưa chính xác.')">Sai thông tin liên hệ</button>
+                    <button type="button" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 font-medium transition-colors"
+                            onclick="addDetailQuickReason('Tên doanh nghiệp chưa khớp với giấy phép đăng ký kinh doanh.')">Sai tên DN</button>
+                    <button type="button" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] text-slate-700 font-medium transition-colors"
+                            onclick="addDetailQuickReason('Địa chỉ trụ sở công ty chưa cụ thể hoặc thiếu website chính thức.')">Thiếu địa chỉ/website</button>
                 </div>
             </div>
 
-            <div style="display:flex; justify-content:flex-end; gap:10px; padding-top:12px; border-top:1px solid #e5e7eb;">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('rejectModal').style.display='none'">Hủy bỏ</button>
-                <button type="submit" class="btn btn-danger" style="background:#dc2626; color:#fff; font-weight:600;">✕ Xác Nhận Từ Chối & Gửi Mail</button>
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="closeRejectModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm transition-all">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                    Xác nhận từ chối &amp; Gửi mail
+                </button>
             </div>
         </form>
     </div>
 </div>
 
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+
+    function openRejectModal() {
+        var modal = document.getElementById('rejectModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeRejectModal() {
+        var modal = document.getElementById('rejectModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
     function addDetailQuickReason(text) {
-        const area = document.getElementById('detailModalReason');
+        var area = document.getElementById('detailModalReason');
         if (area.value.trim() === '') {
             area.value = text;
         } else {
@@ -214,7 +293,5 @@
         }
     }
 </script>
-
-<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
 </body>
 </html>
