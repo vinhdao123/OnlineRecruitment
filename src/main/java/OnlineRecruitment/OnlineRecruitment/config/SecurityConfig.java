@@ -65,7 +65,7 @@ public class SecurityConfig {
                                 "/verify-otp", "/resend-otp", "/auth/**",
                                 "/forgot-password", "/forgot-password/**",
                                 "/403", "/error", "/companies", "/about",
-                                "/company-profile",
+                                "/company-profile", "/pricing",
                                 "/interview-questions", "/interview-questions/**",
                                 "/skill-tests", "/skill-tests/{id:[0-9]+}",
                                 "/css/**", "/js/**", "/images/**", "/static/**",

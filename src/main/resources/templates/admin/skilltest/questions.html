@@ -1,152 +1,201 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{admin/_layout :: head('Ngân hàng câu hỏi — ' + ${test.title})}"></head>
-<body class="admin">
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
 
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
 
-<div class="main">
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-  <div class="topbar">
-    <div>
-      <div class="breadcrumb" style="font-size:13px; color:#8895a8; margin-bottom:4px;">
-        <a th:href="@{/admin/skill-tests}">Đề thi kỹ năng</a>
-        <span>›</span>
-        <b th:text="${test.skillName}">Java</b>
-        <span>›</span>
-        <span>Ngân hàng câu hỏi (Question Pool)</span>
+  <div th:replace="~{admin/_layout :: topbar('Ngân hàng câu hỏi', 'Cấu hình ngân hàng câu hỏi trắc nghiệm bốc ngẫu nhiên (Question Pool)')}"></div>
+
+  <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+
+    <!-- Breadcrumb -->
+    <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+      <div class="flex items-center gap-2">
+        <a th:href="@{/admin/skill-tests}" class="hover:text-primary-600">Đề thi kỹ năng</a>
+        <span>/</span>
+        <b class="text-slate-800" th:text="${test.skillName}">Kỹ năng</b>
+        <span>/</span>
+        <span class="text-primary-600 font-semibold">Ngân hàng câu hỏi</span>
       </div>
-      <h1 style="font-size:22px; font-weight:800; color:#1a2b4a;" th:text="'Ngân hàng câu hỏi: ' + ${test.title}">
-        Ngân hàng câu hỏi
-      </h1>
+      <a th:href="@{/admin/skill-tests}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-600">
+        <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+        Quay lại danh sách đề thi
+      </a>
     </div>
-    <div class="topbar-actions">
-      <a th:href="@{/admin/skill-tests}" class="btn btn-secondary">← Quay lại danh sách đề thi</a>
+
+    <!-- Alert messages -->
+    <div th:if="${success}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+      <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+      <span th:text="${success}"></span>
     </div>
-  </div>
+    <div th:if="${error}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+      <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+      <span th:text="${error}"></span>
+    </div>
 
-  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-  <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <!-- Mechanism Info Strip -->
+    <div class="bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+      <div class="space-y-2">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md">
+          <i data-lucide="shuffle" class="w-3.5 h-3.5"></i>
+          CƠ CHẾ RANDOM QUESTION POOL
+        </span>
+        <h1 class="text-xl sm:text-2xl font-extrabold font-display" th:text="'Ngân hàng câu hỏi: ' + ${test.title}">
+          Ngân hàng câu hỏi
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-xl">
+          Mỗi ứng viên khi vào thi sẽ được hệ thống bốc <strong class="text-amber-400 font-bold" th:text="${test.totalQuestionsPerTest}">10</strong> câu ngẫu nhiên từ ngân hàng gồm <strong class="text-emerald-400 font-bold" th:text="${questions.size()}">0</strong> câu hỏi bên dưới.
+        </p>
+      </div>
 
-  <!-- STATS BANNER -->
-  <div style="background:#fff; border-radius:12px; border:1px solid #e5eaf2; padding:20px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-    <div>
-      <div style="font-size:13px; color:#8895a8;">Cơ chế thi:</div>
-      <div style="font-size:15px; color:#1a2b4a; font-weight:700; margin-top:2px;">
-        Mỗi ứng viên khi vào thi sẽ được hệ thống bốc <span style="color:#00b14f;" th:text="${test.totalQuestionsPerTest}">10</span> câu ngẫu nhiên từ ngân hàng <span style="color:#2563eb;" th:text="${questions.size()}">20</span> câu hỏi bên dưới.
+      <div class="flex-shrink-0">
+        <button type="button" onclick="openAddModal()"
+                class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          Thêm câu hỏi vào Pool
+        </button>
       </div>
     </div>
-    <button type="button" class="btn btn-primary" onclick="openAddModal()">
-      + Thêm câu hỏi vào Pool
-    </button>
-  </div>
 
-  <!-- QUESTION LIST -->
-  <div class="table-wrap">
-    <table class="data">
-      <thead>
-      <tr>
-        <th style="width: 50px;">STT</th>
-        <th>Nội dung câu hỏi trắc nghiệm</th>
-        <th>Các phương án (A, B, C, D)</th>
-        <th style="width: 100px;">Đáp án đúng</th>
-        <th style="width: 140px; text-align:right;">Thao tác</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr th:each="q, stat : ${questions}">
-        <td th:text="${stat.index + 1}">1</td>
-        <td style="max-width:350px;">
-          <b th:text="${q.questionText}">Nội dung câu hỏi?</b>
-          <div style="font-size:12px; color:#64748b; margin-top:4px;" th:if="${q.explanation != null and !#strings.isEmpty(q.explanation)}">
-            💡 Giải thích: <span th:text="${#strings.abbreviate(q.explanation, 90)}">Giải thích...</span>
-          </div>
-        </td>
-        <td style="font-size:13px;">
-          <div><b th:style="${q.correctOption == 'A' ? 'color:#00b14f;' : ''}">A.</b> <span th:text="${q.optionA}">Option A</span></div>
-          <div><b th:style="${q.correctOption == 'B' ? 'color:#00b14f;' : ''}">B.</b> <span th:text="${q.optionB}">Option B</span></div>
-          <div><b th:style="${q.correctOption == 'C' ? 'color:#00b14f;' : ''}">C.</b> <span th:text="${q.optionC}">Option C</span></div>
-          <div><b th:style="${q.correctOption == 'D' ? 'color:#00b14f;' : ''}">D.</b> <span th:text="${q.optionD}">Option D</span></div>
-        </td>
-        <td>
-          <span class="badge badge-active" style="font-weight:800; font-size:13px;" th:text="'Đáp án ' + ${q.correctOption}">Đáp án A</span>
-        </td>
-        <td style="text-align:right; white-space:nowrap;">
-          <button type="button" class="btn btn-secondary" style="font-size:12px; padding:4px 8px;"
-                  th:data-id="${q.id}"
-                  th:data-text="${q.questionText}"
-                  th:data-a="${q.optionA}"
-                  th:data-b="${q.optionB}"
-                  th:data-c="${q.optionC}"
-                  th:data-d="${q.optionD}"
-                  th:data-correct="${q.correctOption}"
-                  th:data-exp="${q.explanation}"
-                  onclick="openEditModal(this)">
-            Sửa
-          </button>
-          <form th:action="@{'/admin/skill-tests/' + ${test.id} + '/questions/' + ${q.id} + '/delete'}" method="post" style="display:inline;"
-                onsubmit="return confirm('Bạn có chắc chắn muốn xóa câu hỏi này khỏi ngân hàng?')">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <button type="submit" class="btn btn-danger" style="font-size:12px; padding:4px 8px;">
-              Xóa
-            </button>
-          </form>
-        </td>
-      </tr>
-      <tr th:if="${questions.isEmpty()}">
-        <td colspan="5" style="text-align:center; color:#8895a8; padding: 40px;">
-          Ngân hàng đề thi này chưa có câu hỏi nào. Nhấn "+ Thêm câu hỏi vào Pool" để bắt đầu tạo.
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
+    <!-- Questions Table Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+        <span>Tổng số <strong class="text-slate-900 font-bold" th:text="${questions.size()}">0</strong> câu hỏi trong ngân hàng</span>
+      </div>
 
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+          <tr class="border-b border-slate-200/80 bg-slate-50/70 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+            <th class="py-3.5 px-6 w-12">STT</th>
+            <th class="py-3.5 px-4 min-w-[280px]">Nội dung câu hỏi trắc nghiệm</th>
+            <th class="py-3.5 px-4 min-w-[280px]">Phương án (A, B, C, D)</th>
+            <th class="py-3.5 px-4 w-32">Đáp án đúng</th>
+            <th class="py-3.5 px-6 text-right w-36">Thao tác</th>
+          </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+          <tr th:each="q, stat : ${questions}" class="hover:bg-slate-50/80 transition-colors">
+            <td class="py-4 px-6 font-mono font-bold text-slate-500" th:text="${stat.index + 1}">1</td>
+            <td class="py-4 px-4 space-y-1">
+              <span class="font-bold text-slate-900 text-sm leading-snug block" th:text="${q.questionText}">Nội dung câu hỏi?</span>
+              <div th:if="${q.explanation != null and !#strings.isEmpty(q.explanation)}"
+                   class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-lg border border-slate-100 leading-relaxed">
+                <strong class="text-primary-700">💡 Giải thích:</strong> <span th:text="${q.explanation}">Giải thích...</span>
+              </div>
+            </td>
+            <td class="py-4 px-4 space-y-1 text-slate-700">
+              <div class="flex items-start gap-1.5" th:classappend="${q.correctOption == 'A' ? 'font-bold text-emerald-700' : ''}">
+                <span class="w-4 flex-shrink-0">A.</span> <span th:text="${q.optionA}">Option A</span>
+              </div>
+              <div class="flex items-start gap-1.5" th:classappend="${q.correctOption == 'B' ? 'font-bold text-emerald-700' : ''}">
+                <span class="w-4 flex-shrink-0">B.</span> <span th:text="${q.optionB}">Option B</span>
+              </div>
+              <div class="flex items-start gap-1.5" th:classappend="${q.correctOption == 'C' ? 'font-bold text-emerald-700' : ''}">
+                <span class="w-4 flex-shrink-0">C.</span> <span th:text="${q.optionC}">Option C</span>
+              </div>
+              <div class="flex items-start gap-1.5" th:classappend="${q.correctOption == 'D' ? 'font-bold text-emerald-700' : ''}">
+                <span class="w-4 flex-shrink-0">D.</span> <span th:text="${q.optionD}">Option D</span>
+              </div>
+            </td>
+            <td class="py-4 px-4">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                <span th:text="'Đáp án ' + ${q.correctOption}">Đáp án A</span>
+              </span>
+            </td>
+            <td class="py-4 px-6 text-right">
+              <div class="flex items-center justify-end gap-1.5">
+                <button type="button" class="p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-primary-600 transition-colors"
+                        th:data-id="${q.id}"
+                        th:data-text="${q.questionText}"
+                        th:data-a="${q.optionA}"
+                        th:data-b="${q.optionB}"
+                        th:data-c="${q.optionC}"
+                        th:data-d="${q.optionD}"
+                        th:data-correct="${q.correctOption}"
+                        th:data-exp="${q.explanation}"
+                        onclick="openEditModal(this)" title="Chỉnh sửa câu hỏi">
+                  <i data-lucide="pencil" class="w-4 h-4"></i>
+                </button>
+                <form th:action="@{'/admin/skill-tests/' + ${test.id} + '/questions/' + ${q.id} + '/delete'}" method="post" class="inline"
+                      onsubmit="return confirm('Bạn chắc chắn muốn xóa câu hỏi này khỏi Question Pool?');">
+                  <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                  <button type="submit" class="p-2 rounded-xl text-rose-600 hover:bg-rose-50 transition-colors" title="Xóa câu hỏi">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty state -->
+          <tr th:if="${questions.isEmpty()}">
+            <td colspan="5" class="py-12 text-center text-slate-400">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+              Ngân hàng đề thi chưa có câu hỏi nào. Nhấn "+ Thêm câu hỏi vào Pool" phía trên để bắt đầu soạn.
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <!-- ADD QUESTION MODAL -->
-<div id="addModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px); overflow-y:auto;">
-  <div style="background:#fff; width:620px; max-width:92%; margin:40px auto; padding:28px; border-radius:14px; box-shadow:0 15px 35px rgba(0,0,0,0.2);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #e5eaf2;">
-      <h3 style="font-size:18px; font-weight:800; color:#1a2b4a; margin:0;">+ Thêm câu hỏi mới vào Pool</h3>
-      <span onclick="document.getElementById('addModal').style.display='none'" style="cursor:pointer; font-size:24px; color:#94a3b8;">&times;</span>
+<div id="addModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-xl space-y-5 my-8">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <h3 class="text-base font-extrabold text-slate-900 font-display flex items-center gap-2">
+        <i data-lucide="plus-circle" class="w-5 h-5 text-emerald-600"></i>
+        Thêm câu hỏi mới vào Question Pool
+      </h3>
+      <button type="button" onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
     </div>
 
-    <form th:action="@{'/admin/skill-tests/' + ${test.id} + '/questions/create'}" method="post">
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <form th:action="@{'/admin/skill-tests/' + ${test.id} + '/questions/create'}" method="post" class="space-y-4">
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-      <div style="margin-bottom:14px;">
-        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Nội dung câu hỏi <span style="color:#ef4444;">*</span></label>
-        <textarea name="questionText" rows="3" required
-                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;"
-                  placeholder="Nhập nội dung câu hỏi trắc nghiệm..."></textarea>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">Nội dung câu hỏi <span class="text-rose-500">*</span></label>
+        <textarea name="questionText" rows="3" required placeholder="Nhập đề bài câu hỏi trắc nghiệm..."
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án A <span style="color:#ef4444;">*</span></label>
-          <input type="text" name="optionA" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án A <span class="text-rose-500">*</span></label>
+          <input type="text" name="optionA" required placeholder="Nội dung phương án A"
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
         </div>
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án B <span style="color:#ef4444;">*</span></label>
-          <input type="text" name="optionB" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án B <span class="text-rose-500">*</span></label>
+          <input type="text" name="optionB" required placeholder="Nội dung phương án B"
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án C <span class="text-rose-500">*</span></label>
+          <input type="text" name="optionC" required placeholder="Nội dung phương án C"
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án D <span class="text-rose-500">*</span></label>
+          <input type="text" name="optionD" required placeholder="Nội dung phương án D"
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án C <span style="color:#ef4444;">*</span></label>
-          <input type="text" name="optionC" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
-        </div>
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án D <span style="color:#ef4444;">*</span></label>
-          <input type="text" name="optionD" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
-        </div>
-      </div>
-
-      <div style="margin-bottom:14px;">
-        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Đáp án đúng <span style="color:#ef4444;">*</span></label>
-        <select name="correctOption" style="width:100%; box-sizing:border-box; padding:10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:14px; font-weight:700;">
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">Đáp án chính xác <span class="text-rose-500">*</span></label>
+        <select name="correctOption" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
           <option value="A">Phương án A</option>
           <option value="B">Phương án B</option>
           <option value="C">Phương án C</option>
@@ -154,63 +203,74 @@
         </select>
       </div>
 
-      <div style="margin-bottom:18px;">
-        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Giải thích đáp án chi tiết (Hiển thị sau khi ứng viên nộp bài)</label>
-        <textarea name="explanation" rows="2"
-                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:13.5px; font-family:inherit;"
-                  placeholder="Giải thích vì sao đáp án này đúng để giúp ứng viên học hỏi..."></textarea>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">Giải thích chi tiết đáp án</label>
+        <textarea name="explanation" rows="2" placeholder="Giải thích lý do đúng để ứng viên học hỏi sau khi hoàn thành bài..."
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('addModal').style.display='none'">Hủy bỏ</button>
-        <button type="submit" class="btn btn-primary" style="font-weight:700;">Lưu câu hỏi</button>
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+          Hủy bỏ
+        </button>
+        <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition-all">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          Lưu câu hỏi
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- EDIT QUESTION MODAL -->
-<div id="editModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); backdrop-filter:blur(2px); overflow-y:auto;">
-  <div style="background:#fff; width:620px; max-width:92%; margin:40px auto; padding:28px; border-radius:14px; box-shadow:0 15px 35px rgba(0,0,0,0.2);">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid #e5eaf2;">
-      <h3 style="font-size:18px; font-weight:800; color:#1a2b4a; margin:0;">Chỉnh sửa câu hỏi</h3>
-      <span onclick="document.getElementById('editModal').style.display='none'" style="cursor:pointer; font-size:24px; color:#94a3b8;">&times;</span>
+<div id="editModal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden items-center justify-center p-4 overflow-y-auto">
+  <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-xl space-y-5 my-8">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+      <h3 class="text-base font-extrabold text-slate-900 font-display flex items-center gap-2">
+        <i data-lucide="pencil" class="w-5 h-5 text-primary-600"></i>
+        Chỉnh sửa câu hỏi
+      </h3>
+      <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
     </div>
 
-    <form id="editQuestionForm" method="post">
-      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+    <form id="editQuestionForm" method="post" class="space-y-4">
+      <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-      <div style="margin-bottom:14px;">
-        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Nội dung câu hỏi <span style="color:#ef4444;">*</span></label>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">Nội dung câu hỏi <span class="text-rose-500">*</span></label>
         <textarea id="editQuestionText" name="questionText" rows="3" required
-                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:14px; font-family:inherit;"></textarea>
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án A <span style="color:#ef4444;">*</span></label>
-          <input type="text" id="editOptionA" name="optionA" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án A <span class="text-rose-500">*</span></label>
+          <input type="text" id="editOptionA" name="optionA" required
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
         </div>
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án B <span style="color:#ef4444;">*</span></label>
-          <input type="text" id="editOptionB" name="optionB" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án B <span class="text-rose-500">*</span></label>
+          <input type="text" id="editOptionB" name="optionB" required
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án C <span class="text-rose-500">*</span></label>
+          <input type="text" id="editOptionC" name="optionC" required
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
+        </div>
+        <div class="space-y-1">
+          <label class="text-xs font-bold text-slate-700">Phương án D <span class="text-rose-500">*</span></label>
+          <input type="text" id="editOptionD" name="optionD" required
+                 class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500">
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án C <span style="color:#ef4444;">*</span></label>
-          <input type="text" id="editOptionC" name="optionC" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
-        </div>
-        <div>
-          <label style="display:block; font-size:13px; font-weight:700; margin-bottom:4px;">Phương án D <span style="color:#ef4444;">*</span></label>
-          <input type="text" id="editOptionD" name="optionD" required style="width:100%; box-sizing:border-box; padding:8px 10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:13.5px;">
-        </div>
-      </div>
-
-      <div style="margin-bottom:14px;">
-        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Đáp án đúng <span style="color:#ef4444;">*</span></label>
-        <select id="editCorrectOption" name="correctOption" style="width:100%; box-sizing:border-box; padding:10px; border:1.5px solid #d1d5db; border-radius:6px; font-size:14px; font-weight:700;">
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">Đáp án chính xác <span class="text-rose-500">*</span></label>
+        <select id="editCorrectOption" name="correctOption" required
+                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
           <option value="A">Phương án A</option>
           <option value="B">Phương án B</option>
           <option value="C">Phương án C</option>
@@ -218,25 +278,46 @@
         </select>
       </div>
 
-      <div style="margin-bottom:18px;">
-        <label style="display:block; font-size:13px; font-weight:700; margin-bottom:6px;">Giải thích đáp án chi tiết</label>
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">Giải thích chi tiết đáp án</label>
         <textarea id="editExplanation" name="explanation" rows="2"
-                  style="width:100%; box-sizing:border-box; border:1.5px solid #d1d5db; border-radius:8px; padding:10px; font-size:13.5px; font-family:inherit;"></textarea>
+                  class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-primary-500"></textarea>
       </div>
 
-      <div style="display:flex; justify-content:flex-end; gap:10px;">
-        <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Hủy bỏ</button>
-        <button type="submit" class="btn btn-primary" style="font-weight:700;">Cập nhật câu hỏi</button>
+      <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 transition-all">
+          Hủy bỏ
+        </button>
+        <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold shadow-sm transition-all">
+          <i data-lucide="save" class="w-4 h-4"></i>
+          Cập nhật câu hỏi
+        </button>
       </div>
     </form>
   </div>
 </div>
 
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
 <script th:inline="javascript">
   const testId = /*[[${test.id}]]*/ 0;
 
+  document.addEventListener("DOMContentLoaded", function () {
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  });
+
   function openAddModal() {
-    document.getElementById('addModal').style.display = 'block';
+    var modal = document.getElementById('addModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeAddModal() {
+    var modal = document.getElementById('addModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
   }
 
   function openEditModal(btn) {
@@ -249,10 +330,17 @@
     document.getElementById('editOptionD').value = btn.getAttribute('data-d');
     document.getElementById('editCorrectOption').value = btn.getAttribute('data-correct');
     document.getElementById('editExplanation').value = btn.getAttribute('data-exp') || '';
-    document.getElementById('editModal').style.display = 'block';
+
+    var modal = document.getElementById('editModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+
+  function closeEditModal() {
+    var modal = document.getElementById('editModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
   }
 </script>
-
-<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
 </body>
 </html>

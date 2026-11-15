@@ -68,6 +68,15 @@ public class CvExtraSectionController extends AbstractCvController {
                 "Đã xóa chứng chỉ!", "/certificates");
     }
 
+    @PostMapping("/{id}/certificates/{certId}/edit")
+    public String editCertificate(@PathVariable Long id, @PathVariable("certId") Long certId,
+                                  @Valid @ModelAttribute("certRequest") CertificateRequest req,
+                                  BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> extraSectionService.updateCertificate(id, certId, req, getUserId(auth)),
+                "Cập nhật chứng chỉ thành công!", "/certificates");
+    }
+
     // ---------- GIẢI THƯỞNG ----------
 
     @GetMapping("/{id}/awards")
@@ -101,6 +110,15 @@ public class CvExtraSectionController extends AbstractCvController {
         return deleteSectionItem(id, ra,
                 () -> extraSectionService.deleteAward(id, awardId, getUserId(auth)),
                 "Đã xóa giải thưởng!", "/awards");
+    }
+
+    @PostMapping("/{id}/awards/{awardId}/edit")
+    public String editAward(@PathVariable Long id, @PathVariable("awardId") Long awardId,
+                            @Valid @ModelAttribute("awardRequest") AwardRequest req,
+                            BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> extraSectionService.updateAward(id, awardId, req, getUserId(auth)),
+                "Cập nhật giải thưởng thành công!", "/awards");
     }
 
     // ---------- HOẠT ĐỘNG NGOẠI KHÓA ----------
@@ -138,6 +156,15 @@ public class CvExtraSectionController extends AbstractCvController {
                 "Đã xóa hoạt động!", "/activities");
     }
 
+    @PostMapping("/{id}/activities/{activityId}/edit")
+    public String editActivity(@PathVariable Long id, @PathVariable("activityId") Long activityId,
+                               @Valid @ModelAttribute("activityRequest") ActivityRequest req,
+                               BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> extraSectionService.updateActivity(id, activityId, req, getUserId(auth)),
+                "Cập nhật hoạt động thành công!", "/activities");
+    }
+
     // ---------- NGƯỜI THAM CHIẾU ----------
 
     @GetMapping("/{id}/references")
@@ -171,5 +198,14 @@ public class CvExtraSectionController extends AbstractCvController {
         return deleteSectionItem(id, ra,
                 () -> extraSectionService.deleteReference(id, refId, getUserId(auth)),
                 "Đã xóa người tham chiếu!", "/references");
+    }
+
+    @PostMapping("/{id}/references/{refId}/edit")
+    public String editReference(@PathVariable Long id, @PathVariable("refId") Long refId,
+                                @Valid @ModelAttribute("referenceRequest") ReferenceRequest req,
+                                BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> extraSectionService.updateReference(id, refId, req, getUserId(auth)),
+                "Cập nhật người tham chiếu thành công!", "/references");
     }
 }

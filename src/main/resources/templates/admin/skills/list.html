@@ -1,26 +1,152 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quản lý kỹ năng</title>
-<link rel="stylesheet" th:href="@{/css/admin.css}"><link rel="stylesheet" th:href="@{/css/admin-job-layout.css}"><link rel="stylesheet" th:href="@{/css/admin-skills.css}"></head>
-<body class="admin"><aside th:replace="~{admin/_layout :: sidebar}"></aside><div class="main skill-main">
-<div th:replace="~{admin/_layout :: topbar('Skills', 'Quản lý kỹ năng theo danh mục')}"></div>
-<main class="skill-container"><div class="skill-heading"><div><h1>Danh sách kỹ năng</h1><p>Quản lý kỹ năng dùng cho hồ sơ CV và phân loại yêu cầu tuyển dụng.</p></div>
-<a class="skill-btn" th:href="@{/admin/skills/new}">+ Tạo kỹ năng</a></div>
-<p class="skill-success" th:if="${successMessage}" th:text="${successMessage}"></p><p class="skill-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-<form class="admin-catalog-filters" th:action="@{/admin/skills}" method="get">
-    <input name="keyword" th:value="${keyword}" placeholder="Tìm tên kỹ năng" aria-label="Tên kỹ năng">
-    <select name="categoryId" aria-label="Danh mục"><option value="">Tất cả danh mục</option>
-        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryId == c.id}"></option></select>
-    <select name="status" aria-label="Trạng thái"><option value="">Tất cả trạng thái</option>
-        <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Đang sử dụng</option>
-        <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Ngừng sử dụng</option></select>
-    <button class="skill-btn">Lọc</button><a th:href="@{/admin/skills}">Xóa bộ lọc</a>
-</form>
-<p>Ngừng sử dụng sẽ ẩn kỹ năng khỏi lựa chọn mới. CV cũ giữ nguyên dữ liệu; có thể kích hoạt lại bằng cách sửa.</p>
-<div class="skill-table-scroll"><table class="skill-table"><thead><tr><th>ID</th><th>Tên kỹ năng</th><th>Danh mục ngành nghề</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-<tbody><tr th:each="skill : ${skills}"><td th:text="${skill.id}"></td><td th:text="${skill.name}"></td>
-<td th:text="${skill.category != null ? skill.category.name : 'Chưa phân loại'}"></td>
-<td><span class="skill-status" th:classappend="${skill.status == 'ACTIVE'} ? 'is-active' : 'is-inactive'" th:text="${skill.status}"></span></td>
-<td><a class="skill-btn skill-btn-small" th:href="@{/admin/skills/{id}/edit(id=${skill.id})}">Sửa</a></td></tr>
-<tr th:if="${#lists.isEmpty(skills)}"><td colspan="5">Chưa có kỹ năng nào.</td></tr></tbody></table></div>
-</main></div><th:block th:replace="~{admin/_layout :: scripts}"></th:block></body></html>
+<head th:replace="~{admin/_layout :: head('Quản lý kỹ năng chuyên môn')}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
+
+<aside th:replace="~{admin/_layout :: sidebar}"></aside>
+
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
+
+    <div th:replace="~{admin/_layout :: topbar('Quản lý kỹ năng', 'Cấu hình kỹ năng chuyên môn cho hồ sơ CV và yêu cầu tuyển dụng')}"></div>
+
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+
+        <!-- Header Banner -->
+        <div class="bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md">
+                    <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                    NGÂN HÀNG KỸ NĂNG CHUYÊN MÔN
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold font-display">Danh sách kỹ năng hệ thống</h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-xl">
+                    Quản lý toàn bộ thẻ kỹ năng (Java, Python, Figma, React, SEO...) gắn theo từng ngành nghề để tối ưu gợi ý việc làm.
+                </p>
+            </div>
+
+            <div class="flex-shrink-0">
+                <a th:href="@{/admin/skills/new}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Tạo kỹ năng mới
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${successMessage}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Filter Panel -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm">
+            <form th:action="@{/admin/skills}" method="get" class="flex flex-col md:flex-row items-center gap-3">
+                <div class="relative flex-1 w-full">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm theo tên kỹ năng (Java, Spring, Excel...)"
+                           class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                </div>
+
+                <div class="w-full md:w-56">
+                    <select name="categoryId" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option value="">Tất cả ngành nghề</option>
+                        <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}" th:selected="${categoryId == c.id}"></option>
+                    </select>
+                </div>
+
+                <div class="w-full md:w-48">
+                    <select name="status" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="ACTIVE" th:selected="${status == 'ACTIVE'}">Đang sử dụng (ACTIVE)</option>
+                        <option value="INACTIVE" th:selected="${status == 'INACTIVE'}">Ngừng sử dụng (INACTIVE)</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <button type="submit" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs transition-all shadow-sm">
+                        <i data-lucide="filter" class="w-3.5 h-3.5"></i>
+                        Lọc
+                    </button>
+                    <a th:href="@{/admin/skills}" class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-xs transition-all">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        Đặt lại
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                <span>Danh sách <strong class="text-slate-900 font-bold" th:text="${skills.size()}">0</strong> kỹ năng</span>
+                <span class="text-[11px] text-slate-400">Ngừng sử dụng sẽ ẩn khỏi danh sách lựa chọn tạo mới</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                    <tr class="border-b border-slate-200/80 bg-slate-50/70 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-6">ID</th>
+                        <th class="py-3.5 px-4">Tên kỹ năng</th>
+                        <th class="py-3.5 px-4">Ngành nghề liên kết</th>
+                        <th class="py-3.5 px-4">Trạng thái</th>
+                        <th class="py-3.5 px-6 text-right">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                    <tr th:each="skill : ${skills}" class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-4 px-6 font-mono font-bold text-slate-500" th:text="'#' + ${skill.id}">#1</td>
+                        <td class="py-4 px-4">
+                            <span class="font-extrabold text-slate-900 text-sm block" th:text="${skill.name}">Java</span>
+                        </td>
+                        <td class="py-4 px-4 text-slate-600">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold"
+                                  th:text="${skill.category != null ? skill.category.name : 'Chưa phân loại'}">IT</span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                                  th:classappend="${skill.status == 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'}">
+                                <span th:if="${skill.status == 'ACTIVE'}">✓ Đang sử dụng</span>
+                                <span th:unless="${skill.status == 'ACTIVE'}">● Ngừng sử dụng</span>
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <a th:href="@{/admin/skills/{id}/edit(id=${skill.id})}"
+                               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 text-xs font-semibold transition-all">
+                                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                Chỉnh sửa
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${#lists.isEmpty(skills)}">
+                        <td colspan="5" class="py-12 text-center text-slate-400">
+                            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+                            Chưa có kỹ năng nào phù hợp trong danh mục.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
+</body>
+</html>

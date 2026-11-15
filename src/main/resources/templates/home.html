@@ -1,588 +1,704 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOBPORTAL - Nền tảng Tuyển dụng & Tìm việc làm Hàng đầu</title>
 
-    <title>Online Recruitment</title>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" th:href="@{/css/home.css}">
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <!-- Anti-FOUC Instant Theme Initializer -->
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+
+    <!-- Tailwind CSS with Unified JOBPORTAL Design Tokens & Dark Mode Support -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            hover: '#1d4ed8',
+                            light: '#eff6ff',
+                        },
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
 
-<body>
+<body class="bg-app-primary font-sans text-slate-800 dark:text-slate-100 antialiased min-h-screen flex flex-col justify-between transition-colors duration-200">
 
-<header class="header">
-    <div class="container header-content">
+<!-- 1. GLOBAL NAVBAR -->
+<div th:replace="~{fragments :: siteHeader('home')}"></div>
 
-        <a href="/" class="logo">
-            <span class="logo-icon">OR</span>
-            <span>Online Recruitment</span>
-        </a>
+<main class="flex-1">
 
-        <nav class="nav">
-            <a href="/">Trang chủ</a>
-            <a href="/jobs">Việc làm</a>
-            <a th:href="@{/interview-questions}">Cẩm nang phỏng vấn</a>
-            <a th:href="@{/skill-tests}">Đánh giá kỹ năng</a>
-            <a th:href="@{/company-profile}">Công ty</a>
-            <a href="/about">Giới thiệu</a>
-        </nav>
+    <!-- 2. HERO BANNER & SEARCH SECTION -->
+    <section class="relative overflow-hidden bg-gradient-to-b from-blue-100/70 via-blue-50/40 to-slate-50/20 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 py-16 sm:py-20 lg:py-28 px-4 sm:px-6 lg:px-8 border-b border-slate-200/80 dark:border-slate-800 transition-colors duration-200">
+        <!-- Ambient Subtle Background Glow -->
+        <div class="absolute inset-0 bg-[radial-gradient(#2563eb_1.2px,transparent_1.2px)] [background-size:32px_32px] opacity-15 dark:opacity-25 pointer-events-none"></div>
+        <div class="absolute -top-20 left-1/2 -translate-x-1/2 w-[750px] h-[360px] bg-gradient-to-b from-blue-500/20 via-indigo-500/10 to-transparent rounded-full blur-[130px] pointer-events-none"></div>
 
-        <div class="header-actions" sec:authorize="!isAuthenticated()">
-            <a th:href="@{/login}" class="login-btn">Đăng nhập</a>
-            <a th:href="@{/register/candidate}" class="register-btn">Đăng ký</a>
-        </div>
-
-        <div class="user-dropdown-wrapper" sec:authorize="isAuthenticated()">
-            <div class="user-trigger">
-                <div class="user-avatar-small">
-                    <img th:if="${currentUser != null and currentUser.avatarUrl != null and !#strings.isEmpty(currentUser.avatarUrl)}"
-                         th:src="@{${currentUser.avatarUrl}}" alt="Avatar">
-                    <span th:if="${currentUser == null or currentUser.avatarUrl == null or #strings.isEmpty(currentUser.avatarUrl)}"
-                          th:text="${currentUser != null and currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1).toUpperCase() : 'U'}">U</span>
-                </div>
-                <div class="user-info-text">
-                    <span class="user-display-name" th:text="${currentUser != null ? currentUser.fullName : #authentication.name}">Tài khoản</span>
-                    <span class="user-role-badge">
-                        <span sec:authorize="hasRole('CANDIDATE')">Ứng viên</span>
-                        <span sec:authorize="hasRole('RECRUITER')">Nhà tuyển dụng</span>
-                        <span sec:authorize="hasRole('ADMIN')">Quản trị viên</span>
-                    </span>
-                </div>
-                <span class="dropdown-arrow">▼</span>
-            </div>
-
-            <div class="user-dropdown-menu">
-                <div class="menu-header">
-                    <div class="menu-header-name" th:text="${currentUser != null ? currentUser.fullName : 'Người dùng'}">Người dùng</div>
-                    <div class="menu-header-email" th:text="${currentUser != null ? currentUser.email : #authentication.name}">email@example.com</div>
-                </div>
-                <div class="menu-items">
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/profile}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Thông tin cá nhân</span>
-                    </a>
-                    <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/profile}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Thông tin cá nhân & Công ty</span>
-                    </a>
-
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/change-password}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        <span>Thay đổi mật khẩu</span>
-                    </a>
-                    <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/change-password}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        <span>Thay đổi mật khẩu</span>
-                    </a>
-
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/dashboard}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Bảng điều khiển</span>
-                    </a>
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/skill-tests/history}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        <span>Lịch sử test kỹ năng</span>
-                    </a>
-                    <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/dashboard}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Kênh tuyển dụng</span>
-                    </a>
-
-                    <div class="menu-divider"></div>
-
-                    <form th:action="@{/logout}" method="post" style="margin: 0;">
-                        <button type="submit" class="menu-item logout-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                            <span>Đăng xuất</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-
-    </div>
-</header>
-
-
-<main>
-
-    <!-- HERO -->
-    <section class="hero">
-
-        <div class="container hero-content">
-
-            <div class="hero-text">
-
-                <span class="hero-label">
-                    🚀 Tìm công việc phù hợp với bạn
+        <div class="relative mx-auto max-w-5xl text-center z-10">
+            <!-- Pill Announcement Badge with Live Pulsing Indicator -->
+            <div class="inline-flex items-center gap-2.5 rounded-full border border-blue-200/80 dark:border-blue-500/30 bg-white/90 dark:bg-blue-500/10 px-4.5 py-2 text-xs sm:text-sm font-semibold text-blue-700 dark:text-blue-300 backdrop-blur-md mb-6 shadow-sm">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
                 </span>
+                <span>Hơn 25,000+ cơ hội việc làm công nghệ & chuyển đổi số dẫn đầu</span>
+            </div>
 
-                <h1>
-                    Tìm công việc
-                    <span>mơ ước</span>
-                    của bạn
-                </h1>
+            <!-- Hero Heading (High Contrast, Bold, Zero Text Collision) -->
+            <h1 class="text-3xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight font-heading leading-tight text-slate-900 dark:text-white drop-shadow-sm">
+                Tìm Kiếm Cơ Hội <br class="hidden sm:inline" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 dark:from-blue-400 dark:via-indigo-300 dark:to-blue-500">
+                    Nghề Nghiệp Lý Tưởng
+                </span>
+            </h1>
 
-                <p>
-                    Khám phá hàng nghìn cơ hội việc làm từ các công ty
-                    hàng đầu và tìm công việc phù hợp với năng lực của bạn.
-                </p>
+            <!-- Hero Subtext -->
+            <p class="mt-5 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto font-normal leading-relaxed">
+                Khám phá hàng nghìn việc làm từ các doanh nghiệp công nghệ uy tín, kết nối trực tiếp với nhà tuyển dụng và nâng tầm sự nghiệp của bạn.
+            </p>
 
-                <!-- SEARCH -->
-                <form class="search-box" action="/jobs" method="get">
-
-                    <div class="search-field">
-                        <span>🔎</span>
-                        <input
-                                type="text"
-                                name="keyword"
-                                placeholder="Tên công việc, kỹ năng..."
-                        >
+            <!-- Floating SaaS Search Box Form (Enlarged, Spacious, 72px Desktop Height) -->
+            <form th:action="@{/jobs}" method="get"
+                  class="hero-search-card mt-10 mx-auto max-w-4xl rounded-2xl sm:rounded-3xl bg-white dark:bg-slate-800 p-2.5 sm:p-3 shadow-2xl shadow-blue-600/10 dark:shadow-slate-950/70 text-slate-900 dark:text-slate-100 text-left flex flex-col md:flex-row gap-2.5 border border-slate-200/90 dark:border-slate-700/80 transition-all">
+                
+                <!-- Keyword Input -->
+                <div class="flex-1 flex items-center gap-3.5 px-4.5 py-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900/80 transition border border-transparent focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:bg-white dark:focus-within:bg-slate-900">
+                    <i data-lucide="search" class="h-5 w-5 text-slate-400 dark:text-slate-500 shrink-0"></i>
+                    <div class="flex flex-col w-full">
+                        <label for="searchKeywordInput" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Từ khóa / Vị trí</label>
+                        <input id="searchKeywordInput" type="text" name="keyword" placeholder="Java, Spring Boot, React, DevOps, Tester..."
+                               class="w-full bg-transparent text-sm sm:text-base font-semibold text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-400">
                     </div>
-
-                    <div class="search-field">
-                        <span>📍</span>
-                        <input
-                                type="text"
-                                name="location"
-                                placeholder="Địa điểm"
-                        >
-                    </div>
-
-                    <button type="submit">
-                        Tìm việc
-                    </button>
-
-                </form>
-
-                <div class="popular-search">
-
-                    <span>Tìm kiếm phổ biến:</span>
-
-                    <a href="/jobs?keyword=Java">Java</a>
-                    <a href="/jobs?keyword=Spring Boot">Spring Boot</a>
-                    <a href="/jobs?keyword=Frontend">Frontend</a>
-                    <a href="/jobs?keyword=DevOps">DevOps</a>
-
                 </div>
 
+                <div class="hidden md:block w-px bg-slate-200 dark:bg-slate-700 my-2"></div>
+
+                <!-- Location Selector -->
+                <div class="w-full md:w-64 flex items-center gap-3.5 px-4.5 py-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-900/50 hover:bg-slate-100/80 dark:hover:bg-slate-900/80 transition border border-transparent focus-within:border-blue-500 dark:focus-within:border-blue-400 focus-within:bg-white dark:focus-within:bg-slate-900">
+                    <i data-lucide="map-pin" class="h-5 w-5 text-slate-400 dark:text-slate-500 shrink-0"></i>
+                    <div class="flex flex-col w-full">
+                        <label for="searchLocationSelect" class="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">Địa điểm</label>
+                        <select id="searchLocationSelect" name="location" class="w-full bg-transparent text-sm sm:text-base font-semibold text-slate-900 dark:text-white focus:outline-none cursor-pointer">
+                            <option value="">Tất cả địa điểm</option>
+                            <option value="Hà Nội">Hà Nội</option>
+                            <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                            <option value="Đà Nẵng">Đà Nẵng</option>
+                            <option value="Remote">Làm việc từ xa (Remote)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Search CTA Button -->
+                <button type="submit"
+                        class="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 px-8 py-4 text-sm sm:text-base font-bold text-white shadow-lg shadow-blue-500/25 transition shrink-0 cursor-pointer">
+                    <i data-lucide="search" class="h-4.5 w-4.5"></i>
+                    <span>Tìm Việc Ngay</span>
+                </button>
+            </form>
+
+            <!-- Popular Search Tags -->
+            <div class="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
+                <span class="text-slate-500 dark:text-slate-400 font-medium">Từ khóa phổ biến:</span>
+                <a th:href="@{/jobs(keyword='Java')}" class="rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md">Java</a>
+                <a th:href="@{/jobs(keyword='Spring Boot')}" class="rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md">Spring Boot</a>
+                <a th:href="@{/jobs(keyword='React')}" class="rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md">ReactJS</a>
+                <a th:href="@{/jobs(keyword='DevOps')}" class="rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md">DevOps</a>
+                <a th:href="@{/jobs(keyword='Tester')}" class="rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md">Tester QA/QC</a>
+                <a th:href="@{/jobs(keyword='UI/UX')}" class="rounded-xl bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400 px-3.5 py-1.5 font-semibold transition border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md">UI/UX Design</a>
             </div>
-
         </div>
-
     </section>
 
+    <!-- 3. TRUST & STATS STRIP (Section B) -->
+    <section class="border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md py-10 transition-colors duration-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 gap-6 lg:grid-cols-4">
+                <div class="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/30 border border-blue-200/50 dark:border-blue-800/50 text-blue-600 dark:text-blue-400 shrink-0 shadow-sm">
+                        <i data-lucide="briefcase" class="h-7 w-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-heading">25,480+</p>
+                        <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">Việc làm đang tuyển</p>
+                    </div>
+                </div>
 
-    <!-- STATISTICS -->
-    <section class="statistics">
+                <div class="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200/50 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400 shrink-0 shadow-sm">
+                        <i data-lucide="building-2" class="h-7 w-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-heading">1,250+</p>
+                        <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">Doanh nghiệp xác thực</p>
+                    </div>
+                </div>
 
-        <div class="container statistics-grid">
+                <div class="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-50 dark:bg-purple-900/30 border border-purple-200/50 dark:border-purple-800/50 text-purple-600 dark:text-purple-400 shrink-0 shadow-sm">
+                        <i data-lucide="users" class="h-7 w-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-heading">180,000+</p>
+                        <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">Ứng viên tin dùng</p>
+                    </div>
+                </div>
 
-            <div class="stat-item">
-                <strong>10,000+</strong>
-                <span>Việc làm</span>
+                <div class="flex items-center gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200/50 dark:border-emerald-800/50 text-emerald-600 dark:text-emerald-400 shrink-0 shadow-sm">
+                        <i data-lucide="check-circle-2" class="h-7 w-7"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white font-heading">99.2%</p>
+                        <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">Tỷ lệ phản hồi hồ sơ</p>
+                    </div>
+                </div>
             </div>
-
-            <div class="stat-item">
-                <strong>2,000+</strong>
-                <span>Công ty</span>
-            </div>
-
-            <div class="stat-item">
-                <strong>50,000+</strong>
-                <span>Ứng viên</span>
-            </div>
-
-            <div class="stat-item">
-                <strong>95%</strong>
-                <span>Tỷ lệ hài lòng</span>
-            </div>
-
         </div>
-
     </section>
 
-
-    <!-- FEATURED JOBS -->
-    <section class="section">
-
-        <div class="container">
-
-            <div class="section-header">
-
+    <!-- 4. FEATURED JOBS SECTION (Section A) -->
+    <section class="py-16 bg-white dark:bg-slate-900 transition-colors duration-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
                 <div>
-                    <span class="section-label">CƠ HỘI MỚI</span>
-
-                    <h2>Việc làm nổi bật</h2>
-
-                    <p>
-                        Những công việc mới nhất đang được tuyển dụng
-                    </p>
+                    <div class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 mb-1">
+                        <i data-lucide="sparkles" class="h-3.5 w-3.5"></i>
+                        CƠ HỘI MỚI NHẤT
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading">
+                        Việc Làm Nổi Bật Hôm Nay
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Các vị trí tuyển dụng được cập nhật liên tục từ các doanh nghiệp uy tín</p>
                 </div>
-
-                <a href="/jobs" class="view-all">
-                    Xem tất cả →
+                <a th:href="@{/jobs}" class="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition">
+                    <span>Xem tất cả việc làm</span>
+                    <i data-lucide="arrow-right" class="h-4 w-4"></i>
                 </a>
-
             </div>
 
+            <!-- Dynamic Live Featured Jobs Grid (When available in Model) -->
+            <div th:if="${featuredJobs != null and !featuredJobs.isEmpty()}"
+                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <div th:each="job : ${featuredJobs}"
+                     class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-850 p-6 shadow-sm hover:shadow-xl transition-all hover:border-blue-400 dark:hover:border-blue-500 flex flex-col justify-between group">
+                    <div>
+                        <!-- Header: Logo + Title + Pin/Badge -->
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3.5">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 font-bold text-blue-600 dark:text-blue-400 text-sm overflow-hidden">
+                                    <img th:if="${job.company != null and job.company.logoUrl != null and !#strings.isEmpty(job.company.logoUrl)}"
+                                         th:src="@{${job.company.logoUrl}}" alt="Logo" class="h-full w-full object-cover">
+                                    <span th:if="${job.company == null or job.company.logoUrl == null or #strings.isEmpty(job.company.logoUrl)}"
+                                          th:text="${job.company != null and job.company.companyName != null and !#strings.isEmpty(job.company.companyName) ? #strings.substring(job.company.companyName, 0, 1).toUpperCase() : 'J'}">J</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">
+                                        <a th:href="@{'/jobs/' + ${job.id}}" th:text="${job.title}">Tên công việc</a>
+                                    </h3>
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-1"
+                                       th:text="${job.company != null ? job.company.companyName : 'Doanh nghiệp tuyển dụng'}">Tên công ty</p>
+                                </div>
+                            </div>
 
-            <div class="job-grid">
-
-                <!-- JOB 1 -->
-                <div class="job-card">
-
-                    <div class="job-top">
-
-                        <div class="company-logo">
-                            T
+                            <span th:if="${job.isPinned != null and job.isPinned}" class="shrink-0 rounded-full bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                HOT
+                            </span>
+                            <span th:if="${job.isPinned == null or !job.isPinned}" class="shrink-0 rounded-full bg-blue-50 dark:bg-blue-900/30 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                                MỚI
+                            </span>
                         </div>
 
-                        <span class="job-type">
-                            Full-time
-                        </span>
-
-                    </div>
-
-                    <h3>Java Backend Developer</h3>
-
-                    <p class="company-name">
-                        Tech Solutions Vietnam
-                    </p>
-
-                    <div class="job-info">
-                        <span>📍 Hà Nội</span>
-                        <span>💰 20 - 35 triệu</span>
-                    </div>
-
-                    <div class="job-tags">
-                        <span>Java</span>
-                        <span>Spring Boot</span>
-                        <span>SQL</span>
-                    </div>
-
-                    <a href="/jobs/1" class="job-detail">
-                        Xem chi tiết →
-                    </a>
-
-                </div>
-
-
-                <!-- JOB 2 -->
-                <div class="job-card">
-
-                    <div class="job-top">
-
-                        <div class="company-logo">
-                            A
+                        <!-- Mid: Salary + Location + Type -->
+                        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                            <span class="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200/60 dark:border-emerald-800/60">
+                                <i data-lucide="badge-dollar-sign" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
+                                <span th:if="${job.salaryMin != null and job.salaryMax != null}" th:text="${job.salaryMin + ' - ' + job.salaryMax + (job.salaryCurrency != null ? ' ' + job.salaryCurrency : '')}">Thoả thuận</span>
+                                <span th:if="${job.salaryMin == null or job.salaryMax == null}">Thoả thuận</span>
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span th:text="${job.location ?: 'Toàn quốc'}">Hà Nội</span>
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span th:if="${job.employmentType == null or job.employmentType.name() == 'FULL_TIME'}">Toàn thời gian</span>
+                                <span th:if="${job.employmentType != null and job.employmentType.name() == 'PART_TIME'}">Bán thời gian</span>
+                                <span th:if="${job.employmentType != null and job.employmentType.name() == 'INTERNSHIP'}">Thực tập</span>
+                                <span th:if="${job.employmentType != null and job.employmentType.name() == 'CONTRACT'}">Hợp đồng</span>
+                                <span th:if="${job.employmentType != null and job.employmentType.name() == 'FREELANCE'}">Freelance</span>
+                            </span>
                         </div>
 
-                        <span class="job-type">
-                            Full-time
-                        </span>
-
+                        <!-- Description Snippet -->
+                        <div class="mt-3.5 text-xs text-slate-500 dark:text-slate-400 line-clamp-2"
+                             th:if="${job.description != null}" th:text="${#strings.abbreviate(job.description, 100)}">
+                            Mô tả công việc vắn tắt...
+                        </div>
                     </div>
 
-                    <h3>Frontend Developer</h3>
-
-                    <p class="company-name">
-                        ABC Technology
-                    </p>
-
-                    <div class="job-info">
-                        <span>📍 Hồ Chí Minh</span>
-                        <span>💰 18 - 30 triệu</span>
+                    <!-- Footer of card -->
+                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 dark:text-slate-500">Đang nhận hồ sơ</span>
+                        <a th:href="@{'/jobs/' + ${job.id}}"
+                           class="inline-flex items-center gap-1 rounded-xl bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-600 dark:hover:text-white transition">
+                            <span>Chi tiết</span>
+                            <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                        </a>
                     </div>
-
-                    <div class="job-tags">
-                        <span>Vue.js</span>
-                        <span>React</span>
-                        <span>JavaScript</span>
-                    </div>
-
-                    <a href="/jobs/2" class="job-detail">
-                        Xem chi tiết →
-                    </a>
-
                 </div>
 
+            </div>
 
-                <!-- JOB 3 -->
-                <div class="job-card">
-
-                    <div class="job-top">
-
-                        <div class="company-logo">
-                            V
+            <!-- Curated Showcase Cards (Fallback when DB has no active jobs) -->
+            <div th:if="${featuredJobs == null or featuredJobs.isEmpty()}"
+                 class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Card 1 -->
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 shadow-sm hover:shadow-xl transition-all hover:border-blue-400 dark:hover:border-blue-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3.5">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/40 border border-blue-100 dark:border-blue-800 font-bold text-blue-600 dark:text-blue-400 text-sm">
+                                    TS
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">
+                                        <a th:href="@{/jobs}">Senior Java Backend Developer</a>
+                                    </h3>
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Tech Solutions Vietnam</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                HOT
+                            </span>
                         </div>
 
-                        <span class="job-type">
-                            Full-time
-                        </span>
+                        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                            <span class="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200/60 dark:border-emerald-800/60">
+                                💰 25 - 40 triệu
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                📍 Hà Nội
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                ⏱ Full-time
+                            </span>
+                        </div>
 
+                        <div class="mt-4 flex flex-wrap gap-1.5">
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">Java</span>
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">Spring Boot</span>
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">Microservices</span>
+                        </div>
                     </div>
 
-                    <h3>DevOps Engineer</h3>
+                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 dark:text-slate-500">Đăng hôm nay</span>
+                        <a th:href="@{/jobs}" class="inline-flex items-center gap-1 rounded-xl bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition">
+                            <span>Chi tiết</span>
+                            <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                        </a>
+                    </div>
+                </div>
 
-                    <p class="company-name">
-                        Vietnam Digital
-                    </p>
+                <!-- Card 2 -->
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 shadow-sm hover:shadow-xl transition-all hover:border-blue-400 dark:hover:border-blue-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3.5">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/40 border border-blue-100 dark:border-blue-800 font-bold text-blue-600 dark:text-blue-400 text-sm">
+                                    FS
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">
+                                        <a th:href="@{/jobs}">Frontend Engineer (React/TypeScript)</a>
+                                    </h3>
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">FPT Software Corporation</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-blue-50 dark:bg-blue-900/40 px-2.5 py-1 text-[11px] font-bold text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+                                MỚI
+                            </span>
+                        </div>
 
-                    <div class="job-info">
-                        <span>📍 Đà Nẵng</span>
-                        <span>💰 25 - 40 triệu</span>
+                        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                            <span class="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200/60 dark:border-emerald-800/60">
+                                💰 20 - 35 triệu
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                📍 TP. Hồ Chí Minh
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                ⏱ Hybrid
+                            </span>
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap gap-1.5">
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">React</span>
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">TypeScript</span>
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">Tailwind CSS</span>
+                        </div>
                     </div>
 
-                    <div class="job-tags">
-                        <span>AWS</span>
-                        <span>Docker</span>
-                        <span>Linux</span>
+                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 dark:text-slate-500">Đăng 3 giờ trước</span>
+                        <a th:href="@{/jobs}" class="inline-flex items-center gap-1 rounded-xl bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition">
+                            <span>Chi tiết</span>
+                            <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 shadow-sm hover:shadow-xl transition-all hover:border-blue-400 dark:hover:border-blue-500 flex flex-col justify-between group">
+                    <div>
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3.5">
+                                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/40 border border-blue-100 dark:border-blue-800 font-bold text-blue-600 dark:text-blue-400 text-sm">
+                                    VD
+                                </div>
+                                <div>
+                                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">
+                                        <a th:href="@{/jobs}">Cloud DevOps Architect (AWS, K8s)</a>
+                                    </h3>
+                                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Viettel Digital Technology</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 rounded-full bg-amber-50 dark:bg-amber-950/40 px-2.5 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
+                                HOT
+                            </span>
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap items-center gap-2 text-xs">
+                            <span class="flex items-center gap-1 font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200/60 dark:border-emerald-800/60">
+                                💰 35 - 55 triệu
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                📍 Đà Nẵng
+                            </span>
+                            <span class="flex items-center gap-1 bg-slate-100 dark:bg-slate-700/60 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-lg">
+                                ⏱ Remote
+                            </span>
+                        </div>
+
+                        <div class="mt-4 flex flex-wrap gap-1.5">
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">AWS</span>
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">Kubernetes</span>
+                            <span class="rounded-md bg-slate-100 dark:bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-700 dark:text-slate-300">CI/CD</span>
+                        </div>
                     </div>
 
-                    <a href="/jobs/3" class="job-detail">
-                        Xem chi tiết →
+                    <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
+                        <span class="text-xs text-slate-400 dark:text-slate-500">Đăng hôm qua</span>
+                        <a th:href="@{/jobs}" class="inline-flex items-center gap-1 rounded-xl bg-blue-50 dark:bg-blue-900/30 px-3.5 py-1.5 text-xs font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white transition">
+                            <span>Chi tiết</span>
+                            <i data-lucide="chevron-right" class="h-3.5 w-3.5"></i>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. POPULAR CATEGORIES SECTION (Section B) -->
+    <section class="py-16 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">DANH MỤC PHỔ BIẾN</span>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading mt-1">Tìm Việc Theo Lĩnh Vực Chuyên Môn</h2>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">Khám phá hàng nghìn vị trí tuyển dụng theo từng chuyên môn thế mạnh của bạn</p>
+            </div>
+
+            <!-- Dynamic Categories from Database -->
+            <div th:if="${categories != null and !categories.isEmpty()}"
+                 class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                <a th:each="cat : ${categories}"
+                   th:href="@{/jobs(keyword=${cat.name})}"
+                   class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-blue-600 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-750 hover:-translate-y-1 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mx-auto flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all mb-4">
+                        <i data-lucide="layers" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1" th:text="${cat.name}">Tên ngành nghề</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1" th:text="${cat.description != null and !#strings.isEmpty(cat.description) ? #strings.abbreviate(cat.description, 40) : 'Khám phá cơ hội'}">Khám phá cơ hội</p>
+                </a>
+            </div>
+
+            <!-- Curated Showcase Categories (Fallback when DB categories are empty) -->
+            <div th:if="${categories == null or categories.isEmpty()}"
+                 class="grid grid-cols-2 md:grid-cols-4 gap-5">
+                <!-- Cat 1 -->
+                <a th:href="@{/jobs(keyword='IT')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-blue-600 dark:hover:border-blue-500 hover:bg-blue-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 mx-auto flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="code" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">Lập trình & Phần mềm</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">3,450+ việc làm</p>
+                </a>
+
+                <!-- Cat 2 -->
+                <a th:href="@{/jobs(keyword='Design')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-purple-600 dark:hover:border-purple-500 hover:bg-purple-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-purple-50 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 mx-auto flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="palette" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">Thiết kế UI/UX</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">820+ việc làm</p>
+                </a>
+
+                <!-- Cat 3 -->
+                <a th:href="@{/jobs(keyword='AI')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-emerald-600 dark:hover:border-emerald-500 hover:bg-emerald-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-emerald-50 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="cpu" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition">Trí tuệ nhân tạo & Data</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">640+ việc làm</p>
+                </a>
+
+                <!-- Cat 4 -->
+                <a th:href="@{/jobs(keyword='DevOps')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-cyan-600 dark:hover:border-cyan-500 hover:bg-cyan-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-cyan-50 dark:bg-cyan-900/40 text-cyan-600 dark:text-cyan-400 mx-auto flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="cloud" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition">Cloud & DevOps</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">590+ việc làm</p>
+                </a>
+
+                <!-- Cat 5 -->
+                <a th:href="@{/jobs(keyword='QA')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-amber-600 dark:hover:border-amber-500 hover:bg-amber-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-amber-50 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 mx-auto flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="check-circle-2" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-amber-600 dark:group-hover:text-amber-400 transition">Kiểm thử phần mềm (QA)</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">780+ việc làm</p>
+                </a>
+
+                <!-- Cat 6 -->
+                <a th:href="@{/jobs(keyword='Product')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-rose-600 dark:hover:border-rose-500 hover:bg-rose-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-rose-50 dark:bg-rose-900/40 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center group-hover:bg-rose-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="kanban" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-rose-600 dark:group-hover:text-rose-400 transition">Quản lý dự án (PM/PO)</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">450+ việc làm</p>
+                </a>
+
+                <!-- Cat 7 -->
+                <a th:href="@{/jobs(keyword='Marketing')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-indigo-600 dark:hover:border-indigo-500 hover:bg-indigo-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 mx-auto flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="trending-up" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition">Marketing & Truyền thông</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">1,280+ việc làm</p>
+                </a>
+
+                <!-- Cat 8 -->
+                <a th:href="@{/jobs(keyword='Finance')}" class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/80 p-6 text-center hover:border-teal-600 dark:hover:border-teal-500 hover:bg-teal-50/40 dark:hover:bg-slate-750 hover:-translate-y-1.5 hover:shadow-xl transition-all group">
+                    <div class="h-14 w-14 rounded-2xl bg-teal-50 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 mx-auto flex items-center justify-center group-hover:bg-teal-600 group-hover:text-white transition-all mb-4 shadow-sm">
+                        <i data-lucide="landmark" class="h-7 w-7"></i>
+                    </div>
+                    <h3 class="font-bold text-slate-900 dark:text-white text-sm group-hover:text-teal-600 dark:group-hover:text-teal-400 transition">Tài chính & Fintech</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">940+ việc làm</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. TOP COMPANIES SECTION (Section A) -->
+    <section class="py-16 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">DOANH NGHIỆP NỔI BẬT</span>
+                    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-heading mt-1">Các Nhà Tuyển Dụng Hàng Đầu</h2>
+                    <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Gia nhập các tổ chức công nghệ tiên phong với chế độ đãi ngộ vượt trội</p>
+                </div>
+                <a th:href="@{/company-profile}" class="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition">
+                    <span>Xem tất cả công ty</span>
+                    <i data-lucide="arrow-right" class="h-4 w-4"></i>
+                </a>
+            </div>
+
+            <!-- Dynamic Live Companies from Database -->
+            <div th:if="${topCompanies != null and !topCompanies.isEmpty()}"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div th:each="comp : ${topCompanies}"
+                     class="bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all flex flex-col items-center text-center group">
+                    <div class="h-16 w-16 rounded-2xl border border-slate-100 dark:border-slate-700 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-extrabold text-xl flex items-center justify-center mb-4 group-hover:scale-105 transition overflow-hidden">
+                        <img th:if="${comp.logoUrl != null and !#strings.isEmpty(comp.logoUrl)}"
+                             th:src="@{${comp.logoUrl}}" alt="Logo" class="h-full w-full object-cover">
+                        <span th:if="${comp.logoUrl == null or #strings.isEmpty(comp.logoUrl)}"
+                              th:text="${comp.companyName != null and !#strings.isEmpty(comp.companyName) ? #strings.substring(comp.companyName, 0, 1).toUpperCase() : 'C'}">C</span>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1"
+                        th:text="${comp.companyName}">Tên công ty</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-1"
+                       th:text="${comp.address ?: (comp.companySize ?: 'Doanh nghiệp uy tín')}">Địa chỉ & Quy mô</p>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mt-2.5">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Đã xác thực
+                    </span>
+                    <a th:href="@{/jobs(companyId=${comp.id})}"
+                       class="mt-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 group-hover:bg-blue-600 group-hover:text-white px-3 py-2 rounded-xl transition w-full">
+                        Xem việc làm
                     </a>
-
                 </div>
-
             </div>
 
-        </div>
+            <!-- Curated Showcase Top Companies (Fallback when DB has no active companies) -->
+            <div th:if="${topCompanies == null or topCompanies.isEmpty()}"
+                 class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Company 1 -->
+                <div class="bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all flex flex-col items-center text-center group">
+                    <div class="h-16 w-16 rounded-2xl border border-slate-100 dark:border-slate-700 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-extrabold text-xl flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        FPT
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">FPT Software</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Hà Nội, TP.HCM • 10,000+ nhân sự</p>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mt-2.5">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Đã xác thực
+                    </span>
+                    <a th:href="@{/jobs(keyword='FPT')}" class="mt-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 group-hover:bg-blue-600 group-hover:text-white px-3 py-2 rounded-xl transition w-full">
+                        24 vị trí đang tuyển
+                    </a>
+                </div>
 
+                <!-- Company 2 -->
+                <div class="bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all flex flex-col items-center text-center group">
+                    <div class="h-16 w-16 rounded-2xl border border-slate-100 dark:border-slate-700 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-extrabold text-xl flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        VT
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">Viettel Solutions</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Hà Nội, Đà Nẵng • 5,000+ nhân sự</p>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mt-2.5">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Đã xác thực
+                    </span>
+                    <a th:href="@{/jobs(keyword='Viettel')}" class="mt-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 group-hover:bg-blue-600 group-hover:text-white px-3 py-2 rounded-xl transition w-full">
+                        18 vị trí đang tuyển
+                    </a>
+                </div>
+
+                <!-- Company 3 -->
+                <div class="bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all flex flex-col items-center text-center group">
+                    <div class="h-16 w-16 rounded-2xl border border-slate-100 dark:border-slate-700 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-extrabold text-xl flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        VNG
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">VNG Corporation</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">TP. Hồ Chí Minh • 3,500+ nhân sự</p>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mt-2.5">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Đã xác thực
+                    </span>
+                    <a th:href="@{/jobs(keyword='VNG')}" class="mt-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 group-hover:bg-blue-600 group-hover:text-white px-3 py-2 rounded-xl transition w-full">
+                        15 vị trí đang tuyển
+                    </a>
+                </div>
+
+                <!-- Company 4 -->
+                <div class="bg-white dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all flex flex-col items-center text-center group">
+                    <div class="h-16 w-16 rounded-2xl border border-slate-100 dark:border-slate-700 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-extrabold text-xl flex items-center justify-center mb-4 group-hover:scale-105 transition">
+                        OM
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition line-clamp-1">One Mount Group</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Hà Nội • 2,000+ nhân sự</p>
+                    <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full mt-2.5">
+                        <i data-lucide="check-circle" class="w-3 h-3"></i> Đã xác thực
+                    </span>
+                    <a th:href="@{/jobs(keyword='One Mount')}" class="mt-4 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-700 group-hover:bg-blue-600 group-hover:text-white px-3 py-2 rounded-xl transition w-full">
+                        12 vị trí đang tuyển
+                    </a>
+                </div>
+            </div>
+        </div>
     </section>
 
+    <!-- 7. RECRUITMENT CTA BANNER (Section B) -->
+    <section class="py-16 bg-slate-50 dark:bg-slate-950/60 border-t border-slate-200 dark:border-slate-800 transition-colors duration-200">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-3xl p-8 sm:p-14 text-white border border-blue-500/30 shadow-2xl relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                <!-- Background Subtle Glow -->
+                <div class="absolute -right-10 -bottom-10 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="absolute top-0 right-1/3 w-64 h-64 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
 
-    <!-- CATEGORIES -->
-    <section class="section categories-section">
-
-        <div class="container">
-
-            <div class="section-header center">
-
-                <span class="section-label">
-                    NGÀNH NGHỀ
-                </span>
-
-                <h2>Tìm việc theo ngành nghề</h2>
-
-                <p>
-                    Khám phá cơ hội trong lĩnh vực bạn yêu thích
-                </p>
-
-            </div>
-
-
-            <div class="category-grid">
-
-                <a href="/jobs?category=IT" class="category-card">
-                    <div class="category-icon">💻</div>
-                    <h3>Công nghệ thông tin</h3>
-                    <span>2,500+ việc làm</span>
-                </a>
-
-                <a href="/jobs?category=Marketing" class="category-card">
-                    <div class="category-icon">📢</div>
-                    <h3>Marketing</h3>
-                    <span>1,200+ việc làm</span>
-                </a>
-
-                <a href="/jobs?category=Finance" class="category-card">
-                    <div class="category-icon">💰</div>
-                    <h3>Tài chính</h3>
-                    <span>850+ việc làm</span>
-                </a>
-
-                <a href="/jobs?category=Design" class="category-card">
-                    <div class="category-icon">🎨</div>
-                    <h3>Thiết kế</h3>
-                    <span>600+ việc làm</span>
-                </a>
-
-                <a href="/jobs?category=Sales" class="category-card">
-                    <div class="category-icon">📈</div>
-                    <h3>Kinh doanh</h3>
-                    <span>1,500+ việc làm</span>
-                </a>
-
-                <a href="/jobs?category=HR" class="category-card">
-                    <div class="category-icon">👥</div>
-                    <h3>Nhân sự</h3>
-                    <span>400+ việc làm</span>
-                </a>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- WHY CHOOSE -->
-    <section class="section">
-
-        <div class="container">
-
-            <div class="section-header center">
-
-                <span class="section-label">
-                    TẠI SAO CHỌN CHÚNG TÔI
-                </span>
-
-                <h2>Tìm việc dễ dàng hơn</h2>
-
-            </div>
-
-
-            <div class="benefit-grid">
-
-                <div class="benefit-card">
-
-                    <div class="benefit-icon">
-                        🔎
-                    </div>
-
-                    <h3>Tìm kiếm nhanh chóng</h3>
-
-                    <p>
-                        Tìm kiếm hàng nghìn công việc theo vị trí,
-                        ngành nghề và mức lương.
+                <div class="max-w-2xl relative z-10">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-4 border border-blue-400/30">
+                        <i data-lucide="building" class="w-3.5 h-3.5 text-blue-300"></i> DÀNH CHO NHÀ TUYỂN DỤNG
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold font-heading tracking-tight mb-3 text-white !text-white drop-shadow-sm">
+                        Bạn Đang Tìm Kiếm Nhân Tài Công Nghệ?
+                    </h2>
+                    <p class="text-sm sm:text-base text-slate-300 leading-relaxed mb-5">
+                        Đăng tin tuyển dụng và tiếp cận hơn 180,000+ ứng viên tiềm năng trên JOBPORTAL. Tối ưu hoá toàn bộ quy trình xét duyệt hồ sơ và thiết lập phỏng vấn tự động.
                     </p>
-
+                    <div class="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-blue-200">
+                        <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Đăng tin nhanh trong 3 phút</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Tự động gợi ý ứng viên phù hợp</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i> Đặt lịch phỏng vấn thông minh</span>
+                    </div>
                 </div>
 
-
-                <div class="benefit-card">
-
-                    <div class="benefit-icon">
-                        🏢
-                    </div>
-
-                    <h3>Công ty uy tín</h3>
-
-                    <p>
-                        Tiếp cận các công ty và nhà tuyển dụng
-                        đang có nhu cầu tuyển dụng.
-                    </p>
-
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 shrink-0 relative z-10">
+                    <a th:href="@{/register/recruiter}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-bold px-7 py-4 shadow-lg shadow-blue-600/30 transition cursor-pointer">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span>Đăng Tin Tuyển Dụng</span>
+                    </a>
+                    <a th:href="@{/pricing}"
+                       class="inline-flex items-center justify-center gap-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm sm:text-base font-bold px-6 py-4 border border-white/20 backdrop-blur-md shadow-sm transition cursor-pointer">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-amber-400"></i>
+                        <span>Xem Bảng Giá</span>
+                    </a>
                 </div>
-
-
-                <div class="benefit-card">
-
-                    <div class="benefit-icon">
-                        ⚡
-                    </div>
-
-                    <h3>Ứng tuyển dễ dàng</h3>
-
-                    <p>
-                        Tạo hồ sơ và ứng tuyển công việc
-                        chỉ với vài bước đơn giản.
-                    </p>
-
-                </div>
-
             </div>
-
         </div>
-
-    </section>
-
-
-    <!-- CTA -->
-    <section class="cta">
-
-        <div class="container cta-content">
-
-            <div>
-
-                <h2>
-                    Bạn đang tìm kiếm nhân tài?
-                </h2>
-
-                <p>
-                    Đăng tin tuyển dụng và tiếp cận hàng nghìn ứng viên.
-                </p>
-
-            </div>
-
-            <a href="/employer/post-job" class="cta-button">
-                Đăng tin tuyển dụng
-            </a>
-
-        </div>
-
     </section>
 
 </main>
 
+<!-- 8. SITE FOOTER FRAGMENT -->
+<div th:replace="~{fragments :: siteFooter}"></div>
 
-<!-- FOOTER -->
-<footer class="footer">
-
-    <div class="container footer-grid">
-
-        <div>
-
-            <a href="/" class="logo footer-logo">
-                <span class="logo-icon">OR</span>
-                <span>Online Recruitment</span>
-            </a>
-
-            <p>
-                Nền tảng kết nối ứng viên và nhà tuyển dụng
-                nhanh chóng và hiệu quả.
-            </p>
-
-        </div>
-
-
-        <div>
-
-            <h4>Ứng viên</h4>
-
-            <a href="/jobs">Tìm việc</a>
-            <a href="/companies">Công ty</a>
-            <a href="/register">Tạo tài khoản</a>
-
-        </div>
-
-
-        <div>
-
-            <h4>Nhà tuyển dụng</h4>
-
-            <a href="/employer/post-job">Đăng tin tuyển dụng</a>
-            <a href="/employer">Quản lý tuyển dụng</a>
-
-        </div>
-
-
-        <div>
-
-            <h4>Liên hệ</h4>
-
-            <p>Email: support@onlinerecruitment.com</p>
-            <p>Hotline: 1900 1234</p>
-
-        </div>
-
-    </div>
-
-
-    <div class="footer-bottom">
-
-        <div class="container">
-
-            © 2026 Online Recruitment. All rights reserved.
-
-        </div>
-
-    </div>
-
-</footer>
-
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

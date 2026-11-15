@@ -1,253 +1,257 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Việc làm đã ứng tuyển — Online Recruitment</title>
 
-    <link rel="stylesheet" th:href="@{/css/candidate/applications.css}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- Thanh điều hướng dùng chung -->
+<!-- Taskbar header -->
 <div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
 
-<main class="applications-wrapper">
+<main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- Tiêu đề -->
-    <header class="applications-header">
-        <div>
-            <h1>Việc làm đã ứng tuyển</h1>
-            <p>
-                Theo dõi các công việc bạn đã nộp hồ sơ
-                và trạng thái xử lý từ nhà tuyển dụng.
-            </p>
+    <!-- Top Breadcrumb & Back -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/candidate/dashboard}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại trang cá nhân
+        </a>
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+            Kênh ứng viên
+        </span>
+    </div>
+
+    <!-- Header Banner (Synchronized Modern SaaS Dark Blue Banner) -->
+    <div class="rounded-3xl p-8 sm:p-10 mb-8 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white shadow-xl relative overflow-hidden border border-blue-500/20">
+        <!-- Ambient Subtle Background Glow -->
+        <div class="absolute -right-10 -bottom-10 w-80 h-80 rounded-full bg-blue-500/15 blur-3xl pointer-events-none"></div>
+        <div class="absolute top-0 right-1/4 w-64 h-64 rounded-full bg-indigo-500/10 blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+            <div>
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 mb-2.5">
+                    <i data-lucide="layers" class="w-3.5 h-3.5 text-blue-300"></i> THEO DÕI TUYỂN DỤNG
+                </span>
+                <h1 class="text-2xl sm:text-4xl font-extrabold text-white !text-white tracking-tight font-display mb-2 drop-shadow-sm">
+                    Việc làm đã ứng tuyển
+                </h1>
+                <p class="text-sm sm:text-base text-slate-300 max-w-2xl leading-relaxed">
+                    Theo dõi tiến trình xử lý hồ sơ từ nhà tuyển dụng, tình trạng duyệt đơn và các lịch phỏng vấn đã được sắp xếp.
+                </p>
+            </div>
+            <div class="inline-flex items-center gap-3.5 px-6 py-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 text-white shadow-inner self-start sm:self-auto shrink-0">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/25 border border-blue-400/30 text-blue-300 flex items-center justify-center font-bold text-xl shadow-sm">
+                    <i data-lucide="layers" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <div class="text-xs font-semibold text-blue-200 uppercase tracking-wider">Tổng số đơn</div>
+                    <div class="text-2xl font-black text-white" th:text="${#lists.size(applications)}">0</div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="application-count">
-            <span class="count-icon">▤</span>
-            <span>
-                Tổng số đơn:
-                <strong th:text="${#lists.size(applications)}">0</strong>
-            </span>
-        </div>
-    </header>
+    <!-- Application List -->
+    <section th:if="${not #lists.isEmpty(applications)}" class="space-y-4">
+        <article th:each="app : ${applications}"
+                 class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all duration-200">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
-    <!-- Danh sách đơn ứng tuyển -->
-    <section class="applications-list"
-             th:if="${not #lists.isEmpty(applications)}">
+                <!-- Job & Company Meta -->
+                <div class="flex items-start gap-4 flex-1">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg flex-shrink-0 shadow-inner">
+                        <span th:text="${app.companyName != null and !app.companyName.isEmpty() ? #strings.substring(app.companyName, 0, 1) : 'C'}">C</span>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h2 class="text-lg font-bold text-slate-900 font-display hover:text-primary-600 transition-colors">
+                                <a th:href="@{/jobs/{id}(id=${app.jobId})}" th:text="${app.jobTitle}">Tên vị trí công việc</a>
+                            </h2>
+                            <span class="text-xs px-2 py-0.5 rounded font-mono font-medium text-slate-500 bg-slate-100" th:text="'#' + ${app.id}">#1</span>
+                        </div>
+                        <p class="text-sm font-semibold text-slate-600 flex items-center gap-1.5">
+                            <i data-lucide="building" class="w-4 h-4 text-slate-400"></i>
+                            <span th:text="${app.companyName}">Tên công ty</span>
+                        </p>
 
-        <article class="application-card"
-                 th:each="app : ${applications}">
+                        <!-- Chips / Meta -->
+                        <div class="flex flex-wrap items-center gap-y-1 gap-x-4 pt-2 text-xs text-slate-500">
+                            <span class="inline-flex items-center gap-1">
+                                <i data-lucide="file-text" class="w-3.5 h-3.5 text-slate-400"></i>
+                                CV: <strong class="text-slate-700 font-medium" th:text="${app.cvTitle != null ? app.cvTitle : 'CV ứng tuyển'}">Hồ sơ chính</strong>
+                            </span>
+                            <span class="inline-flex items-center gap-1">
+                                <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                                Nộp lúc:
+                                <strong class="text-slate-700 font-medium"
+                                        th:text="${app.appliedAt != null ? #dates.format(app.appliedAt, 'dd/MM/yyyy HH:mm') : '—'}">20/10/2026</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="company-logo">
-                <span>▣</span>
+                <!-- Status & Action Block -->
+                <div class="flex flex-col sm:flex-row lg:flex-col items-start sm:items-center lg:items-end gap-3 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-100">
+                    <!-- Status Badge -->
+                    <div>
+                        <span th:if="${app.status == 'SUBMITTED'}"
+                              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                            <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            Chờ xét duyệt
+                        </span>
+                        <span th:if="${app.status == 'ACCEPTED'}"
+                              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
+                            Đã được duyệt
+                        </span>
+                        <span th:if="${app.status == 'REJECTED'}"
+                              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i>
+                            Chưa phù hợp
+                        </span>
+                        <span th:if="${app.status != 'SUBMITTED' and app.status != 'ACCEPTED' and app.status != 'REJECTED'}"
+                              class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700"
+                              th:text="${app.status}">Khác</span>
+                    </div>
+
+                    <!-- Rejected Case: Apply Again Button -->
+                    <div th:if="${app.status == 'REJECTED'}" class="mt-1">
+                        <a th:href="@{/jobs/{id}/apply(id=${app.jobId})}"
+                           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors">
+                            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                            Nộp lại đơn ứng tuyển
+                        </a>
+                    </div>
+                </div>
+
             </div>
 
-            <div class="application-content">
-
-                <div class="application-top">
-                    <div class="job-information">
-                        <h2 th:text="${app.jobTitle}">
-                            Nhân viên phát triển phần mềm
-                        </h2>
-
-                        <p class="company-name"
-                           th:text="${app.companyName}">
-                            Tên công ty
-                        </p>
-                    </div>
-
-                    <div class="status-information">
-                        <span class="status"
-                              th:classappend="${app.status == 'SUBMITTED'
-          ? ' status-submitted'
-          : (app.status == 'ACCEPTED'
-              ? ' status-approved'
-              : (app.status == 'REJECTED'
-                  ? ' status-rejected'
-                  : ' status-other'))}"
-                              th:text="${app.status == 'SUBMITTED'
-          ? 'Chờ xử lý'
-          : (app.status == 'ACCEPTED'
-              ? 'Đã duyệt'
-              : (app.status == 'REJECTED'
-                  ? 'Đã từ chối'
-                  : app.status))}">
-    Chờ xử lý
-</span><!-- Nút nộp lại đơn khi bị từ chối -->
-                        <!-- Nút nộp lại đơn khi bị từ chối -->
-                        <div th:if="${app.status == 'REJECTED'}"
-                             class="apply-again">
-
-                            <a th:href="@{/jobs/{id}/apply(id=${app.jobId})}"
-                               class="btn-apply-again">
-                                Nộp lại đơn xin việc
-                            </a>
-
+            <!-- INTERVIEW SECTION (When Accepted) -->
+            <div th:if="${app.status == 'ACCEPTED'}" class="mt-5 pt-5 border-t border-slate-100 bg-slate-50/70 -mx-6 -mb-6 p-6 rounded-b-2xl">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                            <i data-lucide="calendar" class="w-5 h-5"></i>
                         </div>
-
-                        <p class="applied-date">
-                            Đã ứng tuyển vào
-
-                            <span th:text="${app.appliedAt != null
-    ? #dates.format(app.appliedAt, 'dd/MM/yyyy')
-    : 'Chưa có thông tin'}">20/10/2026</span>
-
-                        </p>
-                    </div>
-                </div>
-
-                <div class="application-meta">
-
-                    <div class="meta-item">
-                        <span class="meta-icon">▤</span>
                         <div>
-                            <small>CV đã gửi</small>
-                            <strong th:text="${app.cvTitle != null
-                                ? app.cvTitle : 'CV ứng tuyển'}">
-                                CV cá nhân
-                            </strong>
-                        </div>
-                    </div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="text-sm font-bold text-slate-900">Lịch phỏng vấn</h3>
+                                <span th:if="${app.scheduleId == null}" class="text-xs px-2 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-800">
+                                    Chưa đặt lịch
+                                </span>
+                                <span th:if="${app.scheduleId != null}" class="text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-800">
+                                    ✓ Đã chốt lịch
+                                </span>
+                            </div>
 
-                    <div class="meta-item">
-                        <span class="meta-icon">▦</span>
-                        <div>
-                            <small>Ngày ứng tuyển</small>
-                            <strong th:text="${app.appliedAt != null
-                                ? #dates.format(app.appliedAt, 'dd/MM/yyyy HH:mm')
-                                : 'Chưa có thông tin'}">
-                                20/10/2026 09:38
-                            </strong>
-                        </div>
-                    </div><!-- LỊCH PHỎNG VẤN -->
-                    <div class="interview-section"
-                         th:if="${app.status == 'ACCEPTED'}">
-
-                        <div class="interview-heading">
-                            <h3>Lịch phỏng vấn</h3>
-
-                            <!-- Chưa đặt lịch -->
-                            <span class="interview-badge pending"
-                                  th:if="${app.scheduleId == null}">
-            Chưa đặt lịch
-        </span>
-
-                            <!-- Đã đặt lịch -->
-                            <span class="interview-badge booked"
-                                  th:if="${app.scheduleId != null}">
-            Đã đặt lịch
-        </span>
-                        </div>
-
-                        <!-- Chưa có lịch -->
-                        <div th:if="${app.scheduleId == null}">
-                            <a th:href="@{/candidate/interviews/{id}(id=${app.id})}"
-                               class="btn-choose-interview">
-                                <span>▣</span> Chọn lịch phỏng vấn
-                            </a>
-
-                            <p class="interview-description">
-                                Sau khi bấm, bạn có thể xem các khung giờ Recruiter
-                                đã tạo và chọn một lịch phù hợp.
+                            <!-- If not booked -->
+                            <p th:if="${app.scheduleId == null}" class="text-xs text-slate-500 mt-0.5">
+                                Nhà tuyển dụng đã mở các khung giờ phỏng vấn. Vui lòng bấm chọn khung giờ phù hợp với bạn.
                             </p>
-                        </div>
 
-                        <!-- Đã có lịch -->
-                        <div class="booked-interview"
-                             th:if="${app.scheduleId != null}">
-
-                            <h3 th:text="${app.jobTitle}">Tên công việc</h3>
-
-
-                            <ul>
-                                <li>
-                                    Ngày:
-                                    <strong th:text="${app.interviewDate != null
-            ? #dates.format(app.interviewDate, 'dd/MM/yyyy')
-            : 'Chưa có thông tin'}">
-                                        03/11/2026
-                                    </strong>
-                                </li>
-
-                                <li>
-                                    Giờ:
-                                    <strong>
-            <span th:text="${app.interviewStartTime != null
-                ? #dates.format(app.interviewStartTime, 'HH:mm')
-                : '--:--'}">
-                08:30
-            </span>
+                            <!-- If already booked -->
+                            <div th:if="${app.scheduleId != null}" class="mt-2 text-xs text-slate-700 space-y-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-500 font-medium">Ngày phỏng vấn:</span>
+                                    <strong class="text-slate-900 font-semibold"
+                                            th:text="${app.interviewDate != null ? #dates.format(app.interviewDate, 'dd/MM/yyyy') : '—'}">03/11/2026</strong>
+                                    <span class="text-slate-300">|</span>
+                                    <span class="text-slate-500 font-medium">Khung giờ:</span>
+                                    <strong class="text-emerald-700 font-semibold">
+                                        <span th:text="${app.interviewStartTime != null ? #dates.format(app.interviewStartTime, 'HH:mm') : '--:--'}">08:30</span>
                                         -
-                                        <span th:text="${app.interviewEndTime != null
-                ? #dates.format(app.interviewEndTime, 'HH:mm')
-                : '--:--'}">
-                09:00
-            </span>
+                                        <span th:text="${app.interviewEndTime != null ? #dates.format(app.interviewEndTime, 'HH:mm') : '--:--'}">09:00</span>
                                     </strong>
-                                </li>
-
-                                <li th:if="${app.interviewNote != null
-        and !#strings.isEmpty(app.interviewNote)}">
-                                    Ghi chú:
-                                    <strong th:text="${app.interviewNote}"></strong>
-                                </li>
-                            </ul>
-
-
-                            <button type="button"
-                                    class="btn-booked"
-                                    disabled>
-                                Đã đặt lịch phỏng vấn
-                            </button>
+                                </div>
+                                <div th:if="${app.interviewNote != null and !#strings.isEmpty(app.interviewNote)}" class="text-slate-600 italic">
+                                    Ghi chú: <span th:text="${app.interviewNote}"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="meta-item">
-                        <span class="meta-icon">▤</span>
-                        <div>
-                            <small>Mã đơn</small>
-                            <strong th:text="'#' + ${app.id}">#1</strong>
-                        </div>
+                    <!-- Interview Action Buttons -->
+                    <div class="self-end md:self-center">
+                        <a th:if="${app.scheduleId == null}"
+                           th:href="@{/candidate/interviews/{id}(id=${app.id})}"
+                           class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition-all">
+                            <i data-lucide="clock" class="w-4 h-4"></i>
+                            Chọn lịch phỏng vấn
+                        </a>
+                        <span th:if="${app.scheduleId != null}"
+                              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            Đã xác nhận tham gia
+                        </span>
                     </div>
-
                 </div>
-
             </div>
 
         </article>
-
     </section>
 
-    <!-- Chưa có đơn ứng tuyển -->
-    <section class="empty-state"
-             th:if="${#lists.isEmpty(applications)}">
-
-        <div class="empty-icon">▣</div>
-
-        <h2>Bạn chưa ứng tuyển công việc nào</h2>
-
-        <p>
-            Hãy khám phá các vị trí phù hợp và gửi hồ sơ ngay hôm nay.
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(applications)}"
+         class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center max-w-lg mx-auto shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="folder-search" class="w-8 h-8"></i>
+        </div>
+        <h2 class="text-xl font-bold text-slate-900 font-display mb-2">Bạn chưa ứng tuyển công việc nào</h2>
+        <p class="text-sm text-slate-500 mb-6">
+            Hàng ngàn cơ hội việc làm hấp dẫn đang chờ bạn khám phá. Hãy chuẩn bị CV và ứng tuyển ngay hôm nay!
         </p>
-
-        <a th:href="@{/jobs}" class="btn-jobs">
-            Khám phá việc làm <span>→</span>
-        </a>
-
-    </section>
-
-    <!-- Nút quay lại -->
-    <div class="back-link">
-        <a th:href="@{/candidate/dashboard}">
-            ← Quay lại trang cá nhân
+        <a th:href="@{/jobs}"
+           class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md shadow-primary-600/20 transition-all">
+            <i data-lucide="compass" class="w-4 h-4"></i>
+            Khám phá việc làm ngay
         </a>
     </div>
 
 </main>
 
+<!-- Shared Modern Footer -->
+<footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

@@ -28,8 +28,11 @@ public class SePayGatewayConfig {
     }
     public String publicBaseUrl() { return publicBaseUrl.replaceAll("/+$", ""); }
     public boolean isReady() {
-        if (merchantId.isBlank() || merchantSecret.length() < 16 || ipnSecret.length() < 24
-                || !("sandbox".equals(environment) || "production".equals(environment))) return false;
+        if (merchantId == null || merchantId.isBlank()
+                || merchantSecret == null || merchantSecret.length() < 16
+                || ipnSecret == null || ipnSecret.length() < 24
+                || environment == null || !("sandbox".equals(environment) || "production".equals(environment))
+                || publicBaseUrl == null || publicBaseUrl.isBlank()) return false;
         if (!isSandbox() && (merchantId.startsWith("SP-TEST-") || merchantSecret.contains("_test_"))) return false;
         try {
             URI uri = URI.create(publicBaseUrl);
@@ -38,7 +41,7 @@ public class SePayGatewayConfig {
                     && !host.equalsIgnoreCase("localhost") && !host.equals("127.0.0.1") && !host.equals("[::1]")
                     && uri.getRawUserInfo() == null && uri.getRawQuery() == null && uri.getRawFragment() == null
                     && (uri.getPath().isEmpty() || uri.getPath().equals("/"));
-        } catch (IllegalArgumentException e) { return false; }
+        } catch (Exception e) { return false; }
     }
     public boolean authenticIpn(String provided) {
         return isReady() && provided != null && MessageDigest.isEqual(

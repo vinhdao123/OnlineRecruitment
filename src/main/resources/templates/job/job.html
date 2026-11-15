@@ -3,252 +3,394 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách việc làm | OnlineRecruitment</title>
 
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/job/job.css}">
-
-    <!-- Thêm CSS cho thẻ Ghim -->
-    <style>
-        .job-card {
-            position: relative; /* Để badge hiển thị đúng góc */
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            hover: '#1d4ed8',
+                            light: '#eff6ff',
+                        },
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                    }
+                }
+            }
         }
-        .job-card-pinned {
-            border: 2px solid #f59e0b !important;
-            background-color: #fffdf5 !important;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15) !important;
-        }
-        .pinned-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
-            z-index: 10;
-        }
-    </style>
+    </script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
+<!-- Topbar Header Fragment -->
 <div th:replace="~{fragments/taskbar :: taskbar('jobs')}"></div>
 
-<!-- ===================================================== -->
-<!-- ======================== HERO ======================= -->
-<!-- ===================================================== -->
+<!-- ================= HERO SEARCH SECTION ================= -->
+<section class="bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 text-white pt-12 pb-16 px-4 relative overflow-hidden">
+    <div class="absolute inset-0 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:24px_24px] opacity-15"></div>
+    <div class="max-w-6xl mx-auto relative z-10 text-center">
+        <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-semibold uppercase tracking-wider mb-4">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Cơ Hội Nghề Nghiệp Đột Phá
+        </span>
+        <h1 class="text-3xl md:text-5xl font-display font-extrabold tracking-tight mb-3 text-white !text-white drop-shadow-md">
+            Tìm Việc Làm Phù Hợp Với Bạn
+        </h1>
+        <p class="text-slate-300 text-base md:text-lg max-w-2xl mx-auto mb-8">
+            Khám phá hàng nghìn cơ hội việc làm hấp dẫn từ các công ty và tập đoàn công nghệ hàng đầu
+        </p>
 
-<section class="hero">
-    <div class="container">
-        <h1>Tìm việc làm phù hợp với bạn</h1>
-        <p>Khám phá hàng nghìn cơ hội việc làm từ các công ty hàng đầu</p>
+        <!-- Search Bar Card (Enlarged, Spacious & Prominent) -->
+        <div class="hero-search-card bg-white p-3.5 md:p-4.5 rounded-2xl shadow-2xl max-w-4xl mx-auto border border-slate-100 text-left">
+            <form th:action="@{/jobs}" method="get" class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <!-- Keyword input -->
+                <div class="md:col-span-5 flex items-center gap-3 px-4 py-3.5 min-h-[52px] bg-slate-50 rounded-xl border border-slate-200 focus-within:border-blue-600 focus-within:bg-white transition-all">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
+                    <input type="text" name="keyword" th:value="${keyword}"
+                           placeholder="Vị trí tuyển dụng, kỹ năng, công ty..."
+                           class="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none">
+                </div>
 
-        <!-- ================= SEARCH ================= -->
-        <form class="search-box" th:action="@{/jobs}" method="get">
-            <div class="search-item">
-                <span class="search-icon">🔍</span>
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tên công việc, vị trí...">
-            </div>
-            <div class="search-item">
-                <span class="search-icon">📍</span>
-                <input type="text" name="location" th:value="${location}" placeholder="Địa điểm">
-            </div>
-            <div class="search-item">
-                <span class="search-icon">📁</span>
-                <select name="categoryIds">
-                    <option value="">Tất cả ngành nghề</option>
-                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
-                </select>
-            </div>
-            <button type="submit" class="search-btn">Tìm kiếm</button>
-        </form>
+                <!-- Location input -->
+                <div class="md:col-span-3 flex items-center gap-3 px-4 py-3.5 min-h-[52px] bg-slate-50 rounded-xl border border-slate-200 focus-within:border-blue-600 focus-within:bg-white transition-all">
+                    <i data-lucide="map-pin" class="w-5 h-5 text-slate-400 shrink-0"></i>
+                    <input type="text" name="location" th:value="${location}"
+                           placeholder="Địa điểm (TP.HCM, HN...)"
+                           class="w-full bg-transparent text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none">
+                </div>
+
+                <!-- Category select -->
+                <div class="md:col-span-2 flex items-center gap-2 px-3.5 py-3.5 min-h-[52px] bg-slate-50 rounded-xl border border-slate-200 focus-within:border-blue-600 focus-within:bg-white transition-all">
+                    <i data-lucide="briefcase" class="w-5 h-5 text-slate-400 shrink-0"></i>
+                    <select name="categoryIds" class="w-full bg-transparent text-sm sm:text-base text-slate-800 focus:outline-none cursor-pointer">
+                        <option value="">Tất cả ngành nghề</option>
+                        <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="md:col-span-2">
+                    <button type="submit" class="w-full h-full min-h-[52px] bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-bold rounded-xl transition-all shadow-md shadow-blue-600/30 flex items-center justify-center gap-2 cursor-pointer">
+                        <i data-lucide="search" class="w-4.5 h-4.5"></i>
+                        <span>Tìm kiếm</span>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </section>
 
-<!-- ===================================================== -->
-<!-- ======================== MAIN ======================= -->
-<!-- ===================================================== -->
+<!-- ================= MAIN CONTENT ================= -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-<main class="container main-content">
+        <!-- ================= FILTER SIDEBAR ================= -->
+        <aside class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 sticky top-24">
+                <form th:action="@{/jobs}" method="get" id="filterForm">
+                    <input type="hidden" name="keyword" th:value="${keyword}">
+                    <input type="hidden" name="location" th:value="${location}">
+                    <input type="hidden" name="sort" th:value="${sort}">
 
-    <!-- ================================================= -->
-    <!-- ===================== FILTER ==================== -->
-    <!-- ================================================= -->
+                    <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="sliders-horizontal" class="w-5 h-5 text-blue-600"></i>
+                            <h2 class="font-display font-bold text-slate-900 text-base">Bộ Lọc Tìm Kiếm</h2>
+                        </div>
+                        <a th:href="@{/jobs}" class="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline">
+                            Xóa tất cả
+                        </a>
+                    </div>
 
-    <aside class="filter">
-        <form th:action="@{/jobs}" method="get">
-            <input type="hidden" name="keyword" th:value="${keyword}">
-            <input type="hidden" name="location" th:value="${location}">
-            <input type="hidden" name="sort" th:value="${sort}">
+                    <!-- LOCATION FILTER -->
+                    <div class="mb-6">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i> Địa Điểm
+                        </h3>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <label th:each="item : ${locationsList}" class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="locations" th:value="${item}"
+                                       th:checked="${locations != null and locations.contains(item)}"
+                                       onchange="this.form.submit()"
+                                       class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span th:text="${item}" class="truncate"></span>
+                            </label>
+                        </div>
+                    </div>
 
-            <div class="filter-header">
-                <h2>Bộ lọc</h2>
-                <a th:href="@{/jobs}" class="clear-filter">Xóa tất cả</a>
+                    <!-- EXPERIENCE FILTER -->
+                    <div class="mb-6 pt-5 border-t border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> Kinh Nghiệm
+                        </h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="experiences" value="none"
+                                       th:checked="${experiences != null and experiences.contains('none')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>Không yêu cầu</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="experiences" value="0-1"
+                                       th:checked="${experiences != null and experiences.contains('0-1')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>Dưới 1 năm</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="experiences" value="1-3"
+                                       th:checked="${experiences != null and experiences.contains('1-3')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>1 - 3 năm</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="experiences" value="3-5"
+                                       th:checked="${experiences != null and experiences.contains('3-5')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>3 - 5 năm</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="experiences" value="5+"
+                                       th:checked="${experiences != null and experiences.contains('5+')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>Trên 5 năm</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- SALARY FILTER -->
+                    <div class="mb-6 pt-5 border-t border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <i data-lucide="badge-dollar-sign" class="w-3.5 h-3.5 text-slate-400"></i> Mức Lương
+                        </h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="salaryRanges" value="under-1000"
+                                       th:checked="${salaryRanges != null and salaryRanges.contains('under-1000')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>Dưới $1,000 / tháng</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="salaryRanges" value="1000-2000"
+                                       th:checked="${salaryRanges != null and salaryRanges.contains('1000-2000')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>$1,000 - $2,000</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="salaryRanges" value="2000-3000"
+                                       th:checked="${salaryRanges != null and salaryRanges.contains('2000-3000')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>$2,000 - $3,000</span>
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="salaryRanges" value="3000+"
+                                       th:checked="${salaryRanges != null and salaryRanges.contains('3000+')}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span>Trên $3,000</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- LEVEL FILTER -->
+                    <div class="mb-6 pt-5 border-t border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <i data-lucide="layers" class="w-3.5 h-3.5 text-slate-400"></i> Cấp Bậc
+                        </h3>
+                        <div class="space-y-2">
+                            <label th:each="lvl : ${ {'Intern', 'Junior', 'Middle', 'Senior'} }" class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="levels" th:value="${lvl}"
+                                       th:checked="${levels != null and levels.contains(lvl)}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span th:text="${lvl}"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- CATEGORIES FILTER -->
+                    <div class="pt-5 border-t border-slate-100">
+                        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                            <i data-lucide="folder" class="w-3.5 h-3.5 text-slate-400"></i> Ngành Nghề
+                        </h3>
+                        <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <label th:each="category : ${categories}" class="flex items-center gap-2.5 text-sm text-slate-600 hover:text-slate-900 cursor-pointer">
+                                <input type="checkbox" name="categoryIds" th:value="${category.id}"
+                                       th:checked="${categoryIds != null and categoryIds.contains(category.id)}"
+                                       onchange="this.form.submit()" class="w-4 h-4 rounded text-blue-600 border-slate-300 focus:ring-blue-500">
+                                <span th:text="${category.name}" class="truncate"></span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
             </div>
+        </aside>
 
-            <!-- LOCATION -->
-            <div class="filter-group">
-                <h3>Địa điểm</h3>
-                <label th:each="item : ${locationsList}">
-                    <input type="checkbox" name="locations" th:value="${item}" th:checked="${locations != null and locations.contains(item)}" onchange="this.form.submit()">
-                    <span th:text="${item}"></span>
-                </label>
-            </div>
-
-            <!-- EXPERIENCE -->
-            <div class="filter-group">
-                <h3>Kinh nghiệm</h3>
-                <label>
-                    <input type="checkbox" name="experiences" value="none" th:checked="${experiences != null and experiences.contains('none')}" onchange="this.form.submit()">
-                    Không cần kinh nghiệm
-                </label>
-                <label>
-                    <input type="checkbox" name="experiences" value="0-1" th:checked="${experiences != null and experiences.contains('0-1')}" onchange="this.form.submit()">
-                    0 - 1 năm
-                </label>
-                <label>
-                    <input type="checkbox" name="experiences" value="1-3" th:checked="${experiences != null and experiences.contains('1-3')}" onchange="this.form.submit()">
-                    1 - 3 năm
-                </label>
-                <label>
-                    <input type="checkbox" name="experiences" value="3-5" th:checked="${experiences != null and experiences.contains('3-5')}" onchange="this.form.submit()">
-                    3 - 5 năm
-                </label>
-                <label>
-                    <input type="checkbox" name="experiences" value="5+" th:checked="${experiences != null and experiences.contains('5+')}" onchange="this.form.submit()">
-                    Trên 5 năm
-                </label>
-            </div>
-
-            <!-- SALARY -->
-            <div class="filter-group">
-                <h3>Mức lương</h3>
-                <label>
-                    <input type="checkbox" name="salaryRanges" value="under-1000" th:checked="${salaryRanges != null and salaryRanges.contains('under-1000')}" onchange="this.form.submit()">
-                    Dưới 1000
-                </label>
-                <label>
-                    <input type="checkbox" name="salaryRanges" value="1000-2000" th:checked="${salaryRanges != null and salaryRanges.contains('1000-2000')}" onchange="this.form.submit()">
-                    1000 - 2000
-                </label>
-                <label>
-                    <input type="checkbox" name="salaryRanges" value="2000-3000" th:checked="${salaryRanges != null and salaryRanges.contains('2000-3000')}" onchange="this.form.submit()">
-                    2000 - 3000
-                </label>
-                <label>
-                    <input type="checkbox" name="salaryRanges" value="3000+" th:checked="${salaryRanges != null and salaryRanges.contains('3000+')}" onchange="this.form.submit()">
-                    Trên 3000
-                </label>
-            </div>
-
-            <!-- LEVEL -->
-            <div class="filter-group">
-                <h3>Cấp bậc</h3>
-                <label>
-                    <input type="checkbox" name="levels" value="Intern" th:checked="${levels != null and levels.contains('Intern')}" onchange="this.form.submit()">
-                    Intern
-                </label>
-                <label>
-                    <input type="checkbox" name="levels" value="Junior" th:checked="${levels != null and levels.contains('Junior')}" onchange="this.form.submit()">
-                    Junior
-                </label>
-                <label>
-                    <input type="checkbox" name="levels" value="Middle" th:checked="${levels != null and levels.contains('Middle')}" onchange="this.form.submit()">
-                    Middle
-                </label>
-                <label>
-                    <input type="checkbox" name="levels" value="Senior" th:checked="${levels != null and levels.contains('Senior')}" onchange="this.form.submit()">
-                    Senior
-                </label>
-            </div>
-
-            <!-- CATEGORY -->
-            <div class="filter-group">
-                <h3>Ngành nghề</h3>
-                <label th:each="category : ${categories}">
-                    <input type="checkbox" name="categoryIds" th:value="${category.id}" th:checked="${categoryIds != null and categoryIds.contains(category.id)}" onchange="this.form.submit()">
-                    <span th:text="${category.name}"></span>
-                </label>
-            </div>
-        </form>
-    </aside>
-
-    <!-- ================================================= -->
-    <!-- ==================== JOB LIST =================== -->
-    <!-- ================================================= -->
-
-    <section class="job-section">
-        <div class="job-section-header">
-            <div>
-                <h2>Việc làm phù hợp</h2>
-                <p><span th:text="${#lists.size(jobs)}">0</span> việc làm được tìm thấy</p>
-            </div>
-
-            <form th:action="@{/jobs}" method="get">
-                <input type="hidden" name="keyword" th:value="${keyword}">
-                <input type="hidden" name="location" th:value="${location}">
-                <select class="sort-select" name="sort" onchange="this.form.submit()">
-                    <option value="newest" th:selected="${sort == 'newest'}">Mới nhất</option>
-                    <option value="salary-high" th:selected="${sort == 'salary-high'}">Lương cao nhất</option>
-                    <option value="salary-low" th:selected="${sort == 'salary-low'}">Lương thấp nhất</option>
-                </select>
-            </form>
-        </div>
-
-        <!-- JOB CARD -->
-        <div class="job-card"
-             th:each="job : ${jobs}"
-             th:classappend="${job.isPinned} ? 'job-card-pinned' : ''">
-
-            <!-- NHÃN TIN NỔI BẬT -->
-            <div th:if="${job.isPinned}" class="pinned-badge">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-                TIN NỔI BẬT
-            </div>
-
-            <!-- LOGO -->
-            <div class="company-logo">
-                <span th:if="${job.title != null and !job.title.isEmpty()}" th:text="${#strings.substring(job.title, 0, 1)}">J</span>
-            </div>
-
-            <!-- JOB INFO -->
-            <div class="job-info">
-                <h3 th:text="${job.title}">Junior Backend Developer</h3>
-                <p class="company-name">Công ty tuyển dụng</p>
-
-                <div class="job-details">
-                    <span>📍 <span th:text="${job.location}"></span></span>
-                    <span>💰 <span th:text="${job.salaryMin}"></span> - <span th:text="${job.salaryMax}"></span></span>
-                    <span>⏱ <span th:text="${job.experience}"></span></span>
-                    <span>👨‍💻 <span th:text="${job.level}"></span></span>
+        <!-- ================= JOB LIST CONTENT ================= -->
+        <section class="lg:col-span-3 space-y-6">
+            <!-- Results Header & Sort -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-lg font-display font-bold text-slate-900">
+                        Việc Làm Phù Hợp
+                    </h2>
+                    <p class="text-sm text-slate-500 mt-0.5">
+                        Tìm thấy <strong class="text-blue-600 font-bold" th:text="${#lists.size(jobs)}">0</strong> cơ hội tuyển dụng
+                    </p>
                 </div>
 
-                <div class="skills"></div>
+                <!-- Sort select -->
+                <form th:action="@{/jobs}" method="get" class="flex items-center gap-2">
+                    <input type="hidden" name="keyword" th:value="${keyword}">
+                    <input type="hidden" name="location" th:value="${location}">
+                    <label for="sortSelect" class="text-xs font-medium text-slate-500 shrink-0">Sắp xếp theo:</label>
+                    <select id="sortSelect" name="sort" onchange="this.form.submit()"
+                            class="text-sm bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-700 font-medium focus:outline-none focus:border-blue-600">
+                        <option value="newest" th:selected="${sort == 'newest'}">Mới nhất</option>
+                        <option value="salary-high" th:selected="${sort == 'salary-high'}">Lương cao nhất</option>
+                        <option value="salary-low" th:selected="${sort == 'salary-low'}">Lương thấp nhất</option>
+                    </select>
+                </form>
+            </div>
 
-                <div class="job-footer">
-                    <span class="posted" th:text="${job.createdAt}"></span>
-                    <a th:href="@{/jobs/{id}/apply(id=${job.id})}" class="detail-btn">Ứng tuyển</a>
+            <!-- Job Card List -->
+            <div class="space-y-4">
+                <div th:each="job : ${jobs}"
+                     class="group bg-white rounded-2xl p-6 border transition-all duration-200 relative"
+                     th:classappend="${job.isPinned} ? 'border-amber-300 bg-amber-50/20 shadow-md shadow-amber-500/5 ring-1 ring-amber-400/40' : 'border-slate-200/80 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-500/5'">
+
+                    <!-- Pinned Ribbon Badge -->
+                    <div th:if="${job.isPinned}" class="absolute top-4 right-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold shadow-sm">
+                        <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> TIN NỔI BẬT
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-start gap-5">
+                        <!-- Company Avatar / Logo Container -->
+                        <div class="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1 flex items-center justify-center font-heading font-black text-xl shadow-sm shrink-0 overflow-hidden">
+                            <img th:if="${job.company != null and job.company.logoUrl != null and !#strings.isEmpty(job.company.logoUrl)}"
+                                 th:src="@{${job.company.logoUrl}}"
+                                 th:alt="${job.title}"
+                                 class="w-full h-full object-contain"
+                                 onerror="this.style.display='none'">
+                            <div th:if="${job.company == null or job.company.logoUrl == null or #strings.isEmpty(job.company.logoUrl)}"
+                                 class="w-full h-full rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-heading font-black text-lg">
+                                <span th:if="${job.title != null and !job.title.isEmpty()}" th:text="${#strings.substring(job.title, 0, 1)}">J</span>
+                                <span th:unless="${job.title != null and !job.title.isEmpty()}">J</span>
+                            </div>
+                        </div>
+
+                        <!-- Info Content -->
+                        <div class="flex-1 min-w-0 pr-16 sm:pr-0">
+                            <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                                <a th:href="@{/jobs/{id}(id=${job.id})}"
+                                   class="text-lg font-heading font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate block">
+                                    <span th:text="${job.title}">Junior Backend Developer</span>
+                                </a>
+                            </div>
+
+                            <p class="text-sm font-medium text-slate-500 mb-4 flex items-center gap-1.5">
+                                <i data-lucide="building-2" class="w-4 h-4 text-slate-400"></i>
+                                <span th:text="${job.company != null ? job.company.companyName : (job.recruiter != null ? job.recruiter.fullName : 'Doanh nghiệp tuyển dụng')}">Tên công ty</span>
+                            </p>
+
+                            <!-- Meta Chips -->
+                            <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-slate-600 mb-5">
+                                <!-- Location -->
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <span th:text="${job.location != null and !#strings.isEmpty(job.location) ? job.location : 'Toàn quốc'}">Địa điểm</span>
+                                </span>
+
+                                <!-- Salary -->
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-semibold">
+                                    <i data-lucide="circle-dollar-sign" class="w-3.5 h-3.5 text-emerald-600"></i>
+                                    <span th:text="${job.salaryMin == null and job.salaryMax == null
+                                                    ? 'Thỏa thuận'
+                                                    : (job.salaryMin != null and job.salaryMax != null
+                                                        ? #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT') + ' - ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')
+                                                        : (job.salaryMin != null
+                                                            ? 'Từ ' + #numbers.formatDecimal(job.salaryMin, 0, 'COMMA', 0, 'POINT')
+                                                            : 'Tới ' + #numbers.formatDecimal(job.salaryMax, 0, 'COMMA', 0, 'POINT')))
+                                                      + (job.salaryCurrency != null ? ' ' + job.salaryCurrency : '')}">
+                                        Thỏa thuận
+                                    </span>
+                                </span>
+
+                                <!-- Experience -->
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700" th:if="${job.experience != null and !#strings.isEmpty(job.experience)}">
+                                    <i data-lucide="briefcase" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <span th:text="${job.experience}">1 - 3 năm</span>
+                                </span>
+
+                                <!-- Level -->
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-700" th:if="${job.level != null and !#strings.isEmpty(job.level)}">
+                                    <i data-lucide="award" class="w-3.5 h-3.5 text-indigo-500"></i>
+                                    <span th:text="${job.level}">Junior</span>
+                                </span>
+                            </div>
+
+                            <!-- Card Footer -->
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                                <span class="text-xs text-slate-400 flex items-center gap-1.5">
+                                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                                    <span th:text="${job.createdAt != null ? 'Đăng ngày: ' + job.createdAt : 'Vừa mới đăng'}">Vừa mới đăng</span>
+                                </span>
+
+                                <div class="flex items-center gap-2">
+                                    <a th:href="@{/jobs/{id}(id=${job.id})}"
+                                       class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                                        Xem chi tiết
+                                    </a>
+                                    <a th:href="@{/jobs/{id}/apply(id=${job.id})}"
+                                       class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/30 transition-all flex items-center gap-1.5">
+                                        <span>Ứng tuyển</span>
+                                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(jobs)}"
+                     class="bg-white rounded-2xl p-12 border border-slate-200/80 text-center shadow-sm">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="search-x" class="w-8 h-8"></i>
+                    </div>
+                    <h3 class="text-lg font-display font-bold text-slate-900 mb-1">Không tìm thấy việc làm phù hợp</h3>
+                    <p class="text-sm text-slate-500 max-w-md mx-auto mb-6">
+                        Thử xóa bớt bộ lọc hoặc tìm kiếm với từ khóa khác để tìm thấy nhiều cơ hội hơn.
+                    </p>
+                    <a th:href="@{/jobs}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-md shadow-blue-600/20 hover:bg-blue-700 transition-all">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                        <span>Đặt lại bộ lọc</span>
+                    </a>
                 </div>
             </div>
-        </div>
-
-        <!-- NO JOB -->
-        <div th:if="${#lists.isEmpty(jobs)}">
-            <p>Không tìm thấy việc làm nào.</p>
-        </div>
-    </section>
+        </section>
+    </div>
 </main>
 
-<footer class="footer">
-    <div class="container">
-        <p>© 2026 JobHub. All rights reserved.</p>
-    </div>
-</footer>
+<!-- Shared Modern Footer -->
+<footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

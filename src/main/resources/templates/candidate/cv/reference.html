@@ -4,127 +4,331 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Người tham chiếu — Online Recruitment</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
+<!-- Taskbar Header -->
 <div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
 
-<div class="cv-dashboard-layout">
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- SIDEBAR -->
-    <aside class="cv-sidebar">
-        <div class="cv-sidebar-menu">
-            <div class="cv-sidebar-title">Quản lý chung</div>
-            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                My CV
-            </a>
-            <a th:href="@{/candidate/cvs/gallery}" class="cv-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                Template CV
-            </a>
+    <!-- Breadcrumb -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại tổng quan CV
+        </a>
+        <div class="text-xs text-slate-500 font-medium">
+            <a th:href="@{/}" class="hover:text-primary-600">Trang chủ</a> /
+            <a th:href="@{/candidate/cvs}" class="hover:text-primary-600">My CV</a> /
+            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="hover:text-primary-600" th:text="${cv.title}">CV</a> /
+            <span class="text-primary-600 font-semibold">Người tham chiếu</span>
         </div>
+    </div>
 
-        <div class="cv-sidebar-menu">
-            <div class="cv-sidebar-title">Đầu mục thông tin CV</div>
-            <div class="cv-sidebar-current">
-                Đang chỉnh sửa:
-                <strong th:text="${cv.title}">Tên CV</strong>
+    <!-- Layout Grid: Sidebar + Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+        <!-- Sidebar Navigation -->
+        <aside class="lg:col-span-1 space-y-6">
+            <!-- CV Context Card -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm">
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Đang chỉnh sửa CV</span>
+                <h3 class="text-base font-extrabold text-slate-900 font-display truncate mb-3" th:text="${cv.title}">Tên CV</h3>
+                <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary-600 hover:text-primary-700">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                    Bảng điều khiển CV
+                </a>
             </div>
-            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">📋</span> Tổng quan CV</a>
-            <a th:href="@{/candidate/cvs/{id}/work-experiences(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">💼</span> Kinh nghiệm làm việc</a>
-            <a th:href="@{/candidate/cvs/{id}/educations(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🎓</span> Trình độ học vấn</a>
-            <a th:href="@{/candidate/cvs/{id}/skills(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">⚡</span> Kỹ năng chuyên môn</a>
-            <a th:href="@{/candidate/cvs/{id}/projects(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🚀</span> Dự án tiêu biểu</a>
-            <a th:href="@{/candidate/cvs/{id}/certificates(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">📜</span> Chứng chỉ</a>
-            <a th:href="@{/candidate/cvs/{id}/awards(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🏆</span> Giải thưởng</a>
-            <a th:href="@{/candidate/cvs/{id}/activities(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🤝</span> Hoạt động ngoại khóa</a>
-            <a th:href="@{/candidate/cvs/{id}/references(id=${cv.id})}" class="cv-sidebar-item active"><span class="cv-sidebar-emoji">👥</span> Người tham chiếu</a>
-        </div>
-    </aside>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-
-        <div class="cv-breadcrumb">
-            <a th:href="@{/}">Trang chủ</a>
-            <span>/</span>
-            <a th:href="@{/candidate/cvs}">My CV</a>
-            <span>/</span>
-            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" th:text="${cv.title}">CV</a>
-            <span>/</span>
-            <span class="current">Người tham chiếu</span>
-        </div>
-
-        <div class="page-header">
-            <div>
-                <h2 class="page-title">Người tham chiếu</h2>
-                <p class="page-subtitle">Đang chỉnh sửa cho CV: <strong th:text="${cv.title}"></strong></p>
+            <!-- Sections Menu -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-3 shadow-sm space-y-1">
+                <div class="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Đầu mục hồ sơ</div>
+                <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>📋</span> Tổng quan CV
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/work-experiences(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>💼</span> Kinh nghiệm làm việc
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/educations(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>🎓</span> Trình độ học vấn
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/skills(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>⚡</span> Kỹ năng chuyên môn
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/projects(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>🚀</span> Dự án tiêu biểu
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/certificates(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>📜</span> Chứng chỉ
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/awards(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>🏆</span> Giải thưởng
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/activities(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all">
+                    <span>🤝</span> Hoạt động ngoại khóa
+                </a>
+                <a th:href="@{/candidate/cvs/{id}/references(id=${cv.id})}" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-primary-700 bg-primary-50 border border-primary-100 transition-all">
+                    <span>👥</span> Người tham chiếu
+                </a>
             </div>
-            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="btn-link">&larr; Quay lại tổng quan CV</a>
-        </div>
 
-        <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
+            <!-- Quick Link to Preview -->
+            <a th:href="@{/candidate/cvs/{id}/preview(id=${cv.id})}" target="_blank"
+               class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-2xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 transition-all shadow-sm">
+                <i data-lucide="eye" class="w-4 h-4"></i>
+                Xem trước trang in CV
+            </a>
+        </aside>
 
-        <div class="form-card">
-            <h3 class="form-title">Thêm người tham chiếu</h3>
-            <form th:action="@{/candidate/cvs/{id}/references/add(id=${cv.id})}" th:object="${referenceRequest}" method="post">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label class="form-label">Họ và tên <span class="required-star">*</span></label>
-                        <input type="text" th:field="*{fullName}" class="form-control" placeholder="VD: Ông Trần Minh Hoàng">
-                        <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="field-error"></span>
+        <!-- Main Content Column -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- Alerts -->
+            <div th:if="${successMessage}" class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+                <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+                <span th:text="${successMessage}"></span>
+            </div>
+            <div th:if="${errorMessage}" class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+                <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+
+            <!-- Section Header -->
+            <div class="bg-gradient-to-r from-primary-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-2xl flex-shrink-0">
+                        👥
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Chức vụ</label>
-                        <input type="text" th:field="*{position}" class="form-control" placeholder="VD: Giám đốc Kinh doanh">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Công ty / Cơ quan</label>
-                        <input type="text" th:field="*{company}" class="form-control" placeholder="VD: Công ty TNHH Giải pháp ABC">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Mối quan hệ công việc</label>
-                        <input type="text" th:field="*{relationship}" class="form-control" placeholder="VD: Quản lý trực tiếp">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email liên hệ</label>
-                        <input type="email" th:field="*{email}" class="form-control" placeholder="hoang.tran@company.vn">
-                        <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="field-error"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Số điện thoại</label>
-                        <input type="text" th:field="*{phone}" class="form-control" placeholder="0901 234 567">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold font-display">Người tham chiếu (References)</h1>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">Thông tin quản lý trực tiếp, giảng viên hướng dẫn hoặc đồng nghiệp uy tín có thể xác nhận năng lực và thái độ làm việc của bạn.</p>
                     </div>
                 </div>
-                <button type="submit" class="btn-submit">+ Thêm người tham chiếu</button>
-            </form>
-        </div>
+            </div>
 
-        <h3 class="item-list-title">Danh sách người tham chiếu</h3>
-        <div th:if="${references.isEmpty()}" class="empty-note">Chưa có người tham chiếu nào trong CV này.</div>
+            <!-- Add Form Card -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">
+                <h2 class="text-base font-extrabold text-slate-900 font-display mb-6 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center text-xs">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                    </span>
+                    Thêm người tham chiếu mới
+                </h2>
 
-        <div th:each="ref : ${references}" class="item-card">
-            <div class="item-body">
-                <h4 class="item-title" th:text="${ref.fullName}">Họ tên</h4>
-                <p class="item-subtitle" th:text="${(ref.position != null && !ref.position.isEmpty() ? ref.position : '') + (ref.company != null && !ref.company.isEmpty() ? ' — ' + ref.company : '')}"></p>
-                <p class="item-meta" th:if="${ref.relationship != null && !ref.relationship.isEmpty()}" th:text="'Mối quan hệ: ' + ${ref.relationship}"></p>
-                <div class="ref-contact">
-                    <span th:if="${ref.email != null && !ref.email.isEmpty()}">✉️ <a th:href="${'mailto:' + ref.email}" th:text="${ref.email}"></a></span>
-                    <span th:if="${ref.phone != null && !ref.phone.isEmpty()}" th:text="${'📞 ' + ref.phone}"></span>
+                <form th:action="@{/candidate/cvs/{id}/references/add(id=${cv.id})}" th:object="${referenceRequest}" method="post" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Họ và tên người tham chiếu <span class="text-rose-500">*</span></label>
+                            <input type="text" th:field="*{fullName}" placeholder="VD: Ông Trần Minh Hoàng..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="text-xs text-rose-500 font-medium"></span>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Chức vụ hiện tại</label>
+                            <input type="text" th:field="*{position}" placeholder="VD: Giám đốc Kỹ thuật (CTO), Trưởng phòng..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Công ty / Cơ quan</label>
+                            <input type="text" th:field="*{company}" placeholder="VD: Tập đoàn Công nghệ ABC..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Mối quan hệ công việc</label>
+                            <input type="text" th:field="*{relationship}" placeholder="VD: Quản lý trực tiếp tại dự án X..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Email liên hệ</label>
+                            <input type="email" th:field="*{email}" placeholder="hoang.tran@company.com"
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-xs text-rose-500 font-medium"></span>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Số điện thoại</label>
+                            <input type="text" th:field="*{phone}" placeholder="0912 345 678"
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-end">
+                        <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold shadow-sm transition-all">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            Thêm người tham chiếu
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- List of existing references -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-sm font-extrabold text-slate-900 font-display uppercase tracking-wider">
+                        Danh sách người tham chiếu (<span th:text="${references.size()}">0</span>)
+                    </h3>
+                </div>
+
+                <!-- Empty state -->
+                <div th:if="${references.isEmpty()}" class="bg-white rounded-3xl border border-slate-200/80 p-8 text-center space-y-3">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center text-xl">
+                        👥
+                    </div>
+                    <p class="text-sm font-semibold text-slate-700">Chưa có người tham chiếu nào</p>
+                    <p class="text-xs text-slate-400 max-w-md mx-auto">Cung cấp thông tin người xác thực uy tín giúp hồ sơ của bạn nhận được sự tín nhiệm cao hơn từ nhà tuyển dụng.</p>
+                </div>
+
+                <!-- Cards List -->
+                <div class="space-y-3" th:unless="${references.isEmpty()}">
+                    <div th:each="ref : ${references}" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:border-slate-300 transition-all flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div class="space-y-1.5 flex-1">
+                            <h4 class="text-base font-extrabold text-slate-900 font-display" th:text="${ref.fullName}">Họ tên</h4>
+                            <p class="text-xs font-semibold text-primary-700" th:text="${(ref.position != null && !ref.position.isEmpty() ? ref.position : '') + (ref.company != null && !ref.company.isEmpty() ? ' — ' + ref.company : '')}"></p>
+                            <p class="text-xs text-slate-500 font-medium" th:if="${ref.relationship != null && !ref.relationship.isEmpty()}" th:text="'Mối quan hệ: ' + ${ref.relationship}"></p>
+
+                            <div class="flex items-center gap-4 text-xs text-slate-600 pt-2 border-t border-slate-100 flex-wrap">
+                                <span th:if="${ref.email != null && !ref.email.isEmpty()}" class="inline-flex items-center gap-1.5">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <a th:href="${'mailto:' + ref.email}" class="text-primary-600 hover:underline" th:text="${ref.email}"></a>
+                                </span>
+                                <span th:if="${ref.phone != null && !ref.phone.isEmpty()}" class="inline-flex items-center gap-1.5">
+                                    <i data-lucide="phone" class="w-3.5 h-3.5 text-slate-400"></i>
+                                    <span th:text="${ref.phone}"></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <button type="button" th:onclick="'document.getElementById(\'edit-modal-' + ${ref.id} + '\').classList.remove(\'hidden\');'"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition-all">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                                Sửa
+                            </button>
+                            <form th:action="@{/candidate/cvs/{id}/references/{refId}/delete(id=${cv.id}, refId=${ref.id})}" method="post"
+                                  onsubmit="return confirm('Bạn chắc chắn muốn xóa người tham chiếu này?');">
+                                <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition-all">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                    Xóa
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Modal Sửa Người Tham Chiếu -->
+                        <div th:id="'edit-modal-' + ${ref.id}" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+                            <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative text-left">
+                                <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+                                    <h3 class="text-base font-extrabold text-slate-900 font-display flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                                            <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                        </span>
+                                        Chỉnh sửa người tham chiếu
+                                    </h3>
+                                    <button type="button" th:onclick="'document.getElementById(\'edit-modal-' + ${ref.id} + '\').classList.add(\'hidden\');'"
+                                            class="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                                        <i data-lucide="x" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+
+                                <form th:action="@{/candidate/cvs/{id}/references/{refId}/edit(id=${cv.id}, refId=${ref.id})}" method="post" class="space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="space-y-1.5">
+                                            <label class="text-xs font-bold text-slate-700">Họ và tên người tham chiếu <span class="text-rose-500">*</span></label>
+                                            <input type="text" name="fullName" th:value="${ref.fullName}" required
+                                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <label class="text-xs font-bold text-slate-700">Chức vụ / Vị trí</label>
+                                            <input type="text" name="position" th:value="${ref.position}"
+                                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                        </div>
+                                        <div class="space-y-1.5 sm:col-span-2">
+                                            <label class="text-xs font-bold text-slate-700">Cơ quan / Doanh nghiệp</label>
+                                            <input type="text" name="company" th:value="${ref.company}"
+                                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <label class="text-xs font-bold text-slate-700">Địa chỉ Email</label>
+                                            <input type="email" name="email" th:value="${ref.email}"
+                                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                        </div>
+                                        <div class="space-y-1.5">
+                                            <label class="text-xs font-bold text-slate-700">Số điện thoại liên hệ</label>
+                                            <input type="tel" name="phone" th:value="${ref.phone}"
+                                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                        </div>
+                                        <div class="space-y-1.5 sm:col-span-2">
+                                            <label class="text-xs font-bold text-slate-700">Mối quan hệ trong công việc</label>
+                                            <input type="text" name="relationship" th:value="${ref.relationship}" placeholder="VD: Trưởng phòng trực tiếp, Giảng viên hướng dẫn..."
+                                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                        </div>
+                                    </div>
+                                    <div class="pt-4 flex items-center justify-end gap-3 border-t border-slate-100">
+                                        <button type="button" th:onclick="'document.getElementById(\'edit-modal-' + ${ref.id} + '\').classList.add(\'hidden\');'"
+                                                class="px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                                            Hủy
+                                        </button>
+                                        <button type="submit" class="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all">
+                                            <i data-lucide="check" class="w-4 h-4"></i>
+                                            Lưu thay đổi
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <form th:action="@{/candidate/cvs/{id}/references/{refId}/delete(id=${cv.id}, refId=${ref.id})}" method="post" onsubmit="return confirm('Xóa người tham chiếu này?');">
-                <button type="submit" class="btn-delete">Xóa</button>
-            </form>
+
         </div>
-    </main>
-</div>
+    </div>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
 </body>
 </html>

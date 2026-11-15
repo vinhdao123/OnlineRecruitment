@@ -3,314 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ doanh nghiệp & Nhà tuyển dụng</title>
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
-</head>
-<body>
+    <title>Hồ sơ Doanh nghiệp & Nhà tuyển dụng — JOBPORTAL</title>
 
-    <!-- Taskbar Header -->
-    <div th:replace="~{fragments/taskbar :: taskbar('profile')}"></div>
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-    <main class="main-wrapper">
-        <!-- Page Title -->
-        <div class="page-title-box">
-            <h1 class="page-title">Hồ sơ Nhà tuyển dụng & Doanh nghiệp</h1>
-            <p class="page-subtitle">Quản lý thông tin doanh nghiệp để xây dựng thương hiệu uy tín và thu hút ứng viên tài năng.</p>
-        </div>
-
-        <!-- Notification Alerts -->
-        <div th:if="${successMessage}" class="alert alert-success">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            <span th:text="${successMessage}"></span>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span th:text="${errorMessage}"></span>
-        </div>
-
-        <div class="profile-grid">
-            <!-- Left Column: Recruiter Card -->
-            <aside class="profile-card">
-                <div class="avatar-container">
-                    <img id="avatarPreview" class="avatar-preview-img"
-                         th:src="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)} ? @{${profileUser.avatarUrl}} : 'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${profileUser.username}"
-                         alt="Avatar">
-                    <label for="avatarInput" class="avatar-upload-btn" title="Tải ảnh đại diện người đại diện">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    </label>
-                </div>
-
-                <h2 class="profile-card-name" th:text="${profileUser.fullName}">Trần Tuyển Dụng</h2>
-                <div class="profile-card-role">Nhà tuyển dụng</div>
-
-                <p style="font-size: 13px; color: #6b7280; margin: 0 0 16px 0;">
-                    Trạng thái: 
-                    <span th:if="${profileUser.status.name() == 'ACTIVE'}" style="color: #10b981; font-weight: 600;">● Đang hoạt động</span>
-                    <span th:if="${profileUser.status.name() == 'PENDING'}" style="color: #f59e0b; font-weight: 600;">● Chờ duyệt</span>
-                    <span th:if="${profileUser.status.name() == 'LOCKED'}" style="color: #ef4444; font-weight: 600;">● Bị khóa</span>
-                </p>
-
-                <div class="profile-card-meta">
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        <span th:text="${profileUser.email}">recruiter@example.com</span>
-                    </div>
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        <span th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa có SĐT'}">0912345678</span>
-                    </div>
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                        <span th:text="${company != null ? company.companyName : 'Chưa liên kết công ty'}">Công ty ABC</span>
-                    </div>
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <span>Tham gia: <th:block th:text="${#temporals.format(profileUser.createdAt, 'dd/MM/yyyy')}">01/01/2026</th:block></span>
-                    </div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <a th:href="@{/recruiter/change-password}" class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 13px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Đổi mật khẩu
-                    </a>
-                </div>
-            </aside>
-
-            <!-- Right Column: Profile Content -->
-            <section class="profile-content-card">
-                <div class="content-header">
-                    <h2 class="content-title" th:text="${isEditMode ? 'Chỉnh sửa thông tin doanh nghiệp & cá nhân' : 'Thông tin hồ sơ doanh nghiệp'}">Thông tin doanh nghiệp</h2>
-                    <div>
-                        <a th:if="${!isEditMode}" th:href="@{/recruiter/profile(edit=true)}" class="btn btn-primary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            Chỉnh sửa thông tin
-                        </a>
-                        <a th:if="${isEditMode}" th:href="@{/recruiter/profile}" class="btn btn-secondary">
-                            ✕ Hủy bỏ
-                        </a>
-                    </div>
-                </div>
-
-                <!-- VIEW MODE -->
-                <div th:if="${!isEditMode}">
-                    <!-- Company Information -->
-                    <div class="info-section">
-                        <h3 class="info-section-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
-                            Thông tin Doanh nghiệp
-                        </h3>
-
-                        <div th:if="${company != null and company.logoUrl != null and !#strings.isEmpty(company.logoUrl)}" style="margin-bottom: 20px; display: flex; align-items: center; gap: 16px;">
-                            <img th:src="@{${company.logoUrl}}" alt="Logo công ty" style="width: 80px; height: 80px; object-fit: contain; border-radius: 8px; border: 1px solid #e5e7eb; padding: 4px; background: #fff;">
-                            <div>
-                                <h4 style="margin: 0 0 4px 0; font-size: 16px; font-weight: 700;" th:text="${company.companyName}">Công ty ABC</h4>
-                                <span style="font-size: 13px; color: #6b7280;">Logo chính thức của doanh nghiệp</span>
-                            </div>
-                        </div>
-
-                        <div class="info-grid">
-                            <div class="info-box">
-                                <div class="info-label">Tên công ty</div>
-                                <div class="info-value" th:text="${company != null ? company.companyName : 'Chưa cập nhật'}">Công ty ABC</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Mã số thuế</div>
-                                <div class="info-value" th:classappend="${company == null or company.taxCode == null ? 'empty' : ''}"
-                                     th:text="${company != null and company.taxCode != null ? company.taxCode : 'Chưa cập nhật'}">0123456789</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Email công ty</div>
-                                <div class="info-value" th:classappend="${company == null or company.email == null ? 'empty' : ''}"
-                                     th:text="${company != null and company.email != null ? company.email : 'Chưa cập nhật'}">contact@company.com</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Số điện thoại công ty</div>
-                                <div class="info-value" th:classappend="${company == null or company.phone == null ? 'empty' : ''}"
-                                     th:text="${company != null and company.phone != null ? company.phone : 'Chưa cập nhật'}">024 1234 5678</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Quy mô nhân sự</div>
-                                <div class="info-value" th:classappend="${company == null or company.companySize == null ? 'empty' : ''}"
-                                     th:text="${company != null and company.companySize != null ? company.companySize : 'Chưa cập nhật'}">50-100 nhân viên</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Website</div>
-                                <div class="info-value" th:if="${company != null and company.website != null and !#strings.isEmpty(company.website)}">
-                                    <a th:href="${company.website}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${company.website}"></a>
-                                </div>
-                                <div class="info-value empty" th:if="${company == null or company.website == null or #strings.isEmpty(company.website)}">Chưa cập nhật</div>
-                            </div>
-                            <div class="info-box" style="grid-column: 1 / -1;">
-                                <div class="info-label">Địa chỉ trụ sở công ty</div>
-                                <div class="info-value" th:classappend="${company == null or company.address == null ? 'empty' : ''}"
-                                     th:text="${company != null and company.address != null ? company.address : 'Chưa cập nhật'}">Tầng 5, Tòa nhà ABC, Hà Nội</div>
-                            </div>
-                            <div class="info-box" style="grid-column: 1 / -1;">
-                                <div class="info-label">Mô tả giới thiệu công ty</div>
-                                <div class="info-value" th:classappend="${company == null or company.description == null ? 'empty' : ''}" style="white-space: pre-line;"
-                                     th:text="${company != null and company.description != null ? company.description : 'Chưa có thông tin mô tả công ty.'}">Mô tả...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recruiter Representative Info -->
-                    <div class="info-section">
-                        <h3 class="info-section-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                            Thông tin người đại diện tài khoản
-                        </h3>
-                        <div class="info-grid">
-                            <div class="info-box">
-                                <div class="info-label">Họ và tên người đại diện</div>
-                                <div class="info-value" th:text="${profileUser.fullName}">Trần Tuyển Dụng</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Tên tài khoản (Username)</div>
-                                <div class="info-value" th:text="${profileUser.username}">recruiter_user</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Email đăng nhập</div>
-                                <div class="info-value" th:text="${profileUser.email}">email@example.com</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Số điện thoại liên hệ</div>
-                                <div class="info-value" th:classappend="${profileUser.phone == null ? 'empty' : ''}"
-                                     th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật'}">0912345678</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 30px; text-align: center;">
-                        <a th:href="@{/recruiter/profile(edit=true)}" class="btn btn-primary" style="padding: 12px 28px; font-size: 15px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            Bấm vào đây để chỉnh sửa thông tin doanh nghiệp
-                        </a>
-                    </div>
-                </div>
-
-                <!-- EDIT MODE -->
-                <form th:if="${isEditMode}" th:action="@{/recruiter/profile}" th:object="${recruiterDto}" method="post" enctype="multipart/form-data">
-                    <input type="file" id="avatarInput" name="avatarFile" class="avatar-file-input" accept="image/*" onchange="previewAvatar(this)">
-
-                    <div class="info-section">
-                        <h3 class="info-section-title">Thông tin Người đại diện</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Họ và tên người đại diện <span class="required">*</span></label>
-                                <input type="text" th:field="*{fullName}" class="form-input" placeholder="Nhập họ và tên người đại diện" required>
-                                <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Số điện thoại liên hệ</label>
-                                <input type="text" th:field="*{phone}" class="form-input" placeholder="Ví dụ: 0912345678">
-                                <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label class="form-label">Địa chỉ / Khu vực làm việc</label>
-                                <input type="text" th:field="*{location}" class="form-input" placeholder="Hà Nội, TP.HCM...">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-section">
-                        <h3 class="info-section-title">Thông tin Doanh nghiệp & Công ty</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Tên doanh nghiệp / Công ty <span class="required">*</span></label>
-                                <input type="text" th:field="*{companyName}" class="form-input" placeholder="Tên đầy đủ của công ty" required>
-                                <div th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Mã số thuế doanh nghiệp</label>
-                                <input type="text" th:field="*{taxCode}" class="form-input" placeholder="Mã số thuế công ty">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Email liên hệ công ty</label>
-                                <input type="email" th:field="*{companyEmail}" class="form-input" placeholder="tuyendung@congty.com">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Hotline / Số điện thoại công ty</label>
-                                <input type="text" th:field="*{companyPhone}" class="form-input" placeholder="024 1234 5678">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Website công ty</label>
-                                <input type="url" th:field="*{companyWebsite}" class="form-input" placeholder="https://congty.com">
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Quy mô công ty</label>
-                                <select th:field="*{companySize}" class="form-select">
-                                    <option value="">-- Chọn quy mô --</option>
-                                    <option value="Dưới 10 nhân viên">Dưới 10 nhân viên</option>
-                                    <option value="10-50 nhân viên">10-50 nhân viên</option>
-                                    <option value="50-150 nhân viên">50-150 nhân viên</option>
-                                    <option value="150-500 nhân viên">150-500 nhân viên</option>
-                                    <option value="Trên 500 nhân viên">Trên 500 nhân viên</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label class="form-label">Tải lên Logo công ty mới</label>
-                                <input type="file" name="logoFile" class="form-input" accept="image/*" onchange="previewLogo(this)">
-                                <div class="form-hint">Chọn ảnh định dạng .png, .jpg, .webp để cập nhật logo công ty.</div>
-                                <div id="logoPreviewWrapper" style="display: none; margin-top: 10px;">
-                                    <img id="logoPreview" src="#" alt="Logo Preview" style="max-height: 80px; border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px;">
-                                </div>
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label class="form-label">Địa chỉ trụ sở công ty</label>
-                                <input type="text" th:field="*{companyAddress}" class="form-input" placeholder="Địa chỉ chi tiết văn phòng / chi nhánh">
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label class="form-label">Mô tả & Giới thiệu về công ty</label>
-                                <textarea th:field="*{companyDescription}" class="form-textarea" placeholder="Giới thiệu sứ mệnh, lĩnh vực hoạt động, môi trường làm việc..."></textarea>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" style="padding: 12px 28px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                            Lưu thay đổi & Cập nhật
-                        </button>
-                        <a th:href="@{/recruiter/profile}" class="btn btn-secondary">Hủy bỏ</a>
-                    </div>
-                </form>
-            </section>
-        </div>
-    </main>
-
+    <!-- Tailwind CSS with Unified JOBPORTAL Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        function previewAvatar(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('avatarPreview').src = e.target.result;
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            hover: '#1d4ed8',
+                            light: '#eff6ff',
+                        },
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        },
+                        success: {
+                            DEFAULT: '#16a34a',
+                            50: '#f0fdf4',
+                        },
+                        warning: {
+                            DEFAULT: '#f59e0b',
+                            50: '#fffbeb',
+                        },
+                        danger: {
+                            DEFAULT: '#dc2626',
+                            50: '#fef2f2',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)'
+                    }
                 }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function previewLogo(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const preview = document.getElementById('logoPreview');
-                    preview.src = e.target.result;
-                    document.getElementById('logoPreviewWrapper').style.display = 'block';
-                }
-                reader.readAsDataURL(input.files[0]);
             }
         }
     </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+
+<body class="bg-surface-50 text-surface-800 font-sans min-h-screen flex flex-col antialiased">
+
+<!-- Unified Global Navbar -->
+<div th:replace="~{fragments/taskbar :: taskbar('profile')}"></div>
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <a th:href="@{/recruiter/dashboard}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-blue-600 transition">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Quay lại Kênh tuyển dụng</span>
+        </a>
+        <div class="inline-flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+                <span>Tài khoản Doanh nghiệp</span>
+            </span>
+            <span th:if="${company != null and company.status != null and company.status.name() == 'ACTIVE'}"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5 text-emerald-600"></i>
+                <span>Đã xác thực</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Notification Alerts -->
+    <div th:if="${successMessage}" class="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3 shadow-sm">
+        <div class="h-8 w-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+        </div>
+        <span th:text="${successMessage}">Cập nhật thành công</span>
+    </div>
+    <div th:if="${errorMessage}" class="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3 shadow-sm">
+        <div class="h-8 w-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+            <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        </div>
+        <span th:text="${errorMessage}">Đã xảy ra lỗi</span>
+    </div>
+
+    <!-- Main Grid Layout (4 cols : 8 cols) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- =========================================================================
+             LEFT COLUMN: RECRUITER REPRESENTATIVE PROFILE CARD (4 cols)
+             ========================================================================= -->
+        <aside class="lg:col-span-4 bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-card space-y-6">
+            
+            <!-- Avatar & Primary Identity -->
+            <div class="text-center">
+                <div class="relative w-28 h-28 mx-auto mb-4 group">
+                    <img id="avatarPreview"
+                         class="w-full h-full rounded-2xl object-cover border-2 border-slate-100 shadow-md"
+                         th:src="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)} ? @{${profileUser.avatarUrl}} : 'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${profileUser.username}"
+                         alt="Avatar">
+                    
+                    <label th:if="${isEditMode}" for="avatarInput"
+                           class="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center cursor-pointer shadow-lg hover:bg-blue-700 transition group-hover:scale-105"
+                           title="Thay đổi ảnh đại diện">
+                        <i data-lucide="camera" class="w-4 h-4"></i>
+                    </label>
+                </div>
+
+                <h2 class="text-xl font-bold text-slate-900 font-heading" th:text="${profileUser.fullName}">Trần Tuyển Dụng</h2>
+                <div class="mt-1 flex items-center justify-center gap-1.5">
+                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 uppercase tracking-wider bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-100">
+                        <i data-lucide="user-check" class="w-3 h-3"></i>
+                        <span>Đại diện tuyển dụng</span>
+                    </span>
+                </div>
+
+                <!-- Status indicator badge -->
+                <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+                     th:classappend="${profileUser.status.name() == 'ACTIVE'} ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : (${profileUser.status.name() == 'PENDING'} ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-rose-50 text-rose-700 border border-rose-200')">
+                    <span class="w-2 h-2 rounded-full"
+                          th:classappend="${profileUser.status.name() == 'ACTIVE'} ? 'bg-emerald-500' : (${profileUser.status.name() == 'PENDING'} ? 'bg-amber-500 animate-pulse' : 'bg-rose-500')"></span>
+                    <span th:if="${profileUser.status.name() == 'ACTIVE'}">Tài khoản Hoạt động</span>
+                    <span th:if="${profileUser.status.name() == 'PENDING'}">Chờ phê duyệt</span>
+                    <span th:if="${profileUser.status.name() == 'LOCKED'}">Đang bị tạm khóa</span>
+                </div>
+            </div>
+
+            <!-- Structured Identity Info List -->
+            <div class="pt-5 border-t border-slate-100 space-y-3.5 text-xs sm:text-sm">
+                <!-- Email -->
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Email tài khoản</span>
+                        <span class="font-semibold text-slate-800 truncate block" th:text="${profileUser.email}">email@example.com</span>
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                        <i data-lucide="phone" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Số điện thoại</span>
+                        <span class="font-semibold text-slate-800 truncate block"
+                              th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật SĐT'}">0912345678</span>
+                    </div>
+                </div>
+
+                <!-- Company Linked -->
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                        <i data-lucide="building" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Doanh nghiệp</span>
+                        <span class="font-bold text-slate-900 truncate block"
+                              th:text="${company != null ? company.companyName : 'Chưa liên kết công ty'}">Tên công ty</span>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                        <i data-lucide="map-pin" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Khu vực làm việc</span>
+                        <span class="font-semibold text-slate-800 truncate block"
+                              th:text="${profileUser.location != null and !#strings.isEmpty(profileUser.location) ? profileUser.location : 'Toàn quốc'}">Hà Nội</span>
+                    </div>
+                </div>
+
+                <!-- Date Joined -->
+                <div class="flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0 mt-0.5">
+                        <i data-lucide="calendar" class="w-4 h-4"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">Ngày tham gia</span>
+                        <span class="font-semibold text-slate-700 block"
+                              th:text="${#temporals.format(profileUser.createdAt, 'dd/MM/yyyy')}">01/01/2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subtle Change Password Button -->
+            <div class="pt-4 border-t border-slate-100">
+                <a th:href="@{/recruiter/change-password}"
+                   class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 hover:text-slate-900 transition">
+                    <i data-lucide="key" class="w-3.5 h-3.5 text-slate-500"></i>
+                    <span>Đổi mật khẩu tài khoản</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- =========================================================================
+             RIGHT COLUMN: COMPANY PROFILE INFORMATION & EDIT FORM (8 cols)
+             ========================================================================= -->
+        <section class="lg:col-span-8 bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-card">
+
+            <!-- ================= VIEW MODE ================= -->
+            <div th:if="${!isEditMode}" class="space-y-8">
+
+                <!-- 1. MODERN COMPANY HEADER BANNER -->
+                <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6 sm:p-7 relative overflow-hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5 relative z-10">
+                        <div class="flex items-center gap-4 sm:gap-5">
+                            <!-- Company Logo Container -->
+                            <div class="w-20 h-20 rounded-2xl bg-white border border-slate-200 p-1.5 shadow-sm flex items-center justify-center font-heading font-black text-2xl text-blue-600 shrink-0 overflow-hidden">
+                                <img th:if="${company != null and company.logoUrl != null and !#strings.isEmpty(company.logoUrl)}"
+                                     th:src="@{${company.logoUrl}}" alt="Logo" class="w-full h-full object-contain">
+                                <span th:if="${company == null or company.logoUrl == null or #strings.isEmpty(company.logoUrl)}"
+                                      th:text="${company != null and company.companyName != null and !#strings.isEmpty(company.companyName) ? #strings.substring(company.companyName, 0, 1).toUpperCase() : 'C'}">C</span>
+                            </div>
+
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2 mb-1">
+                                    <span th:if="${company != null and company.taxCode != null and !#strings.isEmpty(company.taxCode)}"
+                                          class="inline-flex items-center gap-1 font-mono text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200">
+                                        MST: <span th:text="${company.taxCode}">0101234567</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                        <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i> Đã xác thực
+                                    </span>
+                                </div>
+                                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-heading tracking-tight"
+                                    th:text="${company != null ? company.companyName : 'Chưa cập nhật tên công ty'}">
+                                    Tên Doanh Nghiệp
+                                </h1>
+                                <p class="text-xs sm:text-sm text-slate-500 flex items-center gap-1.5 mt-1">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                                    <span th:text="${company != null and company.address != null and !#strings.isEmpty(company.address) ? company.address : 'Chưa cập nhật địa chỉ'}">Hà Nội</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Edit Button in Header -->
+                        <div class="shrink-0">
+                            <a th:href="@{/recruiter/profile(edit=true)}"
+                               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-sm shadow-blue-600/20 transition">
+                                <i data-lucide="edit-3" class="w-4 h-4"></i>
+                                <span>Chỉnh sửa hồ sơ</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. PHÂN NHÓM 1: THÔNG TIN PHÁP LÝ & QUY MÔ -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 mb-4 pb-2 border-b border-slate-100 font-heading">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-blue-600"></i>
+                        <span>Thông tin Pháp lý & Quy mô hoạt động</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Mã số thuế doanh nghiệp (MST)</span>
+                            <span class="text-sm font-bold text-slate-900 font-mono"
+                                  th:text="${company != null and company.taxCode != null and !#strings.isEmpty(company.taxCode) ? company.taxCode : 'Chưa cập nhật'}">0101234567</span>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Quy mô nhân sự</span>
+                            <span class="text-sm font-bold text-slate-900"
+                                  th:text="${company != null and company.companySize != null and !#strings.isEmpty(company.companySize) ? company.companySize : 'Chưa cập nhật'}">150-500 nhân viên</span>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Trạng thái hồ sơ</span>
+                            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                <span th:text="${company != null and company.status != null ? company.status.name() : 'ACTIVE'}">ACTIVE</span>
+                            </span>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Hồ sơ công khai</span>
+                            <a th:if="${company != null and company.id != null}"
+                               th:href="@{'/company-profile/' + ${company.id}}" target="_blank"
+                               class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline">
+                                <span>Xem trang công khai ứng viên thấy</span>
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </a>
+                            <span th:unless="${company != null and company.id != null}" class="text-xs text-slate-400">Chưa có liên kết công khai</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. PHÂN NHÓM 2: KÊNH LIÊN HỆ & TRỤ SỞ DOANH NGHIỆP -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 mb-4 pb-2 border-b border-slate-100 font-heading">
+                        <i data-lucide="phone-call" class="w-4 h-4 text-blue-600"></i>
+                        <span>Kênh Liên hệ & Trụ sở làm việc</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Email liên hệ công ty</span>
+                            <span class="text-sm font-semibold text-slate-800"
+                                  th:text="${company != null and company.email != null and !#strings.isEmpty(company.email) ? company.email : 'Chưa cập nhật'}">tuyendung@company.com</span>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Hotline / Số điện thoại công ty</span>
+                            <span class="text-sm font-semibold text-slate-800"
+                                  th:text="${company != null and company.phone != null and !#strings.isEmpty(company.phone) ? company.phone : 'Chưa cập nhật'}">024 1234 5678</span>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Website doanh nghiệp</span>
+                            <div th:if="${company != null and company.website != null and !#strings.isEmpty(company.website)}">
+                                <a th:href="${company.website}" target="_blank"
+                                   class="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1.5">
+                                    <span th:text="${company.website}">https://company.com</span>
+                                    <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                                </a>
+                            </div>
+                            <span th:unless="${company != null and company.website != null and !#strings.isEmpty(company.website)}" class="text-sm text-slate-400">Chưa cập nhật</span>
+                        </div>
+
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Địa chỉ trụ sở chính</span>
+                            <span class="text-sm font-semibold text-slate-800"
+                                  th:text="${company != null and company.address != null and !#strings.isEmpty(company.address) ? company.address : 'Chưa cập nhật địa chỉ'}">Hà Nội</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. PHÂN NHÓM 3: GIỚI THIỆU & VĂN HÓA DOANH NGHIỆP -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 mb-4 pb-2 border-b border-slate-100 font-heading">
+                        <i data-lucide="file-text" class="w-4 h-4 text-blue-600"></i>
+                        <span>Giới thiệu & Văn hóa doanh nghiệp</span>
+                    </h3>
+                    <div class="p-6 rounded-2xl border border-slate-200 bg-slate-50/50 shadow-card">
+                        <p class="text-sm text-slate-700 whitespace-pre-line leading-relaxed"
+                           th:text="${company != null and company.description != null and !#strings.isEmpty(company.description) ? company.description : 'Doanh nghiệp chưa bổ sung phần giới thiệu chi tiết. Nhấp Chỉnh sửa thông tin để cập nhật sứ mệnh, môi trường làm việc và chế độ đãi ngộ nhằm thu hút ứng viên chất lượng cao.'}">
+                            Nội dung mô tả giới thiệu doanh nghiệp...
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 5. PHÂN NHÓM 4: NGƯỜI ĐẠI DIỆN TÀI KHOẢN -->
+                <div>
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 mb-4 pb-2 border-b border-slate-100 font-heading">
+                        <i data-lucide="user" class="w-4 h-4 text-blue-600"></i>
+                        <span>Thông tin Người đại diện tài khoản</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Họ và tên người đại diện</span>
+                            <span class="text-sm font-bold text-slate-900" th:text="${profileUser.fullName}">Trần Tuyển Dụng</span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Tên đăng nhập hệ thống</span>
+                            <span class="text-sm font-bold text-slate-900 font-mono" th:text="${profileUser.username}">recruiter</span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Email liên hệ đại diện</span>
+                            <span class="text-sm font-semibold text-slate-800" th:text="${profileUser.email}">email@example.com</span>
+                        </div>
+                        <div class="p-4 rounded-xl border border-slate-200 bg-white shadow-card">
+                            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Số điện thoại liên hệ</span>
+                            <span class="text-sm font-semibold text-slate-800"
+                                  th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật'}">0912345678</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom CTA -->
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end">
+                    <a th:href="@{/recruiter/profile(edit=true)}"
+                       class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/20 transition">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        <span>Chỉnh sửa thông tin hồ sơ</span>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- ================= EDIT MODE (Priority 3) ================= -->
+            <form th:if="${isEditMode}" th:action="@{/recruiter/profile}" th:object="${recruiterDto}" method="post" enctype="multipart/form-data" class="space-y-8">
+                <input type="file" id="avatarInput" name="avatarFile" class="hidden" accept="image/*" onchange="previewAvatar(this)">
+
+                <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900 font-heading">Chỉnh Sửa Hồ Sơ Doanh Nghiệp</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Cập nhật thông tin đại diện tuyển dụng và nhận diện thương hiệu công ty</p>
+                    </div>
+                    <a th:href="@{/recruiter/profile}" class="text-xs font-bold text-slate-500 hover:text-slate-800 transition">
+                        Hủy bỏ
+                    </a>
+                </div>
+
+                <!-- Section A: Thông tin Người đại diện -->
+                <div class="space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 font-heading text-blue-600">
+                        <i data-lucide="user-check" class="w-4 h-4"></i>
+                        <span>1. Thông tin Người đại diện tài khoản</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Họ và tên người đại diện <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" th:field="*{fullName}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="Ví dụ: Trần Tuyển Dụng" required>
+                            <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="text-xs text-rose-600 mt-1"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Số điện thoại liên hệ cá nhân
+                            </label>
+                            <input type="text" th:field="*{phone}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="0912345678">
+                            <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-xs text-rose-600 mt-1"></div>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Khu vực làm việc / Tỉnh thành
+                            </label>
+                            <input type="text" th:field="*{location}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="Hà Nội, TP. Hồ Chí Minh, Đà Nẵng...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section B: Thông tin Doanh nghiệp -->
+                <div class="space-y-4 pt-6 border-t border-slate-100">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2 font-heading text-blue-600">
+                        <i data-lucide="building" class="w-4 h-4"></i>
+                        <span>2. Thông tin Doanh nghiệp & Pháp lý</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Tên doanh nghiệp / Công ty <span class="text-rose-500">*</span>
+                            </label>
+                            <input type="text" th:field="*{companyName}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="Tên công ty chính thức" required>
+                            <div th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" class="text-xs text-rose-600 mt-1"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Mã số thuế doanh nghiệp (MST)
+                            </label>
+                            <input type="text" th:field="*{taxCode}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-mono focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="0101234567">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Email tuyển dụng công ty
+                            </label>
+                            <input type="email" th:field="*{companyEmail}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="tuyendung@congty.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Hotline / Số điện thoại công ty
+                            </label>
+                            <input type="text" th:field="*{companyPhone}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="024 1234 5678">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Website chính thức
+                            </label>
+                            <input type="url" th:field="*{companyWebsite}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="https://congty.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Quy mô nhân sự
+                            </label>
+                            <select th:field="*{companySize}"
+                                    class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none bg-white cursor-pointer">
+                                <option value="">-- Chọn quy mô nhân sự --</option>
+                                <option value="Dưới 10 nhân viên">Dưới 10 nhân viên (Startup)</option>
+                                <option value="10-50 nhân viên">10-50 nhân viên (Doanh nghiệp nhỏ)</option>
+                                <option value="50-150 nhân viên">50-150 nhân viên (Quy mô vừa)</option>
+                                <option value="150-500 nhân viên">150-500 nhân viên (Quy mô lớn)</option>
+                                <option value="Trên 500 nhân viên">Trên 500 nhân viên (Tập đoàn)</option>
+                            </select>
+                        </div>
+
+                        <!-- Logo Upload Box with Drag/Drop Preview -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Tải lên Logo Doanh nghiệp mới
+                            </label>
+                            <div class="rounded-2xl border-2 border-dashed border-slate-200 hover:border-blue-400 p-5 bg-slate-50/50 text-center transition">
+                                <input type="file" name="logoFile" id="logoFileInput"
+                                       class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                                       accept="image/*" onchange="previewLogo(this)">
+                                <p class="text-[11px] text-slate-400 mt-2">Hỗ trợ định dạng PNG, JPG, WEBP dung lượng tối đa 5MB. Khuyến nghị ảnh vuông tỉ lệ 1:1.</p>
+                                <div id="logoPreviewWrapper" class="hidden mt-4">
+                                    <span class="text-[11px] font-bold text-slate-500 block mb-1.5">Xem trước logo:</span>
+                                    <img id="logoPreview" src="#" alt="Logo Preview" class="h-20 w-20 object-contain mx-auto border border-slate-200 rounded-xl p-1 bg-white shadow-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Địa chỉ trụ sở chính công ty
+                            </label>
+                            <input type="text" th:field="*{companyAddress}"
+                                   class="w-full h-11 px-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400"
+                                   placeholder="Tầng, tòa nhà, số nhà, đường, quận/huyện, tỉnh/thành phố...">
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                Mô tả & Giới thiệu về doanh nghiệp
+                            </label>
+                            <textarea th:field="*{companyDescription}" rows="5"
+                                      class="w-full p-4 rounded-xl border border-slate-200 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none placeholder:text-slate-400 leading-relaxed"
+                                      placeholder="Mô tả lịch sử phát triển, tầm nhìn, sứ mệnh, môi trường làm việc và các giá trị cốt lõi của công ty..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="flex items-center gap-3 pt-6 border-t border-slate-100">
+                    <button type="submit"
+                            class="inline-flex items-center gap-2 px-7 py-3 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/30 transition">
+                        <i data-lucide="check" class="w-4 h-4"></i>
+                        <span>Lưu thay đổi & Cập nhật</span>
+                    </button>
+                    <a th:href="@{/recruiter/profile}"
+                       class="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+                        <span>Hủy bỏ</span>
+                    </a>
+                </div>
+            </form>
+
+        </section>
+
+    </div>
+
+</main>
+
+<!-- Unified Global Footer -->
+<footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
+
+<script>
+    lucide.createIcons();
+
+    function previewAvatar(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function previewLogo(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('logoPreview');
+                preview.src = e.target.result;
+                document.getElementById('logoPreviewWrapper').classList.remove('hidden');
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 </body>
 </html>
