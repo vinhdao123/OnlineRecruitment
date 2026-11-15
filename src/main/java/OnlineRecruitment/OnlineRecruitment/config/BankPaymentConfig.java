@@ -17,6 +17,9 @@ public class BankPaymentConfig {
     public String getAccountName() { return accountName; }
     public String getWebhookApiKey() { return webhookApiKey; }
     public boolean isReady() {
+        if (bankCode == null || accountNumber == null || accountName == null || webhookApiKey == null) {
+            return false;
+        }
         return bankCode.matches("[A-Za-z0-9]{2,20}") && accountNumber.matches("[A-Za-z0-9]{5,30}")
                 && !accountName.isBlank() && webhookApiKey.length() >= 24;
     }

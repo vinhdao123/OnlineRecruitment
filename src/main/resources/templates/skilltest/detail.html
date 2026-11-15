@@ -4,110 +4,186 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${test.title} + ' — Online Recruitment'">Thông tin bài thi</title>
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body class="page-wrapper">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- TASKBAR -->
-<header th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></header>
+<!-- Taskbar Header -->
+<div th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></div>
 
-<div style="max-width: 860px; margin: 30px auto; padding: 0 20px;">
+<main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- BREADCRUMB -->
-    <div style="font-size:14px; color:#64748b; margin-bottom:20px;">
-        <a th:href="@{/}" style="color:#64748b; text-decoration:none;">Trang chủ</a> ›
-        <a th:href="@{/skill-tests}" style="color:#64748b; text-decoration:none;">Đánh giá kỹ năng</a> ›
-        <span th:text="${test.skillName}" style="color:#00b14f; font-weight:600;">Skill</span>
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/skill-tests}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại danh sách bài test
+        </a>
+        <div class="text-xs text-slate-500 font-medium">
+            <a th:href="@{/}" class="hover:text-primary-600">Trang chủ</a> /
+            <a th:href="@{/skill-tests}" class="hover:text-primary-600">Đánh giá kỹ năng</a> /
+            <span class="text-primary-600 font-semibold" th:text="${test.skillName}">Java</span>
+        </div>
     </div>
 
-    <div th:if="${errorMessage}" class="alert alert-danger" style="background:#fef2f2; border:1px solid #f87171; color:#991b1b; padding:12px 16px; border-radius:8px; margin-bottom:20px;" th:text="${errorMessage}"></div>
+    <!-- Error message -->
+    <div th:if="${errorMessage}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
 
-    <!-- MAIN CARD -->
-    <div style="background:#fff; border-radius:16px; border:1px solid var(--border-color); overflow:hidden; box-shadow:var(--card-shadow);">
-        <!-- BANNER -->
-        <div class="test-card-banner"
-             th:classappend="${'badge-' + #strings.toLowerCase(test.skillName)}"
-             th:style="${test.badgeColor != null ? 'background: linear-gradient(135deg, ' + test.badgeColor + ' 0%, #1e293b 100%); padding: 32px 28px;' : 'padding: 32px 28px;'}">
-            <div>
-                <span class="test-badge-title" th:text="${test.category}">KỸ NĂNG CÔNG NGHỆ</span>
-                <h1 style="font-size:30px; font-weight:900; color:#fff; margin-top:6px;" th:text="${test.title}">
-                    Đề thi đánh giá kỹ năng Java
-                </h1>
-            </div>
-            <div class="test-banner-icon" style="width:68px; height:68px; font-size:36px;">
-                <span th:switch="${#strings.toLowerCase(test.skillName)}">
-                    <span th:case="'java'">☕</span>
-                    <span th:case="'javascript'">⚡</span>
-                    <span th:case="'git'">🌿</span>
-                    <span th:case="'mysql'">🐬</span>
-                    <span th:case="'html'">🌐</span>
-                    <span th:case="'agile'">🔄</span>
-                    <span th:case="*">💻</span>
-                </span>
+    <!-- Main Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+
+        <!-- Top Colored Banner -->
+        <div class="p-8 sm:p-10 text-white relative overflow-hidden"
+             th:style="${test.badgeColor != null ? 'background: linear-gradient(135deg, ' + test.badgeColor + ' 0%, #0f172a 100%);' : 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);'}">
+            <div class="flex items-start justify-between relative z-10 gap-4">
+                <div class="space-y-2 max-w-2xl">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-white backdrop-blur-md border border-white/20"
+                          th:text="${test.category}">KỸ NĂNG CÔNG NGHỆ</span>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-display leading-tight"
+                        th:text="${test.title}">
+                        Đề thi đánh giá kỹ năng Java
+                    </h1>
+                </div>
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-3xl sm:text-4xl flex-shrink-0 shadow-inner">
+                    <span th:switch="${#strings.toLowerCase(test.skillName)}">
+                        <span th:case="'java'">☕</span>
+                        <span th:case="'javascript'">⚡</span>
+                        <span th:case="'git'">🌿</span>
+                        <span th:case="'mysql'">🐬</span>
+                        <span th:case="'html'">🌐</span>
+                        <span th:case="'agile'">🔄</span>
+                        <span th:case="*">💻</span>
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- DETAILS -->
-        <div style="padding: 32px;">
-            <p style="font-size:15px; color:#475569; line-height:1.6; margin-bottom:24px;" th:text="${test.description}">
-                Mô tả chi tiết bài thi...
-            </p>
+        <!-- Details Body -->
+        <div class="p-6 sm:p-10 space-y-8">
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Mô tả bài kiểm tra</h3>
+                <p class="text-sm sm:text-base text-slate-700 leading-relaxed" th:text="${test.description}">
+                    Mô tả chi tiết nội dung bài thi...
+                </p>
+            </div>
 
-            <h3 style="font-size:17px; font-weight:700; color:#0f172a; margin-bottom:16px;">
-                📋 Thông tin & Quy định bài thi
-            </h3>
+            <!-- Parameters Grid -->
+            <div>
+                <h3 class="text-base font-bold text-slate-900 font-display flex items-center gap-2 mb-4">
+                    <i data-lucide="clipboard-list" class="w-5 h-5 text-primary-600"></i>
+                    Thông tin & Quy định bài thi
+                </h3>
 
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:28px;">
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Thời gian làm bài</div>
-                    <div style="font-size:20px; font-weight:800; color:#0f172a; margin-top:4px;" th:text="${test.durationMinutes + ' phút'}">15 phút</div>
-                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Thời gian</span>
+                        <strong class="text-xl font-extrabold text-slate-900 font-display block" th:text="${test.durationMinutes + ' phút'}">15 phút</strong>
+                    </div>
 
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Số lượng câu hỏi</div>
-                    <div style="font-size:20px; font-weight:800; color:#0f172a; margin-top:4px;" th:text="${test.totalQuestionsPerTest + ' câu'}">10 câu</div>
-                    <small style="color:#00b14f; font-weight:600;">(Bốc ngẫu nhiên từ ngân hàng <span th:text="${poolCount}">20</span> câu)</small>
-                </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Số câu hỏi</span>
+                        <strong class="text-xl font-extrabold text-slate-900 font-display block" th:text="${test.totalQuestionsPerTest + ' câu'}">10 câu</strong>
+                        <span class="text-[11px] text-emerald-600 font-semibold">(Ngân hàng: <span th:text="${poolCount}">20</span> câu)</span>
+                    </div>
 
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Điểm tối thiểu đạt</div>
-                    <div style="font-size:20px; font-weight:800; color:#00b14f; margin-top:4px;" th:text="${test.passingScore + '/100 điểm'}">60/100</div>
-                </div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Điểm đạt</span>
+                        <strong class="text-xl font-extrabold text-emerald-600 font-display block" th:text="${test.passingScore + '/100'}">60/100</strong>
+                    </div>
 
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px;">
-                    <div style="font-size:12px; color:#64748b; font-weight:600; text-transform:uppercase;">Cấp độ bài thi</div>
-                    <div style="font-size:20px; font-weight:800; color:#b45309; margin-top:4px;" th:text="${test.difficulty}">Trung bình</div>
+                    <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Cấp độ</span>
+                        <strong class="text-xl font-extrabold text-amber-600 font-display block" th:text="${test.difficulty}">Trung bình</strong>
+                    </div>
                 </div>
             </div>
 
-            <!-- LƯU Ý KHI LÀM BÀI -->
-            <div style="background:#eff6ff; border-left:4px solid #2563eb; padding:16px 20px; border-radius:8px; margin-bottom:30px; font-size:14px; color:#1e40af; line-height:1.6;">
-                <strong>⚠️ Lưu ý quan trọng:</strong>
-                <ul style="margin:8px 0 0 20px;">
-                    <li>Mỗi lần làm bài, hệ thống sẽ <strong>ngẫu nhiên lựa chọn các câu hỏi khác nhau</strong> từ ngân hàng đề thi của quản trị viên.</li>
-                    <li>Đồng hồ đếm ngược sẽ bắt đầu chạy ngay khi bạn nhấn <strong>"Bắt đầu làm bài"</strong>.</li>
-                    <li>Hệ thống sẽ tự động thu bài khi hết giờ nếu bạn chưa bấm nộp bài.</li>
-                    <li>Sau khi nộp bài, bạn sẽ được xem ngay kết quả, thang điểm đánh giá và lời giải thích chi tiết cho từng câu hỏi.</li>
+            <!-- Notes Strip -->
+            <div class="bg-primary-50/70 border border-primary-200/80 rounded-2xl p-5 text-xs sm:text-sm text-primary-900 leading-relaxed space-y-2">
+                <strong class="font-bold flex items-center gap-1.5 text-primary-950">
+                    <i data-lucide="info" class="w-4 h-4 text-primary-600"></i>
+                    Lưu ý quan trọng trước khi làm bài:
+                </strong>
+                <ul class="list-disc pl-5 space-y-1.5 text-primary-800">
+                    <li>Hệ thống tự động <strong>bốc ngẫu nhiên câu hỏi</strong> từ ngân hàng đề thi được thẩm định bởi chuyên gia.</li>
+                    <li>Đồng hồ đếm ngược sẽ kích hoạt ngay khi bạn bấm nút <strong>"Bắt đầu làm bài thi ngay"</strong>.</li>
+                    <li>Bài thi sẽ tự động nộp khi hết giờ nếu bạn chưa kịp hoàn tất.</li>
+                    <li>Ngay sau khi nộp bài, bạn có thể xem điểm số, xếp loại và lời giải chi tiết cho từng câu hỏi.</li>
                 </ul>
             </div>
 
-            <!-- BUTTONS -->
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <a th:href="@{/skill-tests}" style="color:#64748b; text-decoration:none; font-weight:600; font-size:14.5px;">
-                    ← Quay lại danh sách bài test
+            <!-- Action Buttons -->
+            <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <a th:href="@{/skill-tests}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    Quay lại danh sách
                 </a>
 
                 <a th:href="@{'/skill-tests/' + ${test.id} + '/take'}"
-                   class="btn-search"
-                   style="font-size:16px; padding:14px 32px; border-radius:10px; text-decoration:none;">
-                    🚀 Bắt đầu làm bài thi ngay
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md shadow-primary-600/25 hover:shadow-lg transition-all">
+                    <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+                    Bắt đầu làm bài thi ngay
                 </a>
             </div>
         </div>
+
     </div>
 
-</div>
+</main>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

@@ -68,6 +68,15 @@ public class CvSectionController extends AbstractCvController {
                 "Đã xóa kinh nghiệm!", "/work-experiences");
     }
 
+    @PostMapping("/{id}/work-experiences/{workId}/edit")
+    public String editWorkExp(@PathVariable Long id, @PathVariable Long workId,
+                              @Valid @ModelAttribute("workRequest") WorkExperienceRequest req,
+                              BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> sectionService.updateWorkExperience(id, workId, req, getUserId(auth)),
+                "Cập nhật kinh nghiệm thành công!", "/work-experiences");
+    }
+
     // ---------- HỌC VẤN ----------
 
     @GetMapping("/{id}/educations")
@@ -101,6 +110,15 @@ public class CvSectionController extends AbstractCvController {
         return deleteSectionItem(id, ra,
                 () -> sectionService.deleteEducation(id, eduId, getUserId(auth)),
                 "Đã xóa học vấn!", "/educations");
+    }
+
+    @PostMapping("/{id}/educations/{eduId}/edit")
+    public String editEdu(@PathVariable Long id, @PathVariable Long eduId,
+                          @Valid @ModelAttribute("eduRequest") EducationRequest req,
+                          BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> sectionService.updateEducation(id, eduId, req, getUserId(auth)),
+                "Cập nhật học vấn thành công!", "/educations");
     }
 
     // ---------- KỸ NĂNG ----------
@@ -140,6 +158,15 @@ public class CvSectionController extends AbstractCvController {
                 "Đã xóa kỹ năng!", "/skills");
     }
 
+    @PostMapping("/{id}/skills/{skillId}/edit")
+    public String editSkill(@PathVariable Long id, @PathVariable Long skillId,
+                            @Valid @ModelAttribute("skillRequest") SkillRequest req,
+                            BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> sectionService.updateSkill(id, skillId, req, getUserId(auth)),
+                "Cập nhật kỹ năng thành công!", "/skills");
+    }
+
     // ---------- DỰ ÁN ----------
 
     @GetMapping("/{id}/projects")
@@ -173,5 +200,14 @@ public class CvSectionController extends AbstractCvController {
         return deleteSectionItem(id, ra,
                 () -> sectionService.deleteProject(id, projectId, getUserId(auth)),
                 "Đã xóa dự án!", "/projects");
+    }
+
+    @PostMapping("/{id}/projects/{projectId}/edit")
+    public String editProject(@PathVariable Long id, @PathVariable Long projectId,
+                              @Valid @ModelAttribute("projectRequest") ProjectRequest req,
+                              BindingResult result, Authentication auth, RedirectAttributes ra) {
+        return updateSectionItem(id, ra, result,
+                () -> sectionService.updateProject(id, projectId, req, getUserId(auth)),
+                "Cập nhật dự án thành công!", "/projects");
     }
 }

@@ -1,30 +1,190 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Thanh toán SePay</title><link rel="stylesheet" th:href="@{/css/checkout.css}"></head>
-<body><main class="checkout"><a th:href="@{/pricing/history}">← Lịch sử giao dịch</a>
-    <header><span class="eyebrow">ONLINE RECRUITMENT · SEPAY</span><h1>Thanh toán và kích hoạt gói tự động</h1></header>
-    <div th:if="${sandbox}" class="notice" role="status">MÔI TRƯỜNG THỬ NGHIỆM SANDBOX — không chuyển tiền thật. Gói kích hoạt tại đây chỉ phục vụ kiểm thử website.</div>
-    <div class="panel">
-        <h2 th:text="${payment.servicePackage.name}"></h2>
-        <p>Mã hóa đơn: <strong th:text="'ORPAY' + ${payment.id}"></strong></p>
-        <p class="amount" th:text="${#numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán gói dịch vụ - SePay VietQR</title>
 
-        <!-- HIỂN THỊ MÃ QR ĐỘNG CỦA SEPAY -->
-        <div style="text-align: center; margin: 20px 0;">
-            <img th:if="${payment.status == 'PENDING'}"
-                 th:src="|https://qr.sepay.vn/img?acc=109876805496&bank=VietinBank&amount=${payment.amount}&des=SEVQR ORPAY${payment.id}|"
-                 alt="QR Code" style="width: 300px; border-radius: 8px; border: 1px solid #eef1f6;">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Figma Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+
+<body class="bg-surface-50 font-sans text-surface-900 antialiased min-h-screen flex flex-col justify-between">
+
+<!-- Header Simple -->
+<header class="w-full border-b border-surface-200 bg-white py-4 px-6 sm:px-8">
+    <div class="mx-auto flex max-w-7xl items-center justify-between">
+        <a th:href="@{/}" class="flex items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-900 text-white font-bold">
+                <i data-lucide="briefcase" class="h-5 w-5"></i>
+            </div>
+            <span class="text-xl font-extrabold text-surface-900 font-heading">
+                JOB<span class="text-brand-900">PORTAL</span>
+            </span>
+        </a>
+        <a th:href="@{/pricing/history}" class="flex items-center gap-1.5 text-xs font-bold text-surface-600 hover:text-brand-900 transition">
+            <i data-lucide="receipt" class="h-4 w-4"></i>
+            <span>Lịch sử giao dịch</span>
+        </a>
+    </div>
+</header>
+
+<!-- Main Checkout Container (Figma Node 1:2827) -->
+<main class="flex-1 flex items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-xl rounded-2xl border border-surface-200 bg-white p-6 shadow-elevated md:p-8">
+
+        <!-- Sandbox alert if active -->
+        <div th:if="${sandbox}" class="mb-5 flex items-center gap-2 rounded-xl bg-amber-50 p-3.5 text-xs text-amber-800 border border-amber-200 font-semibold">
+            <i data-lucide="alert-triangle" class="h-4 w-4 shrink-0 text-amber-600"></i>
+            <span>MÔI TRƯỜNG THỬ NGHIỆM SANDBOX — Không chuyển tiền thật. Gói chỉ phục vụ kiểm thử.</span>
         </div>
 
-        <div id="payment-status" class="notice" th:classappend="${payment.status == 'SUCCESS'} ? 'paid' : ''" role="status" aria-live="polite"
-             th:text="${payment.status == 'SUCCESS' ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.' : (payment.status == 'FAILED' ? 'Hóa đơn đã hủy, vui lòng liên hệ hỗ trợ nếu đã thanh toán.' : 'Đang chờ kết quả thanh toán từ SePay.')}"></div>
+        <!-- Top Order Info -->
+        <div class="flex items-center justify-between border-b border-surface-100 pb-5">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Cổng thanh toán tự động VietQR</span>
+                <h1 class="text-xl font-bold text-surface-900 font-heading" th:text="${payment.servicePackage != null ? payment.servicePackage.name : 'Gói dịch vụ'}">Tên gói cước</h1>
+                <p class="text-xs text-surface-500 mt-0.5">Mã hóa đơn: <strong class="font-mono font-bold text-surface-800" th:text="'ORPAY' + ${payment.id}">ORPAY1042</strong></p>
+            </div>
+            <div class="text-right">
+                <span class="text-xs text-surface-500">Số tiền thanh toán</span>
+                <p class="text-2xl font-extrabold text-brand-900 font-heading"
+                   th:text="${payment.amount != null ? #numbers.formatDecimal(payment.amount, 0, 'COMMA', 0, 'POINT') + ' ₫' : '0 ₫'}">1,500,000 ₫</p>
+            </div>
+        </div>
 
-        <p>SePay gửi kết quả trực tiếp về website. Bạn không cần bấm xác nhận đã chuyển khoản hoặc chờ Admin duyệt.</p>
-        <p id="connection-status" role="status">Trạng thái tự cập nhật mỗi 5 giây.</p>
-        <a th:href="@{/pricing/history}">Xem lịch sử giao dịch</a>
-    </div></main>
+        <!-- Dynamic VietQR Image Section -->
+        <div id="qr-section" class="my-6 flex flex-col items-center justify-center rounded-xl border border-dashed border-surface-300 bg-surface-50 p-6 text-center">
+            <div class="relative overflow-hidden rounded-lg bg-white p-2 shadow-sm border border-surface-200">
+                <img th:if="${payment.status == 'PENDING'}"
+                     th:src="|https://qr.sepay.vn/img?acc=109876805496&bank=VietinBank&amount=${payment.amount}&des=SEVQR ORPAY${payment.id}|"
+                     alt="VietQR Payment Code"
+                     class="h-60 w-60 object-contain mx-auto" id="vietQrImg" />
+            </div>
+            <p class="mt-3 flex items-center gap-1.5 text-xs text-surface-500 font-medium">
+                <i data-lucide="qr-code" class="h-4 w-4 text-brand-900"></i>
+                Mở ứng dụng Ngân hàng (MB, VCB, VietinBank...) để quét mã thanh toán
+            </p>
+        </div>
+
+        <!-- Bank Transfer Details Breakdown -->
+        <div class="space-y-3 rounded-xl bg-surface-50 p-4 border border-surface-200 text-xs">
+            <div class="flex items-center justify-between">
+                <span class="text-surface-500">Ngân hàng thụ hưởng:</span>
+                <span class="font-bold text-surface-800">VietinBank (Ngân hàng Công Thương)</span>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <span class="text-surface-500">Số tài khoản:</span>
+                <div class="flex items-center gap-2">
+                    <span class="font-mono font-bold text-surface-900 text-sm">109876805496</span>
+                    <button type="button" onclick="navigator.clipboard.writeText('109876805496'); alert('Đã sao chép số tài khoản!');"
+                            class="rounded p-1 text-surface-500 hover:bg-surface-200 hover:text-surface-900">
+                        <i data-lucide="copy" class="h-3.5 w-3.5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <span class="text-surface-500">Chủ tài khoản:</span>
+                <span class="font-bold text-surface-800">ONLINE RECRUITMENT PLATFORM</span>
+            </div>
+
+            <!-- Mandatory Transfer Reference -->
+            <div class="flex items-center justify-between rounded-lg bg-amber-50 p-3 border border-amber-200">
+                <div class="flex flex-col">
+                    <span class="text-[11px] font-bold uppercase text-amber-800">Nội dung chuyển khoản (Bắt buộc):</span>
+                    <span class="font-mono text-sm font-extrabold text-amber-950" th:text="'SEVQR ORPAY' + ${payment.id}">SEVQR ORPAY1042</span>
+                </div>
+                <button type="button" th:attr="data-copy='SEVQR ORPAY' + ${payment.id}"
+                        onclick="navigator.clipboard.writeText(this.getAttribute('data-copy')); alert('Đã sao chép nội dung chuyển khoản!');"
+                        class="flex items-center gap-1 rounded bg-amber-200 px-2.5 py-1 text-xs font-bold text-amber-900 hover:bg-amber-300 transition">
+                    <i data-lucide="copy" class="h-3.5 w-3.5"></i>
+                    <span>Sao chép</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Status Polling Indicator -->
+        <div id="payment-status-box" class="mt-5 flex items-center justify-center gap-2.5 rounded-xl bg-surface-100 p-3 text-xs font-semibold text-surface-700 border border-surface-200">
+            <i data-lucide="loader-2" class="h-4 w-4 animate-spin text-brand-900" id="pollingSpinner"></i>
+            <span id="payment-status-text"
+                  th:text="${payment.status == 'SUCCESS' ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.' : (payment.status == 'FAILED' ? 'Hóa đơn đã bị hủy.' : 'Đang tự động lắng nghe giao dịch... (Tự động kích hoạt sau 3-5s)')}">
+                Đang chờ kết quả thanh toán từ SePay...
+            </span>
+        </div>
+
+        <p class="mt-4 text-center text-xs text-surface-500" id="connection-status">
+            Hệ thống tự động cập nhật trạng thái mỗi 3 giây.
+        </p>
+
+        <div class="mt-6 pt-4 border-t border-surface-100 flex items-center justify-between text-xs">
+            <a th:href="@{/pricing}" class="inline-flex items-center gap-1 font-bold text-surface-500 hover:text-brand-900">
+                <i data-lucide="arrow-left" class="h-3.5 w-3.5"></i>
+                <span>Hủy và quay lại</span>
+            </a>
+            <a th:href="@{/pricing/history}" class="font-bold text-brand-900 hover:underline">
+                Xem lịch sử hóa đơn →
+            </a>
+        </div>
+
+    </div>
+</main>
+
+<footer class="py-4 text-center text-xs text-surface-400 border-t border-surface-200 bg-white">
+    © 2026 Online Recruitment Platform. Tích hợp thanh toán an toàn qua cổng SePay.
+</footer>
+
 <script th:inline="javascript">
+    lucide.createIcons();
+
     const statusUrl = /*[[@{/pricing/status/{id}(id=${payment.id})}]]*/ '';
     const paymentId = /*[[${payment.id}]]*/ 0;
     let terminal = /*[[${payment.status == 'SUCCESS' or payment.status == 'FAILED'}]]*/ false;
@@ -36,7 +196,7 @@
             const response = await fetch(statusUrl, {headers: {Accept: 'application/json'}, cache: 'no-store'});
 
             if (response.redirected || response.status === 401 || response.status === 403) {
-                document.getElementById('connection-status').textContent = 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để xem trạng thái.';
+                document.getElementById('connection-status').textContent = 'Phiên đăng nhập đã hết hạn.';
                 return;
             }
 
@@ -45,46 +205,45 @@
 
             if (result.paid || result.status === 'FAILED') {
                 terminal = true;
-                const box = document.getElementById('payment-status');
-                box.textContent = result.paid
-                    ? 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.'
-                    : 'Hóa đơn đã hủy.';
+                const statusBox = document.getElementById('payment-status-box');
+                const statusText = document.getElementById('payment-status-text');
+                const spinner = document.getElementById('pollingSpinner');
 
                 if (result.paid) {
-                    box.classList.add('paid');
+                    statusBox.className = 'mt-5 flex items-center justify-center gap-2.5 rounded-xl bg-emerald-50 p-4 text-sm font-bold text-emerald-900 border border-emerald-300';
+                    statusText.textContent = 'Thanh toán thành công! Gói dịch vụ đã được kích hoạt.';
+                    if (spinner) spinner.remove();
 
-                    // Ẩn mã QR khi đã thanh toán
-                    document.querySelectorAll('img').forEach(el => el.hidden = true);
+                    // Hide QR image
+                    const qrSec = document.getElementById('qr-section');
+                    if (qrSec) qrSec.innerHTML = '<div class="py-6 text-center text-emerald-700 font-bold"><p class="text-lg">🎉 Giao dịch thành công</p><p class="text-xs font-normal mt-1">Hệ thống SePay đã ghi nhận tiền vào tài khoản.</p></div>';
 
-                    // Đếm ngược trên dòng connection-status
+                    // Countdown to redirect
                     const connEl = document.getElementById('connection-status');
-                    let sec = 6;
-                    connEl.textContent = `Thanh toán thành công! Tự động chuyển trang sau ${sec} giây...`;
+                    let sec = 5;
+                    connEl.textContent = `Tự động chuyển trang sau ${sec} giây...`;
 
                     const countdown = setInterval(() => {
                         sec--;
                         if (sec > 0) {
-                            connEl.textContent = `Thanh toán thành công! Tự động chuyển trang sau ${sec} giây...`;
+                            connEl.textContent = `Tự động chuyển trang sau ${sec} giây...`;
                         } else {
                             clearInterval(countdown);
+                            window.location.href = '/pricing/history?success=true';
                         }
                     }, 1000);
-
-                    // Chuyển trang sau 6 giây
-                    setTimeout(() => {
-                        window.location.href = '/pricing/history?success=true';
-                    }, 6000);
+                } else {
+                    statusBox.className = 'mt-5 flex items-center justify-center gap-2.5 rounded-xl bg-red-50 p-4 text-sm font-bold text-red-900 border border-red-300';
+                    statusText.textContent = 'Hóa đơn đã bị hủy.';
+                    if (spinner) spinner.remove();
                 }
             }
-            document.getElementById('connection-status').textContent = 'Đã cập nhật trạng thái từ website.';
         } catch (e) {
-            document.getElementById('connection-status').textContent = 'Kết nối bị gián đoạn, hệ thống sẽ thử lại.';
+            console.warn('Polling error, retrying...');
         }
 
         if (!terminal && ++attempts < 240) {
-            window.setTimeout(poll, 5000);
-        } else if (!terminal) {
-            document.getElementById('connection-status').textContent = 'Vui lòng tải lại trang để kiểm tra tiếp.';
+            window.setTimeout(poll, 3000);
         }
     }
 

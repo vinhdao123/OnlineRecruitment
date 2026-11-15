@@ -1,9 +1,68 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>403</title></head>
-<body style="font-family:sans-serif;text-align:center;padding:80px;">
-<h1>403 — Truy cập bị từ chối</h1>
-<p>Bạn không có quyền truy cập trang này.</p>
-<a th:href="@{/}">Về trang chủ</a>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 — Truy cập bị từ chối | OnlineRecruitment</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col justify-center items-center py-12 px-4 antialiased">
+
+<div class="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 border border-slate-200/80 shadow-xl shadow-slate-200/50 text-center">
+    <div class="w-16 h-16 rounded-2xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto mb-5">
+        <i data-lucide="shield-alert" class="w-8 h-8"></i>
+    </div>
+
+    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-bold uppercase tracking-wider mb-2">
+        Mã Lỗi 403
+    </span>
+    <h1 class="text-2xl font-display font-extrabold text-slate-900 tracking-tight mb-2">
+        Truy Cập Bị Từ Chối
+    </h1>
+    <p class="text-xs text-slate-500 mb-8 leading-relaxed">
+        Bạn không có quyền hạn bảo mật (Role) để truy cập vào tài nguyên hoặc chức năng này.
+    </p>
+
+    <div class="space-y-3">
+        <a th:href="@{/}"
+           class="inline-flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-600/30 transition-all">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>Về Trang Chủ</span>
+        </a>
+        <a th:href="@{/login}"
+           class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-all">
+            <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            <span>Đổi Tài Khoản Khác</span>
+        </a>
+    </div>
+</div>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

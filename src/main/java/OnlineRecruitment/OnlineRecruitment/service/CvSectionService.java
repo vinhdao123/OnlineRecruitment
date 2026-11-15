@@ -110,6 +110,25 @@ public class CvSectionService {
         workRepo.delete(work);
     }
 
+    @Transactional
+    public void updateWorkExperience(Long cvId, Long workId, WorkExperienceRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        validateDates(req.getStartDate(), req.getEndDate());
+        CvWorkExperience work = workRepo.findById(workId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kinh nghiệm làm việc"));
+        if (!work.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        work.setCompanyName(req.getCompanyName());
+        work.setJobTitle(req.getJobTitle());
+        work.setLocation(req.getLocation());
+        work.setStartDate(req.getStartDate());
+        work.setEndDate(req.getEndDate());
+        work.setIsCurrent(Boolean.TRUE.equals(req.getIsCurrent()));
+        work.setDescription(req.getDescription());
+        workRepo.save(work);
+    }
+
     // ---------- HỌC VẤN ----------
 
     @Transactional(readOnly = true)
@@ -156,6 +175,34 @@ public class CvSectionService {
         eduRepo.delete(edu);
     }
 
+    @Transactional
+    public void updateEducation(Long cvId, Long eduId, EducationRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        validateDates(req.getStartDate(), req.getEndDate());
+        CvEducation edu = eduRepo.findById(eduId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy học vấn"));
+        if (!edu.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        String finalGrade = "";
+        if (req.getAcademicRank() != null && !req.getAcademicRank().isEmpty()) {
+            finalGrade = req.getAcademicRank();
+            if (req.getGpa() != null) {
+                finalGrade += " (GPA: " + req.getGpa() + ")";
+            }
+        } else if (req.getGpa() != null) {
+            finalGrade = "GPA: " + req.getGpa();
+        }
+        edu.setInstitution(req.getInstitution());
+        edu.setDegree(req.getDegree());
+        edu.setFieldOfStudy(req.getFieldOfStudy());
+        edu.setStartDate(req.getStartDate());
+        edu.setEndDate(req.getEndDate());
+        edu.setGrade(finalGrade);
+        edu.setDescription(req.getDescription());
+        eduRepo.save(edu);
+    }
+
     // ---------- KỸ NĂNG ----------
 
     @Transactional(readOnly = true)
@@ -198,6 +245,33 @@ public class CvSectionService {
         cvSkillRepo.deleteById(id);
     }
 
+    @Transactional
+    public void updateSkill(Long cvId, Long skillId, SkillRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        CvSkill oldSkill = cvSkillRepo.findById(new CvSkillId(cvId, skillId))
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy kỹ năng này trong CV"));
+        if (req.getSkillId() != null && !req.getSkillId().equals(skillId)) {
+            Skill newSkill = skillRepo.findById(req.getSkillId())
+                    .orElseThrow(() -> new IllegalArgumentException("Kỹ năng không tồn tại"));
+            if (!"ACTIVE".equals(newSkill.getStatus())) {
+                throw new IllegalArgumentException("Kỹ năng này đã bị vô hiệu hóa");
+            }
+            CvSkillId newId = new CvSkillId(cvId, req.getSkillId());
+            if (cvSkillRepo.existsById(newId)) {
+                throw new IllegalArgumentException("Kỹ năng này đã có trong CV của bạn");
+            }
+            cvSkillRepo.delete(oldSkill);
+            CvSkill cvSkill = new CvSkill();
+            cvSkill.setId(newId);
+            cvSkill.setProficiency(req.getProficiency());
+            cvSkill.setDisplayOrder(oldSkill.getDisplayOrder());
+            cvSkillRepo.save(cvSkill);
+        } else {
+            oldSkill.setProficiency(req.getProficiency());
+            cvSkillRepo.save(oldSkill);
+        }
+    }
+
     // ---------- DỰ ÁN ----------
 
     @Transactional(readOnly = true)
@@ -237,6 +311,25 @@ public class CvSectionService {
             throw new IllegalArgumentException("Dữ liệu không hợp lệ");
         }
         projRepo.delete(project);
+    }
+
+    @Transactional
+    public void updateProject(Long cvId, Long projectId, ProjectRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        validateDates(req.getStartDate(), req.getEndDate());
+        CvProject project = projRepo.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy dự án"));
+        if (!project.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        project.setName(req.getName());
+        project.setRole(req.getRole());
+        project.setStartDate(req.getStartDate());
+        project.setEndDate(req.getEndDate());
+        project.setProjectUrl(req.getProjectUrl());
+        project.setDescription(req.getDescription());
+        project.setTechnologies(req.getTechnologies());
+        projRepo.save(project);
     }
 
     // ---------- SAO CHÉP SANG CV KHÁC ----------

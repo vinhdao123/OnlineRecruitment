@@ -78,6 +78,27 @@ public class CvExtraSectionService {
         certRepo.delete(c);
     }
 
+    @Transactional
+    public void updateCertificate(Long cvId, Long certId, CertificateRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        if (req.getIssueDate() != null && req.getExpiryDate() != null && req.getIssueDate().isAfter(req.getExpiryDate())) {
+            throw new IllegalArgumentException("Ngày hết hạn phải sau hoặc bằng ngày cấp.");
+        }
+        CvCertificate c = certRepo.findById(certId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chứng chỉ"));
+        if (!c.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        c.setName(req.getName());
+        c.setIssuer(req.getIssuer());
+        c.setIssueDate(req.getIssueDate());
+        c.setExpiryDate(req.getExpiryDate());
+        c.setCredentialId(req.getCredentialId());
+        c.setCredentialUrl(req.getCredentialUrl());
+        c.setDescription(req.getDescription());
+        certRepo.save(c);
+    }
+
     // ---------- GIẢI THƯỞNG ----------
 
     @Transactional(readOnly = true)
@@ -113,6 +134,21 @@ public class CvExtraSectionService {
             throw new IllegalArgumentException("Dữ liệu không hợp lệ");
         }
         awardRepo.delete(a);
+    }
+
+    @Transactional
+    public void updateAward(Long cvId, Long awardId, AwardRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        CvAward a = awardRepo.findById(awardId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy giải thưởng"));
+        if (!a.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        a.setTitle(req.getTitle());
+        a.setIssuer(req.getIssuer());
+        a.setAwardDate(req.getAwardDate());
+        a.setDescription(req.getDescription());
+        awardRepo.save(a);
     }
 
     // ---------- HOẠT ĐỘNG NGOẠI KHÓA ----------
@@ -156,6 +192,25 @@ public class CvExtraSectionService {
         activityRepo.delete(a);
     }
 
+    @Transactional
+    public void updateActivity(Long cvId, Long activityId, ActivityRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        validateDateRange(req.getStartDate(), req.getEndDate(), true);
+        boolean current = Boolean.TRUE.equals(req.getIsCurrent());
+        CvActivity a = activityRepo.findById(activityId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hoạt động"));
+        if (!a.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        a.setOrganization(req.getOrganization());
+        a.setRole(req.getRole());
+        a.setStartDate(req.getStartDate());
+        a.setEndDate(current ? null : req.getEndDate());
+        a.setIsCurrent(current);
+        a.setDescription(req.getDescription());
+        activityRepo.save(a);
+    }
+
     // ---------- NGƯỜI THAM CHIẾU ----------
 
     @Transactional(readOnly = true)
@@ -193,6 +248,23 @@ public class CvExtraSectionService {
             throw new IllegalArgumentException("Dữ liệu không hợp lệ");
         }
         referenceRepo.delete(r);
+    }
+
+    @Transactional
+    public void updateReference(Long cvId, Long referenceId, ReferenceRequest req, Long userId) {
+        ownershipService.getOwnedCv(cvId, userId);
+        CvReference r = referenceRepo.findById(referenceId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người tham chiếu"));
+        if (!r.getCvId().equals(cvId)) {
+            throw new IllegalArgumentException("Dữ liệu không hợp lệ");
+        }
+        r.setFullName(req.getFullName());
+        r.setPosition(req.getPosition());
+        r.setCompany(req.getCompany());
+        r.setEmail(req.getEmail());
+        r.setPhone(req.getPhone());
+        r.setRelationship(req.getRelationship());
+        referenceRepo.save(r);
     }
 
     // ---------- SAO CHÉP SANG CV KHÁC ----------

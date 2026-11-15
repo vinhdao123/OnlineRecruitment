@@ -1,73 +1,143 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head('Quản lý Giao dịch')}"></head>
-<body class="admin">
+<head th:replace="~{admin/_layout :: head('Quản lý giao dịch & Doanh thu')}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
+
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
-<div class="main">
-    <div th:replace="~{admin/_layout :: topbar('Quản lý Giao dịch', 'Theo dõi doanh thu và lịch sử mua gói')}"></div>
 
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-    <!-- Thẻ hiển thị tổng doanh thu -->
-    <div class="cards-grid" style="grid-template-columns: repeat(1, 300px); margin-bottom: 24px;">
-        <div class="stat-card ok">
-            <div>
-                <div class="stat-label">Tổng doanh thu</div>
-                <div class="stat-value" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+    <div th:replace="~{admin/_layout :: topbar('Quản lý giao dịch', 'Theo dõi dòng tiền, lịch sử mua gói tin và đối soát hóa đơn SePay')}"></div>
+
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
+
+        <!-- Top Revenue Card -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="sm:col-span-2 bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between space-y-4">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md self-start">
+                    <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+                    BÁO CÁO DOANH THU HỆ THỐNG
+                </span>
+                <div>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold font-display">Lịch sử giao dịch thanh toán</h1>
+                    <p class="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+                        Kiểm tra các hóa đơn chuyển khoản qua ngân hàng, duyệt kích hoạt gói tuyển dụng cho doanh nghiệp.
+                    </p>
+                </div>
             </div>
-            <div class="stat-icon">💵</div>
-        </div>
-    </div>
 
-    <div class="table-wrap" style="overflow: visible;">
-        <table class="data">
-            <thead>
-            <tr>
-                <th>Mã GD</th>
-                <th>Khách hàng</th>
-                <th>Gói dịch vụ</th>
-                <th>Số tiền</th>
-                <th>Ngày giao dịch</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="p : ${payments}">
-                <td th:text="'#' + ${p.id}"></td>
-                <td>
-                    <div style="font-weight: 600;" th:text="${p.user.username}"></div>
-                    <div style="font-size: 12px; color: #8895a8;" th:text="${p.user.email}"></div>
-                </td>
-                <td th:text="${p.servicePackage.name}"></td>
-                <td style="font-weight: bold; color: #2a6df4;" th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                <td>
-                    <span class="badge badge-pending" th:if="${p.status == 'PENDING'}">Chờ thanh toán</span>
-                    <span class="badge" style="background: #fff4e6; color: #b87c1f;" th:if="${p.status == 'WAITING_CONFIRM'}">Chờ Admin duyệt</span>
-                    <span class="badge badge-active" th:if="${p.status == 'SUCCESS'}">Thành công</span>
-                    <span class="badge badge-locked" th:if="${p.status == 'FAILED'}">Thất bại</span>
-                </td>
-                <td>
-                    <!-- Cho phép Admin duyệt cả hóa đơn PENDING (nếu khách chuyển khoản mà không bấm nút) và WAITING_CONFIRM -->
-                    <form th:if="${p.status == 'WAITING_CONFIRM' or p.status == 'PENDING'}"
-                          th:action="@{'/admin/payments/' + ${p.id} + '/approve'}"
-                          method="post" style="margin: 0;">
-                        <button type="submit" class="btn btn-success" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Xác nhận đã nhận được tiền?')">
-                            ✓ Duyệt
-                        </button>
-                    </form>
-                    <span th:if="${p.status == 'SUCCESS'}" style="color: #8895a8; font-size: 12px;">Hoàn tất</span>
-                </td>
-            </tr>
-            <tr th:if="${payments.isEmpty()}">
-                <td colspan="7" style="text-align: center; color: #8895a8; padding: 40px;">Chưa có giao dịch nào.</td>
-            </tr>
-            </tbody>
-        </table>
+            <!-- Revenue KPI Card -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between space-y-2">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tổng doanh thu thực tế</span>
+                    <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                        <i data-lucide="dollar-sign" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div>
+                    <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono tracking-tight"
+                         th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                        0 đ
+                    </div>
+                    <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-1">
+                        <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Cập nhật theo thời gian thực
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert messages -->
+        <div th:if="${success}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span th:text="${success}"></span>
+        </div>
+        <div th:if="${error}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Transactions Table Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between text-xs text-slate-500 font-medium">
+                <span>Danh sách <strong class="text-slate-900 font-bold" th:text="${payments.size()}">0</strong> giao dịch gần nhất</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                    <tr class="border-b border-slate-200/80 bg-slate-50/70 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-6">Mã giao dịch</th>
+                        <th class="py-3.5 px-4">Khách hàng / Doanh nghiệp</th>
+                        <th class="py-3.5 px-4">Gói dịch vụ</th>
+                        <th class="py-3.5 px-4">Số tiền</th>
+                        <th class="py-3.5 px-4">Thời gian</th>
+                        <th class="py-3.5 px-4">Trạng thái</th>
+                        <th class="py-3.5 px-6 text-right">Thao tác</th>
+                    </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                    <tr th:each="p : ${payments}" class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-4 px-6 font-mono font-bold text-slate-700" th:text="'#' + ${p.id}">#1</td>
+                        <td class="py-4 px-4">
+                            <span class="font-extrabold text-slate-900 text-sm block" th:text="${p.user.username}">Username</span>
+                            <span class="text-[11px] text-slate-400 block" th:text="${p.user.email}">user@email.com</span>
+                        </td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center gap-1.5 font-bold text-slate-800" th:text="${p.servicePackage.name}">Gói tin</span>
+                        </td>
+                        <td class="py-4 px-4 font-mono font-extrabold text-primary-700 text-sm"
+                            th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                            0 đ
+                        </td>
+                        <td class="py-4 px-4 text-slate-500" th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                        <td class="py-4 px-4">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
+                                  th:classappend="${p.status == 'SUCCESS' ? 'bg-emerald-100 text-emerald-800' : (p.status == 'WAITING_CONFIRM' ? 'bg-amber-100 text-amber-800' : (p.status == 'FAILED' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'))}">
+                                <span th:if="${p.status == 'PENDING'}">⏳ Chờ thanh toán</span>
+                                <span th:if="${p.status == 'WAITING_CONFIRM'}">🔔 Chờ Admin duyệt</span>
+                                <span th:if="${p.status == 'SUCCESS'}">✓ Thành công</span>
+                                <span th:if="${p.status == 'FAILED'}">✕ Thất bại</span>
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <div class="flex items-center justify-end gap-2">
+                                <form th:if="${p.status == 'WAITING_CONFIRM' or p.status == 'PENDING'}"
+                                      th:action="@{'/admin/payments/' + ${p.id} + '/approve'}" method="post"
+                                      onsubmit="return confirm('Xác nhận đã nhận đủ tiền và kích hoạt gói cho khách hàng?');">
+                                    <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                    <button type="submit" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all">
+                                        <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                                        Duyệt tiền
+                                    </button>
+                                </form>
+                                <span th:if="${p.status == 'SUCCESS'}" class="text-[11px] font-semibold text-slate-400">Đã kích hoạt</span>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${payments.isEmpty()}">
+                        <td colspan="7" class="py-12 text-center text-slate-400">
+                            <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
+                            Chưa có giao dịch thanh toán nào phát sinh trong hệ thống.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
+
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
 </body>
 </html>
