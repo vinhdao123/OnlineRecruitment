@@ -74,4 +74,22 @@ public class WishlistRepository {
                 candidateId
         );
     }
+
+    // Lấy danh sách Job đã yêu thích, công việc lưu gần nhất đứng đầu
+    // (dùng cho trang /candidate/wishlist)
+    public List<Long> findJobIdsByCandidateIdOrderByNewest(Long candidateId) {
+
+        String sql = """
+                SELECT job_id
+                FROM wishlist
+                WHERE candidate_id = ?
+                ORDER BY created_at DESC
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("job_id"),
+                candidateId
+        );
+    }
 }
