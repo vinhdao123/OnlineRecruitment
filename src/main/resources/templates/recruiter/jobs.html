@@ -65,7 +65,24 @@
     <!-- ================= KHÁM PHÁ ================= -->
     <div class="manage-head">
         <div>
-            <h1>Quản lý tin tuyển dụng</h1>
+            <!-- Dùng Flexbox để căn hàng ngang cho H1 và Badge Quota -->
+            <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px;">
+                <h1 style="margin: 0; font-size: 26px;">Quản lý tin tuyển dụng</h1>
+
+                <!-- Badge Quota -->
+                <div th:if="${quotaLabel != null}"
+                     style="display: inline-flex; align-items: center; gap: 8px; background: #eff6ff; color: #1e40af; padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 700; border: 1px solid #bfdbfe; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+
+                    <span th:text="${quotaLabel}">Còn 5/10 tin</span>
+
+                    <a th:href="@{/pricing}" style="color: #ea580c; text-decoration: underline; margin-left: 4px; font-weight: 800; border-left: 1px solid #bfdbfe; padding-left: 8px;">Mua thêm</a>
+                </div>
+            </div>
+
             <p>Theo dõi tin tuyển dụng của bạn từ bản nháp đến khi kết thúc tuyển dụng.</p>
         </div>
 

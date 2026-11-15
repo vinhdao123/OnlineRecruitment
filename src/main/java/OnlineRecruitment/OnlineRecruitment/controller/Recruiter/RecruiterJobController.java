@@ -93,6 +93,9 @@ public class RecruiterJobController {
         model.addAttribute("location", location);
         model.addAttribute("status", status);
         model.addAttribute("currentRecruiter", recruiter);
+        model.addAttribute("quotaLabel", servicePackageService.getQuotaLabel(recruiter));
+        model.addAttribute("totalJobs", jobService.countMyJobs(recruiter.getId()));
+
 
         // Thống kê chỉ tính các tin thuộc recruiter đang đăng nhập.
         model.addAttribute("totalJobs", jobService.countMyJobs(recruiter.getId()));
