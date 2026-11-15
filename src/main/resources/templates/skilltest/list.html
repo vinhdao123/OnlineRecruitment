@@ -3,151 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đánh giá kỹ năng ứng viên & Bài test năng lực - Online Recruitment</title>
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+    <title>Đánh giá kỹ năng & Bài test năng lực — Online Recruitment</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body class="page-wrapper">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- TASKBAR -->
-<header th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></header>
+<!-- Taskbar Header -->
+<div th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></div>
 
-<!-- BANNER -->
-<section class="page-header-banner">
-    <div class="banner-container">
-        <div>
-            <h1 class="banner-title">
-                <span class="icon-badge">🎯</span>
-                <span>Đánh Giá Năng Lực & Kỹ Năng Nghề Nghiệp</span>
-            </h1>
-            <p class="banner-subtitle">
-                Tham gia các bài kiểm tra trắc nghiệm chuyên môn chuẩn hóa (Java, JavaScript, Git, MySQL, HTML/CSS, Agile) được thiết kế bởi chuyên gia. Khẳng định trình độ, bổ sung huy hiệu vào hồ sơ ứng tuyển!
-            </p>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/skill-tests/history}" class="btn-start-test" style="background:#2563eb; color:#fff; border:none; padding:12px 18px;">
-                📜 Lịch sử làm bài thi
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Trang chủ
+        </a>
+        <div class="flex items-center gap-2">
+            <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/skill-tests/history}"
+               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors">
+                <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                Lịch sử bài thi
             </a>
-            <a th:href="@{/interview-questions}" class="btn-start-test" style="background:rgba(255,255,255,0.15); color:#fff; border:none; padding:12px 18px;">
-                📚 Bộ câu hỏi phỏng vấn
+            <a th:href="@{/interview-questions}"
+               class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                Cẩm nang phỏng vấn
             </a>
         </div>
     </div>
-</section>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <!-- Hero Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-primary-950 to-slate-900 text-white rounded-3xl p-8 sm:p-12 mb-8 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-80 h-80 rounded-full bg-primary-600/10 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md mb-4 border border-white/10">
+                <i data-lucide="target" class="w-4 h-4 text-emerald-400"></i>
+                HỆ THỐNG KHẢO SÁT & ĐÁNH GIÁ NĂNG LỰC
+            </span>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display mb-4 leading-tight text-white !text-white drop-shadow-sm">
+                Khẳng định năng lực chuyên môn với bài test chuẩn hóa
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+                Bộ bài thi trắc nghiệm khách quan chuẩn quốc tế (Java, JavaScript, SQL, Git, HTML/CSS, Agile Scrum...) giúp bạn kiểm tra trình độ, nâng tầm CV và thu hút cơ hội phỏng vấn từ các nhà tuyển dụng hàng đầu.
+            </p>
+        </div>
+    </div>
 
-    <!-- SEARCH & FILTER -->
-    <div class="filter-search-box">
-        <form th:action="@{/skill-tests}" method="get" class="search-form-row">
-            <div class="search-input-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Nhập kỹ năng bạn muốn tìm kiếm (Java, Git, MySQL, HTML...)...">
+    <!-- Search & Filter Card -->
+    <div class="skill-search-card hero-search-card bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-8 space-y-4">
+        <form th:action="@{/skill-tests}" method="get" class="flex flex-col sm:flex-row items-center gap-3">
+            <div class="relative flex-1 w-full">
+                <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                <input type="text" name="keyword" th:value="${keyword}"
+                       placeholder="Nhập tên kỹ năng muốn tìm kiếm (Java, JavaScript, Git, SQL, HTML...)..."
+                       class="w-full pl-12 pr-4 h-[50px] rounded-xl border border-slate-200 text-sm sm:text-base focus:ring-2 focus:ring-primary-600 focus:outline-none">
             </div>
 
-            <select name="category" class="filter-select">
-                <option value="">Tất cả kĩ năng</option>
+            <select name="category" class="w-full sm:w-64 px-4 h-[50px] rounded-xl border border-slate-200 text-sm sm:text-base bg-white focus:ring-2 focus:ring-primary-600 focus:outline-none cursor-pointer">
+                <option value="">-- Tất cả danh mục --</option>
                 <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
                         th:selected="${selectedCategory == cat}"></option>
             </select>
 
-            <button type="submit" class="btn-search">
-                Tìm kiếm
-            </button>
-            <a th:href="@{/skill-tests}" class="btn-search" style="background:#64748b;">
-                Tất cả
-            </a>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button type="submit" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 h-[50px] rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors shrink-0">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    <span>Tìm kiếm</span>
+                </button>
+                <a th:href="@{/skill-tests}" class="inline-flex items-center justify-center px-5 h-[50px] rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors shrink-0">
+                    Tất cả
+                </a>
+            </div>
         </form>
 
-        <div class="category-pills">
-            <a th:href="@{/skill-tests}" class="category-pill" th:classappend="${selectedCategory == null} ? 'active' : ''">Tất cả</a>
+        <!-- Category Pills -->
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs sm:text-sm">
+            <span class="text-slate-400 font-semibold mr-1">Chủ đề:</span>
+            <a th:href="@{/skill-tests}"
+               class="px-3.5 py-1.5 rounded-lg font-semibold transition-all"
+               th:classappend="${selectedCategory == null} ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                Tất cả
+            </a>
             <a th:each="cat : ${categories}"
                th:href="@{/skill-tests(category=${cat})}"
-               class="category-pill"
-               th:classappend="${selectedCategory == cat} ? 'active' : ''"
+               class="px-3.5 py-1.5 rounded-lg font-semibold transition-all"
+               th:classappend="${selectedCategory == cat} ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
                th:text="${cat}">Danh mục</a>
         </div>
     </div>
 
-    <!-- SECTION TITLE -->
-    <div style="margin-bottom: 24px; display:flex; justify-content:space-between; align-items:center;">
+    <!-- Section Heading -->
+    <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 style="font-size:22px; font-weight:800; color:#0f172a;" th:text="${selectedCategory != null ? selectedCategory : 'Tất cả bài thi đánh giá kỹ năng'}">
+            <h2 class="text-xl font-bold text-slate-900 font-display" th:text="${selectedCategory != null ? selectedCategory : 'Tất cả bài thi đánh giá kỹ năng'}">
                 Kỹ năng công nghệ
             </h2>
-            <p style="font-size:14px; color:#64748b; margin-top:4px;">
-                Đề thi trắc nghiệm khách quan với ngân hàng câu hỏi ngẫu nhiên và chấm điểm tự động.
-            </p>
+            <p class="text-xs text-slate-500 mt-0.5">Đề thi ngẫu nhiên với chấm điểm tự động và lời giải chi tiết</p>
         </div>
-        <span style="font-size:14px; color:#64748b; font-weight:600;">
-            Hiển thị <b th:text="${totalItems}">0</b> bài thi
+        <span class="text-xs font-semibold text-slate-500">
+            Hiển thị <b class="text-slate-900" th:text="${totalItems}">0</b> bài thi
         </span>
     </div>
 
-    <!-- EMPTY NOTICE -->
-    <div th:if="${#lists.isEmpty(tests)}" style="background:#fff; border-radius:14px; padding:60px 20px; text-align:center; color:#64748b;">
-        <p style="font-size:17px; margin-bottom:14px;">Không tìm thấy bài thi kỹ năng nào phù hợp với từ khóa tìm kiếm.</p>
-        <a th:href="@{/skill-tests}" class="category-pill active">Xem tất cả bài thi</a>
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(tests)}"
+         class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center max-w-md mx-auto shadow-sm">
+        <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="file-question" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 font-display mb-1">Không tìm thấy bài thi phù hợp</h3>
+        <p class="text-xs sm:text-sm text-slate-500 mb-6">Hãy thử tìm kiếm với từ khóa khác hoặc bấm xem tất cả bài thi.</p>
+        <a th:href="@{/skill-tests}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+            Xem toàn bộ bài thi
+        </a>
     </div>
 
-    <!-- TESTS GRID (TOPCV STYLE) -->
-    <div class="test-grid">
-        <div th:each="t : ${tests}" class="test-card">
-            <!-- Dynamic Colored Banner -->
-            <div class="test-card-banner"
-                 th:classappend="${'badge-' + #strings.toLowerCase(t.skillName)}"
-                 th:style="${t.badgeColor != null ? 'background: linear-gradient(135deg, ' + t.badgeColor + ' 0%, #1e293b 100%);' : ''}">
-                <div>
-                    <div class="test-badge-title">Đề thi đánh giá kỹ năng</div>
-                    <div class="test-skill-name" th:text="${#strings.toUpperCase(t.skillName)}">JAVA</div>
+    <!-- Tests Grid -->
+    <div th:unless="${#lists.isEmpty(tests)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <article th:each="t : ${tests}"
+                 class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            
+            <!-- Card Header Banner -->
+            <div class="p-6 text-white relative overflow-hidden"
+                 th:style="${t.badgeColor != null ? 'background: linear-gradient(135deg, ' + t.badgeColor + ' 0%, #0f172a 100%);' : 'background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);'}">
+                <div class="flex items-center justify-between relative z-10">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-white/80 block">Đề thi chuẩn hóa</span>
+                        <h3 class="text-lg font-extrabold font-display uppercase tracking-wide mt-0.5" th:text="${#strings.toUpperCase(t.skillName)}">JAVA</h3>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-2xl shadow-inner">
+                        <span th:switch="${#strings.toLowerCase(t.skillName)}">
+                            <span th:case="'java'">☕</span>
+                            <span th:case="'javascript'">⚡</span>
+                            <span th:case="'git'">🌿</span>
+                            <span th:case="'mysql'">🐬</span>
+                            <span th:case="'html'">🌐</span>
+                            <span th:case="'agile'">🔄</span>
+                            <span th:case="*">💻</span>
+                        </span>
+                    </div>
                 </div>
-                <div class="test-banner-icon">
-                    <span th:switch="${#strings.toLowerCase(t.skillName)}">
-                        <span th:case="'java'">☕</span>
-                        <span th:case="'javascript'">⚡</span>
-                        <span th:case="'git'">🌿</span>
-                        <span th:case="'mysql'">🐬</span>
-                        <span th:case="'html'">🌐</span>
-                        <span th:case="'agile'">🔄</span>
-                        <span th:case="*">💻</span>
+            </div>
+
+            <!-- Card Body Content -->
+            <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                <div class="space-y-2">
+                    <span class="text-xs font-bold text-primary-600 tracking-wider uppercase block" th:text="${t.category}">Kỹ năng công nghệ</span>
+                    <h4 class="text-base font-bold text-slate-900 font-display line-clamp-1 group-hover:text-primary-600 transition-colors" th:text="${t.title}">Đề thi đánh giá kỹ năng</h4>
+                    <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed" th:text="${t.description}">Mô tả chi tiết nội dung bài thi...</p>
+                </div>
+
+                <!-- Chips -->
+                <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-2 text-xs">
+                    <span class="px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-semibold" th:text="${t.difficulty}">Trung bình</span>
+                    <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium inline-flex items-center gap-1">
+                        <i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span th:text="${t.participantCount != null ? t.participantCount + '+ ứng viên' : '1000+ ứng viên'}">1400+ ứng viên</span>
+                    </span>
+                    <span class="px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 font-medium inline-flex items-center gap-1">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
+                        <span th:text="${t.durationMinutes + ' phút (' + t.totalQuestionsPerTest + ' câu)'}">15 phút</span>
                     </span>
                 </div>
-            </div>
 
-            <!-- Card Body -->
-            <div class="test-card-body">
-                <div class="test-category-label" th:text="${t.category}">Kỹ năng công nghệ</div>
-                <h3 class="test-card-title" th:text="${t.title}">Đề thi đánh giá kỹ năng Java</h3>
-                <p class="test-card-desc" th:text="${t.description}">Mô tả nội dung bài thi...</p>
-
-                <div class="test-meta-pills">
-                    <span class="meta-pill difficulty" th:text="${t.difficulty}">Trung bình</span>
-                    <span class="meta-pill participants" th:text="${t.participantCount != null ? t.participantCount + '+ ứng viên' : '1000+ ứng viên'}">1400+ ứng viên</span>
-                    <span class="meta-pill time" th:text="${t.durationMinutes + ' phút (' + t.totalQuestionsPerTest + ' câu)'}">15 phút</span>
+                <div class="pt-2">
+                    <a th:href="@{'/skill-tests/' + ${t.id}}"
+                       class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm shadow-primary-600/20 transition-all">
+                        <span>Làm bài thi ngay</span>
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
                 </div>
-
-                <a th:href="@{'/skill-tests/' + ${t.id}}" class="btn-start-test">
-                    Làm bài thi →
-                </a>
             </div>
-        </div>
+
+        </article>
     </div>
 
-    <!-- PAGINATION -->
-    <div th:if="${totalPages > 1}" style="display:flex; justify-content:center; gap:8px; margin-top:40px;">
+    <!-- Pagination -->
+    <div th:if="${totalPages > 1}" class="flex items-center justify-center gap-2 mt-12">
         <a th:if="${currentPage > 0}" th:href="@{/skill-tests(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
-           class="category-pill">‹ Trước</a>
+           class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            ‹ Trước
+        </a>
 
         <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
             <a th:href="@{/skill-tests(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
-               class="category-pill" th:classappend="${i == currentPage} ? 'active' : ''" th:text="${i + 1}">1</a>
+               class="px-3.5 py-2 rounded-xl text-xs font-bold transition-colors"
+               th:classappend="${i == currentPage} ? 'bg-primary-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'"
+               th:text="${i + 1}">1</a>
         </span>
 
         <a th:if="${currentPage < totalPages - 1}" th:href="@{/skill-tests(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
-           class="category-pill">Sau ›</a>
+           class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
+            Sau ›
+        </a>
     </div>
 
-</div>
+</main>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

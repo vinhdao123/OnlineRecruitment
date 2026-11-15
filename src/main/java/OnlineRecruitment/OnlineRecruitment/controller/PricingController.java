@@ -30,12 +30,17 @@ public class PricingController {
 
     @GetMapping
     public String pricingPage(@AuthenticationPrincipal UserDetails principal, Model model) {
-        User user = user(principal);
-        model.addAttribute("packages", packageService.getPackagesForRole(user.getRole()));
+        User user = principal != null ? user(principal) : null;
+        var role = (user != null && user.getRole() != null) ? user.getRole() : OnlineRecruitment.OnlineRecruitment.entity.UserRole.RECRUITER;
+        var packages = packageService.getPackagesForRole(role);
+        if (packages == null || packages.isEmpty()) {
+            packages = packageService.getPackagesForRole(OnlineRecruitment.OnlineRecruitment.entity.UserRole.RECRUITER);
+        }
+        model.addAttribute("packages", packages != null ? packages : java.util.Collections.emptyList());
         model.addAttribute("currentUser", user);
         model.addAttribute("paymentReady", gateway.isReady() || bank.isReady());
         model.addAttribute("gatewaySandbox", gateway.isReady() && gateway.isSandbox());
-        model.addAttribute("activePackage", packageService.getActivePackage(user));
+        model.addAttribute("activePackage", user != null ? packageService.getActivePackage(user) : null);
 
         return "pricing/index";
     }
