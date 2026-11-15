@@ -3,222 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Các câu hỏi phỏng vấn thường gặp & Cách trả lời ấn tượng - Online Recruitment</title>
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+    <title>Cẩm nang & Bộ câu hỏi phỏng vấn — Online Recruitment</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body class="page-wrapper">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- TASKBAR -->
-<header th:replace="~{fragments/taskbar :: taskbar('interview')}"></header>
+<!-- Taskbar Header -->
+<div th:replace="~{fragments/taskbar :: taskbar('interview')}"></div>
 
-<!-- BANNER -->
-<section class="page-header-banner">
-    <div class="banner-container">
-        <div>
-            <h1 class="banner-title">
-                <span class="icon-badge">🎯</span>
-                <span>Các Câu Hỏi Phỏng Vấn Thường Gặp & Cách Trả Lời Ấn Tượng</span>
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Trang chủ
+        </a>
+        <a th:href="@{/skill-tests}"
+           class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors">
+            <i data-lucide="target" class="w-3.5 h-3.5"></i>
+            Làm bài test đánh giá kỹ năng
+        </a>
+    </div>
+
+    <!-- Hero Banner -->
+    <div class="bg-gradient-to-r from-slate-900 via-primary-950 to-slate-900 text-white rounded-3xl p-8 sm:p-12 mb-8 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-80 h-80 rounded-full bg-primary-600/10 blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 max-w-3xl">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md mb-4 border border-white/10">
+                <i data-lucide="book-open" class="w-4 h-4 text-primary-400"></i>
+                CẨM NANG PHỎNG VẤN NGHỀ NGHIỆP
+            </span>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-display mb-4 leading-tight">
+                Bộ câu hỏi phỏng vấn chuẩn & Cách trả lời ấn tượng
             </h1>
-            <p class="banner-subtitle">
-                Tổng hợp ngân hàng câu hỏi phỏng vấn tuyển dụng chuẩn từ các chuyên gia HR, kèm theo ý đồ nhà tuyển dụng, gợi ý dàn ý và câu trả lời mẫu xuất sắc giúp bạn tự tin chinh phục mọi nhà tuyển dụng.
+            <p class="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
+                Giải mã ý đồ thực sự của nhà tuyển dụng, hướng dẫn cấu trúc câu trả lời theo phương pháp STAR, cung cấp câu trả lời mẫu xuất sắc và cảnh báo các lỗi sai thường gặp.
             </p>
         </div>
-        <div>
-            <a th:href="@{/skill-tests}" class="btn-start-test" style="background:#00b14f; color:#fff; border:none; padding:12px 20px;">
-                ✍️ Làm bài test đánh giá kỹ năng →
-            </a>
-        </div>
     </div>
-</section>
 
-<div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-
-    <!-- SEARCH & FILTER BOX -->
-    <div class="filter-search-box">
-        <form th:action="@{/interview-questions}" method="get" class="search-form-row">
-            <div class="search-input-wrap">
-                <span class="search-icon">🔍</span>
-                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm câu hỏi phỏng vấn, từ khóa...">
+    <!-- Search & Filter Card -->
+    <div class="hero-search-card bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm mb-8 space-y-4">
+        <form th:action="@{/interview-questions}" method="get" class="flex flex-col sm:flex-row items-center gap-3">
+            <div class="relative flex-1 w-full">
+                <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+                <input type="text" name="keyword" th:value="${keyword}"
+                       placeholder="Tìm kiếm câu hỏi phỏng vấn, từ khóa kỹ năng, vị trí..."
+                       class="w-full pl-12 pr-4 h-[50px] rounded-xl border border-slate-200 text-sm sm:text-base focus:ring-2 focus:ring-primary-600 focus:outline-none">
             </div>
 
-            <select name="category" class="filter-select">
+            <select name="category" class="w-full sm:w-64 px-4 h-[50px] rounded-xl border border-slate-200 text-sm sm:text-base bg-white focus:ring-2 focus:ring-primary-600 focus:outline-none cursor-pointer">
                 <option value="">-- Tất cả danh mục --</option>
                 <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
                         th:selected="${selectedCategory == cat}"></option>
             </select>
 
-            <button type="submit" class="btn-search">
-                Tìm kiếm
-            </button>
-            <a th:href="@{/interview-questions}" class="btn-search" style="background:#64748b;">
-                Làm mới
-            </a>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button type="submit" class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 h-[50px] rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-colors shrink-0 cursor-pointer">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    <span>Tìm kiếm</span>
+                </button>
+                <a th:href="@{/interview-questions}" class="inline-flex items-center justify-center px-5 h-[50px] rounded-xl text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors shrink-0">
+                    Làm mới
+                </a>
+            </div>
         </form>
 
         <!-- Category Pills -->
-        <div class="category-pills">
-            <a th:href="@{/interview-questions}" class="category-pill" th:classappend="${selectedCategory == null} ? 'active' : ''">Tất cả</a>
+        <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
+            <span class="text-slate-400 font-semibold mr-1">Chủ đề:</span>
+            <a th:href="@{/interview-questions}"
+               class="px-3 py-1.5 rounded-lg font-semibold transition-all"
+               th:classappend="${selectedCategory == null} ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'">
+                Tất cả
+            </a>
             <a th:each="cat : ${categories}"
                th:href="@{/interview-questions(category=${cat})}"
-               class="category-pill"
-               th:classappend="${selectedCategory == cat} ? 'active' : ''"
+               class="px-3 py-1.5 rounded-lg font-semibold transition-all"
+               th:classappend="${selectedCategory == cat} ? 'bg-primary-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
                th:text="${cat}">Danh mục</a>
         </div>
     </div>
 
-    <!-- MAIN TWO-COLUMN LAYOUT -->
-    <div class="interview-layout">
+    <!-- 2 Columns Layout: Questions vs Sidebar Guides -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-        <!-- LEFT COLUMN: QUESTION CARDS -->
-        <div>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
-                <h2 style="font-size:20px; font-weight:700; color:#0f172a;">
-                    Danh sách câu hỏi phỏng vấn (<span th:text="${totalItems}">0</span>)
+        <!-- Left Column: Questions List (8 cols) -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+                <h2 class="text-base font-bold text-slate-900 font-display">
+                    Danh sách câu hỏi (<span th:text="${totalItems}">0</span>)
                 </h2>
-                <span style="font-size:13px; color:#64748b;">Nhấn vào câu hỏi để xem gợi ý & câu trả lời mẫu</span>
+                <span class="text-xs text-slate-400">Nhấn vào câu hỏi để xem gợi ý & câu trả lời mẫu</span>
             </div>
 
-            <div th:if="${#lists.isEmpty(questions)}" style="background:#fff; border-radius:12px; padding:40px; text-align:center; color:#64748b;">
-                <p style="font-size:16px; margin-bottom:12px;">Không tìm thấy câu hỏi phỏng vấn nào phù hợp với từ khóa.</p>
-                <a th:href="@{/interview-questions}" class="category-pill active">Xem tất cả câu hỏi</a>
-            </div>
-
-            <div th:each="q, stat : ${questions}" class="interview-card" th:id="'q-' + ${q.id}">
-                <div class="question-header">
-                    <div>
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
-                            <span class="question-number-badge" th:text="'Câu ' + (${currentPage * 15} + ${stat.index + 1})">Câu 1</span>
-                            <span class="q-tag q-tag-cat" th:text="${q.category}">Phỏng vấn chung</span>
-                            <span class="q-tag q-tag-level" th:if="${q.targetLevel != null}" th:text="${q.targetLevel}">Mọi cấp bậc</span>
-                        </div>
-                        <a th:href="@{'/interview-questions/' + ${q.id}}" class="question-title-text" th:text="${q.question}">
-                            Hãy giới thiệu ngắn gọn về bản thân bạn?
-                        </a>
-                    </div>
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(questions)}"
+                 class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center shadow-sm">
+                <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="help-circle" class="w-8 h-8"></i>
                 </div>
-
-                <!-- PURPOSE BOX -->
-                <div class="section-box purpose" th:if="${q.purpose != null and !#strings.isEmpty(q.purpose)}">
-                    <div class="section-label">
-                        <span>💡</span> Ý đồ của nhà tuyển dụng
-                    </div>
-                    <div th:text="${q.purpose}">Ý đồ nhà tuyển dụng khi hỏi câu này...</div>
-                </div>
-
-                <!-- TIPS BOX -->
-                <div class="section-box tips" th:if="${q.tips != null and !#strings.isEmpty(q.tips)}">
-                    <div class="section-label">
-                        <span>📝</span> Gợi ý & Dàn ý trả lời
-                    </div>
-                    <div th:text="${q.tips}">Dàn ý trả lời chi tiết...</div>
-                </div>
-
-                <!-- SAMPLE ANSWER BOX -->
-                <div class="section-box sample" th:if="${q.sampleAnswer != null and !#strings.isEmpty(q.sampleAnswer)}">
-                    <div class="section-label">
-                        <span>⭐</span> Câu trả lời mẫu ấn tượng
-                    </div>
-                    <div style="white-space:pre-line; font-style: italic;" th:text="${q.sampleAnswer}">
-                        "Em là Nguyễn Văn A, tốt nghiệp chuyên ngành CNTT..."
-                    </div>
-                </div>
-
-                <!-- PITFALLS BOX -->
-                <div class="section-box pitfalls" th:if="${q.pitfalls != null and !#strings.isEmpty(q.pitfalls)}">
-                    <div class="section-label">
-                        <span>⚠️</span> Những điều nên tránh
-                    </div>
-                    <div th:text="${q.pitfalls}">Tránh kể lan man không liên quan...</div>
-                </div>
-
-                <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:10px;">
-                    <a th:href="@{'/interview-questions/' + ${q.id}}" style="font-size:13px; color:#00b14f; font-weight:600; text-decoration:none;">
-                        Xem chi tiết & Chia sẻ →
-                    </a>
-                </div>
-            </div>
-
-            <!-- PAGINATION -->
-            <div th:if="${totalPages > 1}" style="display:flex; justify-content:center; gap:8px; margin-top:30px;">
-                <a th:if="${currentPage > 0}" th:href="@{/interview-questions(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
-                   class="category-pill">‹ Trước</a>
-
-                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/interview-questions(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
-                       class="category-pill" th:classappend="${i == currentPage} ? 'active' : ''" th:text="${i + 1}">1</a>
-                </span>
-
-                <a th:if="${currentPage < totalPages - 1}" th:href="@{/interview-questions(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
-                   class="category-pill">Sau ›</a>
-            </div>
-        </div>
-
-        <!-- RIGHT COLUMN: SIDEBAR WIDGETS (TOPCV STYLE) -->
-        <div>
-            <!-- Hành trang tìm việc -->
-            <div class="side-widget">
-                <h3 class="widget-title">
-                    <span>🎒</span> Hành trang tìm việc
-                </h3>
-                <ul class="guide-list">
-                    <li class="guide-item">
-                        <span>📄</span>
-                        <a href="javascript:void(0)">Mẫu email xác nhận lịch phỏng vấn chuẩn</a>
-                    </li>
-                    <li class="guide-item">
-                        <span>💌</span>
-                        <a href="javascript:void(0)">Thư cảm ơn sau buổi phỏng vấn gây ấn tượng</a>
-                    </li>
-                    <li class="guide-item">
-                        <span>⭐</span>
-                        <a href="javascript:void(0)">Phương pháp trả lời STAR phỏng vấn hành vi</a>
-                    </li>
-                    <li class="guide-item">
-                        <span>💻</span>
-                        <a href="javascript:void(0)">Kỹ năng phỏng vấn Online qua Google Meet/Zoom</a>
-                    </li>
-                    <li class="guide-item">
-                        <span>🤝</span>
-                        <a href="javascript:void(0)">Bí quyết đàm phán lương khéo léo với HR</a>
-                    </li>
-                    <li class="guide-item">
-                        <span>🎓</span>
-                        <a href="javascript:void(0)">Câu hỏi phỏng vấn thực tập sinh & sinh viên mới ra trường</a>
-                    </li>
-                </ul>
-            </div>
-
-            <!-- Đánh giá năng lực widget -->
-            <div class="side-widget" style="background: linear-gradient(135deg, #00b14f 0%, #00873c 100%); color: #fff;">
-                <h3 style="color:#fff; font-size:17px; font-weight:800; margin-bottom:8px;">
-                    ✍️ Kiểm tra năng lực chuyên môn
-                </h3>
-                <p style="font-size:13.5px; opacity:0.95; line-height:1.5; margin-bottom:16px;">
-                    Thử sức với các bài test kỹ năng công nghệ (Java, JavaScript, Git, MySQL, HTML/CSS, Agile) để đánh giá trình độ và làm đẹp hồ sơ ứng tuyển!
-                </p>
-                <a th:href="@{/skill-tests}" style="display:inline-block; width:100%; text-align:center; background:#fff; color:#00b14f; padding:10px 16px; border-radius:8px; font-weight:700; text-decoration:none;">
-                    Khám phá bài test ngay →
+                <h3 class="text-lg font-bold text-slate-900 font-display mb-1">Không tìm thấy câu hỏi phù hợp</h3>
+                <p class="text-xs sm:text-sm text-slate-500 mb-6">Hãy thử tìm kiếm với từ khóa khác hoặc xem tất cả câu hỏi.</p>
+                <a th:href="@{/interview-questions}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                    Xem toàn bộ câu hỏi
                 </a>
             </div>
 
-            <!-- Câu hỏi phổ biến -->
-            <div class="side-widget" th:if="${!#lists.isEmpty(popularQuestions)}">
-                <h3 class="widget-title">
-                    <span>🔥</span> Câu hỏi xem nhiều nhất
+            <!-- Questions Cards -->
+            <article th:each="q, stat : ${questions}" th:id="'q-' + ${q.id}"
+                     class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-5 hover:border-primary-200 transition-all">
+                
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-50 text-primary-700 border border-primary-200"
+                              th:text="'Câu ' + (${currentPage * 15} + ${stat.index + 1})">Câu 1</span>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-slate-100 text-slate-700" th:text="${q.category}">Phỏng vấn chung</span>
+                        <span class="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200" th:if="${q.targetLevel != null}" th:text="${q.targetLevel}">Mọi cấp bậc</span>
+                    </div>
+
+                    <h3 class="text-lg font-bold text-slate-900 font-display leading-snug">
+                        <a th:href="@{'/interview-questions/' + ${q.id}}" class="hover:text-primary-600 transition-colors" th:text="${q.question}">
+                            Hãy giới thiệu ngắn gọn về bản thân bạn?
+                        </a>
+                    </h3>
+                </div>
+
+                <!-- HR Purpose Box -->
+                <div th:if="${q.purpose != null and !#strings.isEmpty(q.purpose)}"
+                     class="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs sm:text-sm text-amber-950 space-y-1">
+                    <strong class="font-bold flex items-center gap-1.5 text-amber-900">
+                        <i data-lucide="lightbulb" class="w-4 h-4 text-amber-600"></i>
+                        Ý đồ thực sự của nhà tuyển dụng:
+                    </strong>
+                    <p th:text="${q.purpose}" class="text-amber-900/90 leading-relaxed"></p>
+                </div>
+
+                <!-- Tips & Outline Box -->
+                <div th:if="${q.tips != null and !#strings.isEmpty(q.tips)}"
+                     class="p-4 rounded-xl bg-primary-50/70 border border-primary-200/80 text-xs sm:text-sm text-primary-950 space-y-1">
+                    <strong class="font-bold flex items-center gap-1.5 text-primary-900">
+                        <i data-lucide="list-checks" class="w-4 h-4 text-primary-600"></i>
+                        Gợi ý & Dàn ý trả lời chi tiết:
+                    </strong>
+                    <p th:text="${q.tips}" class="text-primary-900/90 leading-relaxed whitespace-pre-line"></p>
+                </div>
+
+                <!-- Sample Answer Box -->
+                <div th:if="${q.sampleAnswer != null and !#strings.isEmpty(q.sampleAnswer)}"
+                     class="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 text-xs sm:text-sm text-emerald-950 space-y-1">
+                    <strong class="font-bold flex items-center gap-1.5 text-emerald-900">
+                        <i data-lucide="star" class="w-4 h-4 text-emerald-600"></i>
+                        Câu trả lời mẫu ấn tượng:
+                    </strong>
+                    <blockquote th:text="${q.sampleAnswer}" class="italic text-emerald-900/90 leading-relaxed whitespace-pre-line"></blockquote >
+                </div>
+
+                <!-- Pitfalls Box -->
+                <div th:if="${q.pitfalls != null and !#strings.isEmpty(q.pitfalls)}"
+                     class="p-4 rounded-xl bg-rose-50/70 border border-rose-200/80 text-xs sm:text-sm text-rose-950 space-y-1">
+                    <strong class="font-bold flex items-center gap-1.5 text-rose-900">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-600"></i>
+                        Những điều tối kỵ nên tránh:
+                    </strong>
+                    <p th:text="${q.pitfalls}" class="text-rose-900/90 leading-relaxed"></p>
+                </div>
+
+                <div class="pt-2 flex justify-end">
+                    <a th:href="@{'/interview-questions/' + ${q.id}}"
+                       class="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700">
+                        Xem chi tiết câu hỏi & Thảo luận
+                        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                </div>
+
+            </article>
+
+            <!-- Pagination -->
+            <div th:if="${totalPages > 1}" class="flex items-center justify-center gap-2 pt-6">
+                <a th:if="${currentPage > 0}" th:href="@{/interview-questions(page=${currentPage - 1}, keyword=${keyword}, category=${selectedCategory})}"
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">‹ Trước</a>
+
+                <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/interview-questions(page=${i}, keyword=${keyword}, category=${selectedCategory})}"
+                       class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                       th:classappend="${i == currentPage} ? 'bg-primary-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'"
+                       th:text="${i + 1}">1</a>
+                </span>
+
+                <a th:if="${currentPage < totalPages - 1}" th:href="@{/interview-questions(page=${currentPage + 1}, keyword=${keyword}, category=${selectedCategory})}"
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">Sau ›</a>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Sidebar Guides & Widgets (4 cols) -->
+        <aside class="lg:col-span-4 space-y-6">
+
+            <!-- Guide Widget -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 font-display flex items-center gap-2 pb-3 border-b border-slate-100">
+                    <i data-lucide="briefcase" class="w-4 h-4 text-primary-600"></i>
+                    Hành trang phỏng vấn chuyên nghiệp
                 </h3>
-                <ul class="guide-list">
-                    <li th:each="pop : ${popularQuestions}" class="guide-item">
-                        <span>❓</span>
-                        <a th:href="@{'/interview-questions/' + ${pop.id}}" th:text="${pop.question}">Câu hỏi...</a>
+                <ul class="space-y-3 text-xs">
+                    <li class="flex items-start gap-2.5 text-slate-600 hover:text-primary-600 transition-colors">
+                        <i data-lucide="mail-check" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+                        <span>Mẫu email xác nhận lịch phỏng vấn chuẩn mực</span>
+                    </li>
+                    <li class="flex items-start gap-2.5 text-slate-600 hover:text-primary-600 transition-colors">
+                        <i data-lucide="heart-handshake" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+                        <span>Thư cảm ơn sau buổi phỏng vấn tạo thiện cảm</span>
+                    </li>
+                    <li class="flex items-start gap-2.5 text-slate-600 hover:text-primary-600 transition-colors">
+                        <i data-lucide="sparkles" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+                        <span>Áp dụng cấu trúc STAR trong trả lời phỏng vấn hành vi</span>
+                    </li>
+                    <li class="flex items-start gap-2.5 text-slate-600 hover:text-primary-600 transition-colors">
+                        <i data-lucide="video" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+                        <span>Kỹ năng phỏng vấn trực tuyến (Google Meet, MS Teams, Zoom)</span>
+                    </li>
+                    <li class="flex items-start gap-2.5 text-slate-600 hover:text-primary-600 transition-colors">
+                        <i data-lucide="dollar-sign" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+                        <span>Bí quyết đàm phán lương & chế độ đãi ngộ khéo léo</span>
                     </li>
                 </ul>
             </div>
-        </div>
+
+            <!-- Skill Test CTA Banner -->
+            <div class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-2xl p-6 shadow-md shadow-emerald-700/20 space-y-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white backdrop-blur-md">
+                    <i data-lucide="award" class="w-3.5 h-3.5"></i> ĐÁNH GIÁ NĂNG LỰC
+                </span>
+                <h3 class="text-base font-bold font-display leading-snug">Kiểm tra năng lực chuyên môn</h3>
+                <p class="text-xs text-emerald-100 leading-relaxed">
+                    Thử sức với các bài test trắc nghiệm công nghệ (Java, JavaScript, Git, SQL, Agile) để chứng minh trình độ và làm đẹp hồ sơ ứng tuyển!
+                </p>
+                <a th:href="@{/skill-tests}"
+                   class="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-emerald-800 bg-white hover:bg-emerald-50 shadow-sm transition-all">
+                    Khám phá bài test ngay
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- Popular Questions Widget -->
+            <div th:if="${!#lists.isEmpty(popularQuestions)}" class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 font-display flex items-center gap-2 pb-3 border-b border-slate-100">
+                    <i data-lucide="flame" class="w-4 h-4 text-rose-500"></i>
+                    Câu hỏi xem nhiều nhất
+                </h3>
+                <ul class="space-y-3 text-xs">
+                    <li th:each="pop : ${popularQuestions}" class="flex items-start gap-2">
+                        <i data-lucide="help-circle" class="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5"></i>
+                        <a th:href="@{'/interview-questions/' + ${pop.id}}" class="text-slate-700 hover:text-primary-600 transition-colors line-clamp-2" th:text="${pop.question}">
+                            Câu hỏi phỏng vấn...
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+        </aside>
 
     </div>
 
-</div>
+</main>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>
