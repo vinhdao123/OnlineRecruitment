@@ -4,94 +4,198 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - Online Recruitment</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Figma Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="auth-body">
 
-<div class="auth-header">
-    <a href="/" class="logo">
-        <span class="logo-icon">OR</span>
-        <span>Online Recruitment</span>
-    </a>
-</div>
+<body class="bg-surface-50 font-sans text-surface-900 antialiased min-h-screen flex flex-col justify-between">
 
-<div class="auth-card">
-    <h1 class="auth-title">Đăng Nhập</h1>
-
-    <!-- Thông báo lỗi cụ thể theo param URL -->
-    <div th:if="${param.rejected}" class="alert alert-danger">
-        ❌ Hồ sơ đăng ký công ty của bạn đã bị từ chối phê duyệt. Vui lòng kiểm tra email của bạn để xem lý do và liên kết chỉnh sửa gửi lại hồ sơ.
+<!-- Header Simple -->
+<header class="w-full border-b border-surface-200 bg-white py-4 px-6 sm:px-8">
+    <div class="mx-auto flex max-w-7xl items-center justify-between">
+        <a th:href="@{/}" class="flex items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-900 text-white font-bold">
+                <i data-lucide="briefcase" class="h-5 w-5"></i>
+            </div>
+            <span class="text-xl font-extrabold text-surface-900 font-heading">
+                JOB<span class="text-brand-900">PORTAL</span>
+            </span>
+        </a>
+        <a th:href="@{/}" class="flex items-center gap-1.5 text-xs font-bold text-surface-600 hover:text-brand-900 transition">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Về Trang chủ</span>
+        </a>
     </div>
+</header>
 
-    <div th:if="${param.resubmitSuccess}" class="alert alert-success">
-        ✅ Bạn đã gửi lại hồ sơ thành công! Vui lòng chờ Quản trị viên xét duyệt.
-    </div>
-
-    <div th:if="${param.locked}" class="alert alert-danger">
-        🔒 Tài khoản của bạn đã bị khóa. Vui lòng liên hệ admin để được hỗ trợ.
-    </div>
-
-    <div th:if="${param.inactive}" class="alert alert-danger">
-        ⏸ Tài khoản đang tạm ẩn.
-    </div>
-
-    <div th:if="${param.badCredentials}" class="alert alert-danger">
-        ❌ Sai email hoặc mật khẩu.
-    </div>
-
-    <div th:if="${param.error}" class="alert alert-danger">
-        ❌ Sai email hoặc mật khẩu.
-    </div>
-
-    <div th:if="${param.logout}" class="alert alert-success">
-        ✅ Đã đăng xuất thành công.
-    </div>
-
-    <div th:if="${param.resetSuccess}" class="alert alert-success">
-        ✅ Đặt lại mật khẩu thành công! Vui lòng đăng nhập bằng mật khẩu mới.
-    </div>
-
-    <!-- Thông báo từ controller -->
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-
-    <form th:action="@{/login}" method="post">
-
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-        <div class="form-group">
-            <label for="email">Gmail</label>
-            <input type="text" id="email" name="email" class="form-control"
-                   placeholder="example@gmail.com" required autofocus>
+<!-- Main Auth Card (Figma Node 1:12014) -->
+<main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md rounded-2xl border border-surface-200 bg-white p-8 shadow-card sm:p-10">
+        
+        <div class="text-center">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-900 mb-4 shadow-sm">
+                <i data-lucide="lock" class="h-7 w-7 text-brand-900"></i>
+            </div>
+            <h1 class="text-2xl font-extrabold text-surface-900 font-heading tracking-tight">Đăng nhập Hệ thống</h1>
+            <p class="mt-1.5 text-xs text-surface-500">Truy cập tài khoản Ứng viên hoặc Doanh nghiệp</p>
         </div>
 
-        <div class="form-group">
-            <label for="password">Mật khẩu</label>
-            <input type="password" id="password" name="password" class="form-control"
-                   placeholder="Nhập mật khẩu" required>
+        <!-- Thông báo lỗi / trạng thái từ Spring Security -->
+        <div class="mt-6 space-y-2 text-xs">
+            <div th:if="${param.rejected != null}" class="flex items-start gap-2 rounded-xl bg-red-50 p-3.5 text-red-800 border border-red-200">
+                <i data-lucide="alert-circle" class="h-4 w-4 shrink-0 text-red-600 mt-0.5"></i>
+                <span>Hồ sơ đăng ký công ty của bạn đã bị từ chối phê duyệt. Vui lòng kiểm tra email để xem lý do và link nộp lại.</span>
+            </div>
+
+            <div th:if="${param.resubmitSuccess != null}" class="flex items-center gap-2 rounded-xl bg-emerald-50 p-3.5 text-emerald-800 border border-emerald-200">
+                <i data-lucide="check-circle-2" class="h-4 w-4 shrink-0 text-emerald-600"></i>
+                <span>Bạn đã gửi lại hồ sơ thành công! Vui lòng chờ Quản trị viên xét duyệt.</span>
+            </div>
+
+            <div th:if="${param.locked != null}" class="flex items-center gap-2 rounded-xl bg-red-50 p-3.5 text-red-800 border border-red-200">
+                <i data-lucide="lock" class="h-4 w-4 shrink-0 text-red-600"></i>
+                <span>Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin để được hỗ trợ.</span>
+            </div>
+
+            <div th:if="${param.inactive != null}" class="flex items-start gap-2.5 rounded-xl bg-amber-50 p-3.5 text-amber-900 border border-amber-200">
+                <i data-lucide="clock" class="h-4 w-4 shrink-0 text-amber-600 mt-0.5"></i>
+                <div class="space-y-0.5 text-xs">
+                    <p class="font-bold">Tài khoản chưa được kích hoạt hoặc đang chờ duyệt!</p>
+                    <p class="text-amber-700">Dành cho Nhà tuyển dụng: Hồ sơ công ty của bạn đang trong quá trình xét duyệt bởi Quản trị viên. Bạn sẽ nhận được email thông báo ngay khi hồ sơ được duyệt.</p>
+                </div>
+            </div>
+
+            <div th:if="${param.badCredentials != null or param.error != null}" class="flex items-center gap-2 rounded-xl bg-red-50 p-3.5 text-red-800 border border-red-200">
+                <i data-lucide="alert-triangle" class="h-4 w-4 shrink-0 text-red-600"></i>
+                <span>Sai email hoặc mật khẩu. Vui lòng thử lại.</span>
+            </div>
+
+            <div th:if="${param.logout != null}" class="flex items-center gap-2 rounded-xl bg-emerald-50 p-3.5 text-emerald-800 border border-emerald-200">
+                <i data-lucide="check" class="h-4 w-4 shrink-0 text-emerald-600"></i>
+                <span>Đã đăng xuất thành công khỏi hệ thống.</span>
+            </div>
+
+            <div th:if="${param.resetSuccess != null}" class="flex items-center gap-2 rounded-xl bg-emerald-50 p-3.5 text-emerald-800 border border-emerald-200">
+                <i data-lucide="check-circle" class="h-4 w-4 shrink-0 text-emerald-600"></i>
+                <span>Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.</span>
+            </div>
+
+            <div th:if="${errorMessage != null}" class="flex items-center gap-2 rounded-xl bg-red-50 p-3.5 text-red-800 border border-red-200" th:text="${errorMessage}"></div>
+            <div th:if="${successMessage != null}" class="flex items-center gap-2 rounded-xl bg-emerald-50 p-3.5 text-emerald-800 border border-emerald-200" th:text="${successMessage}"></div>
         </div>
 
-        <a th:href="@{/forgot-password}" class="forgot-password-link">Quên mật khẩu?</a>
+        <!-- Form Login -->
+        <form th:action="@{/login}" method="post" class="mt-6 space-y-4">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+            <div>
+                <label for="email" class="block text-xs font-bold uppercase tracking-wider text-surface-700 mb-1.5">
+                    Địa chỉ Email
+                </label>
+                <div class="relative">
+                    <i data-lucide="mail" class="absolute left-3.5 top-3 h-4 w-4 text-surface-400"></i>
+                    <input type="email" id="email" name="email" required autofocus placeholder="name@example.com"
+                           class="w-full rounded-xl border border-surface-300 pl-10 pr-4 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:border-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-900 transition font-medium">
+                </div>
+            </div>
 
-        <div class="auth-divider">
-            <span>Hoặc đăng ký tài khoản mới</span>
+            <div>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label for="password" class="text-xs font-bold uppercase tracking-wider text-surface-700">Mật khẩu</label>
+                    <a th:href="@{/forgot-password}" class="text-xs font-bold text-brand-700 hover:underline">Quên mật khẩu?</a>
+                </div>
+                <div class="relative">
+                    <i data-lucide="lock" class="absolute left-3.5 top-3 h-4 w-4 text-surface-400"></i>
+                    <input type="password" id="password" name="password" required placeholder="••••••••"
+                           class="w-full rounded-xl border border-surface-300 pl-10 pr-10 py-2.5 text-sm text-surface-900 placeholder:text-surface-400 focus:border-brand-900 focus:outline-none focus:ring-1 focus:ring-brand-900 transition font-medium">
+                    <button type="button" id="togglePasswordBtn" class="absolute right-3.5 top-3 text-surface-400 hover:text-surface-600">
+                        <i data-lucide="eye" class="h-4 w-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit"
+                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 py-3 text-sm font-bold text-white shadow-elevated hover:bg-brand-800 transition">
+                <i data-lucide="log-in" class="h-4 w-4"></i>
+                <span>Đăng nhập</span>
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="relative my-6 text-center">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-surface-200"></div></div>
+            <span class="relative bg-white px-3 text-xs text-surface-500 font-medium">Hoặc đăng ký tài khoản mới</span>
         </div>
 
-        <div class="btn-group-row">
-            <a th:href="@{/register/candidate}" class="btn btn-secondary">Đăng ký: Candidate</a>
-            <a th:href="@{/register/recruiter}" class="btn btn-success">Đăng ký: Recruiter</a>
-        </div>
-
-        <div style="text-align: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #dee2e6;">
-            <a th:href="@{/}" style="color: #6c757d; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s ease;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                Quay về trang chủ
+        <!-- Registration Buttons -->
+        <div class="grid grid-cols-2 gap-3">
+            <a th:href="@{/register/candidate}"
+               class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-surface-300 bg-white py-2.5 text-xs font-bold text-surface-800 shadow-sm hover:bg-surface-50 transition">
+                <i data-lucide="user" class="h-3.5 w-3.5 text-brand-900"></i>
+                <span>Tài khoản Ứng viên</span>
+            </a>
+            <a th:href="@{/register/recruiter}"
+               class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 py-2.5 text-xs font-bold text-blue-900 shadow-sm hover:bg-blue-100 transition">
+                <i data-lucide="building" class="h-3.5 w-3.5 text-blue-700"></i>
+                <span>Tài khoản NTD</span>
             </a>
         </div>
-    </form>
-</div>
 
+    </div>
+</main>
+
+<footer class="py-4 text-center text-xs text-surface-400 border-t border-surface-200 bg-white">
+    © 2026 Online Recruitment Platform. Bảo mật thông tin tuyệt đối.
+</footer>
+
+<script>
+    lucide.createIcons();
+
+    // Toggle password visibility
+    const passwordInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', () => {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleBtn.innerHTML = isPassword
+                ? '<i data-lucide="eye-off" class="h-4 w-4"></i>'
+                : '<i data-lucide="eye" class="h-4 w-4"></i>';
+            lucide.createIcons();
+        });
+    }
+</script>
 </body>
 </html>
