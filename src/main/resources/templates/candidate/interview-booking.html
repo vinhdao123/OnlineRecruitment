@@ -61,30 +61,7 @@
     </div>
 
     <!-- Header Box -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 mb-6 shadow-sm">
-        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-display mb-2">
-            Chọn lịch phỏng vấn
-        </h1>
-        <p class="text-sm sm:text-base text-slate-500 leading-relaxed">
-            Vui lòng chọn ngày và khung thời gian phù hợp nhất để tham gia buổi phỏng vấn cùng nhà tuyển dụng.
-        </p>
 
-        <!-- Job Context Strip -->
-        <div class="mt-6 pt-6 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
-                <span class="text-xs font-medium text-slate-500 block mb-1">Vị trí ứng tuyển</span>
-                <strong class="text-sm font-bold text-slate-900 block truncate" th:text="${application.jobTitle}">Chức danh</strong>
-            </div>
-            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
-                <span class="text-xs font-medium text-slate-500 block mb-1">Nhà tuyển dụng</span>
-                <strong class="text-sm font-bold text-slate-900 block truncate" th:text="${application.companyName}">Công ty ABC</strong>
-            </div>
-            <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-100">
-                <span class="text-xs font-medium text-slate-500 block mb-1">Mã hồ sơ</span>
-                <strong class="text-sm font-bold text-primary-700 block" th:text="'#' + ${application.applicationId}">#1</strong>
-            </div>
-        </div>
-    </div>
 
     <!-- Available Slots Section -->
     <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 shadow-sm">

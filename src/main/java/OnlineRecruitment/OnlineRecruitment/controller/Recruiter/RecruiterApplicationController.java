@@ -13,7 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-
+import OnlineRecruitment.OnlineRecruitment.service.EmailService;
+import OnlineRecruitment.OnlineRecruitment.service.CvFileStorageService;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +29,11 @@ public class RecruiterApplicationController {
     private final OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService;
     private final CvApplicationPreviewService cvApplicationPreviewService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private EmailService emailService;
 
+    @Autowired
+    private CvFileStorageService cvFileStorageService;
     public RecruiterApplicationController(JdbcTemplate jdbcTemplate, OnlineRecruitment.OnlineRecruitment.service.SkillMatchingService skillMatchingService) {
         this(jdbcTemplate, skillMatchingService, null);
     }
@@ -296,6 +302,7 @@ public class RecruiterApplicationController {
 
 
     // Duyệt đơn ứng tuyển
+
     @PostMapping("/{applicationId}/approve")
     public String approveApplication(
             @PathVariable Long applicationId,
@@ -307,11 +314,12 @@ public class RecruiterApplicationController {
             return "redirect:/login";
         }
 
+        // 1. Lấy ID Recruiter
         List<Map<String, Object>> users = jdbcTemplate.queryForList("""
-                SELECT id
-                FROM dbo.users
-                WHERE username = ? OR email = ?
-                """, username, username);
+            SELECT id
+            FROM dbo.users
+            WHERE username = ? OR email = ?
+            """, username, username);
 
         if (users.isEmpty()) {
             return "redirect:/login";
@@ -319,30 +327,160 @@ public class RecruiterApplicationController {
 
         Object recruiterId = users.get(0).get("id");
 
+        // 2. Cập nhật trạng thái đơn thành ACCEPTED
         int updated = jdbcTemplate.update("""
-        UPDATE a
-        SET a.status = 'ACCEPTED'
-        FROM dbo.applications a
-        JOIN dbo.jobs j ON j.id = a.job_id
-        JOIN dbo.companies c ON c.id = j.company_id
-        WHERE a.id = ?
-          AND c.recruiter_id = ?
-          AND a.status = 'SUBMITTED'
-        """, applicationId, recruiterId);
+            UPDATE a
+            SET a.status = 'ACCEPTED'
+            FROM dbo.applications a
+            JOIN dbo.jobs j ON j.id = a.job_id
+            JOIN dbo.companies c ON c.id = j.company_id
+            WHERE a.id = ?
+              AND c.recruiter_id = ?
+              AND a.status = 'SUBMITTED'
+            """, applicationId, recruiterId);
 
-        if (updated > 0) {
-            redirectAttributes.addFlashAttribute(
-                    "successMessage", "Đã duyệt đơn ứng tuyển thành công.");
-        } else {
+        if (updated == 0) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "Không tìm thấy đơn chờ duyệt hoặc bạn không có quyền thao tác.");
+                    "Không tìm thấy đơn chờ duyệt hoặc bạn không có quyền thao tác."
+            );
+            return "redirect:/recruiter/applications?status=SUBMITTED";
+        }
+
+        try {
+            // 3. Lấy thông tin Candidate, Recruiter, công ty và CV
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT
+                    candidate.full_name AS candidateName,
+                    candidate.email AS candidateEmail,
+                    recruiter.email AS recruiterEmail,
+                    company.company_name AS companyName,
+                    j.title AS jobTitle,
+                    a.cv_file_path_snapshot AS cvFilePath
+                FROM dbo.applications a
+                JOIN dbo.candidates ca ON ca.id = a.candidate_id
+                JOIN dbo.users candidate ON candidate.id = ca.user_id
+                JOIN dbo.jobs j ON j.id = a.job_id
+                JOIN dbo.companies company ON company.id = j.company_id
+                JOIN dbo.users recruiter ON recruiter.id = company.recruiter_id
+                WHERE a.id = ?
+                  AND company.recruiter_id = ?
+                """, applicationId, recruiterId);
+
+            if (rows.isEmpty()) {
+                throw new IllegalStateException(
+                        "Không lấy được thông tin đơn ứng tuyển."
+                );
+            }
+
+            Map<String, Object> data = rows.get(0);
+
+            String candidateName = String.valueOf(data.get("candidateName"));
+            String candidateEmail = String.valueOf(data.get("candidateEmail"));
+            String recruiterEmail = String.valueOf(data.get("recruiterEmail"));
+            String companyName = String.valueOf(data.get("companyName"));
+            String jobTitle = String.valueOf(data.get("jobTitle"));
+
+            // 4. Gửi Gmail cho Candidate
+            String candidateContent = """
+                Xin chào %s,
+
+                CHÚC MỪNG BẠN!
+
+                Hồ sơ ứng tuyển của bạn đã được nhà tuyển dụng chấp nhận.
+
+                Thông tin ứng tuyển:
+
+                Công ty: %s
+                Vị trí: %s
+                Trạng thái: ACCEPTED
+
+                Cảm ơn bạn đã ứng tuyển vào công ty.
+
+                Trân trọng,
+                Online Recruitment
+                """.formatted(candidateName, companyName, jobTitle);
+
+            emailService.sendEmail(
+                    candidateEmail,
+                    "Chúc mừng! Hồ sơ ứng tuyển của bạn đã được chấp nhận",
+                    candidateContent
+            );
+
+            // 5. Gửi Gmail cho Recruiter kèm CV
+            String recruiterContent = """
+                Xin chào nhà tuyển dụng,
+
+                Bạn đã duyệt thành công hồ sơ ứng tuyển.
+
+                Thông tin Candidate:
+
+                Họ tên: %s
+                Email: %s
+                Công ty: %s
+                Vị trí: %s
+
+                Trân trọng,
+                Online Recruitment
+                """.formatted(
+                    candidateName,
+                    candidateEmail,
+                    companyName,
+                    jobTitle
+            );
+
+            String cvPath = data.get("cvFilePath") != null
+                    ? data.get("cvFilePath").toString()
+                    : null;
+
+            java.io.File cvFile =
+                    cvFileStorageService.resolveCvFile(cvPath);
+
+            if (cvFile != null && cvFile.isFile()) {
+
+                String fileName = "CV_Candidate_" + applicationId
+                        + cvFile.getName().substring(
+                        cvFile.getName().lastIndexOf(".")
+                );
+
+                emailService.sendEmailWithAttachment(
+                        recruiterEmail,
+                        "Hồ sơ ứng viên đã được duyệt - " + candidateName,
+                        recruiterContent,
+                        cvFile,
+                        fileName
+                );
+
+            } else {
+                emailService.sendEmail(
+                        recruiterEmail,
+                        "Hồ sơ ứng viên đã được duyệt - " + candidateName,
+                        recruiterContent + "\nLưu ý: Đơn chưa có file CV vật lý để đính kèm."
+                );
+            }
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Đã duyệt đơn và gửi email thông báo."
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Đơn đã được duyệt nhưng có lỗi khi gửi email: "
+                            + e.getMessage()
+            );
         }
 
         return "redirect:/recruiter/applications?status=ACCEPTED";
     }
 
+
     // Từ chối đơn ứng tuyển
+
+    // Từ chối đơn ứng tuyển và gửi Gmail cho Candidate
     @PostMapping("/{applicationId}/reject")
     public String rejectApplication(
             @PathVariable Long applicationId,
@@ -354,11 +492,12 @@ public class RecruiterApplicationController {
             return "redirect:/login";
         }
 
+        // 1. Lấy ID Recruiter
         List<Map<String, Object>> users = jdbcTemplate.queryForList("""
-                SELECT id
-                FROM dbo.users
-                WHERE username = ? OR email = ?
-                """, username, username);
+            SELECT id
+            FROM dbo.users
+            WHERE username = ? OR email = ?
+            """, username, username);
 
         if (users.isEmpty()) {
             return "redirect:/login";
@@ -366,28 +505,119 @@ public class RecruiterApplicationController {
 
         Object recruiterId = users.get(0).get("id");
 
+        // 2. Cập nhật trạng thái đơn thành REJECTED
         int updated = jdbcTemplate.update("""
-                UPDATE a
-                SET a.status = 'REJECTED'
-                FROM dbo.applications a
-                JOIN dbo.jobs j ON j.id = a.job_id
-                JOIN dbo.companies c ON c.id = j.company_id
-                WHERE a.id = ?
-                  AND c.recruiter_id = ?
-                  AND a.status = 'SUBMITTED'
-                """, applicationId, recruiterId);
+            UPDATE a
+            SET a.status = 'REJECTED'
+            FROM dbo.applications a
+            JOIN dbo.jobs j ON j.id = a.job_id
+            JOIN dbo.companies c ON c.id = j.company_id
+            WHERE a.id = ?
+              AND c.recruiter_id = ?
+              AND a.status = 'SUBMITTED'
+            """, applicationId, recruiterId);
 
-        if (updated > 0) {
-            redirectAttributes.addFlashAttribute(
-                    "successMessage", "Đã từ chối đơn ứng tuyển.");
-        } else {
+        if (updated == 0) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",
-                    "Không tìm thấy đơn chờ duyệt hoặc bạn không có quyền thao tác.");
+                    "Không tìm thấy đơn chờ duyệt hoặc bạn không có quyền thao tác."
+            );
+
+            return "redirect:/recruiter/applications?status=SUBMITTED";
+        }
+
+        try {
+            // 3. Lấy thông tin Candidate và công ty
+            List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
+                SELECT
+                    candidate.full_name AS candidateName,
+                    candidate.email AS candidateEmail,
+                    company.company_name AS companyName,
+                    j.title AS jobTitle
+                FROM dbo.applications a
+                JOIN dbo.candidates ca ON ca.id = a.candidate_id
+                JOIN dbo.users candidate ON candidate.id = ca.user_id
+                JOIN dbo.jobs j ON j.id = a.job_id
+                JOIN dbo.companies company ON company.id = j.company_id
+                WHERE a.id = ?
+                  AND company.recruiter_id = ?
+                """, applicationId, recruiterId);
+
+            if (rows.isEmpty()) {
+                throw new IllegalStateException(
+                        "Không tìm thấy thông tin ứng viên."
+                );
+            }
+
+            Map<String, Object> data = rows.get(0);
+
+            String candidateName =
+                    String.valueOf(data.get("candidateName"));
+
+            String candidateEmail =
+                    String.valueOf(data.get("candidateEmail"));
+
+            String companyName =
+                    String.valueOf(data.get("companyName"));
+
+            String jobTitle =
+                    String.valueOf(data.get("jobTitle"));
+
+            // 4. Nội dung Gmail thông báo từ chối
+            String subject =
+                    "Thông báo kết quả ứng tuyển - " + companyName;
+
+            String content = """
+                Xin chào %s,
+
+                Cảm ơn bạn đã quan tâm và ứng tuyển vào công ty %s.
+
+                Sau khi xem xét hồ sơ, chúng tôi rất tiếc phải thông báo
+                rằng hồ sơ ứng tuyển của bạn cho vị trí %s
+                hiện chưa phù hợp với yêu cầu tuyển dụng.
+
+                Trạng thái hồ sơ: KHÔNG ĐƯỢC CHẤP NHẬN.
+
+                Chúng tôi chân thành cảm ơn sự quan tâm của bạn.
+                Mong rằng bạn sẽ tiếp tục theo dõi và ứng tuyển
+                những vị trí phù hợp khác trong tương lai.
+
+                Chúc bạn sớm tìm được công việc mong muốn!
+
+                Trân trọng,
+                Đội ngũ tuyển dụng %s
+                """.formatted(
+                    candidateName,
+                    companyName,
+                    jobTitle,
+                    companyName
+            );
+
+            // 5. Gửi Gmail cho Candidate
+            emailService.sendEmail(
+                    candidateEmail,
+                    subject,
+                    content
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "successMessage",
+                    "Đã từ chối đơn và gửi email thông báo cho ứng viên."
+            );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Đơn đã bị từ chối nhưng gửi email thất bại: "
+                            + e.getMessage()
+            );
         }
 
         return "redirect:/recruiter/applications?status=REJECTED";
     }
+
 
     // Lấy email hoặc username của tài khoản đang đăng nhập
     private String getCurrentUsername() {
