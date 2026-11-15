@@ -166,6 +166,7 @@
                 </label>
                 <div class="relative">
                     <input type="date" id="dob" th:field="*{dob}"
+                           th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"
                            class="w-full px-4 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-blue-600 focus:bg-white transition-all"
                            th:classappend="${#fields.hasErrors('dob')} ? 'border-rose-400 bg-rose-50/30' : ''" required>
                 </div>
