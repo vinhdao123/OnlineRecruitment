@@ -80,6 +80,16 @@ public class PricingController {
             ra.addFlashAttribute("error", "Thanh toán đang được thiết lập. Vui lòng quay lại sau.");
             return "redirect:/pricing";
         }
+
+        java.util.List<Payment> existingPayments = paymentService.getHistoryByUser(currentUser);
+        for (Payment p : existingPayments) {
+            // Nếu tìm thấy hóa đơn đang chờ thanh toán (PENDING) cho đúng gói này
+            if ("PENDING".equals(p.getStatus()) && p.getServicePackage().getId().equals(pkg.getId())) {
+                ra.addFlashAttribute("success", "Bạn đã có hóa đơn chờ thanh toán cho gói này. Đang chuyển hướng...");
+                return "redirect:/pricing/resume/" + p.getId();
+            }
+        }
+
         Payment payment = gateway.isReady()
                 ? paymentService.createGatewayPayment(user(principal), id, gateway.paymentMethod())
                 : paymentService.createPendingPayment(user(principal), id);
