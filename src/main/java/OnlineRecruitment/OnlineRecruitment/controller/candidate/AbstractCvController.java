@@ -5,6 +5,7 @@ import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -77,6 +78,27 @@ public abstract class AbstractCvController {
     /** Xoá một mục con và chuyển hướng về trang tiểu mục tương ứng. */
     protected String deleteSectionItem(Long cvId, RedirectAttributes ra, Runnable action,
                                        String successMessage, String subPath) {
+        try {
+            action.run();
+            ra.addFlashAttribute("successMessage", successMessage);
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/candidate/cvs/" + cvId + subPath;
+    }
+
+    /** Cập nhật một mục con và chuyển hướng về trang tiểu mục tương ứng. */
+    protected String updateSectionItem(Long cvId, RedirectAttributes ra, BindingResult result,
+                                       Runnable action, String successMessage, String subPath) {
+        if (result != null && result.hasErrors()) {
+            String msg = result.getAllErrors().stream()
+                    .map(org.springframework.context.support.DefaultMessageSourceResolvable::getDefaultMessage)
+                    .filter(m -> m != null && !m.isBlank())
+                    .findFirst()
+                    .orElse("Dữ liệu nhập vào không hợp lệ");
+            ra.addFlashAttribute("errorMessage", msg);
+            return "redirect:/candidate/cvs/" + cvId + subPath;
+        }
         try {
             action.run();
             ra.addFlashAttribute("successMessage", successMessage);

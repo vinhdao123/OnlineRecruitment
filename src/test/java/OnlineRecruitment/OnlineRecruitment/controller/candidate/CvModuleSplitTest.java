@@ -366,4 +366,95 @@ class CvModuleSplitTest {
         List<?> works = (List<?>) snapModel.get("works");
         assertEquals(1, works.size());
     }
+
+    @Test
+    void testRowLevelEditEndpointsForMainAndExtraSections() throws Exception {
+        // 1. Edit Work Experience
+        mockMvc.perform(post("/candidate/cvs/1/work-experiences/10/edit")
+                        .principal(auth)
+                        .param("companyName", "Tech Corp")
+                        .param("jobTitle", "Senior Developer")
+                        .param("isCurrent", "true")
+                        .param("description", "Updated desc"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/work-experiences"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật kinh nghiệm thành công!"));
+        verify(sectionService).updateWorkExperience(eq(1L), eq(10L), any(), eq(10L));
+
+        // 2. Edit Education
+        mockMvc.perform(post("/candidate/cvs/1/educations/20/edit")
+                        .principal(auth)
+                        .param("institution", "National University")
+                        .param("degree", "Master")
+                        .param("academicRank", "Giỏi")
+                        .param("gpa", "3.85"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/educations"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật học vấn thành công!"));
+        verify(sectionService).updateEducation(eq(1L), eq(20L), any(), eq(10L));
+
+        // 3. Edit Skill
+        mockMvc.perform(post("/candidate/cvs/1/skills/30/edit")
+                        .principal(auth)
+                        .param("skillId", "30")
+                        .param("proficiency", "EXPERT"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/skills"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật kỹ năng thành công!"));
+        verify(sectionService).updateSkill(eq(1L), eq(30L), any(), eq(10L));
+
+        // 4. Edit Project
+        mockMvc.perform(post("/candidate/cvs/1/projects/40/edit")
+                        .principal(auth)
+                        .param("name", "E-Commerce System")
+                        .param("role", "Lead Architect")
+                        .param("technologies", "Java, Spring Boot"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/projects"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật dự án thành công!"));
+        verify(sectionService).updateProject(eq(1L), eq(40L), any(), eq(10L));
+
+        // 5. Edit Certificate
+        mockMvc.perform(post("/candidate/cvs/1/certificates/50/edit")
+                        .principal(auth)
+                        .param("name", "AWS Certified Solutions Architect")
+                        .param("issuer", "Amazon Web Services")
+                        .param("credentialId", "AWS-12345"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/certificates"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật chứng chỉ thành công!"));
+        verify(extraSectionService).updateCertificate(eq(1L), eq(50L), any(), eq(10L));
+
+        // 6. Edit Award
+        mockMvc.perform(post("/candidate/cvs/1/awards/60/edit")
+                        .principal(auth)
+                        .param("title", "First Prize Hackathon")
+                        .param("issuer", "TechHub"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/awards"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật giải thưởng thành công!"));
+        verify(extraSectionService).updateAward(eq(1L), eq(60L), any(), eq(10L));
+
+        // 7. Edit Activity
+        mockMvc.perform(post("/candidate/cvs/1/activities/70/edit")
+                        .principal(auth)
+                        .param("organization", "Youth Volunteer Club")
+                        .param("role", "Leader"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/activities"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật hoạt động thành công!"));
+        verify(extraSectionService).updateActivity(eq(1L), eq(70L), any(), eq(10L));
+
+        // 8. Edit Reference
+        mockMvc.perform(post("/candidate/cvs/1/references/80/edit")
+                        .principal(auth)
+                        .param("fullName", "Nguyen Van A")
+                        .param("position", "Project Manager")
+                        .param("company", "FPT Software")
+                        .param("relationship", "Former Manager"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/candidate/cvs/1/references"))
+                .andExpect(flash().attribute("successMessage", "Cập nhật người tham chiếu thành công!"));
+        verify(extraSectionService).updateReference(eq(1L), eq(80L), any(), eq(10L));
+    }
 }

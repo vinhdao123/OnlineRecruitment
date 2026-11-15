@@ -1,383 +1,399 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng quan CV — Online Recruitment</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>Chi tiết hồ sơ CV — Online Recruitment</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- ================= TASKBAR ================= -->
+<!-- Taskbar Header -->
 <div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
 
-<!-- ================= LAYOUT CHÍNH ================= -->
-<div class="cv-dashboard-layout">
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- ================= SIDEBAR ================= -->
-    <aside class="cv-sidebar">
-        <div class="cv-sidebar-menu">
-            <div class="cv-sidebar-title">Quản lý chung</div>
-            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                My CV
-            </a>
-            <a th:href="@{/candidate/cvs/gallery}" class="cv-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                Template CV
-            </a>
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/candidate/cvs}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại danh sách CV
+        </a>
+        <div class="text-xs text-slate-500 font-medium">
+            <a th:href="@{/}" class="hover:text-primary-600">Trang chủ</a> /
+            <a th:href="@{/candidate/cvs}" class="hover:text-primary-600">My CV</a> /
+            <span class="text-primary-600 font-semibold" th:text="${cv.title}">Chi tiết</span>
         </div>
+    </div>
 
-        <div class="cv-sidebar-menu">
-            <div class="cv-sidebar-title">Đầu mục thông tin CV</div>
-            <div class="cv-sidebar-current">
-                Đang chỉnh sửa:
-                <strong th:text="${cv.title}">Tên CV</strong>
-            </div>
-            <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="cv-sidebar-item active"><span class="cv-sidebar-emoji">📋</span> Tổng quan CV</a>
-            <a th:href="@{/candidate/cvs/{id}/work-experiences(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">💼</span> Kinh nghiệm làm việc</a>
-            <a th:href="@{/candidate/cvs/{id}/educations(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🎓</span> Trình độ học vấn</a>
-            <a th:href="@{/candidate/cvs/{id}/skills(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">⚡</span> Kỹ năng chuyên môn</a>
-            <a th:href="@{/candidate/cvs/{id}/projects(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🚀</span> Dự án tiêu biểu</a>
-            <a th:href="@{/candidate/cvs/{id}/certificates(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">📜</span> Chứng chỉ</a>
-            <a th:href="@{/candidate/cvs/{id}/awards(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🏆</span> Giải thưởng</a>
-            <a th:href="@{/candidate/cvs/{id}/activities(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">🤝</span> Hoạt động ngoại khóa</a>
-            <a th:href="@{/candidate/cvs/{id}/references(id=${cv.id})}" class="cv-sidebar-item"><span class="cv-sidebar-emoji">👥</span> Người tham chiếu</a>
-        </div>
-    </aside>
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
 
-    <!-- ================= NỘI DUNG CHÍNH ================= -->
-    <main class="main-content">
-
-        <div class="cv-breadcrumb">
-            <a th:href="@{/}">Trang chủ</a>
-            <span>/</span>
-            <a th:href="@{/candidate/cvs}">My CV</a>
-            <span>/</span>
-            <span class="current" th:text="${cv.title}">Chi tiết CV</span>
-        </div>
-
-        <!-- ================= TRƯỜNG HỢP 1: CV TẢI LÊN TỪ MÁY (KHÔNG CHO PHÉP CHỈNH SỬA) ================= -->
-        <th:block th:if="${cv.isUploaded}">
-            <div class="cv-top-actions">
-                <div>
-                    <h2 class="page-title">Thông tin CV đính kèm</h2>
-                    <p class="page-subtitle">Hồ sơ CV tải lên trực tiếp từ máy tính. Tệp được bảo lưu nguyên gốc, không chỉnh sửa trực tuyến.</p>
-                </div>
-                <div class="cv-btn-group">
-                    <a th:href="@{/candidate/cvs}" class="cv-btn cv-btn-grey">&larr; Quay lại danh sách CV</a>
-                </div>
-            </div>
-
-            <div class="cv-content-box cv-uploaded-detail-box">
-                <div class="cv-uploaded-detail-card">
-                    <div class="cv-uploaded-detail-icon-wrap">
-                        <div class="cv-uploaded-detail-icon">📑</div>
+    <!-- ================= CASE 1: UPLOADED FILE CV ================= -->
+    <th:block th:if="${cv.isUploaded}">
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-10 shadow-sm space-y-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-2xl flex-shrink-0">
+                        <i data-lucide="file-text" class="w-8 h-8"></i>
                     </div>
-                    <div class="cv-uploaded-detail-info">
-                        <div class="cv-uploaded-badge-row">
-                            <span class="badge-file">📎 Tệp CV đính kèm</span>
-                            <span th:if="${cv.isDefault}" class="badge-default">★ CV Mặc định</span>
-                            <span th:unless="${cv.isDefault}" class="badge-regular">Hồ sơ phụ</span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-600 uppercase tracking-wider">Hồ sơ tệp đính kèm</span>
+                            <span th:if="${cv.isDefault}" class="px-2.5 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">Mặc định</span>
                         </div>
-                        <h1 class="cv-uploaded-detail-title">
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-display mt-1 flex items-center gap-2">
                             <span th:text="${cv.title}">Tên file CV</span>
-                            <button type="button" class="btn-rename-pill" th:attr="onclick='openRenameModal(' + ${cv.id} + ', \'' + ${#strings.escapeJavaScript(cv.title)} + '\')'" title="Đổi tên CV">✏ Đổi tên</button>
+                            <button type="button" th:attr="onclick='openRenameModal(' + ${cv.id} + ', \'' + ${#strings.escapeJavaScript(cv.title)} + '\')'"
+                                    class="p-1 rounded-lg text-slate-400 hover:text-slate-700 transition-colors" title="Đổi tên">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
                         </h1>
-                        <p class="cv-uploaded-detail-meta">
-                            Định dạng: <strong th:text="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf') ? 'Tài liệu PDF (.pdf)' : 'Tài liệu Word (.doc / .docx)'}"></strong>
-                            &bull; Cập nhật: <strong th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></strong>
+                        <p class="text-xs text-slate-400 mt-1">
+                            Định dạng: <strong class="text-slate-700" th:text="${cv.fileUrl != null && cv.fileUrl.toLowerCase().endsWith('.pdf') ? 'PDF' : 'Word / Tài liệu'}"></strong>
+                            &bull; Cập nhật: <span th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></span>
                         </p>
                     </div>
                 </div>
 
-                <!-- 4 CHỨC NĂNG DUY NHẤT: XEM TRƯỚC, TẢI VỀ, ĐẶT MẶC ĐỊNH, XÓA -->
-                <div class="cv-uploaded-actions-bar">
-                    <div class="cv-uploaded-actions-title">Thao tác với tệp CV</div>
-                    <div class="cv-uploaded-actions-grid">
-                        <!-- 1. Xem trước -->
-                        <a th:href="@{/candidate/cvs/{id}/file(id=${cv.id})}" target="_blank" class="cv-btn cv-btn-dark cv-btn-lg">
-                            👁 Xem trước
-                        </a>
-
-                        <!-- 2. Tải về -->
-                        <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}" class="cv-btn cv-btn-green cv-btn-lg">
-                            ⬇ Tải file về máy
-                        </a>
-
-                        <!-- 3. Đặt làm mặc định -->
-                        <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/default(id=${cv.id})}" method="post">
-                            <button type="submit" class="cv-btn cv-btn-blue cv-btn-lg">
-                                ★ Đặt làm mặc định
-                            </button>
-                        </form>
-                        <span th:if="${cv.isDefault}" class="cv-btn cv-btn-disabled cv-btn-lg">
-                            ★ Đã là mặc định
-                        </span>
-
-                        <!-- 4. Xóa file -->
-                        <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/delete(id=${cv.id})}" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa file CV này?');">
-                            <button type="submit" class="cv-btn cv-btn-danger cv-btn-lg">
-                                🗑 Xóa file
-                            </button>
-                        </form>
-                        <span th:if="${cv.isDefault}" class="cv-btn cv-btn-disabled cv-btn-lg" title="Không thể xóa CV mặc định">
-                            🔒 Khóa xóa
-                        </span>
-                    </div>
-                </div>
-
-                <div class="cv-uploaded-notice">
-                    <div class="cv-notice-icon">💡</div>
-                    <div class="cv-notice-text">
-                        <strong>Lưu ý:</strong> CV tải lên từ máy tính là hồ sơ dạng tệp đính kèm nguyên gốc, hệ thống không hỗ trợ chỉnh sửa trực tuyến. Nếu bạn cần cập nhật thông tin, vui lòng tải file về máy để chỉnh sửa rồi tải lên lại, hoặc tạo CV trực tuyến mới từ kho mẫu của chúng tôi.
-                    </div>
+                <div class="flex items-center gap-2">
+                    <a th:href="@{/candidate/cvs/{id}/file(id=${cv.id})}" target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        Xem trước
+                    </a>
+                    <a th:href="@{/candidate/cvs/{id}/download(id=${cv.id})}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 shadow-sm transition-all">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Tải file về máy
+                    </a>
                 </div>
             </div>
-        </th:block>
 
-        <!-- ================= TRƯỜNG HỢP 2: CV TẠO TRỰC TUYẾN ================= -->
-        <th:block th:unless="${cv.isUploaded}">
-        <div class="cv-top-actions">
-            <div>
-                <h2 class="page-title" th:text="${isEditMode} ? 'Chỉnh sửa thông tin CV' : 'Tổng quan CV'">Tổng quan CV</h2>
-                <p class="page-subtitle">Cập nhật tiêu đề, chức danh, ảnh đại diện và điều hướng sang các đầu mục chi tiết.</p>
+            <!-- Actions grid for Uploaded CV -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/default(id=${cv.id})}" method="post">
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 p-4 rounded-2xl border border-slate-200 bg-slate-50 hover:bg-primary-50 hover:border-primary-200 text-xs font-bold text-primary-700 transition-all">
+                        <i data-lucide="star" class="w-4 h-4"></i>
+                        Đặt làm CV ứng tuyển mặc định
+                    </button>
+                </form>
+                <div th:if="${cv.isDefault}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-center text-xs font-bold text-emerald-800">
+                    ★ Hồ sơ này đang được đặt làm mặc định
+                </div>
+
+                <form th:if="${!cv.isDefault}" th:action="@{/candidate/cvs/{id}/delete(id=${cv.id})}" method="post"
+                      onsubmit="return confirm('Bạn chắc chắn muốn xóa file CV này?');">
+                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 p-4 rounded-2xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-xs font-bold text-rose-700 transition-all">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        Xóa file khỏi danh sách
+                    </button>
+                </form>
             </div>
-            <div class="cv-btn-group" th:if="${!isEditMode}">
-                <a th:href="@{/candidate/cvs/{id}/preview(id=${cv.id})}" target="_blank" class="cv-btn cv-btn-dark">Xem trước CV</a>
-                <a th:href="@{/candidate/cvs/{id}(id=${cv.id}, edit=true)}" class="cv-btn cv-btn-blue">Sửa thông tin chung</a>
-                <a th:href="@{/candidate/cvs}" class="cv-btn cv-btn-grey">&larr; Danh sách CV</a>
+
+            <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-900 leading-relaxed flex items-start gap-3">
+                <i data-lucide="info" class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <strong>Lưu ý:</strong> CV tải lên từ máy tính là hồ sơ dạng tệp đính kèm nguyên gốc, hệ thống không hỗ trợ chỉnh sửa nội dung trực tuyến. Nếu cần cập nhật thông tin, bạn hãy tải file về máy để chỉnh sửa rồi tải lên lại, hoặc khởi tạo một mẫu CV trực tuyến chuyên nghiệp.
+                </div>
             </div>
         </div>
+    </th:block>
 
-        <div th:if="${successMessage}" class="flash-success" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="flash-error" th:text="${errorMessage}"></div>
-
-        <div class="cv-content-box">
-            <!-- CHẾ ĐỘ XEM -->
-            <div th:if="${!isEditMode}">
-                <div class="cv-detail-head">
-                    <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar" class="cv-avatar-lg" onerror="this.onerror=null; this.src='/images/cv-sample-avatar.jpg';">
+    <!-- ================= CASE 2: ONLINE CV TEMPLATE ================= -->
+    <th:block th:unless="${cv.isUploaded}">
+        <!-- Header Strip -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-10 shadow-sm space-y-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-slate-100">
+                <div class="flex items-center gap-4">
+                    <img th:src="@{/candidate/cvs/{id}/avatar(id=${cv.id})}" alt="Avatar"
+                         class="w-16 h-16 rounded-2xl object-cover border border-slate-200 p-0.5 bg-white"
+                         onerror="this.onerror=null; this.src='https://api.dicebear.com/7.x/bottts/svg?seed=avatar';">
                     <div>
-                        <h1 class="cv-header-title" th:text="${cv.title}">Tên CV</h1>
-                        <p class="cv-subtitle" th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : 'Chưa cập nhật chức danh'}"></p>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-display" th:text="${cv.title}">Tên CV</h1>
+                        <p class="text-xs sm:text-sm font-semibold text-primary-600 mt-0.5"
+                           th:text="${cv.professionalTitle != null && !cv.professionalTitle.isEmpty() ? cv.professionalTitle : 'Chưa cập nhật chức danh'}">Chức danh</p>
                     </div>
                 </div>
 
-                <div class="cv-section-title">Tóm tắt bản thân / Mục tiêu nghề nghiệp</div>
-                <div class="cv-text" th:text="${cv.summary != null && !cv.summary.isEmpty() ? cv.summary : 'Chưa có thông tin tóm tắt.'}"></div>
+                <div class="flex items-center gap-2">
+                    <a th:href="@{/candidate/cvs/{id}/preview(id=${cv.id})}" target="_blank"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        Xem trước
+                    </a>
+                    <a th:if="${!isEditMode}" th:href="@{/candidate/cvs/{id}(id=${cv.id}, edit=true)}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                        Sửa thông tin chung
+                    </a>
+                    <a th:if="${isEditMode}" th:href="@{/candidate/cvs/{id}(id=${cv.id})}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        Hủy sửa
+                    </a>
+                </div>
+            </div>
 
-                <div class="cv-meta-row">
-                    <span>Mẫu CV: <strong th:text="${templateName != null ? templateName : (cv.templateVersion?.template?.name != null ? cv.templateVersion.template.name : 'Mặc định')}"></strong></span>
-                    <span>Màu chủ đạo: <strong th:text="${cv.accentColor}">#0284c7</strong></span>
-                    <span>Cập nhật lần cuối: <strong th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></strong></span>
+            <!-- VIEW MODE OVERVIEW -->
+            <div th:if="${!isEditMode}" class="space-y-8">
+                <!-- Summary block -->
+                <div class="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-2">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider block">Mục tiêu nghề nghiệp & Tóm tắt bản thân</span>
+                    <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-line"
+                       th:text="${cv.summary != null && !cv.summary.isEmpty() ? cv.summary : 'Chưa có thông tin tóm tắt. Bấm sửa thông tin chung để bổ sung.'}">Mô tả</p>
+                    <div class="pt-3 border-t border-slate-200/60 flex flex-wrap gap-4 text-xs text-slate-500">
+                        <span>Mẫu CV: <strong class="text-slate-800" th:text="${templateName != null ? templateName : (cv.templateVersion?.template?.name != null ? cv.templateVersion.template.name : 'Mặc định')}"></strong></span>
+                        <span>Màu chủ đạo: <strong class="text-slate-800" th:text="${cv.accentColor}">#2563eb</strong></span>
+                        <span>Cập nhật: <strong class="text-slate-800" th:text="${cv.updatedAt != null ? #temporals.format(cv.updatedAt, 'dd/MM/yyyy HH:mm') : '—'}"></strong></span>
+                    </div>
                 </div>
 
-                <!-- LƯỚI 8 ĐẦU MỤC THÔNG TIN CV -->
-                <div class="cv-sections-overview">
-                    <h3 class="cv-sections-title">Các đầu mục thông tin trong hồ sơ CV</h3>
-                    <p class="cv-sections-subtitle">Chọn mục bạn muốn chỉnh sửa, cập nhật hoặc bổ sung dữ liệu chi tiết:</p>
+                <!-- 8 Interactive CV Section Cards Grid -->
+                <div class="space-y-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-900 font-display">Các đầu mục thông tin trong hồ sơ CV</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Bấm vào từng mục để bổ sung, sửa đổi dữ liệu chi tiết của bạn</p>
+                    </div>
 
-                    <div class="cv-sections-grid">
-                        <a th:href="@{/candidate/cvs/{id}/work-experiences(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">💼</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Kinh nghiệm làm việc</h4>
-                                    <p>Quá trình công tác, vị trí và đóng góp</p>
-                                </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- 1. Work Experience -->
+                        <a th:href="@{/candidate/cvs/{id}/work-experiences(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="briefcase" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-primary-600 transition-colors">Kinh nghiệm làm việc</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Quá trình công tác, vị trí và đóng góp nổi bật</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/educations(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">🎓</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Trình độ học vấn</h4>
-                                    <p>Trường lớp, bằng cấp, chuyên ngành</p>
-                                </div>
+                        <!-- 2. Education -->
+                        <a th:href="@{/candidate/cvs/{id}/educations(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="graduation-cap" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-emerald-600 transition-colors">Trình độ học vấn</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Trường lớp, bằng cấp, chuyên ngành đào tạo</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/skills(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">⚡</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Kỹ năng chuyên môn</h4>
-                                    <p>Bộ kỹ năng nghề nghiệp và mức độ</p>
-                                </div>
+                        <!-- 3. Skills -->
+                        <a th:href="@{/candidate/cvs/{id}/skills(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="zap" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-amber-600 transition-colors">Kỹ năng chuyên môn</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Kỹ năng cốt lõi, công nghệ và mức độ thành thạo</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/projects(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">🚀</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Dự án tiêu biểu</h4>
-                                    <p>Sản phẩm thực tế, công nghệ và vai trò</p>
-                                </div>
+                        <!-- 4. Projects -->
+                        <a th:href="@{/candidate/cvs/{id}/projects(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="rocket" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-indigo-600 transition-colors">Dự án tiêu biểu</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Sản phẩm thực tế, công nghệ ứng dụng và vai trò</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/certificates(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">📜</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Chứng chỉ</h4>
-                                    <p>Chứng nhận chuyên môn, chứng chỉ quốc tế</p>
-                                </div>
+                        <!-- 5. Certificates -->
+                        <a th:href="@{/candidate/cvs/{id}/certificates(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="scroll" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-cyan-600 transition-colors">Chứng chỉ chuyên môn</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Chứng chỉ nghề nghiệp và bằng cấp quốc tế</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/awards(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">🏆</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Giải thưởng & Thành tích</h4>
-                                    <p>Thành tựu và giải thưởng đã đạt được</p>
-                                </div>
+                        <!-- 6. Awards -->
+                        <a th:href="@{/candidate/cvs/{id}/awards(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="trophy" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-rose-600 transition-colors">Giải thưởng & Thành tích</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Thành tích xuất sắc trong công việc & học tập</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/activities(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">🤝</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Hoạt động ngoại khóa</h4>
-                                    <p>Dự án cộng đồng, tình nguyện, CLB</p>
-                                </div>
+                        <!-- 7. Activities -->
+                        <a th:href="@{/candidate/cvs/{id}/activities(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="users" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-teal-600 transition-colors">Hoạt động ngoại khóa</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Dự án cộng đồng, tình nguyện và hoạt động CLB</p>
                         </a>
 
-                        <a th:href="@{/candidate/cvs/{id}/references(id=${cv.id})}" class="cv-section-card">
-                            <div class="cv-section-card-info">
-                                <div class="cv-section-card-icon">👥</div>
-                                <div class="cv-section-card-text">
-                                    <h4>Người tham chiếu</h4>
-                                    <p>Người bảo lãnh năng lực và liên hệ</p>
-                                </div>
+                        <!-- 8. References -->
+                        <a th:href="@{/candidate/cvs/{id}/references(id=${cv.id})}"
+                           class="p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-primary-300 hover:shadow-md transition-all group">
+                            <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold mb-3 group-hover:scale-110 transition-transform">
+                                <i data-lucide="user-check" class="w-5 h-5"></i>
                             </div>
-                            <span class="cv-section-card-arrow">&rarr;</span>
+                            <h3 class="text-sm font-bold text-slate-900 font-display group-hover:text-violet-600 transition-colors">Người tham chiếu</h3>
+                            <p class="text-xs text-slate-400 mt-1 line-clamp-2">Thông tin người bảo lãnh năng lực chuyên môn</p>
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- CHẾ ĐỘ SỬA -->
-            <form th:if="${isEditMode}" th:action="@{/candidate/cvs/{id}/update(id=${cv.id})}" th:object="${cvRequest}" method="post" enctype="multipart/form-data">
-                <div class="form-grid">
-                    <div class="form-group full-width">
-                        <label class="form-label">Mẫu giao diện CV <span class="required-star">*</span></label>
-                        <select th:field="*{templateVersionId}" class="form-control">
+            <!-- EDIT MODE FORM -->
+            <form th:if="${isEditMode}" th:action="@{/candidate/cvs/{id}/update(id=${cv.id})}" th:object="${cvRequest}" method="post" enctype="multipart/form-data" class="space-y-6">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sm:col-span-2 space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Mẫu giao diện CV <span class="text-rose-500">*</span></label>
+                        <select th:field="*{templateVersionId}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm bg-white focus:ring-2 focus:ring-primary-600 focus:outline-none">
                             <option th:each="t : ${templates}" th:value="${t.id}"
                                     th:text="${t.templateName + ' (Phiên bản ' + t.versionNumber + ')'}"></option>
                         </select>
-                        <span class="form-hint">Chọn mẫu giao diện (Tiêu chuẩn, Hiện đại 2 cột, Thanh lịch, Chuẩn ATS...). Toàn bộ thông tin CV sẽ tự động được hiển thị theo mẫu mới.</span>
+                        <span class="text-[11px] text-slate-400 block mt-1">Thay đổi mẫu giao diện sẽ tự động định dạng lại dữ liệu CV theo chuẩn bố cục mới.</span>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Tiêu đề CV <span class="required-star">*</span></label>
-                        <input type="text" th:field="*{title}" class="form-control">
-                        <span th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="field-error"></span>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Tiêu đề CV <span class="text-rose-500">*</span></label>
+                        <input type="text" th:field="*{title}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-primary-600 focus:outline-none" required>
+                        <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" class="text-xs text-rose-600 mt-1"></div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Chức danh nghề nghiệp</label>
-                        <input type="text" th:field="*{professionalTitle}" class="form-control">
-                        <span th:if="${#fields.hasErrors('professionalTitle')}" th:errors="*{professionalTitle}" class="field-error"></span>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Chức danh nghề nghiệp</label>
+                        <input type="text" th:field="*{professionalTitle}" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-primary-600 focus:outline-none">
+                        <div th:if="${#fields.hasErrors('professionalTitle')}" th:errors="*{professionalTitle}" class="text-xs text-rose-600 mt-1"></div>
                     </div>
-                    <div class="form-group full-width">
-                        <label class="form-label">Tóm tắt bản thân / Mục tiêu nghề nghiệp</label>
-                        <textarea th:field="*{summary}" class="form-control" rows="4"></textarea>
+
+                    <div class="sm:col-span-2 space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Mục tiêu nghề nghiệp & Tóm tắt bản thân</label>
+                        <textarea th:field="*{summary}" rows="4" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:ring-2 focus:ring-primary-600 focus:outline-none"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Ảnh đại diện CV (Avatar)</label>
-                        <input type="file" id="avatarFileInput" name="avatarFile" accept="image/*" class="form-control" onchange="previewAvatar(this)">
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Ảnh đại diện CV (Avatar)</label>
+                        <input type="file" id="avatarFileInput" name="avatarFile" accept="image/*" class="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs sm:text-sm file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary-50 file:text-primary-700" onchange="previewAvatar(this)">
                         <input type="hidden" th:field="*{avatarUrl}">
                         <img id="avatarPreviewImg"
                              th:src="${cv.avatarUrl != null && !cv.avatarUrl.isEmpty() ? cv.avatarUrl : ''}"
                              alt="Avatar Preview"
-                             class="avatar-preview"
+                             class="w-16 h-16 rounded-xl object-cover border border-slate-200 mt-2"
                              th:classappend="${cv.avatarUrl == null || cv.avatarUrl.isEmpty()} ? 'hidden'">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Màu chủ đạo CV</label>
-                        <div class="color-field">
-                            <input type="color" th:field="*{accentColor}" class="color-input">
-                            <span class="form-hint">Chọn màu nhấn hiển thị trên bản in CV.</span>
+
+                    <div class="space-y-1">
+                        <label class="text-xs font-semibold text-slate-700">Màu chủ đạo CV</label>
+                        <div class="flex items-center gap-3">
+                            <input type="color" th:field="*{accentColor}" class="w-12 h-10 rounded-lg border border-slate-200 cursor-pointer p-0.5 bg-white">
+                            <span class="text-xs text-slate-500">Màu nhấn hiển thị trên bản xem trước & in ấn</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-actions">
-                    <button type="submit" class="btn-submit">Lưu thay đổi</button>
-                    <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="cv-btn cv-btn-grey pad-lg">Hủy bỏ</a>
+                <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                        Lưu thay đổi
+                    </button>
+                    <a th:href="@{/candidate/cvs/{id}(id=${cv.id})}" class="px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                        Hủy bỏ
+                    </a>
                 </div>
             </form>
         </div>
-        </th:block>
-    </main>
-</div>
+    </th:block>
 
-<!-- ================= MODAL ĐỔI TÊN CV ================= -->
-<div id="renameCvModal" class="cv-modal">
-    <div class="cv-modal-backdrop" onclick="closeRenameModal()"></div>
-    <div class="cv-modal-dialog">
-        <div class="cv-modal-header">
-            <div class="cv-modal-header-icon">✏️</div>
-            <div>
-                <h3 class="cv-modal-title">Đổi tên hồ sơ CV</h3>
-                <p class="cv-modal-subtitle">Cập nhật tên gọi để nhận diện và quản lý thuận tiện hơn.</p>
-            </div>
-            <button type="button" class="cv-modal-close" onclick="closeRenameModal()">&times;</button>
+</main>
+
+<!-- Rename Modal -->
+<div id="renameCvModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+            <h3 class="text-base font-bold text-slate-900 font-display">Đổi tên hồ sơ CV</h3>
+            <button type="button" onclick="closeRenameModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
 
-        <form id="renameCvForm" th:action="@{/candidate/cvs/0/rename}" method="post" class="cv-modal-form">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-            <div class="form-group full-width">
-                <label class="form-label" for="renameCvTitleInput">Tên CV mới <span class="required-star">*</span></label>
-                <input type="text" name="title" id="renameCvTitleInput" class="form-control" placeholder="Nhập tên mới cho CV..." required>
+        <form id="renameCvForm" th:action="@{/candidate/cvs/0/rename}" method="post" class="space-y-4">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <div>
+                <label for="renameCvTitleInput" class="block text-xs font-semibold text-slate-700 mb-1.5">Tên CV mới <span class="text-rose-500">*</span></label>
+                <input type="text" name="title" id="renameCvTitleInput" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs sm:text-sm focus:ring-2 focus:ring-primary-600 focus:outline-none" required>
             </div>
 
-            <div class="cv-modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeRenameModal()">Hủy bỏ</button>
-                <button type="submit" class="btn-submit">Lưu tên mới</button>
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button type="button" onclick="closeRenameModal()" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 transition-colors">
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                    Lưu tên mới
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+    lucide.createIcons();
+
     function openRenameModal(cvId, currentTitle) {
-        var form = document.getElementById('renameCvForm');
-        var input = document.getElementById('renameCvTitleInput');
+        const form = document.getElementById('renameCvForm');
+        const input = document.getElementById('renameCvTitleInput');
         if (form && input) {
             form.action = '/candidate/cvs/' + cvId + '/rename';
             input.value = currentTitle;
-            var m = document.getElementById('renameCvModal');
-            if (m) m.classList.add('active');
+            document.getElementById('renameCvModal').classList.remove('hidden');
         }
     }
     function closeRenameModal() {
-        var m = document.getElementById('renameCvModal');
-        if (m) m.classList.remove('active');
+        document.getElementById('renameCvModal').classList.add('hidden');
     }
 
     function previewAvatar(input) {
         if (input.files && input.files[0]) {
-            var file = input.files[0];
-            var reader = new FileReader();
+            const file = input.files[0];
+            const reader = new FileReader();
             reader.onload = function(e) {
-                var img = document.getElementById('avatarPreviewImg');
+                const img = document.getElementById('avatarPreviewImg');
                 if (img) {
                     img.src = e.target.result;
                     img.classList.remove('hidden');

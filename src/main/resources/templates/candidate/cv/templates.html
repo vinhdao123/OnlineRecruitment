@@ -4,94 +4,151 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thư viện Template CV — Online Recruitment</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/Candidate/cv-dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/Candidate/cv-sidebar.css}">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
+<!-- Taskbar Header -->
 <div th:replace="~{fragments/taskbar :: taskbar('cvs')}"></div>
 
-<div class="cv-dashboard-layout">
-    <!-- SIDEBAR -->
-    <aside class="cv-sidebar">
-        <div class="cv-sidebar-menu">
-            <a th:href="@{/candidate/cvs}" class="cv-sidebar-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                My CV
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/candidate/cvs}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại Hồ sơ CV của tôi
+        </a>
+        <div class="text-xs text-slate-500 font-medium">
+            <a th:href="@{/}" class="hover:text-primary-600">Trang chủ</a> /
+            <a th:href="@{/candidate/cvs}" class="hover:text-primary-600">My CV</a> /
+            <span class="text-primary-600 font-semibold">Thư viện mẫu CV</span>
+        </div>
+    </div>
+
+    <!-- Header Banner -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 mb-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-primary-600 block mb-1">BỘ SƯU TẬP TEMPLATE CV</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-display">
+                    Khám phá 5 mẫu CV chuẩn quốc tế & Tối ưu ATS
+                </h1>
+                <p class="text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+                    Xem trước theo khổ giấy A4, tùy biến màu sắc thương hiệu cá nhân và khởi tạo hồ sơ xin việc chuẩn mực chỉ với 1 cú nhấp chuột.
+                </p>
+            </div>
+            <a th:href="@{/candidate/cvs/gallery}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all self-start sm:self-auto">
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                Mở phòng trưng bày mẫu CV
             </a>
-            <a th:href="@{/candidate/cvs/gallery}" class="cv-sidebar-item active">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
-                Template CV
-            </a>
         </div>
-    </aside>
+    </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-        <div class="cv-breadcrumb">
-            <a th:href="@{/}">Trang chủ</a>
-            <span>/</span>
-            <span class="current">Thư viện mẫu CV</span>
-        </div>
-
-        <section class="cv-welcome-banner">
-            <div class="cv-welcome-content">
-                <span class="cv-welcome-badge">✨ THƯ VIỆN MẪU CV</span>
-                <h1 class="cv-welcome-title">Khám phá bộ 5 mẫu CV chuyên nghiệp chuẩn tuyển dụng</h1>
-                <p class="cv-welcome-subtitle">Xem trước trên khổ giấy A4, đổi màu tức thì và khởi tạo hồ sơ chỉ với một cú nhấp chuột.</p>
-            </div>
-            <div class="cv-welcome-actions">
-                <a th:href="@{/candidate/cvs/gallery}" class="btn-welcome-create">Mở thư viện mẫu CV &rarr;</a>
-            </div>
-        </section>
-
-        <div class="cv-grid" th:if="${templates != null}">
-            <div th:each="tpl : ${templates}" class="cv-card">
-                <div class="cv-card-footer">
-                    <div class="cv-card-title-row">
-                        <h3 class="cv-card-title" th:text="${tpl.name}">Mẫu CV</h3>
-                        <span th:each="tag : ${tpl.tags}" class="badge-default" th:text="${tag}">ATS</span>
-                    </div>
-                    <p class="cv-card-date" th:text="${'Mã mẫu: ' + tpl.code}"></p>
-                </div>
-                <div class="cv-card-actions">
-                    <div class="cv-btn-row-2">
-                        <a th:href="@{/candidate/cvs/customizer(templateCode=${tpl.code})}" class="btn-act-blue">Tùy biến mẫu</a>
-                        <a th:href="@{/candidate/cvs/new(templateId=${tpl.versionId})}" class="btn-act-dark">+ Tạo CV mới</a>
+    <!-- Templates Grid -->
+    <div th:if="${templates != null}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <article th:each="tpl : ${templates}"
+                 class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between group">
+            
+            <div class="space-y-4">
+                <div class="aspect-[4/3] rounded-xl bg-gradient-to-br from-slate-100 to-slate-200/80 flex items-center justify-center p-6 border border-slate-200/60 group-hover:border-primary-300 transition-colors">
+                    <div class="w-24 h-32 rounded-lg bg-white shadow-md border border-slate-200 p-2 space-y-1.5 opacity-90 group-hover:scale-105 transition-transform">
+                        <div class="w-8 h-2 rounded bg-primary-600"></div>
+                        <div class="w-full h-1 rounded bg-slate-200"></div>
+                        <div class="w-4/5 h-1 rounded bg-slate-200"></div>
+                        <div class="w-3/5 h-1 rounded bg-slate-200"></div>
+                        <div class="pt-2 space-y-1">
+                            <div class="w-12 h-1.5 rounded bg-slate-400"></div>
+                            <div class="w-full h-1 rounded bg-slate-100"></div>
+                            <div class="w-full h-1 rounded bg-slate-100"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ================= PHÂN TRANG MẪU CV ================= -->
-        <div th:if="${totalPages > 1}" class="cv-pagination-wrapper">
-            <div class="cv-pagination">
-                <a th:if="${currentPage > 0}"
-                   th:href="@{/candidate/cvs/templates(page=${currentPage - 1}, category=${selectedCategory}, size=${size})}"
-                   class="cv-page-btn" title="Trang trước">‹ Trước</a>
-                <span th:unless="${currentPage > 0}" class="cv-page-btn disabled">‹ Trước</span>
-
-                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                    <a th:href="@{/candidate/cvs/templates(page=${i}, category=${selectedCategory}, size=${size})}"
-                       class="cv-page-btn"
-                       th:classappend="${i == currentPage} ? 'active' : ''"
-                       th:text="${i + 1}">1</a>
-                </th:block>
-
-                <a th:if="${currentPage < totalPages - 1}"
-                   th:href="@{/candidate/cvs/templates(page=${currentPage + 1}, category=${selectedCategory}, size=${size})}"
-                   class="cv-page-btn" title="Trang sau">Sau ›</a>
-                <span th:unless="${currentPage < totalPages - 1}" class="cv-page-btn disabled">Sau ›</span>
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <h3 class="text-base font-bold text-slate-900 font-display group-hover:text-primary-600 transition-colors" th:text="${tpl.name}">Mẫu CV Tiêu Chuẩn</h3>
+                        <div class="flex flex-wrap gap-1">
+                            <span th:each="tag : ${tpl.tags}" class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" th:text="${tag}">ATS</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono" th:text="${'Mã mẫu: ' + tpl.code}">STANDARD</p>
+                </div>
             </div>
-            <div class="cv-pagination-info">
-                Trang <strong th:text="${currentPage + 1}">1</strong> / <strong th:text="${totalPages}">1</strong>
-                (Tổng cộng <strong th:text="${totalItems}">0</strong> mẫu CV)
+
+            <div class="pt-6 border-t border-slate-100 grid grid-cols-2 gap-2 mt-4">
+                <a th:href="@{/candidate/cvs/customizer(templateCode=${tpl.code})}"
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                    <i data-lucide="sliders" class="w-3.5 h-3.5"></i>
+                    Tùy biến mẫu
+                </a>
+                <a th:href="@{/candidate/cvs/new(templateId=${tpl.versionId})}"
+                   class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    Dùng mẫu này
+                </a>
             </div>
-        </div>
-    </main>
-</div>
+
+        </article>
+    </div>
+
+    <!-- Pagination -->
+    <div th:if="${totalPages > 1}" class="flex items-center justify-center gap-2 mt-12">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/candidate/cvs/templates(page=${currentPage - 1}, category=${selectedCategory}, size=${size})}"
+           class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">‹ Trước</a>
+
+        <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/candidate/cvs/templates(page=${i}, category=${selectedCategory}, size=${size})}"
+               class="px-3.5 py-2 rounded-xl text-xs font-bold transition-colors"
+               th:classappend="${i == currentPage} ? 'bg-primary-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'"
+               th:text="${i + 1}">1</a>
+        </span>
+
+        <a th:if="${currentPage < totalPages - 1}"
+           th:href="@{/candidate/cvs/templates(page=${currentPage + 1}, category=${selectedCategory}, size=${size})}"
+           class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">Sau ›</a>
+    </div>
+
+</main>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>
