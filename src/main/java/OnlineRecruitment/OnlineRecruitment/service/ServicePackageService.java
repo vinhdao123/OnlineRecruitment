@@ -73,7 +73,6 @@ public class ServicePackageService {
         return pkg;
     }
 
-    // ===== SỬA LẠI HÀM NÀY =====
     public int getRemainingJobs(User user) {
         UserPackage activePkg = getActivePackage(user);
 

@@ -107,7 +107,6 @@
             <div class="lg:col-span-3">
                 <select name="status"
                         class="w-full px-4 h-[48px] rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:bg-white transition-all cursor-pointer">
-                    <option value="" th:selected="${status == null or status == ''}">Tất cả trạng thái</option>
                     <option value="SUBMITTED" th:selected="${status == 'SUBMITTED'}">Chờ duyệt</option>
                     <option value="ACCEPTED" th:selected="${status == 'ACCEPTED'}">Đã chấp thuận</option>
                     <option value="REJECTED" th:selected="${status == 'REJECTED'}">Đã từ chối</option>
