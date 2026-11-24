@@ -107,8 +107,9 @@
             <td class="py-4 px-4 font-semibold text-slate-700" th:text="${t.durationMinutes + ' phút'}">15 phút</td>
             <td class="py-4 px-4">
               <span class="font-bold text-emerald-600" th:text="${t.totalQuestionsPerTest}">10</span> câu / bài
-              <div class="text-[11px] text-slate-400">
-                (Pool: <strong class="text-slate-700" th:text="${t.questionPool != null ? t.questionPool.size() : 0}">0</strong> câu)
+              <div class="text-[11px]" th:classappend="${(t.questionPool != null ? t.questionPool.size() : 0) < t.totalQuestionsPerTest} ? 'text-rose-600 font-bold' : 'text-slate-400'">
+                Pool: <strong th:text="${t.questionPool != null ? t.questionPool.size() : 0}">0</strong> câu
+                <span th:if="${(t.questionPool != null ? t.questionPool.size() : 0) < t.totalQuestionsPerTest}" class="text-[10px] text-rose-500 font-semibold block">⚠️ Chưa đủ câu</span>
               </div>
             </td>
             <td class="py-4 px-4 font-semibold text-slate-600" th:text="${#numbers.formatInteger(t.participantCount != null ? t.participantCount : 0, 0, 'COMMA')}">1,400</td>

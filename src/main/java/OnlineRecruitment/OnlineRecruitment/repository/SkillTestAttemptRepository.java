@@ -19,6 +19,8 @@ public interface SkillTestAttemptRepository extends JpaRepository<SkillTestAttem
 
     long countByUserId(Long userId);
 
+    boolean existsBySkillTestId(Long skillTestId);
+
     @Query("SELECT AVG(a.score) FROM SkillTestAttempt a WHERE a.user.id = :userId")
     Double getAverageScoreByUserId(@Param("userId") Long userId);
 

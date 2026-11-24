@@ -77,12 +77,16 @@ public class SkillTestService {
             throw new IllegalStateException("Bài thi này hiện chưa có câu hỏi nào trong ngân hàng đề thi!");
         }
 
+        int requiredCount = test.getTotalQuestionsPerTest() != null ? test.getTotalQuestionsPerTest() : 10;
+        if (pool.size() < requiredCount) {
+            throw new IllegalStateException("Ngân hàng đề thi hiện có " + pool.size() + " câu hỏi, chưa đủ số lượng yêu cầu tối thiểu là " + requiredCount + " câu để bắt đầu thi!");
+        }
+
         // Shuffle pool
         List<SkillTestQuestion> shuffled = new ArrayList<>(pool);
         Collections.shuffle(shuffled);
 
-        int count = Math.min(test.getTotalQuestionsPerTest() != null ? test.getTotalQuestionsPerTest() : 10, shuffled.size());
-        return shuffled.subList(0, count);
+        return shuffled.subList(0, requiredCount);
     }
 
     /**
@@ -135,7 +139,10 @@ public class SkillTestService {
         List<SkillTestQuestion> rawQuestions = skillTestQuestionRepository.findAllById(questionIds);
         Map<Long, SkillTestQuestion> questionMap = new HashMap<>();
         for (SkillTestQuestion q : rawQuestions) {
-            questionMap.put(q.getId(), q);
+            // Đảm bảo câu hỏi thuộc đúng đề thi đang thi
+            if (q.getSkillTest() != null && q.getSkillTest().getId().equals(testId)) {
+                questionMap.put(q.getId(), q);
+            }
         }
 
         // Giữ đúng thứ tự câu hỏi như trong đề thi được phát
@@ -259,6 +266,9 @@ public class SkillTestService {
 
     @Transactional
     public void deleteTest(Long testId) {
+        if (skillTestAttemptRepository.existsBySkillTestId(testId)) {
+            throw new IllegalStateException("Không thể xóa đề thi này vì đã có ứng viên tham gia làm bài thi!");
+        }
         skillTestRepository.deleteById(testId);
     }
 
@@ -286,6 +296,11 @@ public class SkillTestService {
     @Transactional(readOnly = true)
     public long countQuestionsInPool(Long testId) {
         return skillTestQuestionRepository.countBySkillTestId(testId);
+    }
+
+    @Transactional(readOnly = true)
+    public long countActiveQuestionsInPool(Long testId) {
+        return skillTestQuestionRepository.countBySkillTestIdAndStatus(testId, "ACTIVE");
     }
 
     /**

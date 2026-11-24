@@ -134,7 +134,10 @@
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
                         <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">Số câu hỏi</span>
                         <strong class="text-xl font-extrabold text-slate-900 font-display block" th:text="${test.totalQuestionsPerTest + ' câu'}">10 câu</strong>
-                        <span class="text-[11px] text-emerald-600 font-semibold">(Ngân hàng: <span th:text="${poolCount}">20</span> câu)</span>
+                        <span class="text-[11px] font-semibold"
+                              th:classappend="${poolCount < test.totalQuestionsPerTest} ? 'text-rose-600 font-bold' : 'text-emerald-600'">
+                            (Ngân hàng: <span th:text="${poolCount}">20</span> câu)
+                        </span>
                     </div>
 
                     <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100">
@@ -163,6 +166,14 @@
                 </ul>
             </div>
 
+            <!-- Warning if not enough questions in pool -->
+            <div th:if="${poolCount < test.totalQuestionsPerTest}" class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm font-medium flex items-center gap-3">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
+                <div>
+                    <strong>Chưa đủ câu hỏi:</strong> Đề thi yêu cầu tối thiểu <span class="font-bold text-slate-900" th:text="${test.totalQuestionsPerTest}">5</span> câu hỏi, nhưng ngân hàng câu hỏi hiện chỉ có <span class="font-bold text-rose-600" th:text="${poolCount}">1</span> câu. Chưa đủ điều kiện để mở bài thi.
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <a th:href="@{/skill-tests}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors">
@@ -170,7 +181,13 @@
                     Quay lại danh sách
                 </a>
 
-                <a th:href="@{'/skill-tests/' + ${test.id} + '/take'}"
+                <button th:if="${poolCount < test.totalQuestionsPerTest}" disabled
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold text-white bg-slate-400 cursor-not-allowed opacity-75 shadow-none">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                    Chưa đủ câu hỏi để thi (<span th:text="${poolCount}">1</span>/<span th:text="${test.totalQuestionsPerTest}">5</span>)
+                </button>
+                <a th:unless="${poolCount < test.totalQuestionsPerTest}"
+                   th:href="@{'/skill-tests/' + ${test.id} + '/take'}"
                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl text-sm font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-md shadow-primary-600/25 hover:shadow-lg transition-all">
                     <i data-lucide="play" class="w-4 h-4 fill-white"></i>
                     Bắt đầu làm bài thi ngay

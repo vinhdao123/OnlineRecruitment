@@ -58,9 +58,44 @@ public class AdminSkillTestController {
         return "admin/skilltest/form";
     }
 
+    private void validateSkillTest(SkillTest test) {
+        if (test.getTitle() == null || test.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tiêu đề bài thi không được để trống!");
+        }
+        if (test.getSkillName() == null || test.getSkillName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên kỹ năng không được để trống!");
+        }
+        if (test.getDurationMinutes() == null || test.getDurationMinutes() <= 0) {
+            throw new IllegalArgumentException("Thời gian làm bài phải lớn hơn 0 phút!");
+        }
+        if (test.getTotalQuestionsPerTest() == null || test.getTotalQuestionsPerTest() <= 0) {
+            throw new IllegalArgumentException("Số câu hỏi bốc ngẫu nhiên phải lớn hơn hoặc bằng 1!");
+        }
+        if (test.getPassingScore() == null || test.getPassingScore() < 1 || test.getPassingScore() > 100) {
+            throw new IllegalArgumentException("Điểm đạt tối thiểu phải nằm trong khoảng từ 1 đến 100!");
+        }
+    }
+
+    private void validateQuestion(String questionText, String optionA, String optionB, String optionC, String optionD, String correctOption) {
+        if (questionText == null || questionText.trim().isEmpty()) {
+            throw new IllegalArgumentException("Nội dung câu hỏi không được để trống!");
+        }
+        if (optionA == null || optionA.trim().isEmpty() ||
+            optionB == null || optionB.trim().isEmpty() ||
+            optionC == null || optionC.trim().isEmpty() ||
+            optionD == null || optionD.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tất cả 4 phương án A, B, C, D đều không được để trống!");
+        }
+        String clean = correctOption != null ? correctOption.trim().toUpperCase() : "";
+        if (!List.of("A", "B", "C", "D").contains(clean)) {
+            throw new IllegalArgumentException("Đáp án đúng phải là một trong các phương án: A, B, C hoặc D!");
+        }
+    }
+
     @PostMapping("/create")
     public String create(@ModelAttribute("test") SkillTest test, RedirectAttributes ra) {
         try {
+            validateSkillTest(test);
             skillTestService.saveTest(test);
             ra.addFlashAttribute("success", "Đã tạo mới bộ đề thi kỹ năng thành công!");
         } catch (Exception e) {
@@ -83,6 +118,7 @@ public class AdminSkillTestController {
                        @ModelAttribute("test") SkillTest form,
                        RedirectAttributes ra) {
         try {
+            validateSkillTest(form);
             SkillTest existing = skillTestService.getById(id);
             existing.setTitle(form.getTitle());
             existing.setSkillName(form.getSkillName());
@@ -140,8 +176,11 @@ public class AdminSkillTestController {
                               @ModelAttribute("newQuestion") SkillTestQuestion question,
                               RedirectAttributes ra) {
         try {
+            validateQuestion(question.getQuestionText(), question.getOptionA(), question.getOptionB(),
+                    question.getOptionC(), question.getOptionD(), question.getCorrectOption());
             SkillTest test = skillTestService.getById(id);
             question.setSkillTest(test);
+            question.setCorrectOption(question.getCorrectOption().trim().toUpperCase());
             skillTestService.saveQuestion(question);
             ra.addFlashAttribute("success", "Đã thêm câu hỏi vào ngân hàng đề thi thành công!");
         } catch (Exception e) {
@@ -162,13 +201,17 @@ public class AdminSkillTestController {
                                @RequestParam(required = false) String explanation,
                                RedirectAttributes ra) {
         try {
+            validateQuestion(questionText, optionA, optionB, optionC, optionD, correctOption);
             SkillTestQuestion q = skillTestService.getQuestionById(questionId);
+            if (!q.getSkillTest().getId().equals(testId)) {
+                throw new IllegalArgumentException("Câu hỏi không thuộc đề thi này!");
+            }
             q.setQuestionText(questionText);
             q.setOptionA(optionA);
             q.setOptionB(optionB);
             q.setOptionC(optionC);
             q.setOptionD(optionD);
-            q.setCorrectOption(correctOption);
+            q.setCorrectOption(correctOption.trim().toUpperCase());
             q.setExplanation(explanation);
 
             skillTestService.saveQuestion(q);
@@ -184,6 +227,10 @@ public class AdminSkillTestController {
                                  @PathVariable Long questionId,
                                  RedirectAttributes ra) {
         try {
+            SkillTestQuestion q = skillTestService.getQuestionById(questionId);
+            if (!q.getSkillTest().getId().equals(testId)) {
+                throw new IllegalArgumentException("Câu hỏi không thuộc đề thi này!");
+            }
             skillTestService.deleteQuestion(questionId);
             ra.addFlashAttribute("success", "Đã xóa câu hỏi khỏi ngân hàng!");
         } catch (Exception e) {

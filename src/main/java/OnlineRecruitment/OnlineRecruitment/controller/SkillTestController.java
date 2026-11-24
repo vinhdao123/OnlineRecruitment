@@ -57,15 +57,28 @@ public class SkillTestController {
 
     // 2. Chi tiết và hướng dẫn bài thi
     @GetMapping("/skill-tests/{id}")
-    public String testDetail(@PathVariable Long id, Model model) {
-        SkillTest test = skillTestService.getById(id);
-        long questionCount = skillTestService.countQuestionsInPool(id);
+    public String testDetail(@PathVariable Long id,
+                             @AuthenticationPrincipal UserDetails principal,
+                             Model model,
+                             RedirectAttributes ra) {
+        try {
+            SkillTest test = skillTestService.getById(id);
+            boolean isAdmin = principal != null && principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!"ACTIVE".equalsIgnoreCase(test.getStatus()) && !isAdmin) {
+                ra.addFlashAttribute("errorMessage", "Bài thi kỹ năng này hiện chưa được mở hoặc đang trong trạng thái bản nháp.");
+                return "redirect:/skill-tests";
+            }
+            long questionCount = skillTestService.countActiveQuestionsInPool(id);
 
-        model.addAttribute("test", test);
-        model.addAttribute("poolCount", questionCount);
-        model.addAttribute("activeTab", "skilltests");
+            model.addAttribute("test", test);
+            model.addAttribute("poolCount", questionCount);
+            model.addAttribute("activeTab", "skilltests");
 
-        return "skilltest/detail";
+            return "skilltest/detail";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/skill-tests";
+        }
     }
 
     // 3. Giao diện làm bài thi (Random câu hỏi từ pool)
@@ -81,6 +94,11 @@ public class SkillTestController {
 
         try {
             SkillTest test = skillTestService.getById(id);
+            boolean isAdmin = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!"ACTIVE".equalsIgnoreCase(test.getStatus()) && !isAdmin) {
+                ra.addFlashAttribute("errorMessage", "Bài thi kỹ năng này hiện chưa được mở hoặc đang trong trạng thái bản nháp.");
+                return "redirect:/skill-tests";
+            }
             List<SkillTestQuestion> randomQuestions = skillTestService.getRandomQuestionsForTest(id);
 
             model.addAttribute("test", test);
@@ -119,16 +137,36 @@ public class SkillTestController {
 
     // 5. Trang xem kết quả bài thi chi tiết
     @GetMapping("/skill-tests/result/{attemptId}")
-    public String testResult(@PathVariable Long attemptId, Model model) {
-        SkillTestAttempt attempt = skillTestService.getAttemptById(attemptId);
-        List<QuestionAnswerItem> reviewItems = skillTestService.parseReviewItems(attempt.getAnswersJson());
+    public String testResult(@PathVariable Long attemptId,
+                             @AuthenticationPrincipal UserDetails principal,
+                             Model model,
+                             RedirectAttributes ra) {
+        if (principal == null) {
+            ra.addFlashAttribute("errorMessage", "Vui lòng đăng nhập để xem kết quả bài thi!");
+            return "redirect:/login";
+        }
 
-        model.addAttribute("attempt", attempt);
-        model.addAttribute("test", attempt.getSkillTest());
-        model.addAttribute("reviewItems", reviewItems);
-        model.addAttribute("activeTab", "skilltests");
+        try {
+            SkillTestAttempt attempt = skillTestService.getAttemptById(attemptId);
+            User user = userService.getByEmail(principal.getUsername());
+            boolean isAdmin = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            if (!isAdmin && (attempt.getUser() == null || !attempt.getUser().getId().equals(user.getId()))) {
+                ra.addFlashAttribute("errorMessage", "Bạn không có quyền xem kết quả bài thi của ứng viên khác!");
+                return "redirect:/skill-tests";
+            }
 
-        return "skilltest/result";
+            List<QuestionAnswerItem> reviewItems = skillTestService.parseReviewItems(attempt.getAnswersJson());
+
+            model.addAttribute("attempt", attempt);
+            model.addAttribute("test", attempt.getSkillTest());
+            model.addAttribute("reviewItems", reviewItems);
+            model.addAttribute("activeTab", "skilltests");
+
+            return "skilltest/result";
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/skill-tests";
+        }
     }
 
     // 6. Lịch sử bài thi của ứng viên
