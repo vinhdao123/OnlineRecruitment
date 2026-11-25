@@ -607,4 +607,187 @@ td {
     .selected-date-heading h2 {
         font-size: 18px;
     }
+}.btn-view-cv {
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     gap: 6px;
+     padding: 8px 14px;
+     background: #eaf2ff;
+     color: #2563eb;
+     border: 1px solid #bfdbfe;
+     border-radius: 8px;
+     text-decoration: none;
+     font-size: 13px;
+     font-weight: 600;
+     white-space: nowrap;
+     transition: all 0.2s ease;
+ }
+
+.btn-view-cv:hover {
+    background: #2563eb;
+    color: white;
+    border-color: #2563eb;
+}
+/* ==============================
+   POPUP XEM CV
+============================== */
+
+.cv-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    background: rgba(15, 23, 42, 0.65);
+
+    justify-content: center;
+    align-items: center;
+
+    padding: 20px;
+}
+
+.cv-modal.show {
+    display: flex;
+}
+
+.cv-modal-content {
+    width: 90%;
+    max-width: 1100px;
+    height: 90vh;
+
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.cv-modal-header {
+    min-height: 65px;
+    padding: 10px 20px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.cv-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #1e293b;
+}
+
+.cv-modal-header p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.cv-close-btn {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+
+    font-size: 30px;
+    line-height: 1;
+
+    cursor: pointer;
+    color: #64748b;
+}
+
+.cv-close-btn:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+#cvFrame {
+    width: 100%;
+    flex: 1;
+    border: none;
+    background: #f8fafc;
+}
+
+/* NÚT XEM CV */
+
+.btn-view-cv {
+    padding: 8px 14px;
+
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #2563eb;
+
+    border-radius: 8px;
+    cursor: pointer;
+
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-view-cv:hover {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-view-cv:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .cv-modal {
+        padding: 8px;
+    }
+
+    .cv-modal-content {
+        width: 100%;
+        height: 95vh;
+        border-radius: 10px;
+    }
+
+    .cv-modal-header {
+        padding: 10px 14px;
+    }
+}
+/* WISHLIST */
+
+.wishlist-form {
+    margin: 0;
+}
+
+.btn-wishlist {
+    padding: 8px 12px;
+    border: 1px solid #fecdd3;
+    background: #fff1f2;
+    color: #e11d48;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.btn-wishlist:hover {
+    background: #ffe4e6;
+    border-color: #fb7185;
+}
+
+.btn-wishlist.wishlisted {
+    background: #e11d48;
+    border-color: #e11d48;
+    color: white;
+}
+
+.btn-wishlist.wishlisted:hover {
+    background: #be123c;
 }

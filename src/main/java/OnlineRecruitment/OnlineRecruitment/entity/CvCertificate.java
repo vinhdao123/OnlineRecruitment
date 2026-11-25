@@ -36,7 +36,7 @@ public class CvCertificate {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder;
 
-    @Transient
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     // Alias methods để tương thích với template & DTO

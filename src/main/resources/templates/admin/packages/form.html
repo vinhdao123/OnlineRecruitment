@@ -1,56 +1,143 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head('Thêm/Sửa Gói')}"></head>
-<body class="admin">
+<head th:replace="~{admin/_layout :: head(${isNew ? 'Thêm gói dịch vụ mới' : 'Chỉnh sửa gói dịch vụ'})}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
+
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
-<div class="main">
-    <div th:replace="~{admin/_layout :: topbar('Thông tin Gói dịch vụ', 'Điền thông tin chi tiết')}"></div>
 
-    <div class="section" style="max-width: 600px;">
-        <form th:action="@{/admin/packages/save}" th:object="${pkg}" method="post">
-            <input type="hidden" th:field="*{id}">
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-            <div style="margin-bottom: 16px;">
-                <label style="font-weight: 600; font-size: 14px;">Tên gói *</label>
-                <input type="text" th:field="*{name}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+    <div th:replace="~{admin/_layout :: topbar(
+        ${isNew ? 'Thêm Gói dịch vụ mới' : 'Chỉnh sửa Gói dịch vụ'},
+        ${isNew ? 'Khởi tạo gói cước đăng tin mới' : 'Cập nhật giá và quyền lợi gói cước'})}"></div>
+
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-3xl w-full mx-auto">
+
+        <!-- Breadcrumb -->
+        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <div class="flex items-center gap-2">
+                <a th:href="@{/admin/packages}" class="hover:text-primary-600">Gói dịch vụ</a>
+                <span>/</span>
+                <span class="text-primary-600 font-semibold" th:text="${isNew ? 'Tạo mới' : 'Chỉnh sửa'}">Biểu mẫu</span>
             </div>
+            <a th:href="@{/admin/packages}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-600">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                Quay lại danh sách
+            </a>
+        </div>
 
-            <div style="margin-bottom: 16px;">
-                <label style="font-weight: 600; font-size: 14px;">Mô tả ngắn</label>
-                <textarea th:field="*{description}" rows="3" style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;"></textarea>
-            </div>
+        <!-- Alert Error -->
+        <div th:if="${error}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span th:text="${error}"></span>
+        </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-                <div>
-                    <label style="font-weight: 600; font-size: 14px;">Giá tiền (VNĐ) *</label>
-                    <input type="number" th:field="*{price}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+        <!-- Form Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-10 shadow-sm space-y-6">
+            <div class="flex items-center gap-4 pb-6 border-b border-slate-100">
+                <div class="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xl flex-shrink-0">
+                    <i data-lucide="package-plus" class="w-6 h-6"></i>
                 </div>
                 <div>
-                    <label style="font-weight: 600; font-size: 14px;">Thời hạn (Ngày) *</label>
-                    <input type="number" th:field="*{durationDays}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-display"
+                        th:text="${isNew ? 'Khởi tạo gói cước tuyển dụng mới' : 'Chỉnh sửa: ' + pkg.name}">
+                        Gói dịch vụ
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Cấu hình thời hạn, giới hạn số tin đăng và quyền lợi ghim Top.</p>
                 </div>
             </div>
 
-            <div style="margin-bottom: 16px;">
-                <label style="font-weight: 600; font-size: 14px;">Dành cho đối tượng *</label>
-                <select th:field="*{targetRole}" required style="width:100%; padding:10px; margin-top:6px; border:1px solid #d5dde8; border-radius:8px;">
-                    <option value="">-- Chọn đối tượng --</option>
-                    <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"></option>
-                </select>
-            </div>
+            <form th:action="@{/admin/packages/save}" th:object="${pkg}" method="post" class="space-y-6">
+                <input type="hidden" th:field="*{id}">
+                <input type="hidden" th:field="*{targetRole}" value="RECRUITER">
 
-            <div style="margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
-                <input type="checkbox" th:field="*{isActive}" id="isActive">
-                <label for="isActive" style="font-weight: 600; font-size: 14px;">Mở bán công khai</label>
-            </div>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-700">Phân loại gói cước <span class="text-rose-500">*</span></label>
+                    <select th:field="*{packageType}" required
+                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white">
+                        <option value="MAIN">Gói chính (có thời hạn ngày + quyền ghim tin)</option>
+                        <option value="TOPUP">Mua thêm tin đăng (Top-up nạp bổ sung)</option>
+                    </select>
+                    <p class="text-[11px] text-slate-400">Gói chính quyết định hạn sử dụng tài khoản doanh nghiệp. Top-up chỉ cộng thêm số lượng tin.</p>
+                </div>
 
-            <div style="display: flex; gap: 12px;">
-                <button type="submit" class="btn btn-primary">Lưu Gói</button>
-                <a th:href="@{/admin/packages}" class="btn btn-secondary">Hủy</a>
-            </div>
-        </form>
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-700">Tên gói dịch vụ <span class="text-rose-500">*</span></label>
+                    <input type="text" th:field="*{name}" th:readonly="${!isNew}" required
+                           placeholder="VD: Gói Tiêu Chuẩn (Standard), Gói Tăng Tốc (Pro)..."
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                           th:classappend="${!isNew} ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-700">Mô tả ngắn quyền lợi</label>
+                    <textarea th:field="*{description}" rows="3" th:readonly="${!isNew}"
+                              placeholder="Nêu các lợi thế chính của gói: số tin đăng, thời hạn, quyền ghim tin trang chủ..."
+                              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                              th:classappend="${!isNew} ? 'bg-slate-50 text-slate-400 cursor-not-allowed' : ''"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Đơn giá bán (VNĐ) <span class="text-rose-500">*</span></label>
+                        <input type="number" th:field="*{price}" required min="1" step="1" placeholder="VD: 500000"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm font-mono">
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-bold text-slate-700">Thời hạn sử dụng (Số ngày)</label>
+                        <input type="number" th:field="*{durationDays}" min="1" placeholder="VD: 30 ngày (để trống nếu là Top-up)"
+                               class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-slate-700">Số lượng tin đăng tối đa (Số tin) <span class="text-rose-500">*</span></label>
+                    <input type="number" th:field="*{maxJobs}" min="1" placeholder="Để trống nếu không giới hạn tin"
+                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                </div>
+
+                <div class="space-y-3 pt-2">
+                    <div class="flex items-center gap-2.5">
+                        <input type="checkbox" th:field="*{allowPinJob}" id="allowPinJob"
+                               class="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-slate-300">
+                        <label for="allowPinJob" class="text-xs font-semibold text-slate-700 cursor-pointer">
+                            Cho phép Ghim tin nổi bật lên đầu trang tìm kiếm (Áp dụng cho gói chính)
+                        </label>
+                    </div>
+
+                    <div class="flex items-center gap-2.5">
+                        <input type="checkbox" th:field="*{isActive}" id="isActive"
+                               class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                        <label for="isActive" class="text-xs font-semibold text-slate-700 cursor-pointer">
+                            Kích hoạt mở bán công khai trên Bảng giá (Pricing Matrix)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a th:href="@{/admin/packages}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-xs transition-all">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-sm transition-all"
+                            th:text="${isNew ? 'Khởi tạo gói mới' : 'Lưu thay đổi'}">
+                        Lưu gói
+                    </button>
+                </div>
+            </form>
+        </div>
+
     </div>
 </div>
+
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
 </body>
 </html>

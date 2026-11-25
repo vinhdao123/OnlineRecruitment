@@ -33,6 +33,15 @@ public class ServicePackage {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "max_jobs")
+    private Integer maxJobs;
+
+    @Column(name = "allow_pin_job")
+    private Boolean allowPinJob = false;
+
+    @Column(name = "package_type", length = 20)
+    private String packageType = "MAIN";
+
     // Tự động gán ngày tạo trước khi lưu vào DB
     @PrePersist
     protected void onCreate() {

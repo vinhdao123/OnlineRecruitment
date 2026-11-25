@@ -45,6 +45,18 @@ public class AuthService {
         if (userRepository.existsByUsername(dto.getUsername())) {
             throw new IllegalArgumentException("Username đã được sử dụng!");
         }
+        if (dto.getDob() == null) {
+            throw new IllegalArgumentException("Ngày sinh không được để trống!");
+        }
+        if (dto.getDob().isAfter(java.time.LocalDate.now())) {
+            throw new IllegalArgumentException("Ngày sinh không được phép ở trong tương lai!");
+        }
+        if (dto.getPhone() == null || dto.getPhone().trim().isEmpty()) {
+            throw new IllegalArgumentException("Số điện thoại không được để trống!");
+        }
+        if (!dto.getPhone().trim().matches("^(?:\\+84|0)[1-9][0-9]{8,9}$")) {
+            throw new IllegalArgumentException("Số điện thoại bắt buộc phải từ 10 - 11 chữ số hợp lệ theo quy chuẩn hiện tại (VD: 0912345678, 02412345678)!");
+        }
 
         User user = new User();
         user.setUsername(dto.getUsername());

@@ -1,64 +1,444 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Lịch sử giao dịch</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-</head>
-<body style="background: #f4f6fa; margin: 0; padding: 40px 20px;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử giao dịch mua gói — Online Recruitment</title>
 
-<div style="max-width: 900px; margin: 0 auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-        <h2 style="color: #1a2b4a; margin: 0;">Lịch sử giao dịch</h2>
-        <a th:href="@{/pricing}" class="btn btn-secondary">Quay lại Bảng giá</a>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
+
+<!-- Taskbar Header -->
+<div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/dashboard}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại Kênh tuyển dụng
+        </a>
+        <a sec:authorize="!hasRole('RECRUITER')" th:href="@{/candidate/dashboard}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại Bảng điều khiển
+        </a>
+
+        <div class="text-xs text-slate-500 font-medium">
+            <a th:href="@{/}" class="hover:text-primary-600">Trang chủ</a> /
+            <a th:href="@{/pricing}" class="hover:text-primary-600">Gói dịch vụ</a> /
+            <span class="text-slate-800 font-semibold">Lịch sử giao dịch</span>
+        </div>
     </div>
 
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
+    <!-- Alert Notifications -->
+    <div th:if="${param.success != null or success != null}" class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+        <span th:text="${success != null ? success : 'Giao dịch của bạn đã được ghi nhận thành công!'}">Thao tác thành công!</span>
+    </div>
 
-    <div class="table-wrap" style="background:#fff; border-radius:12px; padding: 20px; overflow: visible;">
-        <table class="data" style="width: 100%;">
-            <thead>
-            <tr>
-                <th>Mã GD</th>
-                <th>Tên Gói</th>
-                <th>Số tiền</th>
-                <th>Ngày tạo</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="p : ${payments}">
-                <td th:text="'#' + ${p.id}"></td>
-                <td th:text="${p.servicePackage.name}"></td>
-                <td style="font-weight: bold; color: #2a6df4;" th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                <td th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}"></td>
-                <td>
-                    <span class="badge badge-pending" th:if="${p.status == 'PENDING'}">Chờ thanh toán</span>
-                    <span class="badge" style="background: #fff4e6; color: #b87c1f;" th:if="${p.status == 'WAITING_CONFIRM'}">Chờ Admin duyệt</span>
-                    <span class="badge badge-active" th:if="${p.status == 'SUCCESS'}">Thành công</span>
-                    <span class="badge badge-locked" th:if="${p.status == 'FAILED'}">Thất bại</span>
-                </td>
-                <!-- CỘT HÀNH ĐỘNG MỚI -->
-                <td>
-                    <div th:if="${p.status == 'PENDING'}" style="display: flex; gap: 8px;">
-                        <a th:href="@{'/pricing/resume/' + ${p.id}}" class="btn btn-primary" style="padding: 4px 8px; font-size: 12px;">Thanh toán</a>
+    <!-- Header Banner -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 mb-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-display mb-2 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center">
+                        <i data-lucide="credit-card" class="w-6 h-6"></i>
+                    </span>
+                    Lịch sử giao dịch mua gói dịch vụ
+                </h1>
+                <p class="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed">
+                    Theo dõi toàn bộ các đơn hàng, gói dịch vụ đã thanh toán và chi tiết trạng thái kích hoạt tài khoản của bạn.
+                </p>
+            </div>
+            <a th:href="@{/pricing}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all self-start sm:self-auto">
+                <i data-lucide="sparkles" class="w-4 h-4"></i>
+                Bảng giá & Nâng cấp
+            </a>
+        </div>
+    </div>
 
-                        <form th:action="@{'/pricing/cancel/' + ${p.id}}" method="post" style="margin: 0;">
-                            <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 12px;" onclick="return confirm('Bạn có chắc muốn hủy hóa đơn này?')">Hủy</button>
-                        </form>
+    <!-- Active Subscription Banner -->
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-6 sm:p-8 mb-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold flex-shrink-0 shadow-md shadow-amber-500/20">
+                <i data-lucide="award" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div th:if="${currentUserPackage != null}">
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-lg font-bold text-amber-950 font-display">
+                            Gói hiện tại: <span th:text="${currentUserPackage.servicePackage != null ? currentUserPackage.servicePackage.name : 'Gói dịch vụ'}">Gói Tuyển Dụng VIP</span>
+                        </h3>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                            Đang hoạt động
+                        </span>
                     </div>
-                    <span th:if="${p.status == 'SUCCESS'}" style="color: #2a8c2a; font-size: 13px; font-weight: 600;">Đã kích hoạt</span>
-                </td>
-            </tr>
-            <tr th:if="${payments.isEmpty()}">
-                <td colspan="6" style="text-align: center; color: #8895a8; padding: 20px;">Chưa có giao dịch nào.</td>
-            </tr>
-            </tbody>
-        </table>
+                    <p class="text-xs sm:text-sm text-amber-800/90 mt-1">
+                        Hạn sử dụng: <strong class="font-bold text-amber-950" th:text="${currentUserPackage.endDate != null ? #temporals.format(currentUserPackage.endDate, 'dd/MM/yyyy') : 'Vĩnh viễn'}">31/12/2026</strong>
+                        &bull; Tin đăng tối đa: <strong class="font-bold text-amber-950" th:text="${currentUserPackage.servicePackage != null and currentUserPackage.servicePackage.maxJobs != null ? currentUserPackage.servicePackage.maxJobs + ' tin' : 'Không giới hạn'}">Không giới hạn</strong>
+                    </p>
+                </div>
+                <div th:if="${currentUserPackage == null}">
+                    <h3 class="text-lg font-bold text-amber-950 font-display">Tài khoản chưa kích hoạt gói trả phí</h3>
+                    <p class="text-xs sm:text-sm text-amber-800/90 mt-1">
+                        Nâng cấp gói ngay để mở khóa quyền đăng tin không giới hạn, đẩy tin lên Top và tiếp cận ứng viên tiềm năng nhanh chóng.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <a th:href="@{/pricing}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md shadow-amber-600/20 transition-all">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+                <span th:text="${currentUserPackage != null ? 'Gia hạn / Đổi gói' : 'Nâng cấp ngay'}">Nâng cấp gói</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900 font-display">Danh sách hóa đơn giao dịch</h2>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700"
+                  th:text="${payments != null ? payments.size() + ' giao dịch' : '0 giao dịch'}">0 giao dịch</span>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${payments == null or payments.isEmpty()}" class="py-16 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="receipt" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 font-display mb-1">Chưa có giao dịch mua gói nào</h3>
+            <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">
+                Toàn bộ hóa đơn mua gói đăng tin và dịch vụ sẽ hiển thị tại đây khi bạn tiến hành nâng cấp.
+            </p>
+            <a th:href="@{/pricing}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                Xem danh sách gói dịch vụ
+            </a>
+        </div>
+
+        <!-- Data Table -->
+        <div th:if="${payments != null and !payments.isEmpty()}" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-500 uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-6 font-semibold">Mã HĐ</th>
+                        <th class="py-3.5 px-6 font-semibold">Gói dịch vụ</th>
+                        <th class="py-3.5 px-6 font-semibold">Số tiền</th>
+                        <th class="py-3.5 px-6 font-semibold">Hình thức</th>
+                        <th class="py-3.5 px-6 font-semibold">Mã đối soát</th>
+                        <th class="py-3.5 px-6 font-semibold">Ngày tạo</th>
+                        <th class="py-3.5 px-6 font-semibold">Trạng thái</th>
+                        <th class="py-3.5 px-6 font-semibold text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="p : ${payments}"
+                        th:data-id="${p.id}"
+                        th:data-package-name="${p.servicePackage != null ? p.servicePackage.name : 'Gói dịch vụ'}"
+                        th:data-package-desc="${p.servicePackage != null and p.servicePackage.description != null ? p.servicePackage.description : 'Không có mô tả chi tiết.'}"
+                        th:data-duration="${p.servicePackage != null and p.servicePackage.durationDays != null ? p.servicePackage.durationDays + ' ngày' : 'Vĩnh viễn'}"
+                        th:data-max-jobs="${p.servicePackage != null and p.servicePackage.maxJobs != null ? p.servicePackage.maxJobs + ' tin tuyển dụng' : 'Không giới hạn'}"
+                        th:data-amount="${p.amount != null ? #numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}"
+                        th:data-method="${p.paymentMethod != null ? p.paymentMethod : 'BANK_TRANSFER'}"
+                        th:data-txcode="${p.transactionCode != null ? p.transactionCode : 'Đang xử lý / Chưa có'}"
+                        th:data-status="${p.status}"
+                        th:data-created="${p.createdAt != null ? #temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm') : ''}"
+                        th:data-resume-url="@{'/pricing/resume/' + ${p.id}}"
+                        onclick="handleRowClick(event, this)"
+                        class="hover:bg-slate-50/80 transition-colors cursor-pointer">
+
+                        <td class="py-4 px-6 font-bold text-slate-900 font-mono" th:text="'#' + ${p.id}">#1</td>
+                        <td class="py-4 px-6">
+                            <strong class="text-slate-900 font-semibold block" th:text="${p.servicePackage != null ? p.servicePackage.name : 'Gói dịch vụ'}">Gói Tiêu Chuẩn</strong>
+                            <span class="text-slate-400 text-xs" th:text="${p.servicePackage != null and p.servicePackage.durationDays != null ? p.servicePackage.durationDays + ' ngày' : 'Vĩnh viễn'}">30 ngày</span>
+                        </td>
+                        <td class="py-4 px-6 font-bold text-primary-700 font-mono"
+                            th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'">500.000 đ</td>
+                        <td class="py-4 px-6 text-slate-600">
+                            <span th:switch="${p.paymentMethod}">
+                                <span th:case="'BANK_TRANSFER'">Chuyển khoản QR</span>
+                                <span th:case="'SEPAY_SANDBOX'">Cổng SePay</span>
+                                <span th:case="'SEPAY_LIVE'">Cổng SePay</span>
+                                <span th:case="*" th:text="${p.paymentMethod != null ? p.paymentMethod : 'Chuyển khoản'}">Chuyển khoản</span>
+                            </span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <code class="px-2 py-1 rounded bg-slate-100 text-slate-600 text-xs font-mono"
+                                  th:text="${p.transactionCode != null and !#strings.isEmpty(p.transactionCode) ? p.transactionCode : '—'}">—</code>
+                        </td>
+                        <td class="py-4 px-6 text-slate-500 whitespace-nowrap"
+                            th:text="${#temporals.format(p.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</td>
+                        <td class="py-4 px-6 whitespace-nowrap">
+                            <span th:if="${p.status == 'SUCCESS'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Thành công
+                            </span>
+                            <span th:if="${p.status == 'PENDING'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Chờ thanh toán
+                            </span>
+                            <span th:if="${p.status == 'WAITING_CONFIRM'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-50 text-primary-700 border border-primary-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary-600"></span> Chờ đối soát
+                            </span>
+                            <span th:if="${p.status == 'FAILED'}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Đã hủy
+                            </span>
+                        </td>
+
+                        <td class="py-4 px-6 text-right whitespace-nowrap">
+                            <div class="inline-flex items-center gap-2">
+                                <button type="button" class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors"
+                                        onclick="event.stopPropagation(); openDetailFromButton(this)">
+                                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                                    Chi tiết
+                                </button>
+                                <a th:if="${p.status == 'PENDING'}" th:href="@{'/pricing/resume/' + ${p.id}}"
+                                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 transition-colors"
+                                   onclick="event.stopPropagation();">
+                                    Thanh toán
+                                </a>
+                                <form th:if="${p.status == 'PENDING'}" th:action="@{'/pricing/cancel/' + ${p.id}}" method="post" class="inline" onclick="event.stopPropagation();">
+                                    <button type="submit" onclick="return confirm('Bạn có chắc muốn hủy hóa đơn này?')"
+                                            class="inline-flex items-center px-2 py-1.5 rounded-lg text-xs font-semibold text-rose-700 hover:bg-rose-50 transition-colors">
+                                        Hủy
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<!-- Detail Modal Popup -->
+<div id="detailModalOverlay" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
+            <div>
+                <h3 class="text-base font-bold text-slate-900 font-display" id="modalTitle">Chi tiết hóa đơn</h3>
+                <p class="text-xs text-slate-500" id="modalSubtitle">Thông tin đơn hàng</p>
+            </div>
+            <button type="button" onclick="closeDetailModal()" class="p-2 text-slate-400 hover:text-slate-700 rounded-lg">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+            <div class="bg-primary-50 rounded-xl p-4 border border-primary-100 flex items-center justify-between">
+                <div>
+                    <h4 class="text-base font-bold text-slate-900 font-display" id="modalPackageName">Gói Dịch Vụ</h4>
+                    <div id="modalStatusBadge" class="mt-1"></div>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] text-slate-500 uppercase tracking-wider block">Tổng số tiền</span>
+                    <strong class="text-lg font-bold text-primary-700 font-mono" id="modalAmount">0 đ</strong>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Mã hóa đơn</span>
+                    <strong class="text-slate-900 font-mono" id="modalInvoiceId">#1</strong>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Thời gian tạo</span>
+                    <strong class="text-slate-900" id="modalCreatedDate">01/01/2026</strong>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Hình thức</span>
+                    <strong class="text-slate-900" id="modalPaymentMethod">Chuyển khoản QR</strong>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Mã đối soát</span>
+                    <strong class="text-slate-900 font-mono" id="modalTxCode">—</strong>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Thời hạn</span>
+                    <strong class="text-slate-900" id="modalDuration">30 ngày</strong>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <span class="text-slate-400 block mb-0.5">Quyền lợi</span>
+                    <strong class="text-slate-900" id="modalMaxJobs">Tối đa 10 tin</strong>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 text-xs">
+                <strong class="text-slate-800 font-semibold block mb-1">Mô tả gói dịch vụ:</strong>
+                <p class="text-slate-600 leading-relaxed" id="modalPackageDesc"></p>
+            </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3">
+            <button type="button" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 transition-colors" onclick="closeDetailModal()">
+                Đóng
+            </button>
+            <a id="modalPayBtn" href="#" class="hidden inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 transition-colors">
+                <i data-lucide="credit-card" class="w-3.5 h-3.5"></i>
+                Thanh toán ngay
+            </a>
+        </div>
     </div>
 </div>
 
+<script>
+    lucide.createIcons();
+
+    function openDetailModalFromData(data) {
+        document.getElementById('modalTitle').textContent = 'Chi tiết hóa đơn #' + data.id;
+        document.getElementById('modalSubtitle').textContent = 'Mã đơn: #' + data.id + ' • ' + data.created;
+        document.getElementById('modalPackageName').textContent = data.packageName || 'Gói Dịch Vụ';
+        document.getElementById('modalAmount').textContent = data.amount || '0 đ';
+        document.getElementById('modalInvoiceId').textContent = '#' + data.id;
+        document.getElementById('modalCreatedDate').textContent = data.created || '—';
+        
+        let methodText = data.method;
+        if (data.method === 'BANK_TRANSFER') methodText = 'Chuyển khoản QR ngân hàng';
+        else if (data.method === 'SEPAY_SANDBOX') methodText = 'Cổng SePay';
+        else if (data.method === 'SEPAY_LIVE') methodText = 'Cổng SePay';
+        document.getElementById('modalPaymentMethod').textContent = methodText;
+
+        document.getElementById('modalTxCode').textContent = data.txcode && data.txcode !== 'null' ? data.txcode : '—';
+        document.getElementById('modalDuration').textContent = data.duration || '—';
+        document.getElementById('modalMaxJobs').textContent = data.maxJobs || 'Không giới hạn';
+        document.getElementById('modalPackageDesc').textContent = data.packageDesc || 'Không có mô tả chi tiết.';
+
+        const badgeContainer = document.getElementById('modalStatusBadge');
+        badgeContainer.innerHTML = '';
+        const status = (data.status || '').toUpperCase();
+        if (status === 'SUCCESS') {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">✓ Đã thanh toán thành công</span>';
+        } else if (status === 'PENDING') {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">⏱ Chờ thanh toán</span>';
+        } else if (status === 'WAITING_CONFIRM') {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary-100 text-primary-800">⏳ Đang chờ xác nhận đối soát</span>';
+        } else {
+            badgeContainer.innerHTML = '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">✕ Đã hủy / Thất bại</span>';
+        }
+
+        const payBtn = document.getElementById('modalPayBtn');
+        if (status === 'PENDING' && data.resumeUrl) {
+            payBtn.href = data.resumeUrl;
+            payBtn.classList.remove('hidden');
+        } else {
+            payBtn.classList.add('hidden');
+        }
+
+        const modal = document.getElementById('detailModalOverlay');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function handleRowClick(event, row) {
+        if (event.target.closest('button') || event.target.closest('a') || event.target.closest('form')) {
+            return;
+        }
+        const data = {
+            id: row.getAttribute('data-id'),
+            packageName: row.getAttribute('data-package-name'),
+            packageDesc: row.getAttribute('data-package-desc'),
+            duration: row.getAttribute('data-duration'),
+            maxJobs: row.getAttribute('data-max-jobs'),
+            amount: row.getAttribute('data-amount'),
+            method: row.getAttribute('data-method'),
+            txcode: row.getAttribute('data-txcode'),
+            status: row.getAttribute('data-status'),
+            created: row.getAttribute('data-created'),
+            resumeUrl: row.getAttribute('data-resume-url')
+        };
+        openDetailModalFromData(data);
+    }
+
+    function openDetailFromButton(btn) {
+        const row = btn.closest('tr');
+        if (row) {
+            const data = {
+                id: row.getAttribute('data-id'),
+                packageName: row.getAttribute('data-package-name'),
+                packageDesc: row.getAttribute('data-package-desc'),
+                duration: row.getAttribute('data-duration'),
+                maxJobs: row.getAttribute('data-max-jobs'),
+                amount: row.getAttribute('data-amount'),
+                method: row.getAttribute('data-method'),
+                txcode: row.getAttribute('data-txcode'),
+                status: row.getAttribute('data-status'),
+                created: row.getAttribute('data-created'),
+                resumeUrl: row.getAttribute('data-resume-url')
+            };
+            openDetailModalFromData(data);
+        }
+    }
+
+    function closeDetailModal() {
+        const modal = document.getElementById('detailModalOverlay');
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    document.getElementById('detailModalOverlay').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeDetailModal();
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeDetailModal();
+        }
+    });
+</script>
 </body>
 </html>

@@ -58,7 +58,28 @@ public class DataInitializerService implements CommandLineRunner {
                 "IF NOT EXISTS (SELECT 1 FROM sys.columns " +
                 "WHERE object_id = OBJECT_ID('dbo.skill_tests') AND name = 'updated_at') " +
                 "ALTER TABLE dbo.skill_tests ADD updated_at DATETIME2 NULL");
-            log.info("skill_tests schema migration checked OK.");
+
+            // Auto-create skill_test_rating_thresholds table if not exists
+            stmt.execute(
+                "IF NOT EXISTS (SELECT 1 FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[skill_test_rating_thresholds]') AND type in (N'U')) " +
+                "BEGIN " +
+                "    CREATE TABLE [dbo].[skill_test_rating_thresholds] ( " +
+                "        [id] BIGINT IDENTITY(1,1) PRIMARY KEY, " +
+                "        [min_score] INT NOT NULL, " +
+                "        [label] NVARCHAR(100) NOT NULL, " +
+                "        [display_order] INT NOT NULL DEFAULT 0, " +
+                "        [created_at] DATETIME2 NOT NULL DEFAULT SYSDATETIME(), " +
+                "        [updated_at] DATETIME2 NOT NULL DEFAULT SYSDATETIME() " +
+                "    ); " +
+                "    INSERT INTO [dbo].[skill_test_rating_thresholds] ([min_score], [label], [display_order]) VALUES " +
+                "    (90, N'Xuất sắc', 1), " +
+                "    (80, N'Giỏi', 2), " +
+                "    (65, N'Khá', 3), " +
+                "    (50, N'Đạt', 4), " +
+                "    (0, N'Chưa đạt', 5); " +
+                "END");
+
+            log.info("skill_tests and skill_test_rating_thresholds schema migration checked OK.");
         } catch (Exception e) {
             log.warn("skill_tests schema migration warning: {}", e.getMessage());
         }
@@ -233,7 +254,7 @@ public class DataInitializerService implements CommandLineRunner {
         List<SkillTestRatingThreshold> thresholds = List.of(
             createThreshold(90, "Xuất sắc", 1),
             createThreshold(80, "Giỏi",      2),
-            createThreshold(65, "Kháá",       3),
+            createThreshold(65, "Khá",       3),
             createThreshold(50, "Đạt",       4),
             createThreshold(0,  "Chưa đạt",  5)
         );

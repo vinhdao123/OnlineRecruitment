@@ -9,8 +9,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Cấu hình đường dẫn trỏ tới thư mục chứa ảnh upload trong static
+        String uploadDir = "file:" + System.getProperty("user.dir") + "/uploads/";
+        String avatarDir = "file:" + System.getProperty("user.dir") + "/uploads/avatars/";
+        // Không map uploads/cv/ ra static public; file CV được phục vụ qua controller có kiểm tra quyền.
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/", "file:src/main/resources/static/uploads/");
+                .addResourceLocations(uploadDir, avatarDir, "file:src/main/resources/static/uploads/");
     }
 }

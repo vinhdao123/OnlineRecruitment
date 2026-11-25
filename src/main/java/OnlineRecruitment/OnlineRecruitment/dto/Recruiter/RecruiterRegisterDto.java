@@ -18,7 +18,8 @@ public class RecruiterRegisterDto {
     @NotBlank(message = "Họ tên người đại diện không được để trống")
     private String fullName;
 
-    @Pattern(regexp = "^$|^0[35789][0-9]{8}$", message = "Số điện thoại không hợp lệ")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Pattern(regexp = "^(?:\\+84|0)[1-9][0-9]{8,9}$", message = "Số điện thoại phải từ 10 - 11 chữ số hợp lệ theo quy chuẩn hiện tại (VD: 0912345678, 02412345678)")
     private String phone;
 
     @NotBlank(message = "Mật khẩu không được để trống")

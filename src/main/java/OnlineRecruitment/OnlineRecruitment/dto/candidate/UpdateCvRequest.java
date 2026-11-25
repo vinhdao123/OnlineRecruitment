@@ -8,6 +8,8 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateCvRequest {
+    private Long templateVersionId;
+
     @NotBlank(message = "Tiêu đề không được để trống")
     @Size(max = 255, message = "Tiêu đề không quá 255 ký tự")
     private String title;
@@ -22,4 +24,12 @@ public class UpdateCvRequest {
     private String accentColor;
 
     private String avatarUrl;
+
+    public UpdateCvRequest(String title, String professionalTitle, String summary, String accentColor, String avatarUrl) {
+        this.title = title;
+        this.professionalTitle = professionalTitle;
+        this.summary = summary;
+        this.accentColor = accentColor;
+        this.avatarUrl = avatarUrl;
+    }
 }

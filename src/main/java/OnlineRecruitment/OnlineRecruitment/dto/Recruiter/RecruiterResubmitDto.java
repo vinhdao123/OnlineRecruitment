@@ -14,8 +14,10 @@ public class RecruiterResubmitDto {
     @Size(max = 255, message = "Họ tên tối đa 255 ký tự")
     private String fullName;
 
-    @Pattern(regexp = "^$|^0[35789][0-9]{8}$", message = "Số điện thoại người đại diện không hợp lệ (VD: 0912345678)")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Pattern(regexp = "^(?:\\+84|0)[1-9][0-9]{8,9}$", message = "Số điện thoại phải từ 10 - 11 chữ số hợp lệ theo quy chuẩn hiện tại (VD: 0912345678, 02412345678)")
     private String phone;
+
 
     // --- Thông tin Công ty ---
     @NotBlank(message = "Tên công ty không được để trống")

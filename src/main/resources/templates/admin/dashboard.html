@@ -1,228 +1,224 @@
-
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{admin/_layout :: head('Dashboard')}"></head>
+<head th:replace="~{admin/_layout :: head('Bảng điều khiển quản trị')}"></head>
 
-<body class="admin">
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
 
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
 
-<div class="main">
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-    <div th:replace="~{admin/_layout :: topbar('Dashboard', 'Overview')}"></div>
+    <div th:replace="~{admin/_layout :: topbar('Bảng điều khiển', 'Tổng quan vận hành hệ thống tuyển dụng')}"></div>
 
-    <!-- ==================== WELCOME BANNER ==================== -->
-    <div class="section"
-         style="background: linear-gradient(135deg, #e6efff 0%, #f0f6ff 100%);
-                border: none;">
+    <div class="p-6 sm:p-8 space-y-8 flex-1 max-w-7xl w-full mx-auto">
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Welcome Banner -->
+        <div class="bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-md relative overflow-hidden">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                <div class="space-y-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md">
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        TRUNG TÂM KIỂM SOÁT HỆ THỐNG
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold font-display tracking-tight text-white !text-white drop-shadow-sm">
+                        Chào mừng trở lại, Quản trị viên! 👋
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
+                        Hôm nay hệ thống có <strong class="text-amber-400 font-bold" th:text="${companyPending}">0</strong> doanh nghiệp đang chờ duyệt giấy phép và <strong class="text-amber-400 font-bold" th:text="${totalPending}">0</strong> tác vụ yêu cầu bạn kiểm tra.
+                    </p>
 
-            <div>
-                <h2 style="font-size: 24px; font-weight: 700; color: #1a2b4a; margin-bottom: 8px;">
-                    Welcome Back!
-                </h2>
+                    <!-- Fast Action Buttons -->
+                    <div class="flex flex-wrap gap-2.5 pt-3">
+                        <a th:href="@{/admin/companies(status='PENDING')}"
+                           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-500 shadow-sm transition-all">
+                            <i data-lucide="building" class="w-3.5 h-3.5"></i>
+                            Duyệt doanh nghiệp (<span th:text="${companyPending}">0</span>)
+                        </a>
 
-                <p style="color: #4a5568; font-size: 14px; max-width: 620px; line-height: 1.6;">
-                    Your recruitment pipeline is looking healthy today.
-                    You have
-                    <b style="color: #d33;" th:text="${companyPending}">0</b>
-                    pending companies and
-                    <b style="color: #d33;" th:text="${totalPending}">0</b>
-                    total items that require your attention.
-                </p>
+                        <a th:href="@{/admin/jobs(status='PENDING')}"
+                           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-slate-900 bg-white hover:bg-slate-100 shadow-sm transition-all">
+                            <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                            Duyệt tin tuyển dụng
+                        </a>
 
-                <!--
-                    HAI NÚT QUẢN LÝ ADMIN
-                    1. Review Pending: mở danh sách tin đang chờ duyệt.
-                    2. Job Categories: mở trang quản lý danh mục.
-                -->
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px;">
+                        <a th:href="@{/admin/skills}"
+                           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-white/10 hover:bg-white/20 transition-all">
+                            <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+                            Quản lý kỹ năng
+                        </a>
 
-                    <!-- Duyệt công ty chờ duyệt -->
-                    <a th:href="@{/admin/companies(status='PENDING')}"
-                       class="btn btn-primary"
-                       style="background: #2563eb; color: #fff; font-weight: 600;">
-                        🏢 Duyệt công ty (<span th:text="${companyPending}">0</span>) →
-                    </a>
+                        <a th:href="@{/admin/categories}"
+                           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white bg-white/10 hover:bg-white/20 transition-all">
+                            <i data-lucide="folder-tree" class="w-3.5 h-3.5"></i>
+                            Danh mục ngành nghề
+                        </a>
+                    </div>
+                </div>
 
-                    <!-- Duyệt tin tuyển dụng -->
-                    <a th:href="@{/admin/jobs(status='PENDING')}"
-                       class="btn btn-primary">
-                        Review Pending →
-                    </a>
-
-                    <a th:href="@{/admin/skills}" class="btn btn-primary">Quản lý kỹ năng →</a>
-                    <!-- Quản lý danh mục ngành nghề -->
-                    <a th:href="@{/admin/categories}"
-                       class="btn btn-primary">
-                        Danh mục tuyển dụng →
-                    </a>
-
+                <div class="hidden lg:flex w-24 h-24 rounded-2xl bg-white/10 backdrop-blur-md items-center justify-center text-4xl border border-white/10 flex-shrink-0">
+                    📊
                 </div>
             </div>
-
-            <div style="font-size: 64px; opacity: 0.3;">📋</div>
-
         </div>
-    </div>
 
-    <!-- ==================== KPI CARDS ==================== -->
-    <div class="cards-grid">
-
-        <div class="stat-card">
-            <div>
-                <div class="stat-label">Total Users</div>
-                <div class="stat-value"
+        <!-- 4 KPI Metrics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Users -->
+            <a th:href="@{/admin/users}" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:border-primary-200 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tổng người dùng</span>
+                    <span class="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
+                        <i data-lucide="users" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono"
                      th:text="${#numbers.formatInteger(totalUsers, 0, 'COMMA')}">0</div>
-                <div class="stat-trend">↑ All time</div>
-            </div>
-            <div class="stat-icon">👥</div>
-        </div>
+                <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-1">
+                    <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> Toàn thời gian
+                </span>
+            </a>
 
-        <a th:href="@{/admin/companies}" style="text-decoration:none; color:inherit; display:block;">
-        <div class="stat-card">
-            <div>
-                <div class="stat-label">Companies</div>
-                <div class="stat-value"
+            <!-- Total Companies -->
+            <a th:href="@{/admin/companies}" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:border-primary-200 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Doanh nghiệp</span>
+                    <span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
+                        <i data-lucide="building-2" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono"
                      th:text="${#numbers.formatInteger(totalCompanies, 0, 'COMMA')}">0</div>
-                <div class="stat-trend">↑ All time</div>
-            </div>
-            <div class="stat-icon">🏢</div>
-        </div>
-        </a>
+                <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-1">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Đã đăng ký
+                </span>
+            </a>
 
-        <div class="stat-card">
-            <div>
-                <div class="stat-label">Jobs</div>
-                <div class="stat-value"
+            <!-- Total Jobs -->
+            <a th:href="@{/admin/jobs}" class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:border-primary-200 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tin tuyển dụng</span>
+                    <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
+                        <i data-lucide="briefcase" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono"
                      th:text="${#numbers.formatInteger(totalJobs, 0, 'COMMA')}">0</div>
-                <div class="stat-trend">— Coming soon</div>
-            </div>
-            <div class="stat-icon">💼</div>
-        </div>
+                <span class="text-[11px] text-slate-400 font-semibold mt-1 block">Toàn hệ thống</span>
+            </a>
 
-        <a th:href="@{/admin/companies(status='PENDING')}" style="text-decoration:none; color:inherit; display:block;">
-        <div class="stat-card danger">
-            <div>
-                <div class="stat-label">Pending</div>
-                <div class="stat-value"
+            <!-- Pending Review Queue -->
+            <a th:href="@{/admin/companies(status='PENDING')}" class="bg-white rounded-2xl border border-amber-200/80 p-5 shadow-sm hover:shadow-md hover:border-amber-300 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-xs font-semibold text-amber-700 uppercase tracking-wider">Hồ sơ chờ duyệt</span>
+                    <span class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
+                    </span>
+                </div>
+                <div class="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono"
                      th:text="${totalPending}">0</div>
-                <div class="stat-trend down">⚠ Requires attention</div>
-            </div>
-            <div class="stat-icon">⏳</div>
-        </div>
-        </a>
-
-    </div>
-
-    <!-- ==================== CHARTS ==================== -->
-    <div class="chart-grid">
-
-        <!-- Biểu đồ tăng trưởng người dùng -->
-        <div class="chart-box">
-            <h3>User Growth</h3>
-            <p class="sub">Registration statistics over the last 6 months</p>
-            <canvas id="growthChart"></canvas>
+                <span class="text-[11px] text-rose-600 font-semibold mt-1 inline-flex items-center gap-1">
+                    <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Cần xử lý ngay
+                </span>
+            </a>
         </div>
 
-        <!-- Biểu đồ phân bố vai trò -->
-        <div class="chart-box">
-            <h3>User Roles</h3>
-            <p class="sub">Distribution by system privilege</p>
-            <canvas id="rolesChart"></canvas>
-        </div>
-
-    </div>
-
-    <!-- ==================== RECENT ACTIVITY ==================== -->
-    <div class="section">
-
-        <div class="section-header">
-            <div>
-                <div class="section-title">Recent Activity</div>
-                <div class="section-sub">
-                    Latest updates across the recruitment platform
+        <!-- Charts Grid (2 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <!-- Line Chart: User Growth (8 cols) -->
+            <div class="lg:col-span-8 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 font-display">Tăng trưởng người dùng</h3>
+                        <p class="text-xs text-slate-400">Số lượng tài khoản đăng ký mới trong 6 tháng gần nhất</p>
+                    </div>
+                </div>
+                <div class="h-72 w-full">
+                    <canvas id="growthChart"></canvas>
                 </div>
             </div>
 
-            <a th:href="@{/admin/activities}">View All →</a>
-        </div>
-
-        <div th:if="${recentActivities == null or recentActivities.isEmpty()}"
-             style="color:#8895a8;font-size:13px;">
-            Chưa có hoạt động nào.
-        </div>
-
-        <div th:each="a : ${recentActivities}" class="activity-item">
-
-            <div class="avatar"
-                 th:text="${a.user != null and a.user.fullName != null and !a.user.fullName.isEmpty()
-                           ? a.user.fullName.substring(0,1).toUpperCase()
-                           : 'S'}">
-                A
-            </div>
-
-            <div class="body">
-                <div class="action" th:text="${a.description}">
-                    Description
+            <!-- Doughnut Chart: Roles Distribution (4 cols) -->
+            <div class="lg:col-span-4 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 font-display">Phân bố vai trò</h3>
+                        <p class="text-xs text-slate-400">Tỷ lệ theo phân quyền tài khoản</p>
+                    </div>
                 </div>
-
-                <div class="time" th:text="${a.createdAt}">
-                    time
+                <div class="h-72 w-full flex items-center justify-center">
+                    <canvas id="rolesChart"></canvas>
                 </div>
             </div>
-
-            <span class="tag"
-                  th:if="${a.statusTag}"
-                  th:text="${a.statusTag}">
-                Tag
-            </span>
-
         </div>
+
+        <!-- Recent Activities Feed -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div>
+                    <h3 class="text-base font-bold text-slate-900 font-display">Hoạt động gần đây</h3>
+                    <p class="text-xs text-slate-400">Nhật ký cập nhật và thao tác trên toàn hệ thống</p>
+                </div>
+                <a th:href="@{/admin/activities}" class="text-xs font-semibold text-primary-600 hover:text-primary-700">Xem tất cả →</a>
+            </div>
+
+            <div th:if="${recentActivities == null or recentActivities.isEmpty()}" class="py-12 text-center text-xs text-slate-400">
+                Chưa có nhật ký hoạt động nào được ghi nhận.
+            </div>
+
+            <div th:unless="${recentActivities == null or recentActivities.isEmpty()}" class="divide-y divide-slate-100">
+                <div th:each="a : ${recentActivities}" class="py-3.5 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-700 font-bold text-xs flex items-center justify-center flex-shrink-0"
+                             th:text="${a.user != null and a.user.fullName != null and !a.user.fullName.isEmpty() ? a.user.fullName.substring(0,1).toUpperCase() : 'S'}">
+                            A
+                        </div>
+                        <div>
+                            <div class="text-xs sm:text-sm font-semibold text-slate-800" th:text="${a.description}">Mô tả hoạt động</div>
+                            <div class="text-[11px] text-slate-400" th:text="${a.createdAt}">Thời gian</div>
+                        </div>
+                    </div>
+
+                    <span th:if="${a.statusTag}" th:text="${a.statusTag}"
+                          class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">Tag</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 </div>
 
-<!-- ==================== CHART.JS ==================== -->
+<!-- CHART.JS CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
+    const growthLabels = /*[[${growthLabels}]]*/ ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const growthData = /*[[${growthData}]]*/ [0, 0, 0, 0, 0, 0];
 
-    // Dữ liệu tăng trưởng do AdminDashboardController truyền xuống.
-    const growthLabels =
-        /*[[${growthLabels}]]*/ ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-
-    const growthData =
-        /*[[${growthData}]]*/ [0, 0, 0, 0, 0, 0];
-
-    // Thống kê số tài khoản theo từng vai trò.
     const roleData = [
         /*[[${totalCandidates}]]*/ 0,
         /*[[${totalRecruiters}]]*/ 0,
         /*[[${totalAdmins}]]*/ 0
     ];
 
-    // ==================== LINE CHART ====================
-    // Hiển thị số lượng người dùng đăng ký trong 6 tháng.
+    // Growth Line Chart
     const growthCtx = document.getElementById('growthChart');
-
     if (growthCtx) {
         new Chart(growthCtx, {
             type: 'line',
             data: {
                 labels: growthLabels,
                 datasets: [{
-                    label: 'New users',
+                    label: 'Người dùng mới',
                     data: growthData,
-                    borderColor: '#2a6df4',
-                    backgroundColor: 'rgba(42,109,244,0.1)',
-                    borderWidth: 2,
-                    tension: 0.4,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37,99,235,0.08)',
+                    borderWidth: 2.5,
+                    tension: 0.35,
                     fill: true,
-                    pointBackgroundColor: '#2a6df4',
+                    pointBackgroundColor: '#2563eb',
                     pointRadius: 4
                 }]
             },
@@ -230,66 +226,53 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        display: false
-                    }
+                    legend: { display: false }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: {
-                            color: '#eef1f6'
-                        }
+                        grid: { color: '#f1f5f9' },
+                        ticks: { font: { size: 11 } }
                     },
                     x: {
-                        grid: {
-                            display: false
-                        }
+                        grid: { display: false },
+                        ticks: { font: { size: 11 } }
                     }
                 }
             }
         });
     }
 
-    // ==================== DONUT CHART ====================
-    // Hiển thị tỷ lệ Candidate, Recruiter và Admin.
+    // Role Doughnut Chart
     const rolesCtx = document.getElementById('rolesChart');
-
     if (rolesCtx) {
         new Chart(rolesCtx, {
             type: 'doughnut',
             data: {
-                labels: ['Candidate', 'Recruiter', 'Admin'],
+                labels: ['Ứng viên', 'Nhà tuyển dụng', 'Quản trị viên'],
                 datasets: [{
                     data: roleData,
-                    backgroundColor: [
-                        '#2a6df4',
-                        '#e6a23c',
-                        '#7a3cd3'
-                    ],
+                    backgroundColor: ['#2563eb', '#f59e0b', '#8b5cf6'],
                     borderWidth: 0
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '65%',
+                cutout: '70%',
                 plugins: {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            boxWidth: 12,
-                            padding: 16,
-                            font: {
-                                size: 12
-                            }
+                            boxWidth: 10,
+                            padding: 12,
+                            font: { size: 11 }
                         }
                     }
                 }
             }
         });
     }
-
     /*]]>*/
 </script>
 

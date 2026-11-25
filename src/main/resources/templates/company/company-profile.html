@@ -1,245 +1,211 @@
-
 <!DOCTYPE html>
-<html lang="vi"
-      xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Danh sách công ty | OnlineRecruitment</title>
-    <link rel="stylesheet" th:href="@{/css/company/company-profile.css}">
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
+    <title>Danh bạ Doanh nghiệp hàng đầu — JOBPORTAL</title>
+
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Unified Design Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            hover: '#1d4ed8',
+                            light: '#eff6ff',
+                        },
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        },
+                        success: {
+                            DEFAULT: '#16a34a',
+                            50: '#f0fdf4',
+                        },
+                        warning: {
+                            DEFAULT: '#f59e0b',
+                            50: '#fffbeb',
+                        },
+                        danger: {
+                            DEFAULT: '#dc2626',
+                            50: '#fef2f2',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
 
-<body>
+<body class="bg-surface-50 text-surface-800 font-sans min-h-screen flex flex-col antialiased">
 
+<!-- Unified Global Navbar -->
 <div th:replace="~{fragments/taskbar :: taskbar('companies')}"></div>
 
-<main>
+<!-- Hero Search Banner -->
+<section class="bg-gradient-to-b from-slate-950 via-slate-900 to-blue-950 text-white pt-16 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Ambient Glow -->
+    <div class="absolute inset-0 bg-[radial-gradient(#2563eb_1px,transparent_1px)] [background-size:28px_28px] opacity-15 pointer-events-none"></div>
+    <div class="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[250px] bg-blue-600/20 rounded-full blur-[100px] pointer-events-none"></div>
 
+    <div class="max-w-4xl mx-auto relative z-10 text-center">
+        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-400/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-4 shadow-sm">
+            <i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-400"></i>
+            <span>MÔI TRƯỜNG LÀM VIỆC TIÊN PHONG</span>
+        </span>
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-heading leading-tight mb-3 text-white !text-white drop-shadow-md">
+            Khám Phá Các Công Ty Hàng Đầu
+        </h1>
+        <p class="text-slate-300 text-sm sm:text-base max-w-2xl mx-auto mb-8 font-normal leading-relaxed">
+            Tìm hiểu văn hóa doanh nghiệp, chế độ đãi ngộ và môi trường phát triển sự nghiệp của các tổ chức uy tín hàng đầu.
+        </p>
 
-    <!-- Banner  saech công ty đỉa điểm-->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Danh sách công ty</h1>
-            <p>Khám phá các công ty và tìm hiểu môi trường làm việc phù hợp với bạn.</p>
+        <!-- Search Bar Form -->
+        <div class="hero-search-card bg-white p-3 sm:p-3.5 rounded-2xl shadow-2xl max-w-3xl mx-auto border border-slate-200 text-left">
+            <form th:action="@{/company-profile}" method="get" class="flex flex-col sm:flex-row gap-3">
+                <!-- Keyword input -->
+                <div class="flex-1 flex items-center gap-3 px-4.5 py-3.5 min-h-[52px] bg-slate-50 rounded-xl border border-slate-200 focus-within:border-blue-600 focus-within:bg-white transition">
+                    <i data-lucide="search" class="w-5 h-5 text-slate-400 shrink-0"></i>
+                    <input type="text" name="keyword" th:value="${keyword}"
+                           placeholder="Nhập tên công ty, tập đoàn..."
+                           class="w-full bg-transparent text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none">
+                </div>
 
-            <form class="search-form"
-                  th:action="@{/company-profile}"
-                  method="get">
+                <!-- Location input -->
+                <div class="w-full sm:w-64 flex items-center gap-3 px-4.5 py-3.5 min-h-[52px] bg-slate-50 rounded-xl border border-slate-200 focus-within:border-blue-600 focus-within:bg-white transition">
+                    <i data-lucide="map-pin" class="w-5 h-5 text-slate-400 shrink-0"></i>
+                    <input type="text" name="location" th:value="${location}"
+                           placeholder="Địa điểm (Hà Nội, TP.HCM...)"
+                           class="w-full bg-transparent text-sm sm:text-base font-medium text-slate-900 placeholder:text-slate-400 focus:outline-none">
+                </div>
 
-                <!-- Tìm theo tên công ty -->
-                <input type="text"
-                       name="keyword"
-                       th:value="${keyword}"
-                       placeholder="Nhập tên công ty..."
-                       aria-label="Tìm theo tên công ty">
-
-                <!-- Tìm theo địa điểm -->
-                <input type="text"
-                       name="location"
-                       th:value="${location}"
-                       placeholder="Nhập địa điểm, ví dụ: Hà Nội..."
-                       aria-label="Tìm theo địa điểm">
-
-                <button type="submit" class="btn btn-primary">
-                    Tìm kiếm
+                <!-- Submit button -->
+                <button type="submit"
+                        class="w-full sm:w-auto px-7 py-3.5 min-h-[52px] bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base font-bold rounded-xl transition shadow-md shadow-blue-600/30 flex items-center justify-center gap-2 shrink-0 cursor-pointer">
+                    <i data-lucide="search" class="w-4.5 h-4.5"></i>
+                    <span>Tìm kiếm</span>
                 </button>
-
             </form>
         </div>
-    </section>
+    </div>
+</section>
 
+<!-- Main List Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
+    <div class="flex items-center justify-between mb-8">
+        <div>
+            <h2 class="text-xl sm:text-2xl font-bold font-heading text-slate-900 tracking-tight">Doanh Nghiệp Tuyển Dụng</h2>
+            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Danh sách các tổ chức, tập đoàn và doanh nghiệp công nghệ đang hoạt động</p>
+        </div>
+        <span class="text-xs font-semibold text-slate-500" th:if="${companies != null}">
+            Hiển thị <strong class="text-blue-600 font-bold" th:text="${#lists.size(companies)}">0</strong> doanh nghiệp
+        </span>
+    </div>
 
-    <section class="companies-section">
-        <h2>Các công ty tuyển dụng</h2>
+    <!-- Company Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" th:if="${not #lists.isEmpty(companies)}">
+        <div th:each="company : ${companies}"
+             class="group bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:border-blue-400 hover:shadow-floating transition-all flex flex-col justify-between">
+            <div>
+                <!-- Top Logo & Name -->
+                <div class="flex items-start gap-4 mb-4">
+                    <div class="w-16 h-16 rounded-2xl bg-white border border-slate-200 p-1 text-blue-600 flex items-center justify-center font-heading font-black text-xl shrink-0 shadow-sm overflow-hidden">
+                        <img th:if="${company.logoUrl != null and !#strings.isEmpty(company.logoUrl)}"
+                             th:src="${company.logoUrl}"
+                             th:alt="${company.companyName}"
+                             class="w-full h-full object-contain"
+                             onerror="this.style.display='none'">
+                        <span th:if="${company.logoUrl == null or #strings.isEmpty(company.logoUrl)}"
+                              th:text="${company.companyName != null and !#strings.isEmpty(company.companyName) ? #strings.substring(company.companyName, 0, 1).toUpperCase() : 'C'}">C</span>
+                    </div>
 
-        <!-- Có công ty ACTIVE -->
-        <div class="company-grid" th:if="${not #lists.isEmpty(companies)}">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-1.5 mb-1">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                                <i data-lucide="check-circle" class="w-3 h-3 text-emerald-600"></i> Đã xác thực
+                            </span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900 group-hover:text-blue-600 transition truncate font-heading"
+                            th:text="${company.companyName}">
+                            Tên công ty
+                        </h3>
+                        <p class="text-xs text-slate-500 flex items-center gap-1.5 mt-1 truncate">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
+                            <span th:text="${company.address != null and !#strings.isEmpty(company.address) ? company.address : 'Chưa cập nhật địa chỉ'}">Hà Nội</span>
+                        </p>
+                    </div>
+                </div>
 
-            <div class="company-card" th:each="company : ${companies}">
+                <!-- Description -->
+                <p class="text-xs text-slate-600 line-clamp-3 mb-6 leading-relaxed"
+                   th:text="${company.description != null and !#strings.isEmpty(company.description) ? company.description : 'Doanh nghiệp chưa cập nhật phần mô tả giới thiệu chi tiết.'}">
+                    Mô tả công ty
+                </p>
+            </div>
 
-                <div class="company-logo">
-                    <img th:if="${company.logoUrl != null
-                              and !#strings.isEmpty(company.logoUrl)}"
-                         th:src="${company.logoUrl}"
-                         th:alt="${company.companyName}">
-
-                    <span th:unless="${company.logoUrl != null
-                                   and !#strings.isEmpty(company.logoUrl)}">
-                    <span th:text="${#strings.substring(company.companyName, 0, 1)}">C</span>
+            <!-- Meta & Action -->
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold"
+                      th:if="${company.companySize != null and !#strings.isEmpty(company.companySize)}">
+                    <i data-lucide="users" class="w-3.5 h-3.5 text-slate-400"></i>
+                    <span th:text="${company.companySize}">50-150 người</span>
                 </span>
-                </div>
+                <span class="text-xs text-slate-400" th:unless="${company.companySize != null and !#strings.isEmpty(company.companySize)}">
+                    Quy mô: Chưa cập nhật
+                </span>
 
-                <div class="company-info">
-                    <h3 th:text="${company.companyName}">
-                        Tên công ty
-                    </h3>
-
-                    <p class="company-address">
-                        <span>Địa chỉ: </span>
-                        <span th:text="${company.address != null
-                                    ? company.address
-                                    : 'Chưa cập nhật'}">
-                        Hà Nội
-                    </span>
-                    </p>
-
-                    <p class="company-description"
-                       th:text="${company.description != null
-                             ? company.description
-                             : 'Chưa có mô tả công ty.'}">
-                        Mô tả công ty
-                    </p>
-
-                    <p class="company-size"
-                       th:if="${company.companySize != null}">
-                        <span>Quy mô: </span>
-                        <span th:text="${company.companySize}"></span>
-                    </p>
-
-                    <a class="company-detail-btn"
-                       th:href="@{/company-profile/{id}(id=${company.id})}">
-                        Xem thông tin
-                    </a>
-                </div>
-
+                <a th:href="@{/company-profile/{id}(id=${company.id})}"
+                   class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white text-xs font-bold transition">
+                    <span>Xem hồ sơ</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
             </div>
         </div>
+    </div>
 
-        <!-- Không có công ty ACTIVE -->
-        <div class="empty-state"
-             th:if="${#lists.isEmpty(companies)}">
-
-            <div class="empty-icon">⌕</div>
-
-            <h3>Chưa tìm thấy công ty</h3>
-
-            <p>Hiện chưa có công ty nào đang hoạt động.</p>
-
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(companies)}"
+         class="bg-white rounded-2xl p-16 text-center border border-slate-200 shadow-card max-w-lg mx-auto">
+        <div class="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="building" class="w-8 h-8"></i>
         </div>
-    </section>
-
-<!--    &lt;!&ndash; Danh sách công ty &ndash;&gt;-->
-<!--    <section class="companies-section">-->
-
-<!--        <div class="section-heading">-->
-<!--            <div>-->
-<!--                <h2>Các công ty tuyển dụng</h2>-->
-<!--                <p class="muted" th:if="${companies != null}">-->
-<!--                    Tổng số:-->
-<!--                    <strong th:text="${companies.size()}">0</strong> công ty-->
-<!--                </p>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        &lt;!&ndash; Có công ty &ndash;&gt;-->
-<!--        <div class="company-grid"-->
-<!--             th:if="${companies != null and !companies.isEmpty()}">-->
-
-<!--            <article class="company-card" th:each="company : ${companies}">-->
-
-<!--                <div class="company-card-top">-->
-<!--                    <div class="company-logo">-->
-<!--                        <span th:text="${company.companyName != null-->
-<!--                            and !company.companyName.isEmpty()-->
-<!--                            ? #strings.substring(company.companyName, 0, 1)-->
-<!--                            : 'C'}">C</span>-->
-<!--                    </div>-->
-
-<!--                    <div class="company-main-info">-->
-<!--                        <h3 th:text="${company.companyName}">-->
-<!--                            Tên công ty-->
-<!--                        </h3>-->
-
-<!--                        <span class="company-status"-->
-<!--                              th:if="${company.status != null}"-->
-<!--                              th:text="${company.status}">-->
-<!--                            Trạng thái-->
-<!--                        </span>-->
-<!--                    </div>-->
-<!--                </div>-->
-
-<!--                <div class="company-description"-->
-<!--                     th:text="${company.description != null-->
-<!--                         and !company.description.isEmpty()-->
-<!--                         ? company.description-->
-<!--                         : 'Công ty chưa cập nhật phần giới thiệu.'}">-->
-<!--                    Mô tả công ty-->
-<!--                </div>-->
-
-<!--                <div class="company-details">-->
-
-<!--                    <div class="detail">-->
-<!--                        <span class="detail-icon">⌖</span>-->
-<!--                        <span th:text="${company.address != null-->
-<!--                            and !company.address.isEmpty()-->
-<!--                            ? company.address-->
-<!--                            : 'Chưa cập nhật địa chỉ'}">-->
-<!--                            Địa chỉ-->
-<!--                        </span>-->
-<!--                    </div>-->
-
-<!--                    <div class="detail"-->
-<!--                         th:if="${company.companySize != null-->
-<!--                             and !company.companySize.isEmpty()}">-->
-<!--                        <span class="detail-icon">♙</span>-->
-<!--                        <span th:text="${company.companySize}">-->
-<!--                            Quy mô công ty-->
-<!--                        </span>-->
-<!--                    </div>-->
-
-<!--                    <div class="detail"-->
-<!--                         th:if="${company.website != null-->
-<!--                             and !company.website.isEmpty()}">-->
-<!--                        <span class="detail-icon">◎</span>-->
-<!--                        <a th:href="${company.website}"-->
-<!--                           th:text="${company.website}"-->
-<!--                           target="_blank"-->
-<!--                           rel="noopener noreferrer">-->
-<!--                            Website-->
-<!--                        </a>-->
-<!--                    </div>-->
-
-<!--                </div>-->
-
-<!--                <div class="company-card-footer">-->
-<!--                    <span class="company-label">Hồ sơ công ty</span>-->
-
-<!--                    <a class="btn btn-outline"-->
-<!--                       th:href="@{/company-profile}">-->
-<!--                        Xem hồ sơ-->
-<!--                    </a>-->
-<!--                </div>-->
-
-<!--            </article>-->
-
-<!--        </div>-->
-
-<!--        &lt;!&ndash; Chưa có công ty hoặc không tìm thấy &ndash;&gt;-->
-<!--        <div class="empty-state"-->
-<!--             th:if="${companies == null or companies.isEmpty()}">-->
-
-<!--            <div class="empty-icon">⌕</div>-->
-<!--            <h3>Chưa tìm thấy công ty</h3>-->
-<!--            <p>-->
-<!--                Không có công ty phù hợp với từ khóa của bạn,-->
-<!--                hoặc hệ thống chưa có dữ liệu công ty.-->
-<!--            </p>-->
-
-<!--            <a th:href="@{/company-profile}" class="btn btn-primary">-->
-<!--                Xem tất cả công ty-->
-<!--            </a>-->
-<!--        </div>-->
-
-<!--    </section>-->
-
+        <h3 class="text-base font-bold text-slate-900 mb-1 font-heading">Chưa tìm thấy doanh nghiệp phù hợp</h3>
+        <p class="text-xs text-slate-500 mb-6">Thử thay đổi từ khóa tìm kiếm hoặc lọc theo khu vực địa lý khác.</p>
+        <a th:href="@{/company-profile}"
+           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold shadow-md shadow-blue-600/20 hover:bg-blue-700 transition">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            <span>Xem tất cả công ty</span>
+        </a>
+    </div>
 </main>
 
-<footer class="footer">
-    <p>© 2026 OnlineRecruitment · Kết nối ứng viên với cơ hội nghề nghiệp</p>
-</footer>
+<!-- Unified Global Footer -->
+<footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

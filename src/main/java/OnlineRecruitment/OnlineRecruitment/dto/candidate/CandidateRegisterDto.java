@@ -20,12 +20,22 @@ public class CandidateRegisterDto {
     @NotBlank(message = "Họ và tên không được để trống")
     private String fullName;
 
-    @Pattern(regexp = "^$|^0[35789][0-9]{8}$", message = "Số điện thoại không hợp lệ")
+    @NotBlank(message = "Số điện thoại không được để trống")
+    @Pattern(regexp = "^(?:\\+84|0)[1-9][0-9]{8,9}$", message = "Số điện thoại phải từ 10 - 11 chữ số hợp lệ theo quy chuẩn hiện tại (VD: 0912345678, 02412345678)")
     private String phone;
+//    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+//    private LocalDate dob;
+//    @NotNull(message = "Ngày sinh không được để trống")
+//    @Past(message = "Ngày sinh không được phép ở trong tương lai")
+//    private String gender;
 
+    // Ngày sinh
+    @NotNull(message = "Ngày sinh không được để trống")
+    @Past(message = "Ngày sinh không được phép ở trong tương lai")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dob;
-
+    // Giới tính
+    @NotBlank(message = "Vui lòng chọn giới tính")
     private String gender;
 
     private String address;

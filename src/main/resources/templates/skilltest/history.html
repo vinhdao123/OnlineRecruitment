@@ -3,109 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đánh giá kỹ năng - Online Recruitment</title>
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+    <title>Lịch sử đánh giá kỹ năng — Online Recruitment</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body class="page-wrapper">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- TASKBAR -->
-<header th:replace="~{fragments/taskbar :: taskbar('history')}"></header>
+<!-- Taskbar Header -->
+<div th:replace="~{fragments/taskbar :: taskbar('history')}"></div>
 
-<div style="max-width: 1100px; margin: 30px auto; padding: 0 20px;">
+<main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <!-- BREADCRUMB -->
-    <div style="font-size:14px; color:#64748b; margin-bottom:20px;">
-        <a th:href="@{/}" style="color:#64748b; text-decoration:none;">Trang chủ</a> ›
-        <a th:href="@{/skill-tests}" style="color:#64748b; text-decoration:none;">Đánh giá kỹ năng</a> ›
-        <span style="color:#00b14f; font-weight:600;">Lịch sử bài thi</span>
-    </div>
-
-    <!-- STATS OVERVIEW -->
-    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; margin-bottom:30px;">
-        <div style="background:#fff; border-radius:14px; padding:24px; border:1px solid #e2e8f0; box-shadow:var(--card-shadow); display:flex; align-items:center; gap:16px;">
-            <div style="width:52px; height:52px; border-radius:12px; background:#eff6ff; color:#2563eb; display:flex; align-items:center; justify-content:center; font-size:24px;">
-                📝
-            </div>
-            <div>
-                <div style="font-size:13px; color:#64748b; font-weight:600;">Tổng số bài đã thi</div>
-                <div style="font-size:26px; font-weight:800; color:#0f172a;" th:text="${stats.totalTests}">0</div>
-            </div>
-        </div>
-
-        <div style="background:#fff; border-radius:14px; padding:24px; border:1px solid #e2e8f0; box-shadow:var(--card-shadow); display:flex; align-items:center; gap:16px;">
-            <div style="width:52px; height:52px; border-radius:12px; background:#ecfdf5; color:#00b14f; display:flex; align-items:center; justify-content:center; font-size:24px;">
-                🏆
-            </div>
-            <div>
-                <div style="font-size:13px; color:#64748b; font-weight:600;">Số bài thi Đạt</div>
-                <div style="font-size:26px; font-weight:800; color:#00b14f;" th:text="${stats.passedTests}">0</div>
-            </div>
-        </div>
-
-        <div style="background:#fff; border-radius:14px; padding:24px; border:1px solid #e2e8f0; box-shadow:var(--card-shadow); display:flex; align-items:center; gap:16px;">
-            <div style="width:52px; height:52px; border-radius:12px; background:#fef3c7; color:#b45309; display:flex; align-items:center; justify-content:center; font-size:24px;">
-                ⭐
-            </div>
-            <div>
-                <div style="font-size:13px; color:#64748b; font-weight:600;">Điểm trung bình</div>
-                <div style="font-size:26px; font-weight:800; color:#b45309;" th:text="${stats.avgScore}">0.0</div>
-            </div>
+    <!-- Top Action Breadcrumb -->
+    <div class="mb-6 flex items-center justify-between">
+        <a th:href="@{/skill-tests}" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-600 hover:text-primary-600 transition-colors">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            Quay lại Danh sách bài test
+        </a>
+        <div class="text-xs text-slate-500 font-medium">
+            <a th:href="@{/}" class="hover:text-primary-600">Trang chủ</a> /
+            <a th:href="@{/skill-tests}" class="hover:text-primary-600">Đánh giá kỹ năng</a> /
+            <span class="text-slate-800 font-semibold">Lịch sử làm bài</span>
         </div>
     </div>
 
-    <!-- TABLE CARD -->
-    <div style="background:#fff; border-radius:16px; border:1px solid #e2e8f0; padding:24px; box-shadow:var(--card-shadow);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="font-size:18px; font-weight:800; color:#0f172a;">
-                📜 Danh sách kết quả các bài thi của bạn
-            </h2>
-            <a th:href="@{/skill-tests}" class="btn-search" style="font-size:13.5px; padding:8px 16px; text-decoration:none;">
-                + Làm bài test mới
+    <!-- Header Banner -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-6 sm:p-8 mb-8 shadow-sm">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight font-display mb-2 flex items-center gap-3">
+                    <span class="w-10 h-10 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center">
+                        <i data-lucide="award" class="w-6 h-6"></i>
+                    </span>
+                    Lịch sử làm bài thi đánh giá năng lực
+                </h1>
+                <p class="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed">
+                    Tổng kết kết quả các bài kiểm tra chuyên môn, điểm số đạt được và liên kết xem lại lời giải chi tiết.
+                </p>
+            </div>
+            <a th:href="@{/skill-tests}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all self-start sm:self-auto">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Làm bài test mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Overview Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold flex-shrink-0">
+                <i data-lucide="file-check-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Tổng số bài đã thi</span>
+                <strong class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-mono" th:text="${stats.totalTests}">0</strong>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold flex-shrink-0">
+                <i data-lucide="trophy" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Số bài thi Đạt</span>
+                <strong class="text-2xl sm:text-3xl font-extrabold text-emerald-600 font-mono" th:text="${stats.passedTests}">0</strong>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold flex-shrink-0">
+                <i data-lucide="star" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Điểm trung bình</span>
+                <strong class="text-2xl sm:text-3xl font-extrabold text-amber-600 font-mono" th:text="${stats.avgScore}">0.0</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900 font-display">Danh sách kết quả các lượt thi</h2>
+            <span class="text-xs text-slate-500 font-medium">Bấm vào hàng để xem lại chi tiết bài làm</span>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${#lists.isEmpty(attempts)}" class="py-16 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="inbox" class="w-8 h-8"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 font-display mb-1">Bạn chưa thực hiện bài thi nào</h3>
+            <p class="text-sm text-slate-500 max-w-sm mx-auto mb-6">
+                Hãy bắt đầu thử sức với các bài thi đánh giá kỹ năng để bổ sung chứng chỉ vào hồ sơ cá nhân.
+            </p>
+            <a th:href="@{/skill-tests}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                Khám phá bài test ngay
             </a>
         </div>
 
-        <div th:if="${#lists.isEmpty(attempts)}" style="text-align:center; padding:50px 20px; color:#64748b;">
-            <p style="font-size:16px; margin-bottom:12px;">Bạn chưa thực hiện bài thi đánh giá kỹ năng nào.</p>
-            <a th:href="@{/skill-tests}" class="btn-search" style="text-decoration:none; display:inline-block;">Bắt đầu làm bài test ngay</a>
-        </div>
-
-        <div th:if="${!#lists.isEmpty(attempts)}" style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+        <!-- Table -->
+        <div th:unless="${#lists.isEmpty(attempts)}" class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
                 <thead>
-                    <tr style="border-bottom:2px solid #e2e8f0; color:#64748b; font-size:13px; text-transform:uppercase;">
-                        <th style="padding:12px 14px;">Bài thi</th>
-                        <th style="padding:12px 14px;">Điểm số</th>
-                        <th style="padding:12px 14px;">Số câu đúng</th>
-                        <th style="padding:12px 14px;">Xếp loại</th>
-                        <th style="padding:12px 14px;">Kết quả</th>
-                        <th style="padding:12px 14px;">Thời gian thi</th>
-                        <th style="padding:12px 14px; text-align:right;">Chi tiết</th>
+                    <tr class="border-b border-slate-200 bg-slate-50/70 text-slate-500 uppercase tracking-wider text-[11px]">
+                        <th class="py-3.5 px-6 font-semibold">Bài thi</th>
+                        <th class="py-3.5 px-6 font-semibold">Điểm số</th>
+                        <th class="py-3.5 px-6 font-semibold">Số câu đúng</th>
+                        <th class="py-3.5 px-6 font-semibold">Xếp loại</th>
+                        <th class="py-3.5 px-6 font-semibold">Kết quả</th>
+                        <th class="py-3.5 px-6 font-semibold">Thời gian nộp</th>
+                        <th class="py-3.5 px-6 font-semibold text-right">Chi tiết</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr th:each="a : ${attempts}" style="border-bottom:1px solid #f1f5f9; transition:background 0.2s;">
-                        <td style="padding:14px;">
-                            <strong style="color:#0f172a;" th:text="${a.skillTest.title}">Đề thi Java</strong>
-                            <div style="font-size:12px; color:#64748b;" th:text="${a.skillTest.skillName}">Java</div>
+                <tbody class="divide-y divide-slate-100">
+                    <tr th:each="a : ${attempts}" class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-4 px-6">
+                            <strong class="text-slate-900 font-semibold block text-sm" th:text="${a.skillTest.title}">Đề thi Java</strong>
+                            <span class="text-slate-400 text-xs" th:text="${a.skillTest.skillName}">Java</span>
                         </td>
-                        <td style="padding:14px;">
-                            <b style="font-size:16px;" th:text="${#numbers.formatDecimal(a.score, 0, 0)} + '/100'">80/100</b>
+                        <td class="py-4 px-6 font-bold text-base font-mono"
+                            th:classappend="${a.isPassed} ? 'text-emerald-600' : 'text-rose-600'"
+                            th:text="${#numbers.formatDecimal(a.score, 0, 0)} + '/100'">80/100</td>
+                        <td class="py-4 px-6 text-slate-700 font-medium" th:text="${a.correctAnswers + ' / ' + a.totalQuestions}">8 / 10</td>
+                        <td class="py-4 px-6">
+                            <span class="px-2.5 py-1 rounded-md text-xs font-semibold bg-slate-100 text-slate-700" th:text="${a.performanceRating}">Khá</span>
                         </td>
-                        <td style="padding:14px;" th:text="${a.correctAnswers + ' / ' + a.totalQuestions}">8 / 10</td>
-                        <td style="padding:14px;">
-                            <span class="meta-pill difficulty" th:text="${a.performanceRating}">Khá</span>
+                        <td class="py-4 px-6 whitespace-nowrap">
+                            <span th:if="${a.isPassed}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> ĐẠT
+                            </span>
+                            <span th:if="${!a.isPassed}" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> CHƯA ĐẠT
+                            </span>
                         </td>
-                        <td style="padding:14px;">
-                            <span th:if="${a.isPassed}" class="meta-pill participants">✓ ĐẠT</span>
-                            <span th:if="${!a.isPassed}" class="meta-pill" style="background:#fee2e2; color:#b91c1c;">✕ CHƯA ĐẠT</span>
-                        </td>
-                        <td style="padding:14px; color:#64748b;" th:text="${#temporals.format(a.completedAt, 'dd/MM/yyyy HH:mm')}">
-                            26/10/2026 14:00
-                        </td>
-                        <td style="padding:14px; text-align:right;">
-                            <a th:href="@{'/skill-tests/result/' + ${a.id}}" style="color:#00b14f; font-weight:700; text-decoration:none;">
-                                Xem bài làm →
+                        <td class="py-4 px-6 text-slate-500 whitespace-nowrap"
+                            th:text="${#temporals.format(a.completedAt, 'dd/MM/yyyy HH:mm')}">26/10/2026</td>
+                        <td class="py-4 px-6 text-right whitespace-nowrap">
+                            <a th:href="@{'/skill-tests/result/' + ${a.id}}"
+                               class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-primary-700 bg-primary-50 hover:bg-primary-100 border border-primary-200 transition-colors">
+                                Xem bài làm
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                             </a>
                         </td>
                     </tr>
@@ -113,17 +200,27 @@
             </table>
         </div>
 
-        <!-- PAGINATION -->
-        <div th:if="${totalPages > 1}" style="display:flex; justify-content:center; gap:8px; margin-top:24px;">
-            <a th:if="${currentPage > 0}" th:href="@{/candidate/skill-tests/history(page=${currentPage - 1})}" class="category-pill">‹ Trước</a>
+        <!-- Pagination -->
+        <div th:if="${totalPages > 1}" class="p-6 border-t border-slate-100 flex items-center justify-center gap-2">
+            <a th:if="${currentPage > 0}" th:href="@{/candidate/skill-tests/history(page=${currentPage - 1})}"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">‹ Trước</a>
+
             <span th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{/candidate/skill-tests/history(page=${i})}" class="category-pill" th:classappend="${i == currentPage} ? 'active' : ''" th:text="${i + 1}">1</a>
+                <a th:href="@{/candidate/skill-tests/history(page=${i})}"
+                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-colors"
+                   th:classappend="${i == currentPage} ? 'bg-primary-600 text-white shadow-sm' : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'"
+                   th:text="${i + 1}">1</a>
             </span>
-            <a th:if="${currentPage < totalPages - 1}" th:href="@{/candidate/skill-tests/history(page=${currentPage + 1})}" class="category-pill">Sau ›</a>
+
+            <a th:if="${currentPage < totalPages - 1}" th:href="@{/candidate/skill-tests/history(page=${currentPage + 1})}"
+               class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">Sau ›</a>
         </div>
     </div>
 
-</div>
+</main>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

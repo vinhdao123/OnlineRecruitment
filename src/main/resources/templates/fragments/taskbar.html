@@ -5,123 +5,659 @@
 </head>
 <body>
 
-<!-- Taskbar Fragment -->
-<header th:fragment="taskbar(activeTab)" class="taskbar">
-    <div class="taskbar-container">
-        <a th:href="@{/}" class="taskbar-brand">
-            <span class="taskbar-brand-icon">OR</span>
-            <span>Online Recruitment</span>
+<!-- =========================================================================
+     JOBPORTAL GLOBAL NAVBAR (Modern Professional SaaS Navigation)
+     Applicable across all roles: Guest, Candidate, Recruiter, Admin
+     Supports: Desktop / Mobile / Light Mode / Dark Mode
+     ========================================================================= -->
+<header th:fragment="taskbar(activeTab)" class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-sm transition-colors duration-200">
+
+    <!-- Anti-FOUC Instant Theme Initializer -->
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
+
+    <div class="mx-auto flex h-[84px] max-w-[1440px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        
+        <!-- LEFT: BRAND LOGO & SUBTITLE -->
+        <a th:href="@{/}" class="flex items-center gap-3 shrink-0 group">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white font-black shadow-md shadow-blue-500/25 group-hover:bg-blue-700 transition">
+                <i data-lucide="briefcase" class="h-6 w-6"></i>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-2xl font-black tracking-tight text-slate-900 dark:text-white font-heading leading-tight">
+                    JOB<span class="text-blue-600 dark:text-blue-400">PORTAL</span>
+                </span>
+                <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
+                      sec:authorize="!isAuthenticated()">Career Platform</span>
+                <span class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider"
+                      sec:authorize="hasRole('CANDIDATE')">Candidate Portal</span>
+                <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider"
+                      sec:authorize="hasRole('RECRUITER')">Recruiter Studio</span>
+                <span class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider"
+                      sec:authorize="hasRole('ADMIN')">Admin Workspace</span>
+            </div>
         </a>
 
-        <!-- Navigation Links -->
-        <nav class="taskbar-nav">
-            <a th:href="@{/}" th:classappend="${activeTab == 'home'} ? 'active'">Trang chủ</a>
-            <a th:href="@{/interview-questions}" th:classappend="${activeTab == 'interview'} ? 'active'">Cẩm nang phỏng vấn</a>
-            <a th:href="@{/skill-tests}" th:classappend="${activeTab == 'skilltest'} ? 'active'">Đánh giá kỹ năng</a>
+        <!-- CENTER: ROLE-BASED NAVIGATION LINKS (Desktop: md+) -->
+        <nav class="hidden md:flex items-center gap-1.5 lg:gap-2.5 text-[16px] font-semibold text-slate-700 dark:text-slate-200" aria-label="Điều hướng chính">
+            
+            <!-- 1. GUEST / PUBLIC NAVIGATION -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a th:href="@{/jobs}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'jobs'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                    <span>Tìm việc làm</span>
+                </a>
+                <a th:href="@{/company-profile}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'companies'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span>Công ty</span>
+                </a>
+                <a th:href="@{/interview-questions}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'interview'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="book-open" class="w-5 h-5"></i>
+                    <span>Cẩm nang</span>
+                </a>
+                <a th:href="@{/skill-tests}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'skilltest' or activeTab == 'skilltests'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    <span>Đánh giá kỹ năng</span>
+                </a>
+                <a th:href="@{/pricing}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'pricing'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                    <span>Bảng giá NTD</span>
+                </a>
+            </th:block>
 
-            <!-- Candidate Links -->
+            <!-- 2. CANDIDATE ROLE NAVIGATION -->
             <th:block sec:authorize="hasRole('CANDIDATE')">
-                <a th:href="@{/jobs}" th:classappend="${activeTab == 'jobs'} ? 'active'">Tìm việc làm</a>
-                <a th:href="@{/candidate/dashboard}" th:classappend="${activeTab == 'dashboard'} ? 'active'">Bảng điều khiển</a>
-                <a th:href="@{/candidate/profile}" th:classappend="${activeTab == 'profile'} ? 'active'">Hồ sơ của tôi</a>
-                <a th:href="@{/candidate/cvs}" th:classappend="${activeTab == 'cvs'} ? 'active'">CV của tôi</a>
+                <a th:href="@{/jobs}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'jobs'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="search" class="w-5 h-5"></i>
+                    <span>Tìm việc làm</span>
+                </a>
+                <a th:href="@{/company-profile}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'companies'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="building-2" class="w-5 h-5"></i>
+                    <span>Công ty</span>
+                </a>
+                <a th:href="@{/candidate/cvs}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'cvs'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                    <span>CV của tôi</span>
+                </a>
+                <a th:href="@{/skill-tests}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'skilltest' or activeTab == 'skilltests'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                    <span>Đánh giá kỹ năng</span>
+                </a>
+                <a th:href="@{/candidate/dashboard}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'dashboard'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Dashboard</span>
+                </a>
             </th:block>
 
-            <!-- Recruiter Links -->
+            <!-- 3. RECRUITER ROLE NAVIGATION -->
             <th:block sec:authorize="hasRole('RECRUITER')">
-                <a th:href="@{/recruiter/dashboard}" th:classappend="${activeTab == 'dashboard'} ? 'active'">Kênh tuyển dụng</a>
-                <a th:href="@{/recruiter/profile}" th:classappend="${activeTab == 'profile'} ? 'active'">Hồ sơ công ty</a>
+                <a th:href="@{/recruiter/dashboard}" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'dashboard'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+                    <span>Kênh tuyển dụng</span>
+                </a>
+                <a th:href="@{/recruiter/jobs}" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'jobs'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="briefcase" class="w-5 h-5"></i>
+                    <span>Tin đã đăng</span>
+                </a>
+                <a th:href="@{/recruiter/applications}" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'applications'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Ứng viên</span>
+                </a>
+                <a th:href="@{/recruiter/interviews}" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'interviews'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="calendar" class="w-5 h-5"></i>
+                    <span>Lịch hẹn</span>
+                </a>
+                <a th:href="@{/pricing}" class="inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'pricing'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i>
+                    <span>Gói dịch vụ</span>
+                </a>
             </th:block>
 
-            <!-- Admin Links -->
+            <!-- 4. ADMIN ROLE NAVIGATION -->
             <th:block sec:authorize="hasRole('ADMIN')">
-                <a th:href="@{/admin/dashboard}" th:classappend="${activeTab == 'admin'} ? 'active'">Quản trị hệ thống</a>
+                <a th:href="@{/admin/dashboard}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400"
+                   th:classappend="${activeTab == 'admin' or activeTab == 'dashboard'} ? 'bg-blue-50 text-blue-600 font-bold dark:bg-blue-900/40 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-sm' : ''">
+                    <i data-lucide="shield-check" class="w-5 h-5"></i>
+                    <span>Bảng điều khiển</span>
+                </a>
+                <a th:href="@{/admin/jobs}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                    <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    <span>Duyệt tin</span>
+                </a>
+                <a th:href="@{/admin/companies}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                    <i data-lucide="building" class="w-5 h-5"></i>
+                    <span>Duyệt công ty</span>
+                </a>
+                <a th:href="@{/admin/users}" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 transition-all whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                    <i data-lucide="users" class="w-5 h-5"></i>
+                    <span>Người dùng</span>
+                </a>
             </th:block>
+
         </nav>
 
-        <!-- User Dropdown Area -->
-        <div class="user-dropdown-wrapper" id="userMenuDropdown">
-            <div class="user-trigger">
-                <div class="user-avatar-small">
-                    <img th:if="${currentUser != null and currentUser.avatarUrl != null and !#strings.isEmpty(currentUser.avatarUrl)}"
-                         th:src="@{${currentUser.avatarUrl}}" alt="Avatar">
-                    <span th:if="${currentUser == null or currentUser.avatarUrl == null or #strings.isEmpty(currentUser.avatarUrl)}"
-                          th:text="${currentUser != null and currentUser.fullName != null ? #strings.substring(currentUser.fullName, 0, 1).toUpperCase() : 'U'}">U</span>
+        <!-- RIGHT: ACTIONS, THEME TOGGLE & ACCOUNT MENU -->
+        <div class="flex items-center gap-2.5 sm:gap-3.5">
+            
+            <!-- Recruiter Post Job Primary CTA (Desktop) -->
+            <th:block sec:authorize="hasRole('RECRUITER')">
+                <a th:href="@{/recruiter/jobs/new}"
+                   class="hidden sm:inline-flex items-center gap-2 h-[46px] px-5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-600/25 transition">
+                    <i data-lucide="plus-circle" class="w-4.5 h-4.5"></i>
+                    <span>Đăng Tin Mới</span>
+                </a>
+            </th:block>
+
+            <!-- THEME TOGGLE COMPONENT (Light / Dark / System Default) -->
+            <div class="relative" id="themeToggleContainer">
+                <button type="button"
+                        id="themeToggleBtn"
+                        onclick="toggleThemeDropdown(event)"
+                        title="Chuyển đổi giao diện Sáng / Tối"
+                        aria-label="Chuyển đổi giao diện Sáng / Tối"
+                        class="flex h-[46px] w-[46px] items-center justify-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition cursor-pointer">
+                    <span id="themeCurrentIcon" class="flex items-center justify-center">
+                        <i data-lucide="sun" class="w-5 h-5 text-amber-500"></i>
+                    </span>
+                </button>
+
+                <!-- Theme Selection Dropdown -->
+                <div id="themeDropdownMenu"
+                     class="absolute right-0 mt-2 w-48 origin-top-right rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 shadow-xl hidden z-50 transition-all">
+                    <button type="button"
+                            id="theme-opt-light"
+                            onclick="JobPortalTheme.setTheme('light')"
+                            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 transition">
+                        <i data-lucide="sun" class="w-4.5 h-4.5 text-amber-500"></i>
+                        <span>Chế độ Sáng</span>
+                    </button>
+                    <button type="button"
+                            id="theme-opt-dark"
+                            onclick="JobPortalTheme.setTheme('dark')"
+                            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 transition">
+                        <i data-lucide="moon" class="w-4.5 h-4.5 text-blue-400"></i>
+                        <span>Chế độ Tối</span>
+                    </button>
+                    <button type="button"
+                            id="theme-opt-system"
+                            onclick="JobPortalTheme.setTheme('system')"
+                            class="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 transition">
+                        <i data-lucide="laptop" class="w-4.5 h-4.5 text-slate-400"></i>
+                        <span>Theo Hệ thống</span>
+                    </button>
                 </div>
-                <div class="user-info-text">
-                    <span class="user-display-name" th:text="${currentUser != null ? currentUser.fullName : #authentication.name}">Tài khoản</span>
-                    <span class="user-role-badge">
-                            <span sec:authorize="hasRole('CANDIDATE')">Ứng viên</span>
-                            <span sec:authorize="hasRole('RECRUITER')">Nhà tuyển dụng</span>
-                            <span sec:authorize="hasRole('ADMIN')">Quản trị viên</span>
-                        </span>
-                </div>
-                <span class="dropdown-arrow">▼</span>
             </div>
 
-            <!-- Dropdown Menu -->
-            <div class="user-dropdown-menu">
-                <div class="menu-header">
-                    <div class="menu-header-name" th:text="${currentUser != null ? currentUser.fullName : 'Người dùng'}">Người dùng</div>
-                    <div class="menu-header-email" th:text="${currentUser != null ? currentUser.email : #authentication.name}">email@example.com</div>
+            <!-- GUEST AUTH BUTTONS -->
+            <th:block sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}"
+                   class="inline-flex items-center gap-1.5 h-[46px] px-4.5 text-[15px] font-semibold text-slate-700 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition whitespace-nowrap">
+                    <i data-lucide="log-in" class="h-4.5 w-4.5"></i>
+                    <span>Đăng nhập</span>
+                </a>
+                <a th:href="@{/register/candidate}"
+                   class="hidden sm:inline-flex items-center gap-1.5 h-[46px] px-5 text-[15px] font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-600/25 transition whitespace-nowrap">
+                    <i data-lucide="user-plus" class="h-4.5 w-4.5"></i>
+                    <span>Đăng ký</span>
+                </a>
+            </th:block>
+
+            <!-- AUTHENTICATED USER DROPDOWN (Modern SaaS Profile Card) -->
+            <th:block sec:authorize="isAuthenticated()">
+                <div class="relative" id="userMenuContainer">
+                    <button type="button"
+                            id="userDropdownBtn"
+                            onclick="toggleUserDropdown(event)"
+                            class="flex h-[48px] items-center gap-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-1.5 pr-3.5 shadow-sm hover:border-blue-400 hover:shadow-md transition">
+                        
+                        <!-- Avatar -->
+                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-600 font-bold text-base overflow-hidden shrink-0 shadow-sm">
+                            <img th:if="${currentUser != null and currentUser.avatarUrl != null and !#strings.isEmpty(currentUser.avatarUrl)}"
+                                 th:src="@{${currentUser.avatarUrl}}" alt="Avatar" class="h-full w-full object-cover">
+                            <span th:if="${currentUser == null or currentUser.avatarUrl == null or #strings.isEmpty(currentUser.avatarUrl)}"
+                                  th:text="${currentUser?.fullName != null and !#strings.isEmpty(currentUser.fullName) ? #strings.substring(currentUser.fullName, 0, 1).toUpperCase() : (#authentication?.name != null and !#strings.isEmpty(#authentication.name) ? #strings.substring(#authentication.name, 0, 1).toUpperCase() : 'U')}">U</span>
+                        </div>
+                        
+                        <!-- Identity info -->
+                        <div class="hidden sm:flex flex-col text-left">
+                            <span class="text-sm font-bold text-slate-800 dark:text-slate-100 max-w-[140px] truncate"
+                                  th:text="${currentUser?.fullName ?: (#authentication?.name ?: 'Tài khoản')}">Tài khoản</span>
+                            <span class="text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                                <span sec:authorize="hasRole('CANDIDATE')">Ứng viên</span>
+                                <span sec:authorize="hasRole('RECRUITER')">Nhà tuyển dụng</span>
+                                <span sec:authorize="hasRole('ADMIN')">Quản trị viên</span>
+                            </span>
+                        </div>
+                        <i data-lucide="chevron-down" class="h-4 w-4 text-slate-400"></i>
+                    </button>
+
+                    <!-- SaaS Dropdown Menu -->
+                    <div id="userDropdownContent"
+                         class="absolute right-0 mt-2 w-64 origin-top-right rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-2 shadow-xl hidden z-50">
+                        
+                        <!-- Header identity strip -->
+                        <div class="border-b border-slate-100 dark:border-slate-700 px-3 py-2.5">
+                            <p class="text-xs font-bold text-slate-900 dark:text-white truncate" th:text="${currentUser?.fullName ?: (#authentication?.name ?: 'Người dùng')}"></p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate" th:text="${currentUser?.email ?: (#authentication?.name ?: '')}"></p>
+                            <div class="mt-1.5">
+                                <span class="badge badge-primary text-[10px]">
+                                    <span sec:authorize="hasRole('CANDIDATE')">Tài khoản Ứng viên</span>
+                                    <span sec:authorize="hasRole('RECRUITER')">Tài khoản Doanh nghiệp</span>
+                                    <span sec:authorize="hasRole('ADMIN')">Quản trị viên Hệ thống</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Dropdown Items by Role -->
+                        <div class="py-1 text-xs font-semibold text-slate-700 dark:text-slate-300 space-y-0.5">
+                            
+                            <!-- Candidate Links -->
+                            <th:block sec:authorize="hasRole('CANDIDATE')">
+                                <a th:href="@{/candidate/dashboard}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                                    <span>Bảng điều khiển</span>
+                                </a>
+                                <a th:href="@{/candidate/profile}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="user" class="h-4 w-4"></i>
+                                    <span>Hồ sơ cá nhân</span>
+                                </a>
+                                <a th:href="@{/candidate/cvs}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="file-text" class="h-4 w-4"></i>
+                                    <span>Quản lý CV</span>
+                                </a>
+                                <a th:href="@{/candidate/saved}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="bookmark" class="h-4 w-4"></i>
+                                    <span>Việc làm đã lưu</span>
+                                </a>
+                                <a th:href="@{/candidate/change-password}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="key" class="h-4 w-4"></i>
+                                    <span>Đổi mật khẩu</span>
+                                </a>
+                            </th:block>
+
+                            <!-- Recruiter Links -->
+                            <th:block sec:authorize="hasRole('RECRUITER')">
+                                <a th:href="@{/recruiter/dashboard}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                                    <span>Kênh tuyển dụng</span>
+                                </a>
+                                <a th:href="@{/recruiter/profile}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="building" class="h-4 w-4"></i>
+                                    <span>Hồ sơ Doanh nghiệp</span>
+                                </a>
+                                <a th:href="@{/recruiter/jobs}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="briefcase" class="h-4 w-4"></i>
+                                    <span>Quản lý tin đăng</span>
+                                </a>
+                                <a th:href="@{/recruiter/applications}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="users" class="h-4 w-4"></i>
+                                    <span>Hồ sơ ứng viên</span>
+                                </a>
+                                <a th:href="@{/recruiter/interviews}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="calendar-check" class="h-4 w-4"></i>
+                                    <span>Lịch phỏng vấn</span>
+                                </a>
+                                <a th:href="@{/pricing}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="sparkles" class="h-4 w-4 text-amber-500"></i>
+                                    <span>Nâng cấp gói dịch vụ</span>
+                                </a>
+                                <a th:href="@{/recruiter/packages/history}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="receipt" class="h-4 w-4"></i>
+                                    <span>Lịch sử giao dịch</span>
+                                </a>
+                                <a th:href="@{/recruiter/change-password}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="key" class="h-4 w-4"></i>
+                                    <span>Đổi mật khẩu</span>
+                                </a>
+                            </th:block>
+
+                            <!-- Admin Links -->
+                            <th:block sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/admin/dashboard}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="shield-check" class="h-4 w-4"></i>
+                                    <span>Bảng điều khiển Admin</span>
+                                </a>
+                                <a th:href="@{/admin/jobs}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="clipboard-check" class="h-4 w-4"></i>
+                                    <span>Duyệt tin tuyển dụng</span>
+                                </a>
+                                <a th:href="@{/admin/companies}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="building" class="h-4 w-4"></i>
+                                    <span>Duyệt doanh nghiệp</span>
+                                </a>
+                                <a th:href="@{/admin/users}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="users" class="h-4 w-4"></i>
+                                    <span>Quản lý người dùng</span>
+                                </a>
+                                <a th:href="@{/admin/payments}" class="flex items-center gap-2.5 rounded-xl px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-600 dark:hover:text-blue-400 transition">
+                                    <i data-lucide="receipt" class="h-4 w-4"></i>
+                                    <span>Đối soát SePay</span>
+                                </a>
+                            </th:block>
+
+                        </div>
+
+                        <!-- Divider & Logout Action -->
+                        <div class="border-t border-slate-100 dark:border-slate-700 pt-1 mt-1">
+                            <form th:action="@{/logout}" method="post">
+                                <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition">
+                                    <i data-lucide="log-out" class="h-4 w-4"></i>
+                                    <span>Đăng xuất</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="menu-items">
-                    <!-- Option 1: Thông tin cá nhân -->
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/profile}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Thông tin cá nhân</span>
-                    </a>
+            </th:block>
 
-                    <!-- Option 2: CV -->
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/cvs}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        <span>Quản lý CV</span>
-                    </a>
+            <!-- MOBILE MENU TOGGLE BUTTON (md:hidden) -->
+            <button type="button"
+                    id="mobileMenuToggleBtn"
+                    onclick="toggleMobileMenu()"
+                    aria-label="Mở menu điều hướng"
+                    class="md:hidden flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <i data-lucide="menu" id="mobileMenuIcon" class="h-5 w-5"></i>
+            </button>
+        </div>
 
-                    <!-- Option 3: Thay đổi mật khẩu -->
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/change-password}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        <span>Thay đổi mật khẩu</span>
-                    </a>
+    </div>
 
-                    <!-- Recruiter options -->
-                    <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/profile}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                        <span>Thông tin cá nhân & Công ty</span>
-                    </a>
-                    <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/change-password}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        <span>Thay đổi mật khẩu</span>
-                    </a>
-
-                    <!-- Dashboard shortcuts -->
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/dashboard}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Bảng điều khiển</span>
-                    </a>
-                    <a sec:authorize="hasRole('CANDIDATE')" th:href="@{/candidate/skill-tests/history}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        <span>Lịch sử test kỹ năng</span>
-                    </a>
-                    <a sec:authorize="hasRole('RECRUITER')" th:href="@{/recruiter/dashboard}" class="menu-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                        <span>Kênh tuyển dụng</span>
-                    </a>
-
-                    <div class="menu-divider"></div>
-
-                    <!-- Logout Button -->
-                    <form th:action="@{/logout}" method="post" style="margin: 0;">
-                        <button type="submit" class="menu-item logout-item">
-                            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                            <span>Đăng xuất</span>
-                        </button>
-                    </form>
-                </div>
+    <!-- MOBILE MENU DRAWER (md:hidden) -->
+    <div id="mobileMenuDrawer" class="hidden md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-4 space-y-1 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-xl transition-all">
+        
+        <!-- Mobile Theme Switcher Bar -->
+        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100 dark:border-slate-800 text-xs">
+            <span class="text-slate-500 dark:text-slate-400">Giao diện</span>
+            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                <button type="button" onclick="JobPortalTheme.setTheme('light')" class="px-2.5 py-1 rounded-lg text-xs font-semibold hover:bg-white dark:hover:bg-slate-700 transition">Sáng</button>
+                <button type="button" onclick="JobPortalTheme.setTheme('dark')" class="px-2.5 py-1 rounded-lg text-xs font-semibold hover:bg-white dark:hover:bg-slate-700 transition">Tối</button>
+                <button type="button" onclick="JobPortalTheme.setTheme('system')" class="px-2.5 py-1 rounded-lg text-xs font-semibold hover:bg-white dark:hover:bg-slate-700 transition">Tự động</button>
             </div>
         </div>
+
+        <!-- Public Mobile Links -->
+        <a th:href="@{/}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+            <i data-lucide="home" class="h-4 w-4"></i>
+            <span>Trang chủ</span>
+        </a>
+        <a th:href="@{/jobs}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+            <i data-lucide="search" class="h-4 w-4"></i>
+            <span>Tìm việc làm</span>
+        </a>
+        <a th:href="@{/company-profile}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+            <i data-lucide="building-2" class="h-4 w-4"></i>
+            <span>Danh bạ công ty</span>
+        </a>
+        <a th:href="@{/interview-questions}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+            <i data-lucide="book-open" class="h-4 w-4"></i>
+            <span>Cẩm nang phỏng vấn</span>
+        </a>
+        <a th:href="@{/skill-tests}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+            <i data-lucide="check-circle-2" class="h-4 w-4"></i>
+            <span>Đánh giá kỹ năng</span>
+        </a>
+        <a th:href="@{/pricing}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+            <i data-lucide="credit-card" class="h-4 w-4"></i>
+            <span>Bảng giá dịch vụ</span>
+        </a>
+
+        <!-- Candidate Mobile Links -->
+        <th:block sec:authorize="hasRole('CANDIDATE')">
+            <div class="border-t border-slate-100 dark:border-slate-800 my-2 pt-2">
+                <span class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Dành cho Ứng viên</span>
+            </div>
+            <a th:href="@{/candidate/dashboard}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                <span>Bảng điều khiển</span>
+            </a>
+            <a th:href="@{/candidate/cvs}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="file-text" class="h-4 w-4"></i>
+                <span>CV của tôi</span>
+            </a>
+            <a th:href="@{/candidate/profile}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="user" class="h-4 w-4"></i>
+                <span>Hồ sơ cá nhân</span>
+            </a>
+        </th:block>
+
+        <!-- Recruiter Mobile Links -->
+        <th:block sec:authorize="hasRole('RECRUITER')">
+            <div class="border-t border-slate-100 dark:border-slate-800 my-2 pt-2">
+                <span class="px-3 text-[11px] font-bold uppercase tracking-wider text-slate-400">Dành cho Nhà tuyển dụng</span>
+            </div>
+            <a th:href="@{/recruiter/dashboard}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="layout-dashboard" class="h-4 w-4"></i>
+                <span>Kênh tuyển dụng</span>
+            </a>
+            <a th:href="@{/recruiter/jobs/new}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-bold">
+                <i data-lucide="plus-circle" class="h-4 w-4 text-blue-600"></i>
+                <span>Đăng tin tuyển dụng mới</span>
+            </a>
+            <a th:href="@{/recruiter/jobs}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="briefcase" class="h-4 w-4"></i>
+                <span>Quản lý tin đăng</span>
+            </a>
+            <a th:href="@{/recruiter/applications}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="users" class="h-4 w-4"></i>
+                <span>Hồ sơ ứng viên</span>
+            </a>
+            <a th:href="@{/recruiter/profile}" class="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 hover:text-blue-600 dark:hover:text-blue-400">
+                <i data-lucide="building" class="h-4 w-4"></i>
+                <span>Hồ sơ Doanh nghiệp</span>
+            </a>
+        </th:block>
+
+        <!-- Guest Auth Buttons in Drawer -->
+        <th:block sec:authorize="!isAuthenticated()">
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-3 mt-3 flex flex-col gap-2">
+                <a th:href="@{/login}" class="btn btn-outline w-full justify-center text-sm font-bold">Đăng nhập</a>
+                <a th:href="@{/register/candidate}" class="btn btn-primary w-full justify-center text-sm font-bold">Đăng ký ứng viên</a>
+                <a th:href="@{/register/recruiter}" class="btn btn-secondary w-full justify-center text-sm font-bold">Đăng ký doanh nghiệp</a>
+            </div>
+        </th:block>
+
+        <!-- Authenticated User Logout & Info in Drawer -->
+        <th:block sec:authorize="isAuthenticated()">
+            <div class="border-t border-slate-100 dark:border-slate-800 pt-3 mt-3 space-y-2">
+                <div class="px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 flex items-center justify-between text-xs">
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-800 dark:text-slate-100 truncate max-w-[180px]"
+                              th:text="${currentUser?.fullName ?: (#authentication?.name ?: 'Tài khoản')}"></span>
+                        <span class="text-[11px] text-slate-500 dark:text-slate-400"
+                              th:text="${currentUser?.email ?: ''}"></span>
+                    </div>
+                    <span class="badge badge-primary text-[10px]">
+                        <span sec:authorize="hasRole('CANDIDATE')">Ứng viên</span>
+                        <span sec:authorize="hasRole('RECRUITER')">Doanh nghiệp</span>
+                        <span sec:authorize="hasRole('ADMIN')">Quản trị</span>
+                    </span>
+                </div>
+                <form th:action="@{/logout}" method="post">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" class="flex w-full items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold text-rose-600 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 transition">
+                        <i data-lucide="log-out" class="h-4 w-4"></i>
+                        <span>Đăng xuất tài khoản</span>
+                    </button>
+                </form>
+            </div>
+        </th:block>
     </div>
+
+    <!-- Essential Inline Navbar Dropdown Controller -->
+    <script>
+        function toggleUserDropdown(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            var menu = document.getElementById('userDropdownContent');
+            var themeMenu = document.getElementById('themeDropdownMenu');
+            if (themeMenu) themeMenu.classList.add('hidden');
+            if (menu) {
+                menu.classList.toggle('hidden');
+                if (!menu.classList.contains('hidden') && typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        function toggleMobileMenu() {
+            var drawer = document.getElementById('mobileMenuDrawer');
+            if (drawer) {
+                drawer.classList.toggle('hidden');
+                if (!drawer.classList.contains('hidden') && typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+    </script>
 </header>
 
+<!-- =========================================================================
+     JOBPORTAL GLOBAL FOOTER (Modern Clean SaaS Footer)
+     Applicable across all pages with 4-column structured groups
+     Fully styled for Light and Dark modes
+     ========================================================================= -->
+<footer th:fragment="taskbarFooter" class="w-full border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-auto transition-colors duration-200">
+    <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        
+        <!-- 4 Columns Grid -->
+        <div class="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-5">
+            
+            <!-- Column 1: Brand Info (2 spans) -->
+            <div class="lg:col-span-2">
+                <a th:href="@{/}" class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-extrabold shadow-sm">
+                        <i data-lucide="briefcase" class="h-5 w-5"></i>
+                    </div>
+                    <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white font-heading">
+                        JOB<span class="text-blue-600 dark:text-blue-400">PORTAL</span>
+                    </span>
+                </a>
+                <p class="mt-4 max-w-sm text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Nền tảng tuyển dụng công nghệ và kết nối nhân tài hàng đầu. Ứng tuyển nhanh chóng, phỏng vấn trực tiếp, thanh toán tự động VietQR SePay.
+                </p>
+                <div class="mt-4 flex flex-col gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="phone-call" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"></i>
+                        <span>Hotline: 1900 6868 (8:00 - 18:00 Thứ 2 - Thứ 6)</span>
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="mail" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"></i>
+                        <span>Email: support@recruitmentportal.vn</span>
+                    </span>
+                    <span class="flex items-center gap-2">
+                        <i data-lucide="map-pin" class="h-3.5 w-3.5 text-blue-600 dark:text-blue-400"></i>
+                        <span>Khu Công nghệ cao, TP. Hà Nội & TP. Hồ Chí Minh</span>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Column 2: Dành cho Ứng viên -->
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Dành cho Ứng viên</h4>
+                <ul class="space-y-2.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                    <li><a th:href="@{/jobs}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Tìm kiếm việc làm</a></li>
+                    <li><a th:href="@{/company-profile}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Danh bạ công ty</a></li>
+                    <li><a th:href="@{/candidate/cvs}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Tạo CV chuyên nghiệp</a></li>
+                    <li><a th:href="@{/skill-tests}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Đánh giá kỹ năng online</a></li>
+                    <li><a th:href="@{/interview-questions}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Cẩm nang phỏng vấn</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Dành cho Nhà tuyển dụng -->
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Dành cho Doanh nghiệp</h4>
+                <ul class="space-y-2.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                    <li><a th:href="@{/pricing}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Bảng giá dịch vụ tuyển dụng</a></li>
+                    <li><a th:href="@{/register/recruiter}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Đăng ký tài khoản tuyển dụng</a></li>
+                    <li><a th:href="@{/recruiter/jobs/new}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Đăng tin tuyển dụng mới</a></li>
+                    <li><a th:href="@{/recruiter/dashboard}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Studio Tuyển dụng ATS</a></li>
+                    <li><a th:href="@{/recruiter/packages/history}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Lịch sử giao dịch mua gói</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Chính sách & An toàn -->
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white mb-4">Chính sách & An toàn</h4>
+                <ul class="space-y-2.5 text-xs font-medium text-slate-600 dark:text-slate-400">
+                    <li><a th:href="@{/about}" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Về chúng tôi</a></li>
+                    <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Quy định bảo mật thông tin</a></li>
+                    <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Điều khoản sử dụng dịch vụ</a></li>
+                    <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Quy chế đối soát SePay</a></li>
+                    <li><a href="#" class="hover:text-blue-600 dark:hover:text-blue-400 transition">Giải quyết khiếu nại</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom Copyright -->
+        <div class="mt-10 border-t border-slate-200 dark:border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 dark:text-slate-500">
+            <p>© 2026 JOBPORTAL Recruitment Platform. Tất cả quyền được bảo lưu.</p>
+            <p class="text-slate-400 dark:text-slate-500">Được tối ưu hoá trải nghiệm Modern Professional SaaS.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Shared Dropdown & Mobile Menu Interactive Script -->
+<script>
+    function toggleUserDropdown(event) {
+        event.stopPropagation();
+        var menu = document.getElementById('userDropdownContent');
+        if (menu) {
+            menu.classList.toggle('hidden');
+        }
+    }
+
+    function toggleMobileMenu() {
+        var drawer = document.getElementById('mobileMenuDrawer');
+        if (drawer) {
+            drawer.classList.toggle('hidden');
+        }
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        var menu = document.getElementById('userDropdownContent');
+        var btn = document.getElementById('userDropdownBtn');
+        if (menu && !menu.classList.contains('hidden')) {
+            if (btn && !btn.contains(e.target) && !menu.contains(e.target)) {
+                menu.classList.add('hidden');
+            }
+        }
+    });
+
+    // Auto-create icons safely
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+</script>
 </body>
 </html>

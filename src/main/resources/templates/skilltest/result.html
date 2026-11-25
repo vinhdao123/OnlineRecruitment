@@ -4,146 +4,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="'Kết quả bài thi: ' + ${test.title}">Kết quả bài thi đánh giá năng lực</title>
-    <link rel="stylesheet" th:href="@{/css/fragments/taskbar.css}">
-    <link rel="stylesheet" th:href="@{/css/skilltest.css}">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        (function() {
+            var saved = localStorage.getItem('jobportal_theme') || 'system';
+            var isDark = saved === 'dark' || (saved === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (isDark) {
+                document.documentElement.classList.add('dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <script th:src="@{/js/theme-manager.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body class="page-wrapper">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<!-- TASKBAR -->
-<header th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></header>
+<!-- Taskbar Header -->
+<div th:replace="~{fragments/taskbar :: taskbar('skilltests')}"></div>
 
-<div style="max-width: 960px; margin: 30px auto; padding: 0 20px;">
+<main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    <!-- RESULT SUMMARY CARD -->
-    <div class="result-header-card">
-        <!-- SCORE CIRCLE -->
-        <div class="score-circle" th:classappend="${attempt.isPassed} ? 'pass' : 'fail'">
-            <div class="score-number" th:text="${#numbers.formatDecimal(attempt.score, 0, 0)}">80</div>
-            <div class="score-label">/ 100 Điểm</div>
+    <!-- Result Summary Card -->
+    <div class="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 text-center shadow-sm">
+        
+        <!-- Score Circle -->
+        <div class="w-28 h-28 mx-auto rounded-full flex flex-col items-center justify-center mb-6 shadow-inner"
+             th:classappend="${attempt.isPassed} ? 'bg-emerald-50 text-emerald-700 border-4 border-emerald-500' : 'bg-rose-50 text-rose-700 border-4 border-rose-500'">
+            <span class="text-3xl sm:text-4xl font-extrabold font-mono tracking-tight" th:text="${#numbers.formatDecimal(attempt.score, 0, 0)}">80</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 mt-0.5">/ 100 Điểm</span>
         </div>
 
-        <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 8px;">
-            <span th:if="${attempt.isPassed}">🎉 Chúc mừng bạn đã hoàn thành bài thi!</span>
-            <span th:if="${!attempt.isPassed}">💪 Rất tiếc, bạn chưa đạt điểm tối thiểu!</span>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-display mb-2">
+            <span th:if="${attempt.isPassed}">🎉 Chúc mừng! Bạn đã đạt yêu cầu bài thi</span>
+            <span th:if="${!attempt.isPassed}">💪 Rất tiếc! Bạn chưa đạt điểm tối thiểu</span>
         </h1>
 
-        <p style="font-size: 15px; color: #64748b; margin-bottom: 24px;">
-            Bài thi: <strong style="color: #0f172a;" th:text="${test.title}">Đề thi đánh giá kỹ năng Java</strong> ·
-            Xếp loại: <strong th:text="${attempt.performanceRating}"
-                             th:style="${attempt.isPassed ? 'color:#00b14f;' : 'color:#ef4444;'}">Khá</strong>
+        <p class="text-sm sm:text-base text-slate-500 max-w-md mx-auto mb-8">
+            Bài thi: <strong class="text-slate-900 font-semibold" th:text="${test.title}">Java Skill Test</strong> &bull;
+            Xếp loại: <strong class="font-bold" th:text="${attempt.performanceRating}"
+                              th:classappend="${attempt.isPassed} ? 'text-emerald-600' : 'text-rose-600'">Khá</strong>
         </p>
 
-        <!-- STATS ROW -->
-        <div style="display:flex; justify-content:center; gap:20px; flex-wrap:wrap; margin-bottom: 28px;">
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 24px; border-radius:10px;">
-                <div style="font-size:12px; color:#64748b; font-weight:600;">Số câu trả lời đúng</div>
-                <div style="font-size:22px; font-weight:800; color:#00b14f;" th:text="${attempt.correctAnswers + ' / ' + attempt.totalQuestions}">8 / 10</div>
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-xl mx-auto mb-8">
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Số câu đúng</span>
+                <strong class="text-2xl font-extrabold text-emerald-600 font-mono" th:text="${attempt.correctAnswers + ' / ' + attempt.totalQuestions}">8 / 10</strong>
             </div>
 
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 24px; border-radius:10px;">
-                <div style="font-size:12px; color:#64748b; font-weight:600;">Thời gian làm bài</div>
-                <div style="font-size:22px; font-weight:800; color:#2563eb;"
-                     th:text="${(attempt.timeSpentSeconds / 60) + ' phút ' + (attempt.timeSpentSeconds % 60) + ' giây'}">5 phút 20 giây</div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Thời gian làm bài</span>
+                <strong class="text-2xl font-extrabold text-primary-700 font-mono"
+                        th:text="${(attempt.timeSpentSeconds / 60) + 'p ' + (attempt.timeSpentSeconds % 60) + 's'}">5p 20s</strong>
             </div>
 
-            <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px 24px; border-radius:10px;">
-                <div style="font-size:12px; color:#64748b; font-weight:600;">Kết quả chung</div>
-                <div style="font-size:22px; font-weight:800;"
-                     th:text="${attempt.isPassed ? 'ĐẠT' : 'CHƯA ĐẠT'}"
-                     th:style="${attempt.isPassed ? 'color:#00b14f;' : 'color:#ef4444;'}">ĐẠT</div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-1">Đánh giá chung</span>
+                <strong class="text-2xl font-extrabold font-display"
+                        th:text="${attempt.isPassed ? 'ĐẠT' : 'CHƯA ĐẠT'}"
+                        th:classappend="${attempt.isPassed} ? 'text-emerald-600' : 'text-rose-600'">ĐẠT</strong>
             </div>
         </div>
 
-        <div style="display:flex; justify-content:center; gap:12px;">
-            <a th:href="@{'/skill-tests/' + ${test.id} + '/take'}" class="btn-search" style="text-decoration:none;">
-                🔄 Thi lại bài này (Bốc đề mới)
+        <!-- Action CTAs -->
+        <div class="flex flex-wrap items-center justify-center gap-3">
+            <a th:href="@{'/skill-tests/' + ${test.id} + '/take'}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-primary-600 hover:bg-primary-700 shadow-sm transition-all">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                Thi lại bài này (Bốc đề mới)
             </a>
-            <a th:href="@{/skill-tests}" class="btn-search" style="background:#2563eb; text-decoration:none;">
-                🎯 Khám phá các bài test khác
+            <a th:href="@{/skill-tests}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+                Khám phá bài test khác
             </a>
-            <a th:href="@{/candidate/skill-tests/history}" class="btn-search" style="background:#64748b; text-decoration:none;">
-                📜 Xem lịch sử thi của bạn
+            <a th:href="@{/candidate/skill-tests/history}"
+               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition-colors">
+                <i data-lucide="history" class="w-3.5 h-3.5"></i>
+                Lịch sử làm bài
             </a>
         </div>
     </div>
 
-    <!-- DETAILED REVIEW SECTION -->
-    <div style="margin-bottom: 24px;">
-        <h2 style="font-size:20px; font-weight:800; color:#0f172a; margin-bottom:6px;">
-            🔍 Xem lại chi tiết từng câu hỏi & Lời giải thích
-        </h2>
-        <p style="font-size:14px; color:#64748b;">
-            Xem lại phương án bạn đã chọn so với đáp án chính xác kèm giải thích chi tiết từ chuyên gia.
-        </p>
+    <!-- Review Section Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-xl font-bold text-slate-900 font-display">Chi tiết câu hỏi & Lời giải thích</h2>
+            <p class="text-xs text-slate-500 mt-0.5">So sánh phương án bạn đã chọn với đáp án chính xác kèm giải thích từ chuyên gia</p>
+        </div>
     </div>
 
-    <div th:each="item, stat : ${reviewItems}" class="review-item"
-         th:classappend="${item.isCorrect} ? 'correct' : 'incorrect'">
+    <!-- Review Questions List -->
+    <div class="space-y-4">
+        <article th:each="item, stat : ${reviewItems}"
+                 class="bg-white rounded-2xl border p-6 shadow-sm space-y-4 transition-all"
+                 th:classappend="${item.isCorrect} ? 'border-emerald-200/80 bg-emerald-50/20' : 'border-rose-200/80 bg-rose-50/20'">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold"
+                      th:classappend="${item.isCorrect} ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'"
+                      th:text="'Câu hỏi ' + (${stat.index + 1})">Câu 1</span>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-            <span class="question-number-badge"
-                  th:text="'Câu ' + (${stat.index + 1})"
-                  th:style="${item.isCorrect ? '' : 'background:#fee2e2; color:#ef4444;'}">Câu 1</span>
-
-            <span th:if="${item.isCorrect}" style="font-weight:700; color:#00b14f; font-size:14px;">
-                ✓ Trả lời chính xác (+1 điểm)
-            </span>
-            <span th:if="${!item.isCorrect}" style="font-weight:700; color:#ef4444; font-size:14px;">
-                ✕ Trả lời chưa đúng (0 điểm)
-            </span>
-        </div>
-
-        <div style="font-size:16px; font-weight:700; color:#0f172a; line-height:1.5; margin-bottom:14px;"
-             th:text="${item.questionText}">
-            Nội dung câu hỏi...
-        </div>
-
-        <!-- 4 OPTIONS REVIEW -->
-        <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:14px;">
-            <!-- Option A -->
-            <div class="review-choice"
-                 th:classappend="${item.selectedOption == 'A' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'A' ? 'correct-ans' : '')}">
-                <b>A.</b> <span th:text="${item.optionA}">Phương án A</span>
-                <span th:if="${item.selectedOption == 'A' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
-                <span th:if="${item.correctOption == 'A'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+                <span th:if="${item.isCorrect}" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600">
+                    <i data-lucide="check" class="w-4 h-4"></i> Trả lời chính xác (+1 điểm)
+                </span>
+                <span th:if="${!item.isCorrect and item.selectedOption != null}" class="inline-flex items-center gap-1 text-xs font-bold text-rose-600">
+                    <i data-lucide="x" class="w-4 h-4"></i> Trả lời chưa đúng (0 điểm)
+                </span>
+                <span th:if="${!item.isCorrect and item.selectedOption == null}" class="inline-flex items-center gap-1 text-xs font-bold text-amber-600">
+                    <i data-lucide="alert-triangle" class="w-4 h-4"></i> Bỏ qua câu hỏi này (0 điểm)
+                </span>
             </div>
 
-            <!-- Option B -->
-            <div class="review-choice"
-                 th:classappend="${item.selectedOption == 'B' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'B' ? 'correct-ans' : '')}">
-                <b>B.</b> <span th:text="${item.optionB}">Phương án B</span>
-                <span th:if="${item.selectedOption == 'B' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
-                <span th:if="${item.correctOption == 'B'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+            <div class="text-sm sm:text-base font-bold text-slate-900 font-display leading-relaxed"
+                 th:text="${item.questionText}">Nội dung câu hỏi...</div>
+
+            <!-- Choices -->
+            <div class="space-y-2 text-xs sm:text-sm">
+                <!-- Option A -->
+                <div class="flex items-center justify-between p-3 rounded-xl border text-slate-700"
+                     th:classappend="${item.selectedOption == 'A' and !item.isCorrect ? 'bg-rose-50 border-rose-300 text-rose-900 font-semibold' : (item.correctOption == 'A' ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200')}">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold">A.</span>
+                        <span th:text="${item.optionA}">Phương án A</span>
+                    </div>
+                    <span th:if="${item.selectedOption == 'A' and !item.isCorrect}" class="text-xs text-rose-600 font-semibold">(Bạn đã chọn)</span>
+                    <span th:if="${item.correctOption == 'A'}" class="text-xs text-emerald-700 font-bold">✓ Đáp án đúng</span>
+                </div>
+
+                <!-- Option B -->
+                <div class="flex items-center justify-between p-3 rounded-xl border text-slate-700"
+                     th:classappend="${item.selectedOption == 'B' and !item.isCorrect ? 'bg-rose-50 border-rose-300 text-rose-900 font-semibold' : (item.correctOption == 'B' ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200')}">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold">B.</span>
+                        <span th:text="${item.optionB}">Phương án B</span>
+                    </div>
+                    <span th:if="${item.selectedOption == 'B' and !item.isCorrect}" class="text-xs text-rose-600 font-semibold">(Bạn đã chọn)</span>
+                    <span th:if="${item.correctOption == 'B'}" class="text-xs text-emerald-700 font-bold">✓ Đáp án đúng</span>
+                </div>
+
+                <!-- Option C -->
+                <div class="flex items-center justify-between p-3 rounded-xl border text-slate-700"
+                     th:classappend="${item.selectedOption == 'C' and !item.isCorrect ? 'bg-rose-50 border-rose-300 text-rose-900 font-semibold' : (item.correctOption == 'C' ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200')}">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold">C.</span>
+                        <span th:text="${item.optionC}">Phương án C</span>
+                    </div>
+                    <span th:if="${item.selectedOption == 'C' and !item.isCorrect}" class="text-xs text-rose-600 font-semibold">(Bạn đã chọn)</span>
+                    <span th:if="${item.correctOption == 'C'}" class="text-xs text-emerald-700 font-bold">✓ Đáp án đúng</span>
+                </div>
+
+                <!-- Option D -->
+                <div class="flex items-center justify-between p-3 rounded-xl border text-slate-700"
+                     th:classappend="${item.selectedOption == 'D' and !item.isCorrect ? 'bg-rose-50 border-rose-300 text-rose-900 font-semibold' : (item.correctOption == 'D' ? 'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold' : 'bg-slate-50 border-slate-200')}">
+                    <div class="flex items-center gap-2">
+                        <span class="font-bold">D.</span>
+                        <span th:text="${item.optionD}">Phương án D</span>
+                    </div>
+                    <span th:if="${item.selectedOption == 'D' and !item.isCorrect}" class="text-xs text-rose-600 font-semibold">(Bạn đã chọn)</span>
+                    <span th:if="${item.correctOption == 'D'}" class="text-xs text-emerald-700 font-bold">✓ Đáp án đúng</span>
+                </div>
             </div>
 
-            <!-- Option C -->
-            <div class="review-choice"
-                 th:classappend="${item.selectedOption == 'C' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'C' ? 'correct-ans' : '')}">
-                <b>C.</b> <span th:text="${item.optionC}">Phương án C</span>
-                <span th:if="${item.selectedOption == 'C' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
-                <span th:if="${item.correctOption == 'C'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
+            <!-- Explanation Box -->
+            <div th:if="${item.explanation != null and !#strings.isEmpty(item.explanation)}"
+                 class="p-4 rounded-xl bg-primary-50/70 border border-primary-200/80 text-xs sm:text-sm text-primary-950 leading-relaxed">
+                <strong class="font-bold flex items-center gap-1.5 text-primary-900 mb-1">
+                    <i data-lucide="lightbulb" class="w-4 h-4 text-amber-500"></i>
+                    Lời giải thích từ chuyên gia:
+                </strong>
+                <p th:text="${item.explanation}" class="text-slate-700"></p>
             </div>
 
-            <!-- Option D -->
-            <div class="review-choice"
-                 th:classappend="${item.selectedOption == 'D' and !item.isCorrect ? 'selected-wrong' : (item.correctOption == 'D' ? 'correct-ans' : '')}">
-                <b>D.</b> <span th:text="${item.optionD}">Phương án D</span>
-                <span th:if="${item.selectedOption == 'D' and !item.isCorrect}" style="margin-left:auto; font-size:12px;">(Bạn đã chọn)</span>
-                <span th:if="${item.correctOption == 'D'}" style="margin-left:auto; font-size:12px;">✓ Đáp án đúng</span>
-            </div>
-        </div>
-
-        <!-- EXPLANATION -->
-        <div class="section-box tips" th:if="${item.explanation != null and !#strings.isEmpty(item.explanation)}" style="margin-bottom:0;">
-            <div class="section-label">
-                <span>💡</span> Lời giải thích từ chuyên gia
-            </div>
-            <div th:text="${item.explanation}">Giải thích vì sao đáp án này là đúng...</div>
-        </div>
-
+        </article>
     </div>
 
-</div>
+</main>
 
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

@@ -7,6 +7,7 @@ import OnlineRecruitment.OnlineRecruitment.entity.JobStatus;
 import OnlineRecruitment.OnlineRecruitment.entity.User;
 import OnlineRecruitment.OnlineRecruitment.repository.UserRepository;
 import OnlineRecruitment.OnlineRecruitment.service.JobService;
+import OnlineRecruitment.OnlineRecruitment.service.ServicePackageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -15,10 +16,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
+import OnlineRecruitment.OnlineRecruitment.service.JobSkillService;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.time.LocalDate;
+import org.springframework.format.annotation.DateTimeFormat;
 
 @Controller
 @RequestMapping("/recruiter/jobs")
@@ -27,6 +31,8 @@ public class RecruiterJobController {
 
     private final JobService jobService;
     private final UserRepository userRepository;
+    private final JobSkillService jobSkillService;
+    private final ServicePackageService servicePackageService;
 
     // Số tin hiển thị trên mỗi trang
     private static final int PAGE_SIZE = 6;
@@ -45,15 +51,15 @@ public class RecruiterJobController {
             Authentication authentication,
             Model model
     ) {
-        jobService.refreshExpiredJobs();
         User recruiter = getLoggedInRecruiter(authentication);
 
         // Lấy tất cả tin khớp bộ lọc (tiêu đề, địa điểm, trạng thái)
-        List<Job> allJobs = jobService.findMyJobs(recruiter.getId(), keyword, status).stream()
-                .filter(job -> location == null || location.isBlank()
-                        || (job.getLocation() != null && job.getLocation().toLowerCase(java.util.Locale.ROOT)
-                        .contains(location.trim().toLowerCase(java.util.Locale.ROOT))))
-                .toList();
+        List<Job> allJobs = jobService.findMyJobs(recruiter.getId(), keyword, status);
+        if (location != null && !location.isBlank()) {
+            String searchLocation = location.trim().toLowerCase(java.util.Locale.ROOT);
+            allJobs = allJobs.stream().filter(job -> job.getLocation() != null
+                    && job.getLocation().toLowerCase(java.util.Locale.ROOT).contains(searchLocation)).toList();
+        }
 
         // Tính số trang (luôn có ít nhất 1 trang)
         int totalFound = allJobs.size();
@@ -88,7 +94,7 @@ public class RecruiterJobController {
         model.addAttribute("status", status);
         model.addAttribute("currentRecruiter", recruiter);
 
-        // Thống kê riêng của nhà tuyển dụng, độc lập với bộ lọc danh sách.
+        // Thống kê chỉ tính các tin thuộc recruiter đang đăng nhập.
         model.addAttribute("totalJobs", jobService.countMyJobs(recruiter.getId()));
 
         model.addAttribute(
@@ -119,12 +125,19 @@ public class RecruiterJobController {
     // =====================================================
 
     @GetMapping("/new")
-    // Tạo form trong luồng tuyển dụng.
-    public String createForm(Model model) {
+    public String createForm(Model model, Authentication authentication) {
+        User recruiter = getLoggedInRecruiter(authentication); // Lấy user đang đăng nhập
+
         model.addAttribute("jobForm", new RecruiterJobForm());
+        model.addAttribute("skillOptions", jobSkillService.options(List.of()));
         model.addAttribute("categories", jobService.getActiveCategories());
         model.addAttribute("employmentTypes", EmploymentType.values());
         model.addAttribute("pageTitle", "Tạo tin tuyển dụng");
+
+        // ===== THÊM 2 DÒNG NÀY =====
+        model.addAttribute("quotaLabel", servicePackageService.getQuotaLabel(recruiter));
+        model.addAttribute("canPin", servicePackageService.canPinJob(recruiter));
+        // ============================
 
         return "recruiter/job-form";
     }
@@ -134,7 +147,6 @@ public class RecruiterJobController {
     // =====================================================
 
     @GetMapping("/{id}/edit")
-    // Xử lý form trong luồng tuyển dụng.
     public String editForm(
             @PathVariable Long id,
             Authentication authentication,
@@ -144,28 +156,18 @@ public class RecruiterJobController {
         try {
             User recruiter = getLoggedInRecruiter(authentication);
 
-            // Chỉ chủ sở hữu của tin mới được sửa.
-            Job job = jobService.getJobForRecruiter(
-                    id,
-                    recruiter.getId()
-            );
+            Job job = jobService.getJobForRecruiter(id, recruiter.getId());
 
-            // Tin đã đóng thì phải mở lại trước; các trạng thái khác đều được sửa
-            // (sửa tin chờ duyệt/đang hiển thị sẽ được gửi lại cho Admin duyệt)
-            if (job.getStatus() == JobStatus.CLOSED || job.getStatus() == JobStatus.EXPIRED) {
-
-                redirectAttributes.addFlashAttribute(
-                        "errorMessage",
-                        "Tin đã đóng. Hãy mở lại tin trước khi sửa."
-                );
-
+            if (job.getStatus() == JobStatus.CLOSED) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Tin đã đóng. Hãy mở lại tin trước khi sửa.");
                 return "redirect:/recruiter/jobs";
             }
 
             RecruiterJobForm form = new RecruiterJobForm();
 
             form.setJobId(job.getId());
-            form.setCategoryId(job.getCategory() == null ? null : job.getCategory().getId());
+            form.setCategoryId(job.getCategory().getId());
+            form.setSkillIds(jobSkillService.requiredIds(job.getId()));
             form.setTitle(job.getTitle());
             form.setDescription(job.getDescription());
             form.setRequirements(job.getRequirements());
@@ -179,29 +181,24 @@ public class RecruiterJobController {
             form.setEmploymentType(job.getEmploymentType());
             form.setQuantity(job.getQuantity());
             form.setDeadline(job.getDeadline());
+            form.setIsPinned(job.getIsPinned()); // Load lại trạng thái ghim cũ (nếu có)
 
             model.addAttribute("jobForm", form);
-            model.addAttribute(
-                    "categories",
-                    jobService.getActiveCategories()
-            );
-            model.addAttribute(
-                    "employmentTypes",
-                    EmploymentType.values()
-            );
-            model.addAttribute(
-                    "pageTitle",
-                    "Chỉnh sửa tin tuyển dụng"
-            );
+            model.addAttribute("skillOptions", jobSkillService.options(form.getSkillIds()));
+            model.addAttribute("currentJobImageUrl", job.getLogoUrl());
+            model.addAttribute("categories", jobService.getActiveCategories());
+            model.addAttribute("employmentTypes", EmploymentType.values());
+            model.addAttribute("pageTitle", "Chỉnh sửa tin tuyển dụng");
+
+            // ===== THÊM 2 DÒNG NÀY =====
+            model.addAttribute("quotaLabel", servicePackageService.getQuotaLabel(recruiter));
+            model.addAttribute("canPin", servicePackageService.canPinJob(recruiter));
+            // ============================
 
             return "recruiter/job-form";
 
         } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    e.getMessage()
-            );
-
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/recruiter/jobs";
         }
     }
@@ -219,30 +216,31 @@ public class RecruiterJobController {
     @PostMapping("/save")
     public String saveJob(
             @ModelAttribute("jobForm") RecruiterJobForm form,
-            BindingResult bindingResult,
-            Model model,
+            BindingResult binding,
             @RequestParam(defaultValue = "draft") String action,
             Authentication authentication,
+            Model model,
             RedirectAttributes redirectAttributes
     ) {
+        if (binding.hasErrors()) {
+            model.addAttribute("errorMessage", "Dữ liệu chưa hợp lệ. Hãy kiểm tra số tiền, ngày tháng và các lựa chọn.");
+            return invalidForm(form, model);
+        }
         try {
             User recruiter = getLoggedInRecruiter(authentication);
 
-            if (bindingResult.hasErrors()) {
-                throw new IllegalArgumentException("Ngày, số lượng hoặc mức lương không hợp lệ. Vui lòng kiểm tra lại.");
-            }
-            if (!"draft".equals(action) && !"submit".equals(action)) {
-                throw new IllegalArgumentException("Thao tác lưu tin không hợp lệ.");
-            }
-            boolean submitForReview = "submit".equals(action);
+            boolean submitForReview =
+                    "submit".equalsIgnoreCase(action.trim());
 
-            jobService.saveRecruiterJob(
+            Job saved = jobService.saveRecruiterJob(
                     recruiter,
                     form,
                     submitForReview
             );
 
-            if (submitForReview) {
+
+
+            if (saved.getStatus() == JobStatus.PENDING) {
                 redirectAttributes.addFlashAttribute(
                         "successMessage",
                         "Nộp tin tuyển dụng thành công! "
@@ -255,16 +253,27 @@ public class RecruiterJobController {
                 );
             }
 
-            return submitForReview ? "redirect:/recruiter/jobs?status=PENDING"
-                    : "redirect:/recruiter/jobs/archive?tab=draft";
+            return "redirect:/recruiter/jobs";
 
         } catch (IllegalArgumentException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("categories", jobService.getActiveCategories());
-            model.addAttribute("employmentTypes", EmploymentType.values());
-            model.addAttribute("pageTitle", "Hoàn thiện tin tuyển dụng");
-            return "recruiter/job-form";
+            model.addAttribute(
+                    "errorMessage",
+                    "Không thể lưu tin tuyển dụng: " + e.getMessage()
+            );
+
+            // Chuyển về danh sách để hiện thông báo lỗi rõ ràng.
+            // Không báo thành công nếu dữ liệu chưa được lưu.
+            return invalidForm(form, model);
         }
+    }
+
+    private String invalidForm(RecruiterJobForm form, Model model) {
+        model.addAttribute("jobForm", form);
+        model.addAttribute("categories", jobService.getActiveCategories());
+        model.addAttribute("employmentTypes", EmploymentType.values());
+        model.addAttribute("skillOptions", jobSkillService.options(form.getSkillIds()));
+        model.addAttribute("pageTitle", form.getJobId() == null ? "Tạo tin tuyển dụng" : "Chỉnh sửa tin tuyển dụng");
+        return "recruiter/job-form";
     }
 
     // =====================================================
@@ -308,6 +317,8 @@ public class RecruiterJobController {
     // Xử lý job trong luồng tuyển dụng.
     public String reopenJob(
             @PathVariable Long id,
+            @RequestParam(value = "newDeadline", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate newDeadline,
             Authentication authentication,
             RedirectAttributes redirectAttributes
     ) {
@@ -316,13 +327,12 @@ public class RecruiterJobController {
             User recruiter = getLoggedInRecruiter(authentication);
 
             // Gọi service mở lại tin
-            jobService.reopenRecruiterJob(id, recruiter);
+            jobService.reopenRecruiterJob(id, recruiter, newDeadline);
 
             redirectAttributes.addFlashAttribute(
                     "successMessage",
-                    "Đã chuyển tin về nháp. Cập nhật hạn ứng tuyển và gửi duyệt để đăng lại."
+                    "Đã chuyển tin về nháp. Hãy cập nhật hạn ứng tuyển rồi gửi Admin duyệt lại."
             );
-            return "redirect:/recruiter/jobs/" + id + "/edit";
         } catch (IllegalArgumentException e) {
             // Có lỗi nghiệp vụ thì báo ra màn hình
             redirectAttributes.addFlashAttribute(

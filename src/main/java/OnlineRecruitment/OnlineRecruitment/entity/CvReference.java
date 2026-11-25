@@ -32,7 +32,7 @@ public class CvReference {
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder;
 
-    @Transient
+    @Column(name = "relationship", length = 255)
     private String relationship;
 
     // Alias methods để tương thích với template & DTO

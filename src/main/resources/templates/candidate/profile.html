@@ -4,222 +4,379 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hồ sơ cá nhân — Ứng viên</title>
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind CSS CDN with Figma Design Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        },
+                        emerald: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
     <!-- Taskbar Header -->
     <div th:replace="~{fragments/taskbar :: taskbar('profile')}"></div>
 
-    <main class="main-wrapper">
-        <!-- Page Title -->
-        <div class="page-title-box">
-            <h1 class="page-title">Hồ sơ ứng viên</h1>
-            <p class="page-subtitle">Quản lý và cập nhật thông tin cá nhân của bạn để nhà tuyển dụng dễ dàng tiếp cận.</p>
-        </div>
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 
-        <!-- Notification Alerts -->
-        <div th:if="${successMessage}" class="alert alert-success">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            <span th:text="${successMessage}"></span>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-danger">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span th:text="${errorMessage}"></span>
-        </div>
-
-        <div class="profile-grid">
-            <!-- Left Column: Profile Overview Card -->
-            <aside class="profile-card">
-                <div class="avatar-container">
-                    <img id="avatarPreview" class="avatar-preview-img"
-                         th:src="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)} ? @{${profileUser.avatarUrl}} : 'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${profileUser.username}"
-                         alt="Avatar">
-                    <label for="avatarInput" class="avatar-upload-btn" title="Tải ảnh đại diện mới từ máy">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    </label>
-                </div>
-
-                <h2 class="profile-card-name" th:text="${profileUser.fullName}">Nguyễn Văn A</h2>
-                <div class="profile-card-role">Ứng viên</div>
-
-                <p style="font-size: 13px; color: #6b7280; margin: 0 0 16px 0;">
-                    Trạng thái: 
-                    <span th:if="${profileUser.status.name() == 'ACTIVE'}" style="color: #10b981; font-weight: 600;">● Đang hoạt động</span>
-                    <span th:if="${profileUser.status.name() == 'PENDING'}" style="color: #f59e0b; font-weight: 600;">● Chờ duyệt</span>
-                    <span th:if="${profileUser.status.name() == 'LOCKED'}" style="color: #ef4444; font-weight: 600;">● Bị khóa</span>
+        <!-- Page Header Banner -->
+        <div class="bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="space-y-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/10 text-primary-200 backdrop-blur-md">
+                    <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                    THÔNG TIN ỨNG VIÊN
+                </span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold font-display text-white !text-white drop-shadow-sm">Hồ sơ cá nhân</h1>
+                <p class="text-xs sm:text-sm text-slate-300 max-w-xl">
+                    Quản lý và cập nhật thông tin cá nhân, định hướng nghề nghiệp của bạn để nhà tuyển dụng dễ dàng tiếp cận và gửi lời mời phỏng vấn.
                 </p>
+            </div>
 
-                <div class="profile-card-meta">
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                        <span th:text="${profileUser.email}">email@example.com</span>
+            <div class="flex-shrink-0 flex items-center gap-3">
+                <a th:if="${!isEditMode}" th:href="@{/candidate/profile(edit=true)}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-600/30 transition-all">
+                    <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    Chỉnh sửa hồ sơ
+                </a>
+                <a th:if="${isEditMode}" th:href="@{/candidate/profile}"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-md transition-all">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                    Hủy chỉnh sửa
+                </a>
+            </div>
+        </div>
+
+        <!-- Alert Notifications -->
+        <div th:if="${successMessage}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3 shadow-sm">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span class="font-medium" th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="p-4 rounded-2xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center gap-3 shadow-sm">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0"></i>
+            <span class="font-medium" th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Two Column Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            <!-- Left Column: Profile Card -->
+            <aside class="lg:col-span-4 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+                <!-- Avatar with Upload Overlay -->
+                <div class="flex flex-col items-center text-center">
+                    <div class="relative group">
+                        <img id="avatarPreview"
+                             class="w-32 h-32 rounded-3xl object-cover border-4 border-white shadow-md bg-slate-100"
+                             th:src="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)} ? @{${profileUser.avatarUrl}} : 'https://api.dicebear.com/7.x/bottts/svg?seed=' + ${profileUser.username}"
+                             alt="Avatar">
+                        <label for="avatarInput"
+                               class="absolute inset-0 bg-black/40 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer text-white text-xs font-semibold gap-1">
+                            <i data-lucide="camera" class="w-6 h-6"></i>
+                            <span>Đổi ảnh</span>
+                        </label>
                     </div>
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                        <span th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa có SĐT'}">0912345678</span>
-                    </div>
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                        <span th:text="${profileUser.location != null and !#strings.isEmpty(profileUser.location) ? profileUser.location : 'Chưa cập nhật địa chỉ'}">Hà Nội</span>
-                    </div>
-                    <div class="meta-item">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                        <span>Tham gia: <th:block th:text="${#temporals.format(profileUser.createdAt, 'dd/MM/yyyy')}">01/01/2026</th:block></span>
+
+                    <h2 class="mt-4 text-xl font-bold font-display text-slate-900" th:text="${profileUser.fullName}">Nguyễn Văn A</h2>
+                    <span class="inline-flex items-center gap-1 mt-1 px-3 py-0.5 rounded-full text-xs font-bold bg-primary-50 text-primary-700">
+                        <i data-lucide="user" class="w-3 h-3"></i>
+                        Ứng viên
+                    </span>
+
+                    <!-- Status Indicator -->
+                    <div class="mt-3 flex items-center gap-2 text-xs font-semibold">
+                        <span th:if="${profileUser.status.name() == 'ACTIVE'}" class="inline-flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Đang hoạt động
+                        </span>
+                        <span th:if="${profileUser.status.name() == 'PENDING'}" class="inline-flex items-center gap-1.5 text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                            Chờ duyệt
+                        </span>
+                        <span th:if="${profileUser.status.name() == 'LOCKED'}" class="inline-flex items-center gap-1.5 text-red-600 bg-red-50 px-2.5 py-1 rounded-full">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                            Bị khóa
+                        </span>
                     </div>
                 </div>
 
-                <div style="margin-top: 20px;">
-                    <a th:href="@{/candidate/change-password}" class="btn btn-outline" style="width: 100%; justify-content: center; font-size: 13px;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                        Đổi mật khẩu
+                <div class="border-t border-slate-100 pt-5 space-y-3.5 text-xs">
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                            <i data-lucide="mail" class="w-4 h-4"></i>
+                        </div>
+                        <span class="truncate font-medium text-slate-700" th:text="${profileUser.email}">email@example.com</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                            <i data-lucide="phone" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-medium text-slate-700" th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật SĐT'}">0912345678</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                            <i data-lucide="map-pin" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-medium text-slate-700" th:text="${profileUser.location != null and !#strings.isEmpty(profileUser.location) ? profileUser.location : 'Chưa cập nhật địa chỉ'}">Hà Nội</span>
+                    </div>
+
+                    <div class="flex items-center gap-3 text-slate-600">
+                        <div class="w-8 h-8 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                            <i data-lucide="calendar" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-medium text-slate-700">
+                            Tham gia: <span th:text="${#temporals.format(profileUser.createdAt, 'dd/MM/yyyy')}">01/01/2026</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="pt-2">
+                    <a th:href="@{/candidate/change-password}"
+                       class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs">
+                        <i data-lucide="key-round" class="w-3.5 h-3.5 text-slate-400"></i>
+                        Đổi mật khẩu tài khoản
                     </a>
                 </div>
             </aside>
 
-            <!-- Right Column: Profile Content -->
-            <section class="profile-content-card">
-                <div class="content-header">
-                    <h2 class="content-title" th:text="${isEditMode ? 'Chỉnh sửa thông tin hồ sơ' : 'Chi tiết thông tin cá nhân'}">Thông tin cá nhân</h2>
+            <!-- Right Column: Detail Content -->
+            <section class="lg:col-span-8 bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-6 border-b border-slate-100 mb-6">
                     <div>
-                        <a th:if="${!isEditMode}" th:href="@{/candidate/profile(edit=true)}" class="btn btn-primary">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            Chỉnh sửa thông tin
-                        </a>
-                        <a th:if="${isEditMode}" th:href="@{/candidate/profile}" class="btn btn-secondary">
-                            ✕ Hủy bỏ
-                        </a>
+                        <h2 class="text-xl font-bold font-display text-slate-900"
+                            th:text="${isEditMode ? 'Chỉnh sửa thông tin hồ sơ' : 'Chi tiết thông tin cá nhân'}">
+                            Chi tiết thông tin cá nhân
+                        </h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            Cập nhật thông tin chính xác giúp gia tăng 80% cơ hội nhận được lời mời phỏng vấn
+                        </p>
                     </div>
+
+                    <a th:if="${!isEditMode}" th:href="@{/candidate/profile(edit=true)}"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold text-xs transition-colors shadow-xs">
+                        <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                        Chỉnh sửa
+                    </a>
                 </div>
 
-                <!-- VIEW MODE -->
-                <div th:if="${!isEditMode}">
-                    <div class="info-section">
-                        <h3 class="info-section-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <!-- ==================== VIEW MODE ==================== -->
+                <div th:if="${!isEditMode}" class="space-y-8">
+                    <!-- Basic Info -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold font-display text-slate-900 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4 text-primary-600"></i>
                             Thông tin cơ bản
                         </h3>
-                        <div class="info-grid">
-                            <div class="info-box">
-                                <div class="info-label">Họ và tên</div>
-                                <div class="info-value" th:text="${profileUser.fullName}">Nguyễn Văn A</div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs text-slate-400 block font-medium">Họ và tên</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" th:text="${profileUser.fullName}">Nguyễn Văn A</span>
                             </div>
-                            <div class="info-box">
-                                <div class="info-label">Tên tài khoản (Username)</div>
-                                <div class="info-value" th:text="${profileUser.username}">nguyenvana</div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs text-slate-400 block font-medium">Giới tính</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" th:text="${candidate.gender != null and !#strings.isEmpty(candidate.gender) ? candidate.gender : 'Chưa cập nhật'}">Nam</span>
                             </div>
-                            <div class="info-box">
-                                <div class="info-label">Email</div>
-                                <div class="info-value" th:text="${profileUser.email}">email@example.com</div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs text-slate-400 block font-medium">Ngày sinh</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" th:text="${candidate.dob != null ? #temporals.format(candidate.dob, 'dd/MM/yyyy') : 'Chưa cập nhật'}">01/01/2000</span>
                             </div>
-                            <div class="info-box">
-                                <div class="info-label">Số điện thoại</div>
-                                <div class="info-value" th:classappend="${profileUser.phone == null ? 'empty' : ''}"
-                                     th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật'}">0912345678</div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs text-slate-400 block font-medium">Số điện thoại</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" th:text="${profileUser.phone != null and !#strings.isEmpty(profileUser.phone) ? profileUser.phone : 'Chưa cập nhật'}">0912345678</span>
                             </div>
-                            <div class="info-box">
-                                <div class="info-label">Ngày sinh</div>
-                                <div class="info-value" th:classappend="${candidate.dob == null ? 'empty' : ''}"
-                                     th:text="${candidate.dob != null ? #temporals.format(candidate.dob, 'dd/MM/yyyy') : 'Chưa cập nhật'}">01/01/2000</div>
-                            </div>
-                            <div class="info-box">
-                                <div class="info-label">Giới tính</div>
-                                <div class="info-value" th:classappend="${candidate.gender == null ? 'empty' : ''}"
-                                     th:text="${candidate.gender != null and !#strings.isEmpty(candidate.gender) ? candidate.gender : 'Chưa cập nhật'}">Nam</div>
-                            </div>
-                            <div class="info-box" style="grid-column: 1 / -1;">
-                                <div class="info-label">Địa chỉ nơi ở</div>
-                                <div class="info-value" th:classappend="${candidate.address == null and profileUser.location == null ? 'empty' : ''}"
-                                     th:text="${candidate.address != null and !#strings.isEmpty(candidate.address) ? candidate.address : (profileUser.location != null ? profileUser.location : 'Chưa cập nhật')}">Hà Nội</div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 sm:col-span-2">
+                                <span class="text-xs text-slate-400 block font-medium">Địa chỉ nơi ở</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" th:text="${candidate.address != null and !#strings.isEmpty(candidate.address) ? candidate.address : (profileUser.location != null ? profileUser.location : 'Chưa cập nhật')}">Hà Nội, Việt Nam</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="info-section">
-                        <h3 class="info-section-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                            Mục tiêu nghề nghiệp & Giới thiệu
+                    <!-- Career Info -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold font-display text-slate-900 flex items-center gap-2">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-primary-600"></i>
+                            Định hướng nghề nghiệp
                         </h3>
-                        <div class="info-grid">
-                            <div class="info-box" style="grid-column: 1 / -1;">
-                                <div class="info-label">Vị trí mong muốn</div>
-                                <div class="info-value" th:classappend="${candidate.desiredPosition == null ? 'empty' : ''}"
-                                     th:text="${candidate.desiredPosition != null and !#strings.isEmpty(candidate.desiredPosition) ? candidate.desiredPosition : 'Chưa cập nhật vị trí mong muốn'}">Software Engineer</div>
+
+                        <div class="space-y-4">
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs text-slate-400 block font-medium">Vị trí mong muốn ứng tuyển</span>
+                                <span class="text-sm font-bold text-slate-800 mt-1 block" th:text="${candidate.desiredPosition != null and !#strings.isEmpty(candidate.desiredPosition) ? candidate.desiredPosition : 'Chưa cập nhật'}">Senior Fullstack Developer</span>
                             </div>
-                            <div class="info-box" style="grid-column: 1 / -1;">
-                                <div class="info-label">Giới thiệu bản thân</div>
-                                <div class="info-value" th:classappend="${candidate.aboutMe == null ? 'empty' : ''}" style="white-space: pre-line;"
-                                     th:text="${candidate.aboutMe != null and !#strings.isEmpty(candidate.aboutMe) ? candidate.aboutMe : 'Chưa có thông tin giới thiệu bản thân.'}">Giới thiệu...</div>
+
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="text-xs text-slate-400 block font-medium">Giới thiệu bản thân &amp; Kinh nghiệm tóm tắt</span>
+                                <div class="text-sm text-slate-700 leading-relaxed mt-2 whitespace-pre-line"
+                                     th:if="${candidate.aboutMe != null and !#strings.isEmpty(candidate.aboutMe)}"
+                                     th:text="${candidate.aboutMe}">
+                                    Tôi là một lập trình viên nhiệt huyết...
+                                </div>
+                                <span th:unless="${candidate.aboutMe != null and !#strings.isEmpty(candidate.aboutMe)}" class="text-xs text-slate-400 italic block mt-1">
+                                    Chưa có phần giới thiệu bản thân
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="info-section">
-                        <h3 class="info-section-title">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                            Liên kết mạng xã hội & Dự án
+                    <!-- Social & Portfolio -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold font-display text-slate-900 flex items-center gap-2">
+                            <i data-lucide="globe" class="w-4 h-4 text-primary-600"></i>
+                            Mạng xã hội &amp; Portfolio
                         </h3>
-                        <div class="info-grid">
-                            <div class="info-box">
-                                <div class="info-label">LinkedIn</div>
-                                <div class="info-value" th:if="${candidate.linkedinUrl != null and !#strings.isEmpty(candidate.linkedinUrl)}">
-                                    <a th:href="${candidate.linkedinUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${candidate.linkedinUrl}"></a>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <a th:if="${candidate.linkedinUrl != null and !#strings.isEmpty(candidate.linkedinUrl)}"
+                               th:href="${candidate.linkedinUrl}" target="_blank"
+                               class="p-4 rounded-2xl bg-slate-50 hover:bg-blue-50/50 border border-slate-100 hover:border-blue-200 transition-all flex items-center gap-3 group">
+                                <div class="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="linkedin" class="w-4 h-4"></i>
                                 </div>
-                                <div class="info-value empty" th:if="${candidate.linkedinUrl == null or #strings.isEmpty(candidate.linkedinUrl)}">Chưa cập nhật</div>
+                                <div class="min-w-0">
+                                    <span class="text-xs text-slate-400 block font-medium">LinkedIn</span>
+                                    <span class="text-xs font-bold text-slate-800 truncate block group-hover:text-blue-600">Xem trang</span>
+                                </div>
+                            </a>
+                            <div th:unless="${candidate.linkedinUrl != null and !#strings.isEmpty(candidate.linkedinUrl)}"
+                                 class="p-4 rounded-2xl bg-slate-50 border border-slate-100 opacity-60 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="linkedin" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block font-medium">LinkedIn</span>
+                                    <span class="text-xs text-slate-400">Chưa cập nhật</span>
+                                </div>
                             </div>
-                            <div class="info-box">
-                                <div class="info-label">GitHub</div>
-                                <div class="info-value" th:if="${candidate.githubUrl != null and !#strings.isEmpty(candidate.githubUrl)}">
-                                    <a th:href="${candidate.githubUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${candidate.githubUrl}"></a>
+
+                            <a th:if="${candidate.githubUrl != null and !#strings.isEmpty(candidate.githubUrl)}"
+                               th:href="${candidate.githubUrl}" target="_blank"
+                               class="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-100 hover:border-slate-300 transition-all flex items-center gap-3 group">
+                                <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="github" class="w-4 h-4"></i>
                                 </div>
-                                <div class="info-value empty" th:if="${candidate.githubUrl == null or #strings.isEmpty(candidate.githubUrl)}">Chưa cập nhật</div>
+                                <div class="min-w-0">
+                                    <span class="text-xs text-slate-400 block font-medium">GitHub</span>
+                                    <span class="text-xs font-bold text-slate-800 truncate block group-hover:text-slate-900">Xem GitHub</span>
+                                </div>
+                            </a>
+                            <div th:unless="${candidate.githubUrl != null and !#strings.isEmpty(candidate.githubUrl)}"
+                                 class="p-4 rounded-2xl bg-slate-50 border border-slate-100 opacity-60 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="github" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block font-medium">GitHub</span>
+                                    <span class="text-xs text-slate-400">Chưa cập nhật</span>
+                                </div>
                             </div>
-                            <div class="info-box" style="grid-column: 1 / -1;">
-                                <div class="info-label">Portfolio Website</div>
-                                <div class="info-value" th:if="${candidate.portfolioUrl != null and !#strings.isEmpty(candidate.portfolioUrl)}">
-                                    <a th:href="${candidate.portfolioUrl}" target="_blank" style="color: #2563eb; text-decoration: underline;" th:text="${candidate.portfolioUrl}"></a>
+
+                            <a th:if="${candidate.portfolioUrl != null and !#strings.isEmpty(candidate.portfolioUrl)}"
+                               th:href="${candidate.portfolioUrl}" target="_blank"
+                               class="p-4 rounded-2xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-100 hover:border-emerald-200 transition-all flex items-center gap-3 group">
+                                <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
                                 </div>
-                                <div class="info-value empty" th:if="${candidate.portfolioUrl == null or #strings.isEmpty(candidate.portfolioUrl)}">Chưa cập nhật</div>
+                                <div class="min-w-0">
+                                    <span class="text-xs text-slate-400 block font-medium">Portfolio</span>
+                                    <span class="text-xs font-bold text-slate-800 truncate block group-hover:text-emerald-600">Mở liên kết</span>
+                                </div>
+                            </a>
+                            <div th:unless="${candidate.portfolioUrl != null and !#strings.isEmpty(candidate.portfolioUrl)}"
+                                 class="p-4 rounded-2xl bg-slate-50 border border-slate-100 opacity-60 flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-slate-200 text-slate-400 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs text-slate-400 block font-medium">Portfolio</span>
+                                    <span class="text-xs text-slate-400">Chưa cập nhật</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div style="margin-top: 30px; text-align: center;">
-                        <a th:href="@{/candidate/profile(edit=true)}" class="btn btn-primary" style="padding: 12px 28px; font-size: 15px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
-                            Bấm vào đây để chỉnh sửa thông tin hồ sơ
-                        </a>
                     </div>
                 </div>
 
-                <!-- EDIT MODE -->
-                <form th:if="${isEditMode}" th:action="@{/candidate/profile}" th:object="${candidateDto}" method="post" enctype="multipart/form-data" id="profileForm">
-                    <input type="file" id="avatarInput" name="avatarFile" class="avatar-file-input" accept="image/*" onchange="previewImage(this)">
 
-                    <div class="info-section">
-                        <h3 class="info-section-title">Thông tin cơ bản</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Họ và tên <span class="required">*</span></label>
-                                <input type="text" th:field="*{fullName}" class="form-input" placeholder="Nhập họ và tên đầy đủ" required>
-                                <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="field-error"></div>
+                <!-- ==================== EDIT MODE ==================== -->
+                <form th:if="${isEditMode}" th:action="@{/candidate/profile}" th:object="${candidateDto}"
+                      method="post" enctype="multipart/form-data" id="profileForm" class="space-y-8">
+                    <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                    <!-- Hidden Avatar File Input -->
+                    <input type="file" id="avatarInput" name="avatarFile" accept="image/*" class="hidden" onchange="previewImage(this)">
+
+                    <!-- Basic Information Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold font-display text-slate-900 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4 text-primary-600"></i>
+                            Thông tin cá nhân
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Họ và tên <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" th:field="*{fullName}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="Nhập họ và tên đầy đủ">
+                                <p th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="text-xs text-red-600 mt-1 font-medium"></p>
                             </div>
 
-                            <div class="form-group">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="text" th:field="*{phone}" class="form-input" placeholder="Ví dụ: 0912345678">
-                                <div th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Ngày sinh</label>
-                                <input type="date" th:field="*{dob}" class="form-input">
-                                <div th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Giới tính</label>
-                                <select th:field="*{gender}" class="form-select">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Giới tính</label>
+                                <select th:field="*{gender}"
+                                        class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 bg-white transition-all">
                                     <option value="">-- Chọn giới tính --</option>
                                     <option value="Nam">Nam</option>
                                     <option value="Nữ">Nữ</option>
@@ -227,75 +384,127 @@
                                 </select>
                             </div>
 
-                            <div class="form-group full-width">
-                                <label class="form-label">Địa chỉ nơi ở</label>
-                                <input type="text" th:field="*{address}" class="form-input" placeholder="Địa chỉ hiện tại của bạn">
-                                <div th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="field-error"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Ngày sinh</label>
+                                <input type="date" th:field="*{dob}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all">
+                                <p th:if="${#fields.hasErrors('dob')}" th:errors="*{dob}" class="text-xs text-red-600 mt-1 font-medium"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Số điện thoại liên hệ</label>
+                                <input type="tel" th:field="*{phone}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="Ví dụ: 0912345678">
+                                <p th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}" class="text-xs text-red-600 mt-1 font-medium"></p>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Địa chỉ nơi ở</label>
+                                <input type="text" th:field="*{address}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="Số nhà, tên đường, quận/huyện, tỉnh/thành phố">
+                                <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-xs text-red-600 mt-1 font-medium"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="info-section">
-                        <h3 class="info-section-title">Thông tin nghề nghiệp</h3>
-                        <div class="form-grid">
-                            <div class="form-group full-width">
-                                <label class="form-label">Vị trí mong muốn ứng tuyển</label>
-                                <input type="text" th:field="*{desiredPosition}" class="form-input" placeholder="Ví dụ: Senior Java Developer, Frontend React Developer...">
-                                <div th:if="${#fields.hasErrors('desiredPosition')}" th:errors="*{desiredPosition}" class="field-error"></div>
+                    <!-- Career Goal Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold font-display text-slate-900 flex items-center gap-2">
+                            <i data-lucide="briefcase" class="w-4 h-4 text-primary-600"></i>
+                            Định hướng nghề nghiệp
+                        </h3>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Vị trí mong muốn ứng tuyển</label>
+                                <input type="text" th:field="*{desiredPosition}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="Ví dụ: Senior Java Developer, Frontend React Developer...">
+                                <p th:if="${#fields.hasErrors('desiredPosition')}" th:errors="*{desiredPosition}" class="text-xs text-red-600 mt-1 font-medium"></p>
                             </div>
 
-                            <div class="form-group full-width">
-                                <label class="form-label">Giới thiệu bản thân & Kinh nghiệm tóm tắt</label>
-                                <textarea th:field="*{aboutMe}" class="form-textarea" placeholder="Mô tả kỹ năng, mục tiêu nghề nghiệp, kinh nghiệm nổi bật của bạn..."></textarea>
-                                <div th:if="${#fields.hasErrors('aboutMe')}" th:errors="*{aboutMe}" class="field-error"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="info-section">
-                        <h3 class="info-section-title">Mạng xã hội & Portfolio</h3>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label class="form-label">Link LinkedIn</label>
-                                <input type="url" th:field="*{linkedinUrl}" class="form-input" placeholder="https://linkedin.com/in/username">
-                                <div th:if="${#fields.hasErrors('linkedinUrl')}" th:errors="*{linkedinUrl}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="form-label">Link GitHub</label>
-                                <input type="url" th:field="*{githubUrl}" class="form-input" placeholder="https://github.com/username">
-                                <div th:if="${#fields.hasErrors('githubUrl')}" th:errors="*{githubUrl}" class="field-error"></div>
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label class="form-label">Link Portfolio / Blog cá nhân</label>
-                                <input type="url" th:field="*{portfolioUrl}" class="form-input" placeholder="https://yourportfolio.com">
-                                <div th:if="${#fields.hasErrors('portfolioUrl')}" th:errors="*{portfolioUrl}" class="field-error"></div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Giới thiệu bản thân &amp; Kinh nghiệm tóm tắt</label>
+                                <textarea th:field="*{aboutMe}" rows="4"
+                                          class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all resize-y"
+                                          placeholder="Mô tả kỹ năng thế mạnh, mục tiêu nghề nghiệp, kinh nghiệm nổi bật của bạn..."></textarea>
+                                <p th:if="${#fields.hasErrors('aboutMe')}" th:errors="*{aboutMe}" class="text-xs text-red-600 mt-1 font-medium"></p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary" style="padding: 12px 28px;">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                            Lưu thay đổi & Cập nhật
+                    <!-- Social & Links Section -->
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold font-display text-slate-900 flex items-center gap-2">
+                            <i data-lucide="globe" class="w-4 h-4 text-primary-600"></i>
+                            Mạng xã hội &amp; Portfolio
+                        </h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">LinkedIn URL</label>
+                                <input type="url" th:field="*{linkedinUrl}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="https://linkedin.com/in/username">
+                                <p th:if="${#fields.hasErrors('linkedinUrl')}" th:errors="*{linkedinUrl}" class="text-xs text-red-600 mt-1 font-medium"></p>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">GitHub URL</label>
+                                <input type="url" th:field="*{githubUrl}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="https://github.com/username">
+                                <p th:if="${#fields.hasErrors('githubUrl')}" th:errors="*{githubUrl}" class="text-xs text-red-600 mt-1 font-medium"></p>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">Portfolio / Website cá nhân</label>
+                                <input type="url" th:field="*{portfolioUrl}"
+                                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-xs text-slate-800 transition-all"
+                                       placeholder="https://myportfolio.dev">
+                                <p th:if="${#fields.hasErrors('portfolioUrl')}" th:errors="*{portfolioUrl}" class="text-xs text-red-600 mt-1 font-medium"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex items-center gap-3 pt-4 border-t border-slate-100">
+                        <button type="submit"
+                                class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-sm transition-colors">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            Lưu thay đổi &amp; Cập nhật
                         </button>
-                        <a th:href="@{/candidate/profile}" class="btn btn-secondary">Hủy bỏ</a>
+                        <a th:href="@{/candidate/profile}"
+                           class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition-colors">
+                            Hủy bỏ
+                        </a>
                     </div>
                 </form>
             </section>
         </div>
     </main>
 
+    <!-- Shared Modern Footer -->
+    <footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
+
     <script>
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('avatarPreview').src = e.target.result;
+                    const preview = document.getElementById('avatarPreview');
+                    if (preview) {
+                        preview.src = e.target.result;
+                    }
                 }
                 reader.readAsDataURL(input.files[0]);
             }
+        }
+
+        if (window.lucide) {
+            lucide.createIcons();
         }
     </script>
 </body>

@@ -1,152 +1,147 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head('Edit User')}"></head>
-<body class="admin">
+<head th:replace="~{admin/_layout :: head('Chỉnh sửa tài khoản')}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
 
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
 
-<div class="main">
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-    <div class="topbar">
-        <div>
-            <div class="breadcrumb">
-                <a th:href="@{/admin/users}">Accounts</a>
-                <span>›</span>
-                <a th:href="@{'/admin/users/' + ${user.id}}" th:text="${user.fullName}">User</a>
-                <span>›</span>
-                <b>Edit</b>
+    <div th:replace="~{admin/_layout :: topbar('Chỉnh sửa tài khoản', 'Cập nhật quyền hạn và thông tin người dùng')}"></div>
+
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-4xl w-full mx-auto">
+
+        <!-- Breadcrumb -->
+        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <div class="flex items-center gap-2">
+                <a th:href="@{/admin/users}" class="hover:text-primary-600">Quản lý tài khoản</a>
+                <span>/</span>
+                <a th:href="@{'/admin/users/' + ${user.id}}" class="hover:text-primary-600" th:text="${user.fullName}">Chi tiết</a>
+                <span>/</span>
+                <span class="text-primary-600 font-semibold">Chỉnh sửa</span>
             </div>
+            <a th:href="@{'/admin/users/' + ${user.id}}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-600">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                Quay lại chi tiết
+            </a>
         </div>
-        <div class="topbar-actions">
-            <div class="search-global">
-                <input type="text" placeholder="Search candidates, companies..." maxlength="100">
-            </div>
-            <div class="topbar-user">
-                <div class="avatar-circle">
-                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
+
+        <!-- Alert Error -->
+        <div th:if="${error}" class="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 flex-shrink-0"></i>
+            <span th:text="${error}"></span>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-10 shadow-sm space-y-8">
+            <div class="flex items-center gap-4 pb-6 border-b border-slate-100">
+                <div class="w-12 h-12 rounded-2xl bg-primary-50 text-primary-600 flex items-center justify-center font-bold text-xl flex-shrink-0">
+                    <i data-lucide="edit-3" class="w-6 h-6"></i>
                 </div>
-                <span th:text="${#authentication.name}">admin</span>
-            </div>
-        </div>
-    </div>
-
-    <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-
-    <div class="section">
-        <div class="section-header">
-            <div>
-                <div class="section-title">✏ Chỉnh sửa tài khoản</div>
-                <div class="section-sub">
-                    Cập nhật thông tin cho tài khoản
-                    <b th:text="${user.username}">user</b>
-                </div>
-            </div>
-        </div>
-
-        <form th:action="@{'/admin/users/' + ${user.id} + '/edit'}" method="post">
-
-            <h3 style="font-size: 14px; color: #4a5568; margin: 16px 0 12px;
-                       text-transform: uppercase; letter-spacing: 0.5px;">
-                🔐 Thông tin tài khoản
-            </h3>
-
-            <div class="info-grid">
                 <div>
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin-bottom:6px;">
-                        Username (không đổi được)
-                    </label>
-                    <input type="text" th:value="${user.username}" disabled
-                           style="width:100%; padding:10px; border:1px solid #d5dde8;
-                                  border-radius:8px; font-size:14px;
-                                  background:#f7f9fc; color:#8895a8;">
-
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin:14px 0 6px;">
-                        Email <span style="color:#d33;">*</span>
-                    </label>
-                    <input type="email" name="email" required maxlength="255"
-                           th:value="${user.email}"
-                           style="width:100%; padding:10px; border:1px solid #d5dde8;
-                                  border-radius:8px; font-size:14px;">
-
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin:14px 0 6px;">
-                        Họ tên <span style="color:#d33;">*</span>
-                    </label>
-                    <input type="text" name="fullName" required maxlength="150"
-                           th:value="${user.fullName}"
-                           style="width:100%; padding:10px; border:1px solid #d5dde8;
-                                  border-radius:8px; font-size:14px;">
-                </div>
-
-                <div>
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin-bottom:6px;">
-                        Vai trò <span style="color:#d33;">*</span>
-                    </label>
-                    <select name="role" required
-                            style="width:100%; padding:10px; border:1px solid #d5dde8;
-                                   border-radius:8px; font-size:14px;">
-                        <option th:each="r : ${roles}"
-                                th:value="${r}"
-                                th:text="${r}"
-                                th:selected="${user.role.name() == r.name()}"></option>
-                    </select>
-
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin:14px 0 6px;">
-                        Trạng thái <span style="color:#d33;">*</span>
-                    </label>
-                    <select name="status" required
-                            style="width:100%; padding:10px; border:1px solid #d5dde8;
-                                   border-radius:8px; font-size:14px;">
-                        <option th:each="s : ${statuses}"
-                                th:if="${s.name() != 'INACTIVE'}"
-                                th:value="${s}"
-                                th:text="${s}"
-                                th:selected="${user.status.name() == s.name()}"></option>
-                    </select>
-
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin:14px 0 6px;">
-                        Số điện thoại
-                    </label>
-                    <input type="text" name="phone" maxlength="11"
-                           pattern="[0-9]{10,11}"
-                           title="Số điện thoại chỉ gồm 10 chữ số"
-                           placeholder="vd: 0901234567"
-                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
-                           style="width:100%; padding:10px; border:1px solid #d5dde8;
-                           border-radius:8px; font-size:14px;">
-
-                    <label style="display:block; font-size:13px; font-weight:600;
-                                  color:#4a5568; margin:14px 0 6px;">
-                        Địa điểm
-                    </label>
-                    <input type="text" name="location" maxlength="255"
-                           th:value="${user.location}"
-                           style="width:100%; padding:10px; border:1px solid #d5dde8;
-                                  border-radius:8px; font-size:14px;">
+                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-display">
+                        Cập nhật tài khoản: <span class="text-primary-600" th:text="${user.fullName}">Tên</span>
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Tên đăng nhập cố định: <code class="font-mono font-bold text-slate-700" th:text="${user.username}">user</code></p>
                 </div>
             </div>
 
-            <div style="display:flex; gap:12px; margin-top:32px; padding-top:20px;
-                        border-top:1px solid #eef1f6;">
-                <button type="submit" class="btn btn-primary">
-                    ✓ Cập nhật
-                </button>
-                <a th:href="@{'/admin/users/' + ${user.id}}" class="btn btn-secondary">
-                    Hủy
-                </a>
-            </div>
+            <form th:action="@{'/admin/users/' + ${user.id} + '/edit'}" method="post" class="space-y-8">
 
-        </form>
+                <!-- Section 1: Tài khoản & Vai trò -->
+                <div class="space-y-4">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="shield" class="w-4 h-4 text-primary-600"></i>
+                        Thông tin tài khoản &amp; Vai trò
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Tên đăng nhập (Username)</label>
+                            <input type="text" th:value="${user.username}" disabled
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 font-mono text-sm cursor-not-allowed">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Địa chỉ Email <span class="text-rose-500">*</span></label>
+                            <input type="email" name="email" required maxlength="255" th:value="${user.email}"
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Vai trò hệ thống <span class="text-rose-500">*</span></label>
+                            <select name="role" required
+                                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white">
+                                <option th:each="r : ${roles}" th:value="${r}" th:text="${r}"
+                                        th:selected="${user.role.name() == r.name()}"></option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Trạng thái tài khoản <span class="text-rose-500">*</span></label>
+                            <select name="status" required
+                                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm bg-white">
+                                <option th:each="s : ${statuses}" th:if="${s.name() != 'INACTIVE'}"
+                                        th:value="${s}" th:text="${s}" th:selected="${user.status.name() == s.name()}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Thông tin cá nhân -->
+                <div class="space-y-4 pt-4 border-t border-slate-100">
+                    <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+                        <i data-lucide="user" class="w-4 h-4 text-primary-600"></i>
+                        Thông tin định danh cá nhân
+                    </h2>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div class="space-y-1.5 sm:col-span-2">
+                            <label class="text-xs font-bold text-slate-700">Họ và tên đầy đủ <span class="text-rose-500">*</span></label>
+                            <input type="text" name="fullName" required maxlength="150" th:value="${user.fullName}"
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Số điện thoại</label>
+                            <input type="text" name="phone" maxlength="11" pattern="[0-9]{10,11}"
+                                   th:value="${user.phone}" placeholder="0901 234 567"
+                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-bold text-slate-700">Tỉnh / Thành phố</label>
+                            <input type="text" name="location" maxlength="255" th:value="${user.location}"
+                                   placeholder="Hà Nội, TP. Hồ Chí Minh..."
+                                   class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <a th:href="@{'/admin/users/' + ${user.id}}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-xs transition-all">
+                        Hủy bỏ
+                    </a>
+                    <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-sm transition-all">
+                        <i data-lucide="save" class="w-4 h-4"></i>
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
+
     </div>
-
 </div>
 
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
 </body>
 </html>

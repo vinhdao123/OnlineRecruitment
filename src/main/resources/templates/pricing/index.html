@@ -2,112 +2,249 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Bảng giá dịch vụ</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-    <style>
-        .pricing-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .pricing-header { text-align: center; margin-bottom: 40px; }
-        .pricing-header h1 { font-size: 32px; color: #1a2b4a; margin-bottom: 10px; }
-        .pricing-header p { color: #8895a8; font-size: 16px; }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bảng giá gói dịch vụ tuyển dụng | OnlineRecruitment</title>
 
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
         }
-
-        .price-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 30px;
-            border: 1px solid #eef1f6;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .price-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 24px rgba(42,109,244,0.1);
-            border-color: #2a6df4;
-        }
-
-        .price-card h3 { font-size: 20px; color: #1a2b4a; margin-bottom: 10px; }
-        .price-card .desc { font-size: 14px; color: #8895a8; min-height: 40px; margin-bottom: 20px; }
-        .price-card .price { font-size: 36px; font-weight: 700; color: #2a6df4; margin-bottom: 5px; }
-        .price-card .duration { font-size: 14px; color: #4a5568; margin-bottom: 30px; }
-
-        .btn-buy {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background: #2a6df4;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background 0.15s;
-        }
-        .btn-buy:hover { background: #1d5ad6; }
-
-        .current-role-badge {
-            display: inline-block;
-            padding: 6px 16px;
-            border-radius: 20px;
-            background: #e6efff;
-            color: #2a6df4;
-            font-weight: 600;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-    </style>
+    </script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body style="background: #f4f6fa; margin: 0;">
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col antialiased">
 
-<div class="pricing-container">
-    <div class="pricing-header">
-        <h1>Nâng cấp tài khoản của bạn</h1>
-        <p>Chọn gói dịch vụ phù hợp để mở khóa các tính năng đặc biệt</p>
-        <div class="current-role-badge">
-            Bạn đang đăng nhập với vai trò:
-            <span th:text="${currentUser.role}"></span>
+<!-- Navigation -->
+<div th:replace="~{fragments/taskbar :: taskbar('pricing')}"></div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
+
+    <!-- Header Section -->
+    <div class="text-center max-w-3xl mx-auto mb-12">
+        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-bold uppercase tracking-wider mb-3">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-blue-600"></i> Dịch Vụ Nhà Tuyển Dụng
+        </span>
+        <h1 class="text-3xl md:text-5xl font-display font-black text-slate-900 tracking-tight mb-4">
+            Nâng Cấp Gói Tuyển Dụng
+        </h1>
+        <p class="text-slate-500 text-base md:text-lg mb-6">
+            Mở rộng giới hạn đăng bài, tiếp cận nhân tài không giới hạn và nhận đặc quyền Ghim tin lên trang chủ
+        </p>
+
+        <!-- Role Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white border border-slate-200/80 shadow-sm text-xs font-semibold text-slate-600">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            <span>Vai trò tài khoản: <strong class="text-slate-900 font-bold" th:text="${currentUser != null ? currentUser.role : 'KHÁCH HÀNG'}">RECRUITER</strong></span>
         </div>
     </div>
 
-    <div class="pricing-grid">
-        <!-- Vòng lặp hiển thị các gói -->
-        <div class="price-card" th:each="p : ${packages}">
-            <h3 th:text="${p.name}">Tên gói</h3>
-            <div class="desc" th:text="${p.description}">Mô tả</div>
+    <!-- Error Alert -->
+    <div th:if="${error}"
+         class="max-w-2xl mx-auto mb-8 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-sm font-medium flex items-center justify-center gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-rose-600 shrink-0"></i>
+        <span th:text="${error}"></span>
+    </div>
 
-            <div class="price">
-                <span th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">0</span> đ
+    <!-- Sandbox / Config Notices -->
+    <div th:if="${gatewaySandbox}"
+         class="max-w-xl mx-auto mb-6 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs text-center font-medium flex items-center justify-center gap-2">
+        <i data-lucide="info" class="w-4 h-4 text-amber-600"></i>
+        <span>Hệ thống đang chạy SePay Sandbox: Môi trường thử nghiệm, không trừ tiền thật.</span>
+    </div>
+
+    <div th:unless="${paymentReady}"
+         class="max-w-xl mx-auto mb-6 p-3 rounded-xl bg-slate-100 text-slate-600 text-xs text-center font-medium">
+        Cổng thanh toán đang được kích hoạt cấu hình. Bạn có thể tham khảo bảng giá dịch vụ bên dưới.
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div th:each="p : ${packages}"
+             class="group bg-white rounded-3xl p-8 border transition-all duration-300 flex flex-col justify-between relative"
+             th:classappend="${p.packageType == 'MAIN' and p.price > 0} ? 'border-blue-400 shadow-xl shadow-blue-500/5 ring-2 ring-blue-500/20' : 'border-slate-200/80 shadow-sm hover:border-slate-300 hover:shadow-md'">
+
+            <!-- Badge for Recommended / Main Package -->
+            <div th:if="${p.packageType == 'MAIN' and p.price > 500000}"
+                 class="absolute -top-3.5 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                Phổ Biến Nhất
             </div>
-            <div class="duration" th:text="'Thời hạn: ' + ${p.durationDays} + ' ngày'"></div>
 
-            <!-- Nút mua gói -->
-            <a th:href="@{/pricing/checkout/{id}(id=${p.id})}" class="btn-buy">
-                Mua gói này
-            </a>
+            <div>
+                <!-- Package Type Tag -->
+                <div class="flex items-center justify-between mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold"
+                          th:classappend="${p.packageType == 'MAIN'} ? 'bg-blue-50 text-blue-700 border border-blue-200/60' : 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'">
+                        <i data-lucide="box" class="w-3.5 h-3.5"></i>
+                        <span th:text="${p.packageType == 'MAIN' ? 'Gói Chính' : 'Gói Mua Thêm (Top-up)'}">Gói dịch vụ</span>
+                    </span>
+                </div>
+
+                <!-- Package Name -->
+                <h3 class="text-xl font-display font-extrabold text-slate-900 mb-2" th:text="${p.name}">
+                    Gói Tiêu Chuẩn
+                </h3>
+
+                <!-- Description -->
+                <p class="text-xs text-slate-500 min-h-[36px] mb-6 leading-relaxed" th:text="${p.description}">
+                    Mô tả gói dịch vụ tuyển dụng
+                </p>
+
+                <!-- Price -->
+                <div class="mb-6 pb-6 border-b border-slate-100">
+                    <div class="flex items-baseline gap-1">
+                        <span class="text-3xl sm:text-4xl font-display font-black text-slate-900"
+                              th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">0</span>
+                        <span class="text-base font-bold text-slate-400">VNĐ</span>
+                    </div>
+                </div>
+
+                <!-- Features list -->
+                <ul class="space-y-3.5 text-xs text-slate-600 mb-8">
+                    <!-- Max Jobs -->
+                    <li class="flex items-center gap-2.5">
+                        <div class="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span th:if="${p.maxJobs != null}">
+                            Đăng tối đa: <strong class="text-slate-900 font-bold" th:text="${p.maxJobs + ' tin tuyển dụng'}">10 tin</strong>
+                        </span>
+                        <span th:if="${p.maxJobs == null}">
+                            <strong class="text-emerald-700 font-bold">Không giới hạn</strong> số lượng tin đăng
+                        </span>
+                    </li>
+
+                    <!-- Duration Days -->
+                    <li class="flex items-center gap-2.5">
+                        <div class="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span th:if="${p.durationDays != null}">
+                            Thời hạn duy trì: <strong class="text-slate-900 font-bold" th:text="${p.durationDays + ' ngày'}">30 ngày</strong>
+                        </span>
+                        <span th:if="${p.durationDays == null}">
+                            Cộng dồn vĩnh viễn vào gói hiện tại
+                        </span>
+                    </li>
+
+                    <!-- Pinned privileges -->
+                    <li class="flex items-center gap-2.5">
+                        <div class="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span>Đặc quyền Ghim tin lên Top tìm kiếm</span>
+                    </li>
+
+                    <!-- Fast moderation -->
+                    <li class="flex items-center gap-2.5">
+                        <div class="w-5 h-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span>Ưu tiên kiểm duyệt hồ sơ tự động</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Action Buy Button Container -->
+            <div th:with="isMain=${p.packageType == 'MAIN'},
+                          isCurrent=${activePackage != null and activePackage.servicePackage != null and activePackage.servicePackage.id == p.id},
+                          hasOtherMain=${activePackage != null and activePackage.servicePackage != null and activePackage.servicePackage.id != p.id}">
+
+                <!-- Guest State: Must login -->
+                <div th:if="${currentUser == null}">
+                    <a th:href="@{/login}"
+                       class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="log-in" class="w-4 h-4"></i>
+                        <span>Đăng Nhập Để Mua Gói</span>
+                    </a>
+                </div>
+
+                <!-- Non-Recruiter State (e.g. Candidate) -->
+                <div th:if="${currentUser != null and currentUser.role.name() != 'RECRUITER'}" class="space-y-2">
+                    <button type="button" disabled
+                            class="w-full py-3 px-3 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 font-medium text-xs cursor-not-allowed flex items-center justify-center gap-1.5">
+                        <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                        <span>Dành riêng cho Nhà Tuyển Dụng</span>
+                    </button>
+                    <a th:href="@{/register/recruiter}"
+                       class="block text-center text-[11px] font-bold text-blue-600 hover:underline">
+                        Đăng ký tài khoản Doanh nghiệp →
+                    </a>
+                </div>
+
+                <!-- Recruiter State -->
+                <div th:if="${currentUser != null and currentUser.role.name() == 'RECRUITER'}">
+                    <!-- Case 1: Gói hiện tại đang dùng -->
+                    <button th:if="${isCurrent}" disabled
+                            class="w-full py-3.5 px-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-bold text-sm cursor-default flex items-center justify-center gap-2">
+                        <i data-lucide="check-circle" class="w-4 h-4"></i>
+                        <span>Gói Đang Hoạt Động</span>
+                    </button>
+
+                    <!-- Case 2: Đang dùng gói Main khác -->
+                    <button th:if="${!isCurrent and isMain and hasOtherMain}" disabled
+                            class="w-full py-3.5 px-4 rounded-xl bg-slate-100 border border-slate-200 text-slate-400 font-semibold text-sm cursor-not-allowed flex items-center justify-center gap-2">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                        <span>Không thể đổi gói khi chưa hết hạn</span>
+                    </button>
+
+                    <!-- Case 3: Cho phép mua -->
+                    <form th:if="${!isCurrent and !(isMain and hasOtherMain)}"
+                          th:action="@{/pricing/checkout/{id}(id=${p.id})}"
+                          method="post" class="m-0">
+                        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <button type="submit" th:disabled="${!paymentReady}"
+                                class="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="credit-card" class="w-4 h-4"></i>
+                            <span>Thanh Toán Gói Này</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
-        <!-- Nếu không có gói nào -->
-        <div th:if="${packages.isEmpty()}" style="grid-column: 1 / -1; text-align: center; color: #8895a8; padding: 40px;">
-            Hiện chưa có gói dịch vụ nào dành cho vai trò của bạn.
+        <!-- Empty packages state -->
+        <div th:if="${packages == null or #lists.isEmpty(packages)}" class="col-span-full bg-white rounded-3xl p-12 text-center border border-slate-200/80 shadow-sm">
+            <i data-lucide="box" class="w-12 h-12 text-slate-300 mx-auto mb-3"></i>
+            <h3 class="text-base font-bold text-slate-800 mb-1">Hiện chưa có gói dịch vụ nào</h3>
+            <p class="text-xs text-slate-500">Vui lòng quay lại sau hoặc liên hệ bộ phận hỗ trợ khách hàng.</p>
         </div>
     </div>
 
-    <div style="text-align: center; margin-top: 40px;">
-        <a th:href="@{/}" style="color: #2a6df4; text-decoration: none;">&larr; Quay lại trang chủ</a>
+    <!-- Back Link -->
+    <div class="text-center mt-12">
+        <a th:href="@{/}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors">
+            <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Quay lại trang chủ
+        </a>
     </div>
-</div>
+</main>
 
+<!-- Shared Modern Footer -->
+<footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

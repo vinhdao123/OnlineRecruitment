@@ -4,65 +4,201 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực mã OTP - Online Recruitment</title>
-    <link rel="stylesheet" th:href="@{/css/auth.css}">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Figma Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="auth-body">
 
-<div class="auth-header">
-    <a href="/" class="logo">
-        <span class="logo-icon">OR</span>
-        <span>Online Recruitment</span>
-    </a>
-</div>
+<body class="bg-surface-50 font-sans text-surface-900 antialiased min-h-screen flex flex-col justify-between">
 
-<div class="auth-card">
-    <div class="otp-icon">✉️</div>
-    <h1 class="auth-title">Xác Thực Tài Khoản</h1>
-    <p class="auth-subtitle">
-        Chúng tôi đã gửi mã xác thực gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra hộp thư đến (hoặc hòm thư rác/spam).
-    </p>
+<!-- Header -->
+<header class="w-full border-b border-surface-200 bg-white py-4 px-6 sm:px-8">
+    <div class="mx-auto flex max-w-7xl items-center justify-between">
+        <a th:href="@{/}" class="flex items-center gap-2.5">
+            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-900 text-white font-bold">
+                <i data-lucide="briefcase" class="h-5 w-5"></i>
+            </div>
+            <span class="text-xl font-extrabold text-surface-900 font-heading">
+                JOB<span class="text-brand-900">PORTAL</span>
+            </span>
+        </a>
+        <a th:href="@{/login}" class="flex items-center gap-1.5 text-xs font-bold text-surface-600 hover:text-brand-900 transition">
+            <i data-lucide="arrow-left" class="h-4 w-4"></i>
+            <span>Về Đăng nhập</span>
+        </a>
+    </div>
+</header>
 
-    <!-- Thông báo lỗi hoặc thành công -->
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
-
-    <form th:action="@{/verify-otp}" th:object="${verifyDto}" method="post">
-        <div class="form-group">
-            <label for="email">Email tài khoản</label>
-            <input type="email" id="email" th:field="*{email}" class="form-control" readonly style="background-color: #f8f9fa;">
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+<!-- Main Verification Card (Figma Node 1:11627) -->
+<main class="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md rounded-2xl border border-surface-200 bg-white p-8 shadow-card text-center sm:p-10">
+        
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 text-brand-900 mb-5 shadow-sm">
+            <i data-lucide="shield-check" class="h-8 w-8 text-brand-900"></i>
         </div>
 
-        <div class="form-group">
-            <label for="otp">Nhập mã xác thực (6 chữ số) <span class="required">*</span></label>
-            <input type="text" id="otp" th:field="*{otp}"
-                   class="form-control otp-input"
-                   maxlength="6"
-                   pattern="[0-9]{6}"
-                   placeholder="123456"
-                   autocomplete="one-time-code"
-                   required autofocus>
-            <div class="invalid-feedback" th:if="${#fields.hasErrors('otp')}" th:errors="*{otp}"></div>
+        <h1 class="text-2xl font-extrabold text-surface-900 font-heading tracking-tight">Xác thực Tài khoản</h1>
+        <p class="mt-2 text-xs text-surface-500 leading-relaxed">
+            Chúng tôi đã gửi mã xác thực gồm 6 chữ số đến địa chỉ Gmail của bạn.
+            Vui lòng kiểm tra hộp thư đến hoặc mục thư rác (Spam).
+        </p>
+
+        <!-- Thông báo lỗi hoặc thành công -->
+        <div th:if="${errorMessage}" class="mt-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-xs text-red-700 border border-red-200 text-left">
+            <i data-lucide="alert-circle" class="h-4 w-4 shrink-0 text-red-600"></i>
+            <span th:text="${errorMessage}">Mã OTP không chính xác.</span>
+        </div>
+        <div th:if="${successMessage}" class="mt-4 flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-700 border border-emerald-200 text-left">
+            <i data-lucide="check-circle" class="h-4 w-4 shrink-0 text-emerald-600"></i>
+            <span th:text="${successMessage}">Đã gửi lại mã mới.</span>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Xác Thực Ngay</button>
-    </form>
+        <!-- Form Verify -->
+        <form th:action="@{/verify-otp}" th:object="${verifyDto}" method="post" id="otpForm" class="mt-6 space-y-5 text-left">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-    <div class="auth-divider">
-        <span>Không nhận được mã?</span>
+            <div>
+                <label for="email" class="block text-xs font-bold uppercase tracking-wider text-surface-700 mb-1.5">
+                    Email tài khoản
+                </label>
+                <div class="relative">
+                    <i data-lucide="mail" class="absolute left-3.5 top-3 h-4 w-4 text-surface-400"></i>
+                    <input type="email" id="email" th:field="*{email}" readonly
+                           class="w-full rounded-xl border border-surface-200 bg-surface-50 pl-10 pr-4 py-2.5 text-xs text-surface-600 font-semibold focus:outline-none cursor-not-allowed">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase tracking-wider text-surface-700 mb-2">
+                    Nhập mã xác thực (6 chữ số) <span class="text-red-500">*</span>
+                </label>
+                
+                <!-- 6 Visual OTP Input Boxes -->
+                <div class="flex justify-center gap-2.5 sm:gap-3" id="otpBoxContainer">
+                    <input type="text" maxlength="1" inputmode="numeric" class="otp-box h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-surface-300 text-center font-mono text-xl font-extrabold text-surface-900 shadow-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-900/20" />
+                    <input type="text" maxlength="1" inputmode="numeric" class="otp-box h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-surface-300 text-center font-mono text-xl font-extrabold text-surface-900 shadow-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-900/20" />
+                    <input type="text" maxlength="1" inputmode="numeric" class="otp-box h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-surface-300 text-center font-mono text-xl font-extrabold text-surface-900 shadow-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-900/20" />
+                    <input type="text" maxlength="1" inputmode="numeric" class="otp-box h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-surface-300 text-center font-mono text-xl font-extrabold text-surface-900 shadow-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-900/20" />
+                    <input type="text" maxlength="1" inputmode="numeric" class="otp-box h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-surface-300 text-center font-mono text-xl font-extrabold text-surface-900 shadow-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-900/20" />
+                    <input type="text" maxlength="1" inputmode="numeric" class="otp-box h-12 w-11 sm:h-14 sm:w-12 rounded-xl border border-surface-300 text-center font-mono text-xl font-extrabold text-surface-900 shadow-sm focus:border-brand-900 focus:outline-none focus:ring-2 focus:ring-brand-900/20" />
+                </div>
+
+                <!-- Hidden Real Input bound to Thymeleaf -->
+                <input type="hidden" id="otp" th:field="*{otp}" required />
+            </div>
+
+            <button type="submit"
+                    class="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-brand-900 py-3 text-sm font-bold text-white shadow-elevated hover:bg-brand-800 transition">
+                <i data-lucide="check-circle" class="h-4 w-4"></i>
+                <span>Xác thực ngay</span>
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="relative my-6 text-center">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-surface-200"></div></div>
+            <span class="relative bg-white px-3 text-xs text-surface-500 font-medium">Không nhận được mã?</span>
+        </div>
+
+        <!-- Resend OTP Form -->
+        <form th:action="@{/resend-otp}" method="post" class="text-center">
+            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" name="email" th:value="${verifyDto.email}">
+            <button type="submit" id="resendBtn"
+                    class="inline-flex items-center gap-1.5 rounded-xl border border-surface-300 bg-white px-4 py-2 text-xs font-bold text-surface-700 shadow-sm hover:bg-surface-50 transition">
+                <i data-lucide="refresh-cw" class="h-3.5 w-3.5 text-brand-900"></i>
+                <span id="resendBtnText">Gửi lại mã OTP</span>
+            </button>
+        </form>
+
+        <div class="mt-6 pt-4 border-t border-surface-100">
+            <a th:href="@{/login}" class="inline-flex items-center gap-1 text-xs font-bold text-brand-900 hover:underline">
+                <i data-lucide="arrow-left" class="h-3.5 w-3.5"></i>
+                <span>Quay lại trang Đăng nhập</span>
+            </a>
+        </div>
+
     </div>
+</main>
 
-    <form th:action="@{/resend-otp}" method="post" style="text-align: center;">
-        <input type="hidden" name="email" th:value="${verifyDto.email}">
-        <button type="submit" class="btn btn-outline" style="font-size: 14px; padding: 8px 16px;">
-            🔄 Gửi lại mã OTP
-        </button>
-    </form>
+<footer class="py-4 text-center text-xs text-surface-400 border-t border-surface-200 bg-white">
+    © 2026 Online Recruitment Platform. Bảo vệ tài khoản bằng xác thực hai lớp.
+</footer>
 
-    <div class="auth-footer" style="margin-top: 25px;">
-        <a th:href="@{/login}">Quay lại trang Đăng nhập</a>
-    </div>
-</div>
+<script>
+    lucide.createIcons();
 
+    // 6-box OTP input auto-advance logic
+    const boxes = document.querySelectorAll('.otp-box');
+    const realInput = document.getElementById('otp');
+
+    function syncOtp() {
+        let val = '';
+        boxes.forEach(b => val += b.value);
+        realInput.value = val;
+    }
+
+    boxes.forEach((box, idx) => {
+        box.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/[^0-9]/g, '');
+            box.value = val ? val[val.length - 1] : '';
+            if (box.value && idx < boxes.length - 1) {
+                boxes[idx + 1].focus();
+            }
+            syncOtp();
+        });
+
+        box.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && !box.value && idx > 0) {
+                boxes[idx - 1].focus();
+            }
+        });
+
+        box.addEventListener('paste', (e) => {
+            e.preventDefault();
+            const pasteData = (e.clipboardData || window.clipboardData).getData('text').replace(/[^0-9]/g, '');
+            if (pasteData.length === 6) {
+                pasteData.split('').forEach((ch, i) => {
+                    if (boxes[i]) boxes[i].value = ch;
+                });
+                syncOtp();
+                boxes[5].focus();
+            }
+        });
+    });
+
+    if (boxes[0]) boxes[0].focus();
+</script>
 </body>
 </html>

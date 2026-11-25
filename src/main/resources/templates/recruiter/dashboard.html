@@ -3,146 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recruiter Dashboard — Kênh tuyển dụng</title>
-    <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <title>Kênh Tuyển Dụng Doanh Nghiệp — JOBPORTAL ATS</title>
+
+    <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS with Unified Design Tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#2563eb',
+                            hover: '#1d4ed8',
+                            light: '#eff6ff',
+                        },
+                        brand: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a', 950: '#172554'
+                        },
+                        surface: {
+                            50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a'
+                        },
+                        success: {
+                            DEFAULT: '#16a34a',
+                            50: '#f0fdf4',
+                        },
+                        warning: {
+                            DEFAULT: '#f59e0b',
+                            50: '#fffbeb',
+                        },
+                        danger: {
+                            DEFAULT: '#dc2626',
+                            50: '#fef2f2',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
+                        'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05)',
+                        'floating': '0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" th:href="@{/css/ui-polish.css}">
 </head>
-<body>
 
-    <!-- Taskbar Header with Account Dropdown -->
-    <div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+<body class="bg-surface-50 text-surface-800 font-sans min-h-screen flex flex-col antialiased">
 
-    <main class="main-wrapper">
-        <div class="page-title-box">
-            <h1 class="page-title">Chào mừng Nhà Tuyển Dụng, <span th:text="${currentUser != null ? currentUser.fullName : #authentication.name}">Doanh nghiệp</span>!</h1>
-            <p class="page-subtitle">Quản lý hồ sơ công ty, đăng tin tuyển dụng và tìm kiếm những ứng viên tài năng nhất.</p>
+<!-- Unified Global Navbar -->
+<div th:replace="~{fragments/taskbar :: taskbar('dashboard')}"></div>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 flex-1 w-full space-y-8">
+
+    <!-- 1. GREETING BANNER -->
+    <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 rounded-3xl p-7 sm:p-9 text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="absolute -right-10 -bottom-10 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 max-w-2xl">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold uppercase tracking-wider mb-3 border border-blue-400/20">
+                <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 text-blue-400"></i>
+                <span>Bảng điều khiển Nhà Tuyển Dụng</span>
+            </span>
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold font-heading tracking-tight mb-2 text-white !text-white drop-shadow-sm">
+                Xin chào, <span class="text-blue-300 font-extrabold" th:text="${currentUser?.fullName ?: (#authentication?.name ?: 'Nhà tuyển dụng')}">Tập Đoàn FPT Tuyển Dụng</span>!
+            </h1>
+            <p class="text-sm sm:text-base text-slate-300 font-normal leading-relaxed">
+                Theo dõi chiến dịch tuyển dụng, xét duyệt hồ sơ ứng viên và quản lý lịch phỏng vấn nhân tài trên cùng một nền tảng.
+            </p>
         </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; margin-top: 24px;">
-            <!-- Card 1: Hồ sơ công ty & cá nhân -->
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path></svg>
-                    </div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Hồ sơ công ty & Người đại diện</h3>
-                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Cập nhật thông tin doanh nghiệp, tải lên logo, quy mô và mô tả để nâng cao uy tín thương hiệu tuyển dụng.</p>
-                </div>
-                <a th:href="@{/recruiter/profile}" class="btn btn-primary" style="justify-content: center;">
-                    Xem & Chỉnh sửa hồ sơ công ty
-                </a>
+        <!-- Quick Post Job CTA -->
+        <div class="relative z-10 flex items-center gap-3 shrink-0">
+            <a th:href="@{/recruiter/jobs/new}"
+               class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-lg shadow-blue-600/30 transition">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Đăng Tin Tuyển Dụng</span>
+            </a>
+            <a th:href="@{/recruiter/profile}"
+               class="inline-flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-bold border border-white/20 transition">
+                <i data-lucide="building" class="w-4 h-4"></i>
+                <span class="hidden sm:inline">Hồ Sơ Công Ty</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. ACTIVE SERVICE PACKAGE STATUS BAR -->
+    <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/90 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-card">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-md shadow-amber-500/20 shrink-0">
+                <i data-lucide="crown" class="w-6 h-6"></i>
             </div>
+            <div>
+                <h3 class="text-sm sm:text-base font-bold text-amber-950 font-heading mb-0.5">
+                    Gói dịch vụ hiện tại:
+                    <span th:if="${currentUserPackage != null and currentUserPackage.servicePackage != null}"
+                          class="text-amber-800 font-extrabold" th:text="${currentUserPackage.servicePackage.name}">Gói Doanh Nghiệp Kim Cương</span>
+                    <span th:if="${currentUserPackage == null or currentUserPackage.servicePackage == null}"
+                          class="text-slate-600 font-normal">Chưa đăng ký gói dịch vụ</span>
+                </h3>
+                <p class="text-xs text-amber-800/90">
+                    <span th:if="${currentUserPackage?.endDate != null}"
+                          th:text="'Thời hạn đến: ' + ${#temporals.format(currentUserPackage.endDate, 'dd/MM/yyyy')}">Thời hạn đến: 31/12/2026</span>
+                    <span th:if="${currentUserPackage == null or currentUserPackage.endDate == null}">
+                        Nâng cấp gói để đăng tin không giới hạn, xem CV mở rộng và ghim tin tuyển dụng lên vị trí nổi bật.
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2.5 shrink-0">
+            <a th:href="@{/pricing}"
+               class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>Nâng Cấp Gói</span>
+            </a>
+            <a th:href="@{/recruiter/packages/history}"
+               class="px-4 py-2.5 rounded-xl bg-white border border-amber-200 hover:bg-amber-100/50 text-amber-900 text-xs font-bold transition">
+                <span>Lịch sử mua gói</span>
+            </a>
+        </div>
+    </div>
 
-            <!-- Card 2: Quản lý đăng tin -->
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
+    <!-- 3. STATISTIC KPI CARDS (4 Cards Grid) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <!-- Metric 1: Tổng tin tuyển dụng -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-card flex items-center gap-4 hover:shadow-floating hover:border-blue-300 transition">
+            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <i data-lucide="briefcase" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Tổng tin đăng</p>
+                <h4 class="text-2xl font-heading font-extrabold text-slate-900" th:text="${totalJobs != null ? totalJobs : 0}">0</h4>
+            </div>
+        </div>
+
+        <!-- Metric 2: Tin đang mở tuyển -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-card flex items-center gap-4 hover:shadow-floating hover:border-emerald-300 transition">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Tin đang mở tuyển</p>
+                <h4 class="text-2xl font-heading font-extrabold text-emerald-600" th:text="${activeJobs != null ? activeJobs : 0}">0</h4>
+            </div>
+        </div>
+
+        <!-- Metric 3: Hồ sơ chờ duyệt -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-card flex items-center gap-4 hover:shadow-floating hover:border-amber-300 transition">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                <i data-lucide="clock" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Hồ sơ chờ duyệt</p>
+                <h4 class="text-2xl font-heading font-extrabold text-amber-600" th:text="${pendingApplications != null ? pendingApplications : 0}">0</h4>
+            </div>
+        </div>
+
+        <!-- Metric 4: Tổng hồ sơ ứng tuyển -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-card flex items-center gap-4 hover:shadow-floating hover:border-purple-300 transition">
+            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Tổng ứng viên</p>
+                <h4 class="text-2xl font-heading font-extrabold text-purple-600" th:text="${totalApplications != null ? totalApplications : 0}">0</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. CORE WORKSPACES (Two-Column Layout: Recent Jobs & Recent Applications) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+        <!-- =========================================================================
+             LEFT WORKSPACE (7 cols): RECENT JOBS
+             ========================================================================= -->
+        <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-card space-y-5">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
                 <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #ecfdf5; color: #10b981; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
-                    </div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Việc làm & Ứng viên</h3>
-                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Xem danh sách tin tuyển dụng trên thị trường và theo dõi trạng thái các hồ sơ ứng tuyển.</p>
+                    <h2 class="text-base sm:text-lg font-bold font-heading text-slate-900">Tin Tuyển Dụng Gần Đây</h2>
+                    <p class="text-xs text-slate-500">Các vị trí bạn vừa đăng tải trên hệ thống</p>
                 </div>
-
-                <!--
-                    Chuyển nhà tuyển dụng đến trang quản lý tin tuyển dụng.
-                    /recruiter/jobs: xem danh sách Job, tạo tin mới,
-                    sửa tin, gửi duyệt và quản lý trạng thái tuyển dụng.
-                -->
                 <a th:href="@{/recruiter/jobs}"
-                   class="btn btn-outline"
-                   style="justify-content: center;">
-                    Xem danh sách việc làm
-                </a>
-
-            </div>
-
-            <!-- Card 3: Bảo mật & Mật khẩu -->
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                    </div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Bảo mật tài khoản</h3>
-                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Thay đổi mật khẩu tài khoản tuyển dụng với mã xác thực gửi trực tiếp về Gmail chính thức của bạn.</p>
-                </div>
-                <a th:href="@{/recruiter/change-password}" class="btn btn-outline" style="justify-content: center;">
-                    Thay đổi mật khẩu
-                </a>
-            </div>
-            <!-- Card 4: Ứng viên chờ duyệt (khôi phục từ bản (3), đồng bộ giao diện) -->
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #f3e8ff; color: #9333ea; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="4" y="3" width="16" height="18" rx="2"></rect>
-                            <path d="M8 8h8M8 12h8M8 16h5"></path>
-                        </svg>
-                    </div>
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">Ứng viên chờ duyệt</h3>
-                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">Xem tất cả hồ sơ ứng tuyển đang chờ duyệt, kiểm tra thông tin ứng viên và cập nhật trạng thái hồ sơ.</p>
-                </div>
-                <a th:href="@{/recruiter/applications(status='SUBMITTED')}" class="btn btn-outline" style="justify-content: center;">
-                    Xem ứng viên chờ duyệt
-                </a>
-            </div>
-            <!-- Card 5: Tạo lịch phỏng vấn cho ứng viên đã được duyệt -->
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #ede9fe; color: #7c3aed; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="4" width="18" height="17" rx="2"></rect>
-                            <path d="M16 2v4M8 2v4M3 10h18"></path>
-                            <path d="m9 16 2 2 4-4"></path>
-                        </svg>
-                    </div>
-
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">
-                        Tạo lịch phỏng vấn
-                    </h3>
-
-                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">
-                        Thiết lập ngày và khung giờ phỏng vấn để những ứng viên đã được nhà tuyển dụng chấp nhận có thể lựa chọn và đặt lịch phỏng vấn.
-                    </p>
-                </div>
-
-                <a th:href="@{/recruiter/interviews/availability}"
-                   class="btn btn-outline"
-                   style="justify-content: center;">
-                    Tạo lịch phỏng vấn
+                   class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition">
+                    <span>Xem tất cả tin</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
                 </a>
             </div>
 
-            <!-- Card 6: Xem lịch phỏng vấn đã đăng ký -->
-            <div style="background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="width: 48px; height: 48px; border-radius: 12px; background: #dbeafe; color: #2563eb; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-                        <svg width="24" height="24" viewBox="0 0 24 24"
-                             fill="none" stroke="currentColor" stroke-width="2"
-                             stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="4" width="18" height="17" rx="2"></rect>
-                            <path d="M16 2v4M8 2v4M3 10h18"></path>
-                            <path d="M8 14h3M8 17h6"></path>
-                        </svg>
+            <!-- List of Recent Jobs -->
+            <div th:if="${recentJobs != null and !recentJobs.isEmpty()}" class="space-y-3">
+                <div th:each="job : ${recentJobs}"
+                     class="p-4 rounded-xl border border-slate-200 bg-white hover:border-blue-400 hover:shadow-sm transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <!-- Status Badge -->
+                            <span th:if="${job['status'] == 'ACTIVE'}"
+                                  class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đang tuyển
+                            </span>
+                            <span th:if="${job['status'] == 'PENDING'}"
+                                  class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span> Chờ duyệt
+                            </span>
+                            <span th:if="${job['status'] == 'DRAFT'}"
+                                  class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                                Bản nháp
+                            </span>
+                            <span th:if="${job['status'] == 'CLOSED'}"
+                                  class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                                Đã đóng
+                            </span>
+
+                            <span class="text-[11px] text-slate-400"
+                                  th:if="${job['created_at'] != null}"
+                                  th:text="${#strings.abbreviate(job['created_at'].toString(), 10)}">01/01/2026</span>
+                        </div>
+
+                        <h3 class="text-sm font-bold text-slate-900 truncate">
+                            <a th:href="@{'/recruiter/jobs/' + ${job['id']} + '/edit'}"
+                               class="hover:text-blue-600 transition" th:text="${job['title']}">Tên vị trí công việc</a>
+                        </h3>
+
+                        <div class="flex items-center gap-3 text-xs text-slate-500 mt-1">
+                            <span class="flex items-center gap-1">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+                                <span th:text="${job['location'] ?: 'Toàn quốc'}">Hà Nội</span>
+                            </span>
+                            <span class="flex items-center gap-1 font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                <i data-lucide="users" class="w-3 h-3"></i>
+                                <span th:text="${(job['applicationCount'] ?: 0) + ' ứng viên'}">0 ứng viên</span>
+                            </span>
+                        </div>
                     </div>
 
-                    <h3 style="font-size: 18px; font-weight: 700; margin: 0 0 8px 0; color: #111827;">
-                        Xem lịch phỏng vấn
-                    </h3>
-
-                    <p style="font-size: 14px; color: #4b5563; margin: 0 0 20px 0; line-height: 1.5;">
-                        Theo dõi danh sách ứng viên đã đăng ký phỏng vấn, xem CV và kiểm tra các khung giờ còn trống theo từng ngày.
-                    </p>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <a th:href="@{'/recruiter/jobs/' + ${job['id']} + '/edit'}"
+                           class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+                            Sửa tin
+                        </a>
+                        <a th:href="@{/recruiter/applications(jobId=${job['id']})}"
+                           class="px-3 py-1.5 rounded-lg text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-600 hover:text-white transition">
+                            Hồ sơ
+                        </a>
+                    </div>
                 </div>
+            </div>
 
-                <a th:href="@{/recruiter/interviews}"
-                   class="btn btn-outline"
-                   style="justify-content: center;">
-                    Xem lịch phỏng vấn
+            <!-- Empty State for Jobs -->
+            <div th:if="${recentJobs == null or recentJobs.isEmpty()}"
+                 class="p-8 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200">
+                <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="briefcase" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-800 mb-1">Chưa có tin tuyển dụng nào</h3>
+                <p class="text-xs text-slate-500 mb-4 max-w-xs mx-auto">Hãy tạo tin đăng đầu tiên để bắt đầu tiếp cận hàng ngàn ứng viên tiềm năng.</p>
+                <a th:href="@{/recruiter/jobs/new}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 shadow-sm transition">
+                    <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                    <span>Tạo tin tuyển dụng ngay</span>
                 </a>
             </div>
         </div>
-    </main>
 
+        <!-- =========================================================================
+             RIGHT WORKSPACE (5 cols): RECENT APPLICATIONS
+             ========================================================================= -->
+        <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-card space-y-5">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold font-heading text-slate-900">Hồ Sơ Mới Nộp</h2>
+                    <p class="text-xs text-slate-500">Ứng viên vừa ứng tuyển vào các vị trí</p>
+                </div>
+                <a th:href="@{/recruiter/applications}"
+                   class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition">
+                    <span>Xem tất cả</span>
+                    <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- List of Recent Applications -->
+            <div th:if="${recentApplications != null and !recentApplications.isEmpty()}" class="space-y-3">
+                <div th:each="app : ${recentApplications}"
+                     class="p-3.5 rounded-xl border border-slate-200 bg-white hover:border-purple-300 hover:shadow-sm transition flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <!-- Avatar / Letter -->
+                        <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-700 font-bold text-sm flex items-center justify-center shrink-0 border border-purple-100 overflow-hidden">
+                            <img th:if="${app['candidateAvatar'] != null and !#strings.isEmpty(app['candidateAvatar'])}"
+                                 th:src="@{${app['candidateAvatar']}}" alt="Avatar" class="w-full h-full object-cover">
+                            <span th:if="${app['candidateAvatar'] == null or #strings.isEmpty(app['candidateAvatar'])}"
+                                  th:text="${app['candidateName'] != null and !#strings.isEmpty(app['candidateName']) ? #strings.substring(app['candidateName'], 0, 1).toUpperCase() : 'U'}">U</span>
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+                            <h4 class="text-xs font-bold text-slate-900 truncate" th:text="${app['candidateName']}">Tên ứng viên</h4>
+                            <p class="text-[11px] text-slate-500 truncate" th:text="${app['jobTitle']}">Vị trí ứng tuyển</p>
+                            <span class="text-[10px] text-slate-400"
+                                  th:if="${app['applied_at'] != null}"
+                                  th:text="${#strings.abbreviate(app['applied_at'].toString(), 10)}">20/10/2026</span>
+                        </div>
+                    </div>
+
+                    <div class="shrink-0 flex flex-col items-end gap-1.5">
+                        <span th:if="${app['status'] == 'SUBMITTED'}"
+                              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            Chờ duyệt
+                        </span>
+                        <span th:if="${app['status'] == 'ACCEPTED'}"
+                              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            Đã nhận
+                        </span>
+                        <span th:if="${app['status'] == 'REJECTED'}"
+                              class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                            Từ chối
+                        </span>
+
+                        <a th:href="@{'/recruiter/applications/' + ${app['id']} + '/cv'}" target="_blank"
+                           class="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-700">
+                            <i data-lucide="file-text" class="w-3 h-3"></i>
+                            <span>Xem CV</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State for Applications -->
+            <div th:if="${recentApplications == null or recentApplications.isEmpty()}"
+                 class="p-8 text-center rounded-xl bg-slate-50 border border-dashed border-slate-200">
+                <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mx-auto mb-3">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-sm font-bold text-slate-800 mb-1">Chưa có ứng viên mới</h3>
+                <p class="text-xs text-slate-500 mb-4 max-w-xs mx-auto">Khi có ứng viên nộp hồ sơ, danh sách sẽ hiển thị tự động tại đây.</p>
+                <a th:href="@{/recruiter/applications}"
+                   class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600 text-white text-xs font-bold hover:bg-purple-700 shadow-sm transition">
+                    <span>Xem trung tâm ứng viên</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 5. RECRUITER ACTION HUB (6 Function Cards Grid) -->
+    <div>
+        <div class="mb-5">
+            <h2 class="text-lg font-bold font-heading text-slate-900">Trung Tâm Thao Tác Tuyển Dụng</h2>
+            <p class="text-xs text-slate-500">Phím tắt nhanh đến các phân hệ quản trị chính</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Card 1: Quản lý tin tuyển dụng -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:shadow-floating hover:border-blue-400 transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
+                        <i data-lucide="briefcase" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-base font-heading font-bold text-slate-900 mb-1.5">Quản Lý Tin Tuyển Dụng</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                        Kiểm soát toàn diện các tin đăng: Đang tuyển, Bản nháp, Chờ duyệt và Đóng tuyển dụng.
+                    </p>
+                </div>
+                <a th:href="@{/recruiter/jobs}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white text-xs font-bold transition">
+                    <span>Xem danh sách tin</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- Card 2: Duyệt hồ sơ ứng viên -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:shadow-floating hover:border-purple-400 transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition">
+                        <i data-lucide="users" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-base font-heading font-bold text-slate-900 mb-1.5">Xét Duyệt Ứng Viên</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                        Kiểm tra hồ sơ nộp mới, xem bản lưu Frozen Snapshot CV và chấp thuận hoặc từ chối hồ sơ.
+                    </p>
+                </div>
+                <a th:href="@{/recruiter/applications(status='SUBMITTED')}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white text-xs font-bold transition">
+                    <span>Duyệt hồ sơ chờ xử lý</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- Card 3: Hồ sơ công ty -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:shadow-floating hover:border-emerald-400 transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:bg-emerald-600 group-hover:text-white transition">
+                        <i data-lucide="building" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-base font-heading font-bold text-slate-900 mb-1.5">Hồ Sơ Doanh Nghiệp</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                        Cập nhật logo, website, MST, trụ sở và bài giới thiệu văn hóa công ty nhằm thu hút nhân tài.
+                    </p>
+                </div>
+                <a th:href="@{/recruiter/profile}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white text-xs font-bold transition">
+                    <span>Xem & Chỉnh sửa hồ sơ</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- Card 4: Tạo khung giờ phỏng vấn -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:shadow-floating hover:border-indigo-400 transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition">
+                        <i data-lucide="calendar-plus" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-base font-heading font-bold text-slate-900 mb-1.5">Cài Đặt Lịch Phỏng Vấn</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                        Thiết lập các khung giờ phỏng vấn còn trống để ứng viên đã duyệt chủ động chọn giờ gặp mặt.
+                    </p>
+                </div>
+                <a th:href="@{/recruiter/interviews/availability}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white text-xs font-bold transition">
+                    <span>Cài đặt khung giờ</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- Card 5: Lịch phỏng vấn đã đặt -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:shadow-floating hover:border-teal-400 transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center mb-4 group-hover:bg-teal-600 group-hover:text-white transition">
+                        <i data-lucide="calendar-check" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-base font-heading font-bold text-slate-900 mb-1.5">Lịch Phỏng Vấn Đã Đặt</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                        Kiểm tra danh sách buổi phỏng vấn trực tiếp, link Google Meet và danh sách ứng viên đã chọn lịch.
+                    </p>
+                </div>
+                <a th:href="@{/recruiter/interviews}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white text-xs font-bold transition">
+                    <span>Xem lịch đã đặt</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+            <!-- Card 6: Đổi mật khẩu bảo mật -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-card hover:shadow-floating hover:border-slate-400 transition flex flex-col justify-between group">
+                <div>
+                    <div class="w-12 h-12 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-4 group-hover:bg-slate-800 group-hover:text-white transition">
+                        <i data-lucide="shield" class="w-6 h-6"></i>
+                    </div>
+                    <h3 class="text-base font-heading font-bold text-slate-900 mb-1.5">Bảo Mật Tài Khoản</h3>
+                    <p class="text-xs text-slate-500 leading-relaxed mb-5">
+                        Thay đổi mật khẩu tài khoản tuyển dụng với mã xác thực OTP bảo mật gửi qua Gmail công ty.
+                    </p>
+                </div>
+                <a th:href="@{/recruiter/change-password}"
+                   class="inline-flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-800 text-slate-700 hover:text-white text-xs font-bold transition">
+                    <span>Đổi mật khẩu</span>
+                    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</main>
+
+<!-- Unified Global Footer -->
+<footer th:replace="~{fragments/taskbar :: taskbarFooter}"></footer>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>

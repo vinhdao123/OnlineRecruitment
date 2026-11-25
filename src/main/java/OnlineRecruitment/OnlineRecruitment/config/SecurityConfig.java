@@ -53,15 +53,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/api/payments/sepay/webhook", "/api/payments/sepay/ipn"))
                 .userDetailsService(userDetailsService)
 
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/sepay/webhook").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/payments/sepay/ipn").permitAll()
+                        .requestMatchers("/uploads/cv/**").denyAll()
                         .requestMatchers(
                                 "/", "/login", "/register", "/register/**",
                                 "/verify-otp", "/resend-otp", "/auth/**",
                                 "/forgot-password", "/forgot-password/**",
                                 "/403", "/error", "/companies", "/about",
-                                "/company-profile",
+                                "/company-profile", "/pricing",
                                 "/interview-questions", "/interview-questions/**",
                                 "/skill-tests", "/skill-tests/{id:[0-9]+}",
                                 "/css/**", "/js/**", "/images/**", "/static/**",
@@ -69,7 +73,6 @@ public class SecurityConfig {
                                 "/favicon.ico"
                         ).permitAll()
                         .requestMatchers("/jobs/*/apply").hasRole("CANDIDATE")
-                        .requestMatchers("/applications/submit").hasRole("CANDIDATE")
                         .requestMatchers(org.springframework.http.HttpMethod.GET, "/jobs", "/jobs/**").permitAll()
                         .requestMatchers("/skill-tests/*/take", "/skill-tests/*/submit", "/skill-tests/result/**").authenticated()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -101,6 +104,11 @@ public class SecurityConfig {
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/login?logout")
                         .permitAll()
+                )
+                .headers(headers ->
+                        headers.frameOptions(frame ->
+                                frame.sameOrigin()
+                        )
                 )
 
                 .exceptionHandling(ex -> ex.accessDeniedPage("/403"));

@@ -38,4 +38,25 @@ public class CvEducation {
 
     @Column(name = "display_order", nullable = false)
     private Integer displayOrder;
+
+    public String getParsedRank() {
+        if (grade == null || grade.isBlank()) return "";
+        if (grade.startsWith("Xuất sắc")) return "Xuất sắc";
+        if (grade.startsWith("Giỏi")) return "Giỏi";
+        if (grade.startsWith("Khá")) return "Khá";
+        if (grade.startsWith("Trung bình")) return "Trung bình";
+        return "";
+    }
+
+    public Double getParsedGpa() {
+        if (grade == null || grade.isBlank()) return null;
+        try {
+            int idx = grade.indexOf("GPA:");
+            if (idx != -1) {
+                String gpaStr = grade.substring(idx + 4).replace(")", "").trim();
+                return Double.parseDouble(gpaStr);
+            }
+        } catch (Exception ignored) {}
+        return null;
+    }
 }

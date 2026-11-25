@@ -1968,6 +1968,12 @@ select:focus-visible {
         }
     }
 
+    .job-card { position: relative; }
+    .job-card-pinned {
+        border-left: 4px solid #f59e0b !important; /* Viền trái màu vàng */
+        background-color: #fefce8 !important;
+    }
+
     @media (hover: none) {
         /*
          * Trên màn hình cảm ứng không có hover thực sự:

@@ -428,29 +428,82 @@ input[type="file"].form-control, input[type="file"].cv-form-control { padding: 8
 .cv-section-card-arrow { color: #0284c7; font-size: 18px; font-weight: 700; transition: transform 0.2s; }
 .cv-section-card:hover .cv-section-card-arrow { transform: translateX(4px); }
 
-/* ================= TRANG PREVIEW (IN PDF) ================= */
-body.preview-body-bg { background-color: #f1f5f9 !important; background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px) !important; background-size: 24px 24px !important; padding: 40px 20px; }
-.preview-container { background-color: white; max-width: 860px; margin: 0 auto; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05); border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #e2e8f0; }
-.preview-toolbar { position: fixed; top: 20px; right: 20px; display: flex; gap: 10px; background: white; padding: 10px 14px; border-radius: 10px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); z-index: 100; border: 1px solid #e2e8f0; }
-.preview-btn { padding: 9px 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; text-decoration: none; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; }
-.preview-btn-primary { background: linear-gradient(135deg, #0284c7, #0369a1); color: white; box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3); }
+/* ================= TRANG PREVIEW (IN PDF) & 5 MẪU BỐ CỤC CV ================= */
+:root {
+    --cv-accent: #0284c7;
+}
+
+body.preview-body-bg {
+    background-color: #f1f5f9 !important;
+    background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px) !important;
+    background-size: 24px 24px !important;
+    padding: 40px 20px;
+}
+
+.preview-container {
+    background-color: white;
+    max-width: 880px;
+    margin: 0 auto;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #e2e8f0;
+}
+
+.preview-toolbar {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    background: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    z-index: 100;
+    border: 1px solid #e2e8f0;
+}
+
+.preview-btn {
+    padding: 9px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.preview-btn-primary {
+    background: linear-gradient(135deg, var(--cv-accent, #0284c7), #0369a1);
+    color: white;
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+}
+
 .preview-btn-primary:hover { opacity: 0.95; }
 .preview-btn-secondary { background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; }
 .preview-btn-secondary:hover { background: #f1f5f9; color: #0f172a; }
-.preview-header { padding: 36px 40px; border-bottom: 3px solid #0284c7; display: flex; align-items: center; gap: 26px; background: #ffffff; }
-.preview-avatar { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid #0284c7; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); flex-shrink: 0; }
-.preview-avatar-fallback { width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #0c4a6e, #0284c7); color: white; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; flex-shrink: 0; border: 3px solid #e2e8f0; }
+
+/* Các thành phần cơ bản dùng chung */
+.preview-header { padding: 36px 40px; border-bottom: 3px solid var(--cv-accent, #0284c7); display: flex; align-items: center; gap: 26px; background: #ffffff; }
+.preview-avatar { width: 110px; height: 110px; object-fit: cover; border-radius: 50%; border: 3px solid var(--cv-accent, #0284c7); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); flex-shrink: 0; }
+.preview-avatar-fallback { width: 110px; height: 110px; border-radius: 50%; background: linear-gradient(135deg, #0c4a6e, var(--cv-accent, #0284c7)); color: white; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 800; flex-shrink: 0; border: 3px solid #e2e8f0; }
 .preview-info-col { flex-grow: 1; }
 .preview-title { font-size: 28px; font-weight: 800; margin: 0 0 6px 0; color: #0f172a; letter-spacing: -0.5px; }
-.preview-subtitle { font-size: 16px; font-weight: 600; margin: 0 0 10px 0; color: #0284c7; }
+.preview-subtitle { font-size: 16px; font-weight: 600; margin: 0 0 10px 0; color: var(--cv-accent, #0284c7); }
 .preview-contact-bar { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 10px; font-size: 13px; color: #475569; }
 .preview-contact-item { display: inline-flex; align-items: center; gap: 6px; }
-.preview-item-link { font-size: 13px; color: #0284c7; text-decoration: none; font-weight: 500; }
+.preview-item-link { font-size: 13px; color: var(--cv-accent, #0284c7); text-decoration: none; font-weight: 500; }
 .preview-item-link:hover { text-decoration: underline; }
 .preview-body-content { padding: 36px 40px; }
 .preview-section { margin-bottom: 28px; }
 .preview-section:last-child { margin-bottom: 0; }
-.preview-section-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; color: #0c4a6e; }
+.preview-section-title { font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; padding-bottom: 8px; border-bottom: 2px solid var(--cv-accent, #0284c7); color: var(--cv-accent, #0284c7); }
 .preview-item { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px dashed #f1f5f9; }
 .preview-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
 .preview-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
@@ -459,14 +512,337 @@ body.preview-body-bg { background-color: #f1f5f9 !important; background-image: r
 .preview-item-date { font-size: 12.5px; color: #64748b; font-weight: 500; white-space: nowrap; }
 .preview-item-desc { font-size: 13.5px; color: #334155; margin-top: 6px; line-height: 1.6; white-space: pre-wrap; }
 .preview-skills-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.preview-skill-tag { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background-color: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; display: inline-flex; align-items: center; gap: 6px; }
-.preview-badge-level { font-size: 11.5px; font-weight: 500; color: #15803d; }
+.preview-skill-tag { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; background-color: #f8fafc; color: #1e293b; border: 1.5px solid var(--cv-accent, #0284c7); display: inline-flex; align-items: center; gap: 6px; }
+.preview-badge-level { font-size: 11.5px; font-weight: 500; color: var(--cv-accent, #0284c7); }
 .preview-tech-pill { display: inline-block; padding: 2px 10px; margin: 4px 6px 4px 0; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 12px; color: #334155; }
+
+/* =====================================================================
+   CHI TIẾT ĐẶC TRƯNG 5 MẪU CV
+   ===================================================================== */
+
+/* 1. MẪU TIÊU CHUẨN (STANDARD) */
+.preview-layout-standard .preview-header {
+    background: #ffffff;
+    border-bottom: 3.5px solid var(--cv-accent, #0284c7);
+}
+
+/* 2. MẪU TIÊU CHUẨN - ÍT KINH NGHIỆM (MINIMALIST) */
+.preview-layout-minimalist .preview-min-banner {
+    background: #f8fafc;
+    border-bottom: 3px solid var(--cv-accent, #0284c7);
+    padding: 36px 40px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.preview-layout-minimalist .preview-min-avatar {
+    width: 105px;
+    height: 105px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--cv-accent, #0284c7);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    margin-bottom: 14px;
+}
+.preview-layout-minimalist .preview-min-name {
+    font-size: 27px;
+    font-weight: 800;
+    color: var(--cv-accent, #0284c7);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin: 0 0 6px;
+}
+.preview-layout-minimalist .preview-min-role {
+    font-size: 15px;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 16px;
+}
+.preview-layout-minimalist .preview-min-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px 24px;
+    padding-top: 14px;
+    border-top: 1px dashed #cbd5e1;
+    width: 100%;
+    font-size: 13px;
+    color: #334155;
+}
+.preview-layout-minimalist .preview-min-sec-title {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cv-accent, #0284c7);
+    padding: 6px 0;
+    margin-bottom: 18px;
+    border-top: 1.5px solid var(--cv-accent, #0284c7);
+    border-bottom: 1.5px solid var(--cv-accent, #0284c7);
+}
+
+/* 3. MẪU THANH LỊCH (CREATIVE) */
+.preview-layout-creative .preview-cre-banner {
+    background: linear-gradient(135deg, var(--cv-accent, #0284c7) 0%, #0f172a 100%);
+    padding: 40px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+.preview-layout-creative .preview-cre-avatar {
+    width: 115px;
+    height: 115px;
+    border-radius: 16px;
+    object-fit: cover;
+    border: 3px solid #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    flex-shrink: 0;
+}
+.preview-layout-creative .preview-cre-name {
+    font-size: 30px;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 6px;
+    letter-spacing: -0.5px;
+}
+.preview-layout-creative .preview-cre-role {
+    font-size: 16px;
+    font-weight: 600;
+    color: #bae6fd;
+    margin: 0 0 14px;
+}
+.preview-layout-creative .preview-cre-contacts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    font-size: 13px;
+    color: #f1f5f9;
+}
+.preview-layout-creative .preview-cre-contact-pill {
+    background: rgba(255, 255, 255, 0.16);
+    padding: 4px 12px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.preview-layout-creative .preview-cre-summary-box {
+    background: #f8fafc;
+    border-left: 4px solid var(--cv-accent, #0284c7);
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    font-size: 14px;
+    line-height: 1.65;
+    color: #334155;
+    font-style: italic;
+}
+.preview-layout-creative .preview-cre-sec-title {
+    font-size: 16px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--cv-accent, #0284c7);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.preview-layout-creative .preview-cre-sec-title::after {
+    content: "";
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cv-accent, #0284c7), transparent);
+}
+.preview-layout-creative .preview-cre-timeline {
+    border-left: 2px solid var(--cv-accent, #0284c7);
+    margin-left: 8px;
+    padding-left: 20px;
+}
+.preview-layout-creative .preview-cre-tl-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+.preview-layout-creative .preview-cre-tl-item:last-child {
+    margin-bottom: 0;
+}
+.preview-layout-creative .preview-cre-tl-item::before {
+    content: "";
+    position: absolute;
+    left: -27px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 3px solid var(--cv-accent, #0284c7);
+}
+
+/* 4. MẪU HIỆN ĐẠI 2 CỘT (MODERN) */
+.preview-layout-modern {
+    display: grid !important;
+    grid-template-columns: 290px 1fr !important;
+    min-height: 100%;
+}
+.preview-layout-modern .preview-mod-sidebar {
+    background: #f8fafc;
+    border-right: 2px solid #e2e8f0;
+    padding: 36px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+.preview-layout-modern .preview-mod-avatar-box {
+    text-align: center;
+}
+.preview-layout-modern .preview-mod-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--cv-accent, #0284c7);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    margin-bottom: 12px;
+}
+.preview-layout-modern .preview-mod-side-sec {
+    font-size: 13px;
+}
+.preview-layout-modern .preview-mod-side-heading {
+    font-size: 13.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--cv-accent, #0284c7);
+    letter-spacing: 0.05em;
+    padding-bottom: 6px;
+    border-bottom: 2px solid var(--cv-accent, #0284c7);
+    margin-bottom: 12px;
+}
+.preview-layout-modern .preview-mod-contact-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #334155;
+    word-break: break-word;
+}
+.preview-layout-modern .preview-mod-contact-icon {
+    flex-shrink: 0;
+    color: var(--cv-accent, #0284c7);
+    font-weight: bold;
+}
+.preview-layout-modern .preview-mod-skill-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    margin: 3px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+}
+.preview-layout-modern .preview-mod-main {
+    padding: 36px 36px 36px 32px;
+}
+.preview-layout-modern .preview-mod-name {
+    font-size: 32px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    margin: 0 0 6px;
+}
+.preview-layout-modern .preview-mod-role {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--cv-accent, #0284c7);
+    margin: 0 0 18px;
+}
+.preview-layout-modern .preview-mod-sec-heading {
+    font-size: 15px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cv-accent, #0284c7);
+    padding-left: 10px;
+    border-left: 4px solid var(--cv-accent, #0284c7);
+    margin-bottom: 14px;
+}
+
+/* 5. MẪU CHUẨN ATS (ATS_FRIENDLY) */
+.preview-layout-ats {
+    padding: 40px 45px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #111827;
+}
+.preview-layout-ats .preview-ats-header {
+    text-align: center;
+    padding-bottom: 18px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--cv-accent, #111827);
+}
+.preview-layout-ats .preview-ats-name {
+    font-size: 28px;
+    font-weight: 800;
+    color: #111827;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 0 0 6px;
+}
+.preview-layout-ats .preview-ats-role {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 10px;
+}
+.preview-layout-ats .preview-ats-contacts {
+    font-size: 13.5px;
+    color: #4b5563;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+}
+.preview-layout-ats .preview-ats-sec-title {
+    font-size: 14.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--cv-accent, #111827);
+    border-bottom: 1.5px solid var(--cv-accent, #111827);
+    padding-bottom: 4px;
+    margin-bottom: 12px;
+}
+.preview-layout-ats .preview-ats-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-weight: 700;
+    color: #111827;
+    font-size: 14.5px;
+}
+.preview-layout-ats .preview-ats-row-date {
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    white-space: nowrap;
+}
+.preview-layout-ats .preview-ats-row-sub {
+    font-size: 13.5px;
+    color: #4b5563;
+    font-style: italic;
+    margin-bottom: 4px;
+}
 
 @media print {
     .preview-toolbar { display: none !important; }
     body.preview-body-bg { padding: 0 !important; background: white !important; }
-    .preview-container { box-shadow: none !important; border: none !important; border-radius: 0 !important; max-width: 100% !important; margin: 0 !important; }
+    .preview-container { box-shadow: none !important; border: none !important; border-radius: 0 !important; max-width: 100% !important; margin: 0 !important; width: 100% !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    .preview-section, .preview-item, .preview-cre-tl-item, .preview-mod-side-sec { break-inside: avoid; }
 }
 
 /* ================= RESPONSIVE ================= */
@@ -952,4 +1328,77 @@ body.preview-body-bg { background-color: #f1f5f9 !important; background-image: r
     background: #e0f2fe;
     border-color: #7dd3fc;
     color: #0284c7;
+}
+
+/* ================= PHÂN TRANG (PAGINATION) ================= */
+.cv-pagination-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 36px;
+    margin-bottom: 24px;
+}
+
+.cv-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.cv-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    padding: 0 12px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    background: #ffffff;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.cv-page-btn:hover:not(.disabled):not(.active) {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+    color: #0284c7;
+    transform: translateY(-1px);
+}
+
+.cv-page-btn.active {
+    background: #0284c7;
+    border-color: #0284c7;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(2, 132, 199, 0.28);
+    cursor: default;
+}
+
+.cv-page-btn.disabled {
+    background: #f8fafc;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+    cursor: not-allowed;
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.cv-pagination-info {
+    font-size: 13.5px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.cv-pagination-info strong {
+    color: #0f172a;
+    font-weight: 700;
 }

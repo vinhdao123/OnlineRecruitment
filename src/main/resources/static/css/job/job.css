@@ -523,3 +523,10 @@ body {
 /* Ảnh logo nằm đè lên chữ cái dự phòng của mỗi tin tuyển dụng. */
 .company-logo { position: relative; overflow: hidden; }
 .company-logo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+
+.job-card { position: relative; } /* Để Badge hiển thị đúng góc */
+.job-card-pinned {
+    border: 2px solid #f59e0b !important;
+    background: #fffdf5 !important; /* Nền vàng rất nhạt */
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15) !important;
+}

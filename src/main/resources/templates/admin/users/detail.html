@@ -1,204 +1,180 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{admin/_layout :: head('Account Detail')}"></head>
-<body class="admin">
+<head th:replace="~{admin/_layout :: head(${user.fullName} + ' — Chi tiết tài khoản')}"></head>
+<body class="admin bg-slate-50 text-slate-800 font-sans min-h-screen flex antialiased">
 
 <aside th:replace="~{admin/_layout :: sidebar}"></aside>
 
-<div class="main">
+<div class="main flex-1 flex flex-col min-w-0 min-h-screen">
 
-    <!-- Topbar với breadcrumb -->
-    <div class="topbar">
-        <div>
-            <div class="breadcrumb">
-                <a th:href="@{/admin/users}">Accounts</a>
-                <span>›</span>
-                <b th:text="${user.fullName}">User</b>
-            </div>
-        </div>
-        <div class="topbar-actions">
-            <div class="search-global">
-                <input type="text" placeholder="Search candidates, companies..." maxlength="100">
-            </div>
-            <div class="topbar-user">
-                <div class="avatar-circle">
-                    <span th:text="${#authentication.name.substring(0,1).toUpperCase()}">A</span>
-                </div>
-                <span th:text="${#authentication.name}">admin</span>
-            </div>
-        </div>
-    </div>
+    <div th:replace="~{admin/_layout :: topbar('Chi tiết người dùng', 'Thông tin định danh cá nhân và phân quyền hệ thống')}"></div>
 
-    <!-- Alert -->
-    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="p-6 sm:p-8 space-y-6 flex-1 max-w-7xl w-full mx-auto">
 
-    <!-- ==================== USER HEADER ==================== -->
-    <div class="user-header">
-        <div class="avatar-big">
-            <span th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}">U</span>
-            <span class="online-dot" th:if="${user.status.name() == 'ACTIVE'}"></span>
-        </div>
-
-        <div class="user-info">
-            <div class="user-name" th:text="${user.fullName}">Nguyen Van A</div>
-            <div class="user-meta">
-                <span class="badge"
-                      th:classappend="'badge-' + ${#strings.toLowerCase(user.role.name())}">
-                    <span th:switch="${user.role.name()}">
-                        <span th:case="'ADMIN'">🛡 Admin</span>
-                        <span th:case="'RECRUITER'">💼 Recruiter</span>
-                        <span th:case="'CANDIDATE'">👤 Candidate</span>
-                    </span>
-                </span>
-                <span class="badge"
-                      th:classappend="'badge-' + ${#strings.toLowerCase(user.status.name())}">
-                    <span th:switch="${user.status.name()}">
-                        <span th:case="'ACTIVE'">● Active</span>
-                        <span th:case="'PENDING'">⏳ Pending</span>
-                        <span th:case="'REJECTED'">✕ Rejected</span>
-                        <span th:case="'LOCKED'">⛔ Locked</span>
-                    </span>
-                </span>
+        <!-- Breadcrumb -->
+        <div class="flex items-center justify-between text-xs text-slate-500 font-medium">
+            <div class="flex items-center gap-2">
+                <a th:href="@{/admin/users}" class="hover:text-primary-600">Quản lý tài khoản</a>
+                <span>/</span>
+                <span class="text-primary-600 font-semibold" th:text="${user.fullName}">Chi tiết</span>
             </div>
-            <div class="user-meta">
-                <span th:text="${user.email}">email@x.com</span>
-                <span th:if="${user.location != null}">·</span>
-                <span th:if="${user.location != null}" th:text="${user.location}">Location</span>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}" class="btn btn-secondary">
-                ✏ Edit Profile
+            <a th:href="@{/admin/users}" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-primary-600">
+                <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
+                Quay lại danh sách
             </a>
-            <form th:if="${user.status.name() == 'ACTIVE'}"
-                  th:action="@{'/admin/users/' + ${user.id} + '/lock'}"
-                  method="post" style="display:inline">
-                <button type="submit" class="btn btn-danger"
-                        onclick="return confirm('Khóa tài khoản này?')">
-                    🚫 Ban Account
-                </button>
-            </form>
-            <form th:if="${user.status.name() == 'LOCKED'}"
-                  th:action="@{'/admin/users/' + ${user.id} + '/unlock'}"
-                  method="post" style="display:inline">
-                <button type="submit" class="btn btn-success">
-                    ✓ Unban Account
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ==================== INFO GRID ==================== -->
-    <div class="info-grid">
-
-        <div class="info-box">
-            <h3>👤 Personal Info</h3>
-            <div class="info-row">
-                <span class="label">Full Name</span>
-                <span class="value" th:text="${user.fullName}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Email</span>
-                <span class="value" th:text="${user.email}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Phone Number</span>
-                <span class="value" th:text="${user.phone != null ? user.phone : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Location</span>
-                <span class="value" th:text="${user.location != null ? user.location : '—'}">—</span>
-            </div>
         </div>
 
-        <div class="info-box">
-            <h3>⚙ System Info</h3>
-            <div class="info-row">
-                <span class="label">Username</span>
-                <span class="value" th:text="${user.username}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Account Role</span>
-                <span class="value" th:text="${user.role}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Account Status</span>
-                <span class="value" th:text="${user.status}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Created Date</span>
-                <span class="value"
-                      th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Last Updated</span>
-                <span class="value"
-                      th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm')}">—</span>
-            </div>
+        <!-- Success Alert -->
+        <div th:if="${success}" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-medium flex items-center gap-3">
+            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-600 flex-shrink-0"></i>
+            <span th:text="${success}"></span>
         </div>
 
-    </div>
+        <!-- Header Profile Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div class="flex items-center gap-5">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary-600 text-white font-extrabold text-2xl sm:text-3xl flex items-center justify-center font-display shadow-sm flex-shrink-0">
+                    <span th:text="${#strings.substring(user.fullName, 0, 1).toUpperCase()}">U</span>
+                </div>
+                <div class="space-y-1.5">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 font-display" th:text="${user.fullName}">Họ và Tên</h1>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+                              th:classappend="${user.role.name() == 'ADMIN' ? 'bg-purple-100 text-purple-800' : (user.role.name() == 'RECRUITER' ? 'bg-blue-100 text-blue-800' : 'bg-emerald-100 text-emerald-800')}">
+                            <span th:switch="${user.role.name()}">
+                                <span th:case="'ADMIN'">🛡 Quản trị viên</span>
+                                <span th:case="'RECRUITER'">💼 Nhà tuyển dụng</span>
+                                <span th:case="'CANDIDATE'">👤 Ứng viên</span>
+                            </span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold"
+                              th:classappend="${user.status.name() == 'ACTIVE' ? 'bg-emerald-100 text-emerald-800' : (user.status.name() == 'PENDING' ? 'bg-amber-100 text-amber-800' : (user.status.name() == 'LOCKED' ? 'bg-rose-100 text-rose-800' : 'bg-slate-100 text-slate-700'))}">
+                            <span th:switch="${user.status.name()}">
+                                <span th:case="'ACTIVE'">✓ Hoạt động</span>
+                                <span th:case="'PENDING'">⏳ Chờ kích hoạt</span>
+                                <span th:case="'REJECTED'">✕ Bị từ chối</span>
+                                <span th:case="'LOCKED'">⛔ Đã khóa</span>
+                                <span th:case="*">● Khác</span>
+                            </span>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                        <span>Email: <strong class="text-slate-800" th:text="${user.email}"></strong></span>
+                        <span th:if="${user.location != null}">&bull; Địa chỉ: <strong class="text-slate-800" th:text="${user.location}"></strong></span>
+                        <span>&bull; Username: <strong class="font-mono text-slate-700" th:text="${user.username}"></strong></span>
+                    </div>
+                </div>
+            </div>
 
-    <!-- ==================== COMPANY BOX (chỉ RECRUITER) ==================== -->
-    <div class="section" th:if="${user.role.name() == 'RECRUITER'}">
-        <div class="section-header">
-            <div>
-                <div class="section-title">🏢 Company Managed</div>
-                <div class="section-sub">Công ty mà nhà tuyển dụng này quản lý</div>
-            </div>
-        </div>
-
-        <div th:if="${company == null}" style="color:#8895a8; font-size:14px; padding: 12px 0;">
-            Nhà tuyển dụng này chưa đăng ký công ty nào.
-        </div>
-
-        <div th:if="${company != null}">
-            <div class="info-row">
-                <span class="label">Company Name</span>
-                <span class="value" th:text="${company.companyName}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Tax Code</span>
-                <span class="value" th:text="${company.taxCode != null ? company.taxCode : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Email</span>
-                <span class="value" th:text="${company.email != null ? company.email : '—'}">—</span>
-            </div>
-            <div class="info-row">
-                <span class="label">Status</span>
-                <span class="value">
-                    <span class="badge"
-                          th:classappend="'badge-' + ${#strings.toLowerCase(company.status.name())}"
-                          th:text="${company.status}">APPROVED</span>
-                </span>
-            </div>
-            <div style="margin-top: 16px;">
-                <a th:href="@{'/admin/companies/' + ${company.id}}" class="btn btn-primary">
-                    Xem chi tiết công ty →
+            <!-- Header Action CTAs -->
+            <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+                <a th:href="@{'/admin/users/' + ${user.id} + '/edit'}"
+                   class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 font-bold text-xs transition-all">
+                    <i data-lucide="pencil" class="w-4 h-4"></i>
+                    Chỉnh sửa hồ sơ
                 </a>
+
+                <form th:if="${user.status.name() == 'ACTIVE'}"
+                      th:action="@{'/admin/users/' + ${user.id} + '/lock'}" method="post"
+                      onsubmit="return confirm('Bạn chắc chắn muốn KHÓA tài khoản người dùng này?');" class="inline">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs transition-all">
+                        <i data-lucide="lock" class="w-4 h-4"></i>
+                        Khóa tài khoản
+                    </button>
+                </form>
+
+                <form th:if="${user.status.name() == 'LOCKED'}"
+                      th:action="@{'/admin/users/' + ${user.id} + '/unlock'}" method="post"
+                      onsubmit="return confirm('Bạn chắc chắn muốn MỞ KHÓA tài khoản người dùng này?');" class="inline">
+                    <button type="submit" class="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-sm transition-all">
+                        <i data-lucide="unlock" class="w-4 h-4"></i>
+                        Mở khóa tài khoản
+                    </button>
+                </form>
             </div>
         </div>
-    </div>
 
-    <!-- ==================== CANDIDATE NOTE ==================== -->
-    <div class="section" th:if="${user.role.name() == 'CANDIDATE'}">
-        <div class="section-header">
-            <div>
-                <div class="section-title">📄 Candidate Profile</div>
-                <div class="section-sub">Hồ sơ ứng viên</div>
+        <!-- 2 Columns Information Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Personal Info Card -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <h3 class="text-sm font-extrabold text-slate-900 font-display flex items-center gap-2 pb-3 border-b border-slate-100 uppercase tracking-wider">
+                    <i data-lucide="user" class="w-4 h-4 text-primary-600"></i>
+                    Thông tin cá nhân
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Họ và tên đầy đủ</span>
+                        <span class="font-bold text-slate-900 text-right" th:text="${user.fullName}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Địa chỉ Email</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${user.email}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Số điện thoại</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${user.phone != null ? user.phone : '—'}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Tỉnh / Thành phố cư trú</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${user.location != null ? user.location : '—'}">—</span>
+                    </div>
+                </div>
             </div>
-        </div>
-        <p style="color:#8895a8; font-size:14px; padding: 12px 0;">
-            Thông tin chi tiết hồ sơ (CV, kỹ năng, kinh nghiệm) sẽ được hiển thị ở đây
-            sau khi module Candidate được triển khai.
-        </p>
-    </div>
 
+            <!-- System Info Card -->
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+                <h3 class="text-sm font-extrabold text-slate-900 font-display flex items-center gap-2 pb-3 border-b border-slate-100 uppercase tracking-wider">
+                    <i data-lucide="settings" class="w-4 h-4 text-primary-600"></i>
+                    Thông tin phân quyền hệ thống
+                </h3>
+
+                <div class="space-y-3 text-xs">
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Tên đăng nhập (Username)</span>
+                        <span class="font-mono font-bold text-slate-900 text-right" th:text="${user.username}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Vai trò tài khoản</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${user.role}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Trạng thái xác thực</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${user.status}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Ngày khởi tạo</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}">—</span>
+                    </div>
+
+                    <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
+                        <span class="text-slate-400 font-medium">Lần cập nhật gần nhất</span>
+                        <span class="font-semibold text-slate-900 text-right" th:text="${#temporals.format(user.updatedAt, 'dd/MM/yyyy HH:mm')}">—</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
 <th:block th:replace="~{admin/_layout :: scripts}"></th:block>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    });
+</script>
 </body>
 </html>

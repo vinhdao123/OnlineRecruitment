@@ -36,6 +36,7 @@ build/
 
 # Local data, credentials and generated review files
 /uploads/
+/storage/
 .env
 .env.*
 !.env.example
@@ -47,3 +48,5 @@ build/
 /how --stat --oneline 34d0f12
 
 /src/main/resources/static/uploads/
+
+application-local.properties
