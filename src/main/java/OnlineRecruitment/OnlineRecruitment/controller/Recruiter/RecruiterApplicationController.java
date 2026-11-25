@@ -249,7 +249,82 @@ public class RecruiterApplicationController {
     }
 
     // =========================================
+<<<<<<< Updated upstream
     // DỮ LIỆU BỘ LỌC
+=======
+    // DUYỆT ĐƠN ỨNG TUYỂN
+    // =========================================
+
+    @PostMapping("/{applicationId}/approve")
+    public String approveApplication(
+            @PathVariable Long applicationId,
+            RedirectAttributes redirectAttributes
+            ) {
+
+        String username = getCurrentUsername();
+
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        Map<String, String> result =
+                applicationService.approveApplication(applicationId, username);
+
+        if ("/login".equals(result.get("redirect"))) {
+            return "redirect:/login";
+        }
+
+        if (result.containsKey("successMessage")) {
+            redirectAttributes.addFlashAttribute(
+                    "successMessage", result.get("successMessage"));
+        }
+
+        if (result.containsKey("errorMessage")) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", result.get("errorMessage"));
+        }
+
+        return "redirect:" + result.get("redirect");
+    }
+
+    // =========================================
+    // TỪ CHỐI ĐƠN ỨNG TUYỂN
+    // =========================================
+
+    @PostMapping("/{applicationId}/reject")
+    public String rejectApplication(
+            @PathVariable Long applicationId,
+            RedirectAttributes redirectAttributes) {
+
+        String username = getCurrentUsername();
+
+        if (username == null) {
+            return "redirect:/login";
+        }
+
+        Map<String, String> result =
+                applicationService.rejectApplication(applicationId, username);
+
+        if ("/login".equals(result.get("redirect"))) {
+            return "redirect:/login";
+        }
+
+        if (result.containsKey("successMessage")) {
+            redirectAttributes.addFlashAttribute(
+                    "successMessage", result.get("successMessage"));
+        }
+
+        if (result.containsKey("errorMessage")) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage", result.get("errorMessage"));
+        }
+
+        return "redirect:" + result.get("redirect");
+    }
+
+    // =========================================
+    // HÀM HỖ TRỢ
+>>>>>>> Stashed changes
     // =========================================
 
     private void addFilters(
