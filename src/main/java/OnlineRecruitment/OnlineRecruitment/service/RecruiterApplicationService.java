@@ -243,6 +243,16 @@ public class RecruiterApplicationService {
             String recruiterEmail = String.valueOf(data.get("recruiterEmail"));
             String companyName = String.valueOf(data.get("companyName"));
             String jobTitle = String.valueOf(data.get("jobTitle"));
+            String id = String.valueOf(data.get("applicationId"));
+            String candidate_id = String.valueOf(data.get("candidateId"));
+            String company_id = String.valueOf(data.get("companyId"));
+            String job_id = String.valueOf(data.get("jobId"));
+            String cv_id = String.valueOf(data.get("cvId"));
+            String cv_template_version_id = String.valueOf(data.get("cvTemplateVersionId"));
+            String cv_snapshot_json = String.valueOf(data.get("cvSnapshotJson"));
+            String cv_file_path_snapshot = String.valueOf(data.get("cvFilePathSnapshot"));
+            String applicationDeadline = String.valueOf(data.get("applicationDeadline"));
+
 
             String candidateContent = """
                     Xin chào %s,
@@ -256,12 +266,37 @@ public class RecruiterApplicationService {
                     Công ty: %s
                     Vị trí: %s
                     Trạng thái: ACCEPTED
-
+                    
+                    //////////////////////
+                                          Application ID: %s
+                                          Candidate ID: %s
+                                          Company ID: %s
+                                          Job ID: %s
+                                          CV ID: %s
+                                          CV Template Version ID: %s
+                                          CV Snapshot JSON: %s
+                                          CV File Path Snapshot: %s
+                                          Application Deadline: %s
+                    //////////////////////
+                  
                     Cảm ơn bạn đã ứng tuyển vào công ty.
 
                     Trân trọng,
                     Online Recruitment
-                    """.formatted(candidateName, companyName, jobTitle);
+                    """.formatted(
+                    candidateName,
+                    companyName,
+                    jobTitle,
+                    id,
+                    candidate_id,
+                    company_id,
+                    job_id,
+                    cv_id,
+                    cv_template_version_id,
+                    cv_snapshot_json,
+                    cv_file_path_snapshot,
+                    applicationDeadline
+            );
 
             emailService.sendEmail(
                     candidateEmail,
@@ -290,8 +325,8 @@ public class RecruiterApplicationService {
                     jobTitle
             );
 
-            String cvPath = data.get("cvFilePath") != null
-                    ? data.get("cvFilePath").toString()
+            String cvPath = data.get("cvFilePathSnapshot") != null
+                    ? data.get("cvFilePathSnapshot").toString()
                     : null;
 
             File cvFile = cvFileStorageService.resolveCvFile(cvPath);

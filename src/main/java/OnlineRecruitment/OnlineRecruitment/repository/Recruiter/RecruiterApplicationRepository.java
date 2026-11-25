@@ -181,13 +181,22 @@ public class RecruiterApplicationRepository {
             Long recruiterId) {
 
         String sql = """
-            SELECT
+            
+                SELECT
+                a.id AS applicationId,
+                a.candidate_id AS candidateId,
+                a.job_id AS jobId,
+                a.cv_id AS cvId,
+                a.cv_template_version_id AS cvTemplateVersionId,
+                a.cv_snapshot_json AS cvSnapshotJson,
+                a.cv_file_path_snapshot AS cvFilePathSnapshot,
+                company.id AS companyId,
+                j.deadline AS applicationDeadline,
                 candidate.full_name AS candidateName,
                 candidate.email AS candidateEmail,
                 recruiter.email AS recruiterEmail,
                 company.company_name AS companyName,
-                j.title AS jobTitle,
-                a.cv_file_path_snapshot AS cvFilePath
+                j.title AS jobTitle
             FROM dbo.applications a
             JOIN dbo.candidates ca ON ca.id = a.candidate_id
             JOIN dbo.users candidate ON candidate.id = ca.user_id
@@ -224,11 +233,21 @@ public class RecruiterApplicationRepository {
             Long recruiterId) {
 
         String sql = """
-            SELECT
-                candidate.full_name AS candidateName,
-                candidate.email AS candidateEmail,
-                company.company_name AS companyName,
-                j.title AS jobTitle
+            
+                SELECT
+                                       a.id AS applicationId,
+                                       a.candidate_id AS candidateId,
+                                       a.job_id AS jobId,
+                                       a.cv_id AS cvId,
+                                       a.cv_template_version_id AS cvTemplateVersionId,
+                                       a.cv_snapshot_json AS cvSnapshotJson,
+                                       a.cv_file_path_snapshot AS cvFilePathSnapshot,
+                                       company.id AS companyId,
+                                       j.deadline AS applicationDeadline,
+                                       candidate.full_name AS candidateName,
+                                       candidate.email AS candidateEmail,
+                                       company.company_name AS companyName,
+                                       j.title AS jobTitle
             FROM dbo.applications a
             JOIN dbo.candidates ca ON ca.id = a.candidate_id
             JOIN dbo.users candidate ON candidate.id = ca.user_id
