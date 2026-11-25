@@ -36,6 +36,20 @@
       <span th:text="${error}"></span>
     </div>
 
+    <!-- Insufficient questions warning -->
+    <div th:if="${questions.size() < test.totalQuestionsPerTest}" class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-medium flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-600 flex-shrink-0"></i>
+        <div>
+          <strong>Chưa đủ câu hỏi:</strong> Cấu hình đề thi yêu cầu bốc ngẫu nhiên <strong class="text-slate-900" th:text="${test.totalQuestionsPerTest}">5</strong> câu hỏi, nhưng ngân hàng hiện có <strong class="text-rose-600 font-bold" th:text="${questions.size()}">0</strong> câu. Vui lòng thêm ít nhất <strong class="text-amber-800 font-bold" th:text="${test.totalQuestionsPerTest - questions.size()}">5</strong> câu hỏi nữa để ứng viên được phép làm bài.
+        </div>
+      </div>
+      <button type="button" onclick="openAddModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-sm flex-shrink-0 transition-all">
+        <i data-lucide="plus" class="w-4 h-4"></i>
+        Thêm ngay
+      </button>
+    </div>
+
     <!-- Mechanism Info Strip -->
     <div class="bg-gradient-to-r from-primary-900 via-primary-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
       <div class="space-y-2">
@@ -310,6 +324,8 @@
 
   function openAddModal() {
     var modal = document.getElementById('addModal');
+    var form = modal.querySelector('form');
+    if (form) form.reset();
     modal.classList.remove('hidden');
     modal.classList.add('flex');
   }

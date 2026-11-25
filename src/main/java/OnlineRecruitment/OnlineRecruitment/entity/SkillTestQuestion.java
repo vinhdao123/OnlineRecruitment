@@ -43,14 +43,14 @@ public class SkillTestQuestion {
     private String explanation; // Lời giải thích chi tiết đáp án
 
     @Column(name = "status", length = 20)
-    private String status; // "ACTIVE"
+    private String status = "ACTIVE"; // "ACTIVE"
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
     @PrePersist
     public void prePersist() {
         if (createdAt == null) createdAt = LocalDateTime.now();
-        if (status == null) status = "ACTIVE";
+        if (status == null || status.isBlank()) status = "ACTIVE";
     }
 }

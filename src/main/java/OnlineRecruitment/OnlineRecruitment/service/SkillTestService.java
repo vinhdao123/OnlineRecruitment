@@ -285,6 +285,12 @@ public class SkillTestService {
 
     @Transactional
     public SkillTestQuestion saveQuestion(SkillTestQuestion question) {
+        if (question.getStatus() == null || question.getStatus().isBlank()) {
+            question.setStatus("ACTIVE");
+        }
+        if (question.getCreatedAt() == null) {
+            question.setCreatedAt(LocalDateTime.now());
+        }
         return skillTestQuestionRepository.save(question);
     }
 
@@ -300,7 +306,7 @@ public class SkillTestService {
 
     @Transactional(readOnly = true)
     public long countActiveQuestionsInPool(Long testId) {
-        return skillTestQuestionRepository.countBySkillTestIdAndStatus(testId, "ACTIVE");
+        return skillTestQuestionRepository.countActiveQuestionsInPool(testId);
     }
 
     /**

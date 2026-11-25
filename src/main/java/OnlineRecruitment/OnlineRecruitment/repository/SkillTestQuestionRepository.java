@@ -19,6 +19,9 @@ public interface SkillTestQuestionRepository extends JpaRepository<SkillTestQues
 
     long countBySkillTestIdAndStatus(Long skillTestId, String status);
 
-    @Query("SELECT q FROM SkillTestQuestion q WHERE q.skillTest.id = :testId AND q.status = 'ACTIVE'")
+    @Query("SELECT COUNT(q) FROM SkillTestQuestion q WHERE q.skillTest.id = :testId AND (q.status = 'ACTIVE' OR q.status IS NULL)")
+    long countActiveQuestionsInPool(@Param("testId") Long testId);
+
+    @Query("SELECT q FROM SkillTestQuestion q WHERE q.skillTest.id = :testId AND (q.status = 'ACTIVE' OR q.status IS NULL)")
     List<SkillTestQuestion> findActivePoolByTestId(@Param("testId") Long testId);
 }

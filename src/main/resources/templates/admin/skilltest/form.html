@@ -39,6 +39,30 @@
         </div>
       </div>
 
+      <!-- Pool Banner if editing -->
+      <div th:if="${test.id != null}" class="p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+           th:classappend="${(poolCount != null ? poolCount : 0) < test.totalQuestionsPerTest} ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-emerald-50 border-emerald-200 text-emerald-900'">
+        <div class="flex items-center gap-3">
+          <i th:data-lucide="${(poolCount != null ? poolCount : 0) < test.totalQuestionsPerTest} ? 'alert-triangle' : 'check-circle'"
+             class="w-5 h-5 flex-shrink-0"
+             th:classappend="${(poolCount != null ? poolCount : 0) < test.totalQuestionsPerTest} ? 'text-amber-600' : 'text-emerald-600'"></i>
+          <div class="text-xs">
+            <span class="font-bold">Ngân hàng câu hỏi (Pool):</span>
+            Hiện có <strong class="font-extrabold text-sm" th:text="${poolCount != null ? poolCount : 0}">0</strong> câu
+            (Cấu hình bài thi yêu cầu: <strong th:text="${test.totalQuestionsPerTest}">10</strong> câu).
+            <span th:if="${(poolCount != null ? poolCount : 0) < test.totalQuestionsPerTest}" class="block text-amber-700 font-medium mt-0.5">
+              ⚠️ Số câu hỏi hiện tại chưa đủ để ứng viên bắt đầu làm bài thi!
+            </span>
+          </div>
+        </div>
+        <a th:href="@{'/admin/skill-tests/' + ${test.id} + '/questions'}"
+           class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all flex-shrink-0"
+           th:classappend="${(poolCount != null ? poolCount : 0) < test.totalQuestionsPerTest} ? 'bg-amber-600 hover:bg-amber-700 text-white' : 'bg-emerald-600 hover:bg-emerald-700 text-white'">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          Quản lý câu hỏi ngay &rarr;
+        </a>
+      </div>
+
       <form th:action="${test.id == null} ? @{/admin/skill-tests/create} : @{'/admin/skill-tests/' + ${test.id} + '/edit'}"
             th:object="${test}" method="post" class="space-y-6">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
@@ -128,14 +152,23 @@
                     class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"></textarea>
         </div>
 
-        <div class="pt-6 border-t border-slate-100 flex items-center justify-end gap-3">
-          <a th:href="@{/admin/skill-tests}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-xs transition-all">
-            Hủy bỏ
-          </a>
-          <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-sm transition-all">
-            <i data-lucide="save" class="w-4 h-4"></i>
-            Lưu bộ đề thi
-          </button>
+        <div class="pt-6 border-t border-slate-100 flex items-center justify-between gap-3">
+          <div>
+            <a th:if="${test.id != null}" th:href="@{'/admin/skill-tests/' + ${test.id} + '/questions'}"
+               class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-primary-200 bg-primary-50 text-primary-700 hover:bg-primary-100 font-bold text-xs transition-all">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+              Quản lý câu hỏi (<span th:text="${poolCount != null ? poolCount : 0}">0</span> câu)
+            </a>
+          </div>
+          <div class="flex items-center gap-3">
+            <a th:href="@{/admin/skill-tests}" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-semibold text-xs transition-all">
+              Hủy bỏ
+            </a>
+            <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs shadow-sm transition-all">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              Lưu bộ đề thi
+            </button>
+          </div>
         </div>
       </form>
     </div>

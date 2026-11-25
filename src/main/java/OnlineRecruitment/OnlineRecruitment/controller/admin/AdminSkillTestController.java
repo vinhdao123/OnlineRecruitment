@@ -96,19 +96,22 @@ public class AdminSkillTestController {
     public String create(@ModelAttribute("test") SkillTest test, RedirectAttributes ra) {
         try {
             validateSkillTest(test);
-            skillTestService.saveTest(test);
-            ra.addFlashAttribute("success", "Đã tạo mới bộ đề thi kỹ năng thành công!");
+            SkillTest saved = skillTestService.saveTest(test);
+            ra.addFlashAttribute("success", "Đã tạo mới bộ đề thi thành công! Vui lòng thêm các câu hỏi vào ngân hàng đề thi bên dưới (yêu cầu tối thiểu " + saved.getTotalQuestionsPerTest() + " câu).");
+            return "redirect:/admin/skill-tests/" + saved.getId() + "/questions";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            return "redirect:/admin/skill-tests";
         }
-        return "redirect:/admin/skill-tests";
     }
 
     // 3. Chỉnh sửa thông tin đề thi
     @GetMapping("/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         SkillTest test = skillTestService.getById(id);
+        long poolCount = skillTestService.countActiveQuestionsInPool(id);
         model.addAttribute("test", test);
+        model.addAttribute("poolCount", poolCount);
         model.addAttribute("activeMenu", "skill-tests");
         return "admin/skilltest/form";
     }
@@ -181,6 +184,12 @@ public class AdminSkillTestController {
             SkillTest test = skillTestService.getById(id);
             question.setSkillTest(test);
             question.setCorrectOption(question.getCorrectOption().trim().toUpperCase());
+            if (question.getStatus() == null || question.getStatus().isBlank()) {
+                question.setStatus("ACTIVE");
+            }
+            if (question.getCreatedAt() == null) {
+                question.setCreatedAt(java.time.LocalDateTime.now());
+            }
             skillTestService.saveQuestion(question);
             ra.addFlashAttribute("success", "Đã thêm câu hỏi vào ngân hàng đề thi thành công!");
         } catch (Exception e) {
@@ -213,6 +222,9 @@ public class AdminSkillTestController {
             q.setOptionD(optionD);
             q.setCorrectOption(correctOption.trim().toUpperCase());
             q.setExplanation(explanation);
+            if (q.getStatus() == null || q.getStatus().isBlank()) {
+                q.setStatus("ACTIVE");
+            }
 
             skillTestService.saveQuestion(q);
             ra.addFlashAttribute("success", "Đã cập nhật câu hỏi thành công!");
